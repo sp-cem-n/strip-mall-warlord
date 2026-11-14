@@ -78,3 +78,22 @@ Josh's ask: add flavor back and real visuals, define the core loop (`docs/CORE_L
 | 35 | Cruft: the `?bot=1` live-bot mode and raid-era sprite entries. | Delete them. | `app.bot`, live bot loop, unused sprite | — |
 
 Net: no new stats or currencies. Systems are 8 → 9 (walk-ins). The smoke break replaces retry spam rather than adding a choice. The rest is presentation.
+
+---
+
+## Pass 5 (v0.4): Josh's playtest notes
+
+| Note | Change | Deleted |
+|---|---|---|
+| The top bar looks like Mall Bats' | It's now the plaza's **roadside pylon sign**: a title cabinet with stacked cash / Heat / asphalt panels, plus a rented LED board for W/L, the clock and lots | the flat stat bar |
+| Art the whole page | Cinderblock plaza, storefront-glass lot, receipt-printer log, brick dialogs, price-tag hover cards, bolted lot signs. All are generated sprites | plain bordered panels, the native `title=` tooltips |
+| It just jumps in | **Title screen** (the plaza at night, your actual first four units), New Game / Resume / How to Play, and away stats under Resume | the "While you were away" popup |
+| A little story | Six lines on New Game (skippable). The uncle's P.S. points at the pawn shop, and an **uncle's note** under the strip always says the one next thing to do | the static footnote under the strip |
+| Audio + toggle | WebAudio only: lamp hum, register on rent (every 30s), throttled punch thumps, a squeaky cart for walk-ins, a jingle on capture. One shared mute, saved | — |
+| Buffs only make sense with a pawn shop | **Per-shop walk-ins**: Pawn = damage, Dojo = tougher Bouncers, Laundromat = heal, Vape = cash tip, Payday = big cash **+ temporary Heat**, so Heat is now a choice and not only a tax | the single generic walk-in, the `boost` field |
+| The rebrand dropdown | Click the sign, scaffolding goes up, pick from the **Rt. 9 Sign & Awning sample book** (each sample shows the sign, cost, the crew it trains and who it counters), then the new sign flickers on | the `<select>` |
+| Hover details on H / L / F | Hover cards on weak badges (who's weak, ×2.5 / ×0.5, a dry line), zone names, shops, crew, Heat, asphalt, LED, walk-ins | — |
+| Real brand on the Big-Box sign | Circuit City → **Circuit Barn**. The old video store, the candle store, the cheesecake place. Generic walk-in items | brand names |
+| Nits | 30px crew ranks (no bunching), walk-in tags that wrap (no clipping), straight stall lines with wheel stops (no rain) | — |
+
+Tuning: walk-in effects were cut to 30s so a perfect clicker doesn't skip the bulldoze loop entirely. Idle pacing is unchanged because walk-ins never run in the idle sim. Saves: v3 (a v0.3 save migrates in place: walk-in cleared, buffs zeroed).

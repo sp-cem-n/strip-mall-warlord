@@ -1,4 +1,4 @@
-import { FIGHTERS, FIGHT_TIMEOUT, FRONT_ORDER, RESIST_MULT, ROW_GROWTH, SHOPS, STAT_GROWTH, WALKIN_BOOST, WEAK_MULT, ZONES, type EnemyDef } from './defs';
+import { FIGHTERS, FIGHT_TIMEOUT, FRONT_ORDER, RESIST_MULT, ROW_GROWTH, SHOPS, STAT_GROWTH, WALKIN_DMG, WALKIN_REGEN, WALKIN_TOUGH, WEAK_MULT, ZONES, type EnemyDef } from './defs';
 import { asphaltMult, heat, log } from './economy';
 import { pick, rand } from './rng';
 import type { Battle, GameState, Slot, Unit } from './state';
@@ -50,8 +50,9 @@ function act(s: GameState, u: Unit, b: Battle) {
     return;
   }
   const mult = target.weak ? (target.weak === u.kind ? WEAK_MULT : RESIST_MULT) : 1;
-  const boost = u.side === 'crew' && s.boost > 0 ? 1 + WALKIN_BOOST : 1;
-  const dmg = u.dmg * mult * boost * (0.85 + 0.3 * rand(s));
+  const boost = u.side === 'crew' && s.buffs.dmg > 0 ? 1 + WALKIN_DMG : 1;
+  const tough = target.kind === 'bouncer' && s.buffs.tough > 0 ? WALKIN_TOUGH : 1;
+  const dmg = u.dmg * mult * boost * tough * (0.85 + 0.3 * rand(s));
   target.lastMult = mult;
   target.lastTag = u.kind === 'lawyer' && mult > 1 ? 'C&D' : '';
   target.hp = Math.max(0, target.hp - dmg);
@@ -63,6 +64,7 @@ export function stepBattle(s: GameState, b: Battle, dt: number): 'win' | 'loss' 
   b.t += dt;
   for (const u of [...b.crew, ...b.enemies]) {
     if (!alive(u)) continue;
+    if (u.side === 'crew' && s.buffs.regen > 0) u.hp = Math.min(u.maxHp, u.hp + u.maxHp * WALKIN_REGEN * dt);
     u.flash = Math.max(0, u.flash - dt);
     u.acted = Math.max(0, u.acted - dt);
     u.cooldown -= dt;

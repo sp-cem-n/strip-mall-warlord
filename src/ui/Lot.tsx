@@ -1,13 +1,14 @@
 import { useEffect, useRef } from 'preact/hooks';
-import { app } from '../app';
+import { app, ask, tip } from '../app';
 import { glyph } from '../art/font';
 import { C, HEX } from '../art/palette';
-import { FIGHTERS, PRESTIGE_MIN_ZONE, SHOPS, SMOKE_BREAK_AFTER, ZONES, type FighterKind } from '../game/defs';
+import { FIGHTERS, PRESTIGE_MIN_ZONE, SHOPS, SMOKE_BREAK_AFTER, WEAK_MULT, RESIST_MULT, ZONES, type FighterKind } from '../game/defs';
 import { heat, regionTaken } from '../game/economy';
 import { asphaltGain, bulldoze, canBulldoze } from '../game/sim';
 import { saveGame } from '../game/save';
 import type { Unit } from '../game/state';
 import { crewArt, enemyArt, fieldArt } from './art';
+import { hit } from './audio';
 import { fmtTime } from './format';
 
 const W = 320;
@@ -28,20 +29,26 @@ function text(ctx: CanvasRenderingContext2D, s: string, x: number, y: number, c:
 }
 const center = (s: string, x: number) => x - Math.floor((s.length * 4 - 1) / 2);
 
-// feet positions: crew fans out left of the lamp, enemies right
+// feet positions: crew in ranks left of the lamp, enemies right. 30px columns so nobody stands in anybody.
 function spot(side: 'crew' | 'enemy', i: number): [number, number] {
   const col = Math.floor(i / 3);
   const row = i % 3;
-  const x = side === 'crew' ? 132 - col * 22 - (row % 2) * 8 : 172 + col * 24 + (row % 2) * 8;
-  return [x, 92 + row * 18];
+  const stagger = row === 1 ? 12 : 0;
+  const x = side === 'crew' ? 140 - col * 30 - stagger : 182 + col * 30 + stagger;
+  return [x, 88 + row * 20];
 }
+const BOSS_SPOT: [number, number] = [262, 132];
+const lastFlash = new Map<number, number>();
 
 function drawUnit(ctx: CanvasRenderingContext2D, u: Unit, i: number, t: number) {
   const big = u.boss;
   const flash = u.hp > 0 && u.flash > 0.2;
   const art = u.side === 'crew' ? crewArt(u.kind as FighterKind, flash) : enemyArt(u.name, flash);
   const k = big ? 2 : 1;
-  let [x, y] = big ? [196, 124] : spot(u.side, i);
+  let [x, y] = big ? BOSS_SPOT : spot(u.side, i);
+  const was = lastFlash.get(u.uid) ?? 0;
+  if (u.flash > was + 0.05) hit(u.boss || u.kind === 'bouncer');
+  lastFlash.set(u.uid, u.flash);
   const dir = u.side === 'crew' ? 1 : -1;
   if (u.acted > 0) x += dir * 3; // lunge
   if (u.flash > 0) x -= dir * Math.ceil(u.flash * 6); // knockback
@@ -87,10 +94,12 @@ function draw(ctx: CanvasRenderingContext2D, t: number) {
   // heat: cruiser lights at the lot entrance
   if (heat(s) > 0) {
     const on = Math.floor(t * 3) % 2;
-    ctx.fillStyle = HEX[on ? C.red : C.blue];
-    ctx.fillRect(4, 56, 4, 2);
-    ctx.fillStyle = HEX[on ? C.blue : C.red];
-    ctx.fillRect(8, 56, 4, 2);
+    for (const cx of s.buffs.heat > 0 ? [4, 18] : [4]) {
+      ctx.fillStyle = HEX[on ? C.red : C.blue];
+      ctx.fillRect(cx, 56, 4, 2);
+      ctx.fillStyle = HEX[on ? C.blue : C.red];
+      ctx.fillRect(cx + 4, 56, 4, 2);
+    }
   }
   const b = s.battle;
   if (b) {
@@ -108,7 +117,14 @@ function draw(ctx: CanvasRenderingContext2D, t: number) {
     const msg = regionTaken(s) ? 'THE REGION IS YOURS' : s.lossStreak >= SMOKE_BREAK_AFTER ? `SMOKE BREAK ${Math.ceil(s.regroup)}S` : s.slots.some((x) => x.shop) ? 'REGROUPING' : 'OPEN A SHOP';
     text(ctx, msg, center(msg, 230), 96, s.lossStreak >= SMOKE_BREAK_AFTER ? C.sodium : C.bone);
   }
-  if (s.boost > 0) text(ctx, `WALK-IN +50% ${Math.ceil(s.boost)}S`, 4, 140, C.sodiumLight);
+  const buffs = [
+    ['+50% DMG', s.buffs.dmg, C.sodiumLight],
+    ['BOUNCERS TOUGH', s.buffs.tough, C.red],
+    ['PATCHING UP', s.buffs.regen, C.mint],
+    ['+25% HEAT', s.buffs.heat, C.neon],
+  ] as const;
+  let by = 140;
+  for (const [label, left, c] of buffs) if (left > 0) text(ctx, `${label} ${Math.ceil(left)}S`, 4, (by -= 8) + 8, c);
 }
 
 function Field() {
@@ -126,7 +142,15 @@ function Field() {
   return <canvas ref={ref} width={W} height={H} class="field" style={{ width: `${W * SCALE}px`, height: `${H * SCALE}px` }} />;
 }
 
-const Weak = ({ k }: { k: FighterKind }) => <span class={`weak k-${k}`} title={`Weak to ${FIGHTERS[k].plural}`}>{FIGHTERS[k].name[0]}</span>;
+function Weak({ k, zone }: { k: FighterKind; zone: number }) {
+  const z = ZONES[zone];
+  const who = [...new Set([...z.regulars, z.boss].filter((e) => e.weak === k).map((e) => e.name))];
+  return (
+    <span class={`weak k-${k}`} {...tip(`Weak to ${FIGHTERS[k].plural}`, `${who.join(', ')}.`, `×${WEAK_MULT} damage from ${FIGHTERS[k].plural}, ×${RESIST_MULT} from everyone else.`, FIGHTERS[k].quip)}>
+      {FIGHTERS[k].name[0]}
+    </span>
+  );
+}
 
 function ZoneTrack() {
   const s = app.s;
@@ -137,14 +161,16 @@ function ZoneTrack() {
       {ZONES.map((z, i) => {
         const state = i < s.zone ? 'done' : i === s.zone ? 'current' : 'locked';
         return (
-          <div key={z.id} class={`zone ${state}`} title={[...z.regulars, z.boss].map((e) => `${e.name}: ${e.title}`).join('\n')}>
-            <div class="zone-name">{z.name}</div>
+          <div key={z.id} class={`zone ${state}`}>
+            <div class="zone-name" {...tip(z.name, z.blurb, ...[...z.regulars, z.boss].map((e) => `${e.name}: ${e.title}`))}>
+              {z.name}
+            </div>
             <div class="pips">
               {Array.from({ length: z.rows }, (_, r) => (
                 <span key={r} class={`pip ${i < s.zone || (i === s.zone && r < s.row) ? 'won' : i === s.zone && r === s.row ? 'now' : ''} ${r === z.rows - 1 ? 'boss' : ''}`} />
               ))}
             </div>
-            <div class="zone-sub">{state === 'done' ? 'Captured' : [...new Set([...z.regulars.map((e) => e.weak), z.boss.weak])].map((k) => <Weak key={k} k={k} />)}</div>
+            <div class="zone-sub">{state === 'done' ? 'Captured' : [...new Set([...z.regulars.map((e) => e.weak), z.boss.weak])].map((k) => <Weak key={k} k={k} zone={i} />)}</div>
           </div>
         );
       })}
@@ -153,12 +179,13 @@ function ZoneTrack() {
         {ok ? (
           <button
             class="btn small danger"
-            onClick={() => {
-              if (!confirm(`Bulldoze everything for +${asphaltGain(s)} asphalt?`)) return;
-              app.s = bulldoze(s);
-              saveGame(app.s);
-              app.refresh();
-            }}
+            onClick={() =>
+              ask(`Bulldoze Pinewood Plaza and everything you captured for +${asphaltGain(s)} asphalt? You start over with your uncle's vape shop. Everything runs ${asphaltGain(s) * 2}% better, forever.`, 'Pave it', 'Not yet', () => {
+                app.s = bulldoze(app.s);
+                saveGame(app.s);
+                app.refresh();
+              })
+            }
           >
             +{asphaltGain(s)} asphalt
           </button>
@@ -176,7 +203,7 @@ export function Lot() {
   const zd = ZONES[Math.min(s.zone, ZONES.length - 1)];
   const boss = b?.enemies.find((e) => e.boss);
   return (
-    <section class="panel lot">
+    <section class="glass lot">
       <h2>
         The Lot <span class="dim">· fights run themselves</span>
       </h2>
@@ -196,20 +223,36 @@ export function Lot() {
   );
 }
 
-export function Log() {
+const FOOTERS = ['NO REFUNDS. NO EXCEPTIONS.', 'PARKING VALIDATED: NEVER', 'THANK YOU FOR SHOPPING PINEWOOD PLAZA', 'ASK ABOUT OUR VACANCIES', 'NOT A RECEIPT FOR TAX PURPOSES', 'HAVE A NICE NIGHT. NO LOITERING.'];
+
+// The log is the management office's receipt printer. Red ink for losses, like a real two-color printer.
+export function Receipt() {
+  const s = app.s;
   return (
-    <section class="panel log">
-      <ul>
-        {app.s.log
-          .slice(-7)
-          .reverse()
-          .map((l, i) => (
-            <li key={`${l.t}-${i}`} class={`log-${l.tone}`}>
-              <span class="t">{fmtTime(l.t)}</span> {l.text}
-              {l.n && <span class="dim"> ×{l.n}</span>}
-            </li>
-          ))}
-      </ul>
+    <section class="printer">
+      <div class="printer-head">
+        <span>PINEWOOD PLAZA MGMT · ACTIVITY</span>
+        <span class="printer-light" />
+      </div>
+      <div class="paper">
+        <div class="r-rule">--------------------------------------------</div>
+        <ul>
+          {s.log
+            .slice(-7)
+            .reverse()
+            .map((l, i) => (
+              <li key={`${l.t}-${i}`} class={`r-${l.tone}`}>
+                <span class="t">{fmtTime(l.t)}</span>
+                <span>
+                  {l.tone === 'capture' ? `*** ${l.text} ***` : l.text}
+                  {l.n && <b> x{l.n}</b>}
+                </span>
+              </li>
+            ))}
+        </ul>
+        <div class="r-rule">--------------------------------------------</div>
+        <div class="r-foot">{FOOTERS[(s.stats.wins + s.bulldozes) % FOOTERS.length]}</div>
+      </div>
     </section>
   );
 }

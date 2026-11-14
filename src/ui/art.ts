@@ -3,6 +3,7 @@ import { ZONES } from '../game/defs';
 import type { Grid } from '../art/grid';
 import { C } from '../art/palette';
 import { crewSprite, enemySprite } from '../art/people';
+import * as S from '../art/scenes';
 import { battlefield, buttonFrame, facade, ICONS, panelFrame, type Material } from '../art/scenes';
 import type { FighterKind, ShopKind } from '../game/defs';
 
@@ -40,10 +41,30 @@ export function materialOf(slotId: number): Material {
 }
 export const facadeURL = (kind: ShopKind | null, slotId: number) => urlOf(`facade:${kind}:${slotId}`, () => facade(kind, materialOf(slotId), slotId + 1));
 
-// frames as CSS border-images
+export const signURL = (kind: ShopKind, seed: number) => urlOf(`sign:${kind}:${seed}`, () => S.signSample(kind, seed));
+export const scaffoldURL = () => urlOf('scaffold', S.scaffold);
+export const bootURL = (kinds: (ShopKind | null)[]) => urlOf(`boot:${kinds.join(',')}`, () => S.bootScene(kinds));
+
+// frames and tiles as CSS variables (border-image / background)
 export function installFrames() {
   const root = document.documentElement.style;
-  root.setProperty('--frame', `url(${urlOf('frame', panelFrame)})`);
-  root.setProperty('--btn', `url(${urlOf('btn', () => buttonFrame())})`);
-  root.setProperty('--btn-hot', `url(${urlOf('btnhot', () => buttonFrame(C.sodium))})`);
+  const set = (k: string, make: () => Grid) => root.setProperty(`--${k}`, `url(${urlOf(k, make)})`);
+  set('frame', panelFrame);
+  set('btn', () => buttonFrame());
+  set('btn-hot', () => buttonFrame(C.sodium));
+  set('glass', S.glassFrame);
+  set('brick', S.brickFrame);
+  set('pylon', S.pylonFrame);
+  set('tenant', S.tenantFrame);
+  set('tag', S.tagFrame);
+  set('printer', S.printerFrame);
+  set('binder', S.binderFrame);
+  set('lotsign', () => S.signFrame());
+  set('lotsign-now', () => S.signFrame(C.sodium));
+  set('lotsign-done', () => S.signFrame(C.green));
+  set('cinder', S.cinderTile);
+  set('sky', S.skyTile);
+  set('road', S.roadTile);
+  set('led', S.ledTile);
+  set('tear', S.tearTile);
 }

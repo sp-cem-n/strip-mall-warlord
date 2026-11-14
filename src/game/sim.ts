@@ -1,4 +1,4 @@
-import { OFFLINE_CAP_SECONDS, PRESTIGE_MIN_ZONE, REGROUP_SECONDS, SHOPS, SMOKE_BREAK_AFTER, SMOKE_BREAK_SECONDS, STEP, WALKIN_EVERY, WALKIN_ITEMS, WALKIN_STAYS, ZONES } from './defs';
+import { OFFLINE_CAP_SECONDS, PRESTIGE_MIN_ZONE, REGROUP_SECONDS, SHOPS, SMOKE_BREAK_AFTER, SMOKE_BREAK_SECONDS, STEP, WALKIN_EVERY, WALKIN_STAYS, WALKINS, ZONES } from './defs';
 import { pick } from './rng';
 import { lossReason, startBattle, stepBattle } from './battle';
 import { incomePerSec, log, newGame, regionTaken } from './economy';
@@ -8,7 +8,7 @@ import type { GameState } from './state';
 // `watching` is true only for the live game: walk-ins never happen offline or in the idle bot.
 export function step(s: GameState, watching = false) {
   s.time += STEP;
-  s.boost = Math.max(0, s.boost - STEP);
+  for (const k of ['dmg', 'tough', 'regen', 'heat'] as const) s.buffs[k] = Math.max(0, s.buffs[k] - STEP);
   if (watching) walkIns(s);
   s.totalTime += STEP;
   const inc = incomePerSec(s) * STEP;
@@ -42,7 +42,7 @@ function resolve(s: GameState, result: 'win' | 'loss') {
   s.row++;
   if (s.row < zd.rows) return log(s, `Took row ${s.row}/${zd.rows} at ${zd.name}.`, 'win');
   const id = s.slots.length;
-  for (let i = 0; i < zd.captureSlots; i++) s.slots.push({ id: id + i, label: `${zd.name} #${i + 1}`, level: 1, shop: null });
+  for (let i = 0; i < zd.captureSlots; i++) s.slots.push({ id: id + i, label: `${zd.short} #${i + 1}`, level: 1, shop: null });
   log(s, `CAPTURED ${zd.name.toUpperCase()}. ${zd.captureText} (+${zd.captureSlots} storefront${zd.captureSlots > 1 ? 's' : ''})`, 'capture');
   if (zd.unlocks) log(s, `New tenant type: ${SHOPS[zd.unlocks].name}.`, 'capture');
   s.zone++;
@@ -53,13 +53,14 @@ function resolve(s: GameState, result: 'win' | 'loss') {
 
 function walkIns(s: GameState) {
   if (s.find && (s.find.left -= STEP) <= 0) {
-    log(s, `The guy with the ${s.find.name} got tired of waiting and left.`);
+    log(s, `${s.find.name.replace(/^an? /, 'The guy with the ')} got tired of waiting and left.`);
     s.find = null;
   }
   const open = s.slots.filter((x) => x.shop);
   if (!s.find && open.length && (s.findClock -= STEP) <= 0) {
     s.findClock = WALKIN_EVERY;
-    s.find = { slot: pick(s, open).id, name: pick(s, WALKIN_ITEMS), left: WALKIN_STAYS };
+    const sl = pick(s, open);
+    s.find = { slot: sl.id, kind: sl.shop!, name: pick(s, WALKINS[sl.shop!].names), left: WALKIN_STAYS };
   }
 }
 

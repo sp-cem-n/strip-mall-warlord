@@ -6,11 +6,12 @@ import { ZONES, type FighterKind, SHOP_ORDER } from '../src/game/defs';
 import { Grid } from '../src/art/grid';
 import { C, PALETTE } from '../src/art/palette';
 import { crewSprite, enemySprite } from '../src/art/people';
+import * as S from '../src/art/scenes';
 import { battlefield, buttonFrame, facade, ICONS, panelFrame, type Material } from '../src/art/scenes';
 
 const out = process.argv[2] ?? 'docs/spritesheet.png';
 const W = 660;
-const sheet = new Grid(W, 640);
+const sheet = new Grid(W, 940);
 sheet.rect(0, 0, W, sheet.h, C.night);
 const label = (t: string, x: number, y: number) => sheet.text(t, x, y, C.bone);
 const scaled = (g: Grid, k: number) => {
@@ -40,9 +41,10 @@ y += 54;
 ZONES.forEach((z, i) => sheet.blit(scaled(enemySprite(z.boss.name), 3), 6 + i * 60, y));
 y += 78;
 
-label('STOREFRONTS 64X56', 6, y);
+label('STOREFRONTS 64X56 (+ SCAFFOLDING)', 6, y);
 y += 8;
 [...SHOP_ORDER, null].forEach((k, i) => sheet.blit(facade(k, 'home', i + 1), 6 + i * 68, y));
+sheet.blit(facade('dojo', 'home', 1), 414, y).blit(S.scaffold(), 414, y).blit(S.signSample('pawn', 3), 486, y + 4).blit(S.signSample('payday', 4), 486, y + 22);
 y += 60;
 label('CAPTURED-LOT MATERIALS', 6, y);
 y += 8;
@@ -56,6 +58,18 @@ y += 310;
 label('UI FRAMES + ICONS (4X)', 6, y);
 sheet.blit(scaled(panelFrame(), 4), 130, y - 2).blit(scaled(buttonFrame(), 4), 184, y - 2);
 Object.values(ICONS).forEach((f, i) => sheet.blit(scaled(f(), 4), 220 + i * 40, y - 2));
+y += 44;
+label('TITLE SCENE 320X180 (1X) + PAGE FRAMES AND TILES (3X)', 6, y);
+y += 8;
+sheet.blit(S.bootScene(['vape', 'dojo', null, 'pawn']), 6, y);
+let fx = 336;
+let fy = y;
+for (const f of [S.glassFrame, S.brickFrame, S.pylonFrame, S.printerFrame, S.binderFrame, S.tagFrame, () => S.signFrame(C.sodium), S.cinderTile, S.roadTile, S.tearTile]) {
+  const g = scaled(f(), 3);
+  if (fx + g.w > W - 6) (fx = 336), (fy += 84);
+  sheet.blit(g, fx, fy);
+  fx += g.w + 8;
+}
 
 // ---- minimal PNG encoder ----
 function png(g: Grid, k = 2): Buffer {

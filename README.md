@@ -13,10 +13,14 @@ bun scripts/balance.ts 60 1991 --every=10 [--strategy=mixed|static|dojo] [--pres
 bun scripts/spritesheet.ts   # docs/spritesheet.png: every sprite + the palette
 ```
 
-Debug URL params: `?fresh=1`, `?speed=20`, `?seed=1991`, `?advance=300` (bot plays 300s first), `?strategy=dojo`, `?midbattle=1`, `?away=3600`, `?pause=1`.
+Debug URL params: `?fresh=1`, `?speed=20`, `?seed=1991`, `?advance=300` (bot plays 300s first), `?strategy=dojo`, `?midbattle=1`, `?away=3600`, `?pause=1`, `?screen=boot|howto|story|game`, `?story=all`, `?book=SLOT`, `?walkin=1`.
+
+Audio is synthesized with WebAudio in `src/ui/audio.ts` (no sound files). It starts after the first click or key press; mute is saved in localStorage.
 
 ## GitHub Pages
 `.github/workflows/deploy.yml` builds on push to `main` with `BASE_PATH=/<repo>/` and deploys `dist/` to Pages. In the repo, set Settings → Pages → Source to **GitHub Actions**. Local equivalent: `npm run build:pages`.
 
 ## Screenshots
-`npm run build && npx vite preview &` then `npm run screenshots` (needs `npx playwright install chromium` once). Output goes to `screenshots/v3/` (`OUT=` to change); older versions are in `screenshots/` and `screenshots/v2/`.
+`npm run build && npx vite preview &` then `npm run screenshots` (needs `npx playwright install chromium` once). Output goes to `screenshots/v4/` (`OUT=` to change); older versions are in `screenshots/`, `screenshots/v2/` and `screenshots/v3/`.
+
+Live: https://sp-cem-n.github.io/strip-mall-warlord/

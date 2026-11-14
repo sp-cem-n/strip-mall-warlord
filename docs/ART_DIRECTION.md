@@ -45,5 +45,17 @@
 4. **Materials say where a building came from:** home = tan stucco; Parking Lot capture = video-store navy and yellow; Big-Box = beige panel with red trim; Outlet = white stucco with mint; Lifestyle = fake brick.
 5. **Motion is tiny and readable:** 0.6px idle bob, a 3px lunge on attack, knockback plus a 1-frame paper silhouette on hit, a rising damage number (yellow = weak hit, grey = resisted, "C&D" for a Lawyer landing one), and downed units lie flat at 45% opacity.
 
+## The page around the game (v0.4)
+The page uses the same palette and the same frame rules; there are no default HTML boxes. Every frame is a generated sprite installed as a CSS `border-image` at 2×.
+- **Top bar = the roadside pylon sign.** A cabinet with the title, then three stacked tenant panels (cash on paper, Heat on red, asphalt on navy), on two concrete legs in the grass by Rt. 9. W/L, clock and lots are on a rented red **LED board** with an unlit-dot background. The speaker toggle sits next to it.
+- **Plaza = painted cinderblock** behind the strip, with an aluminum cap.
+- **Lot = storefront glass:** an aluminum mullion frame with one bright glint pixel in the corner.
+- **Log = the receipt printer:** a plastic printer head with a green status light, and a paper tape with a torn edge. Losses print in red ink, like a real two-color printer.
+- **Title, how-to, story and dialogs = brick** frames. **Hover cards, notes and walk-ins = price tags** (paper, ink outline). The **sample book** is a navy binder with paper pages.
+- Zone cards are bolted lot signs: grey for future lots, sodium for the current one, green once captured.
+
+## No real brands
+Parody names only: Circuit **Barn** (with the second word's tubes out), Foodway, Pine Creek Outlets, The Promenade. Walk-in items are generic ("a 4-Cell Flashlight", "a Chirp Phone").
+
 ## Where it lives
-`src/art/` (palette, grid, font, people, scenes) is pure data and code shared by the game and `scripts/spritesheet.ts`, which writes `docs/spritesheet.png`. Nothing is hand-painted, so every sprite stays on-palette.
+`src/art/` (palette, grid, font, people, scenes; scenes also holds the title scene, scaffolding, sign samples, page frames and tiles) is pure data and code shared by the game and `scripts/spritesheet.ts`, which writes `docs/spritesheet.png`. Nothing is hand-painted, so every sprite stays on-palette.

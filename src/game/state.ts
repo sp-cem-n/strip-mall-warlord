@@ -1,5 +1,13 @@
 import type { FighterKind, ShopKind } from './defs';
 
+// seconds left on each walk-in effect
+export interface Buffs {
+  dmg: number;
+  tough: number;
+  regen: number;
+  heat: number;
+}
+
 export interface Slot {
   id: number;
   label: string;
@@ -61,7 +69,7 @@ export interface GameState {
   nextUid: number;
   lastCapture: number;
   lossStreak: number; // 3 in a row on one row = smoke break
-  find: { slot: number; name: string; left: number } | null; // walk-in, only while you're watching
+  find: { slot: number; kind: ShopKind; name: string; left: number } | null; // walk-in, only while you're watching
   findClock: number;
-  boost: number; // seconds of +50% crew damage left
+  buffs: Buffs;
 }

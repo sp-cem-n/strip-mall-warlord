@@ -11,13 +11,20 @@ import {
   START_SHOPS,
   SMOKE_BREAK_AFTER,
   REGROUP_SECONDS,
-  WALKIN_SECONDS,
+  BUFF_SECONDS,
+  WALKIN_HEAT,
+  WALKIN_HEAT_SECONDS,
+  WALKIN_LOAN,
+  WALKIN_TIP,
+  WALKINS,
   ZONES,
   type ShopKind,
 } from './defs';
-import type { GameState, LogLine, Slot } from './state';
+import type { Buffs, GameState, LogLine, Slot } from './state';
+import { fmt } from '../ui/format';
 
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
+export const noBuffs = (): Buffs => ({ dmg: 0, tough: 0, regen: 0, heat: 0 });
 const HOME_LABELS = ['Unit A', 'Unit B', 'Unit C', 'Unit D'];
 
 export function newGame(seed = Date.now() % 2147483647, asphalt = 0, bulldozes = 0, totalTime = 0): GameState {
@@ -35,7 +42,7 @@ export function newGame(seed = Date.now() % 2147483647, asphalt = 0, bulldozes =
     row: 0,
     battle: null,
     regroup: 2,
-    log: [{ t: 0, text: 'Your uncle left you Pinewood Plaza, est. 1991: his vape shop, three empty units, and a paid-up lease.', tone: 'info' }],
+    log: [{ t: 0, text: 'Lease transferred: Pinewood Plaza, Unit A (vape shop) and Units B through D (as is).', tone: 'info' }],
     stats: { wins: 0, losses: 0, earned: 0 },
     savedAt: Date.now(),
     nextUid: 1,
@@ -43,7 +50,7 @@ export function newGame(seed = Date.now() % 2147483647, asphalt = 0, bulldozes =
     lossStreak: 0,
     find: null,
     findClock: 30,
-    boost: 0,
+    buffs: noBuffs(),
   };
 }
 
@@ -64,10 +71,10 @@ export function incomePerSec(s: GameState): number {
   return s.slots.reduce((a, sl) => a + slotIncome(s, sl), 0);
 }
 
-// Heat is derived, not stored: every Payday level you own makes every fight harder.
-export function heat(s: GameState): number {
-  return s.slots.reduce((a, sl) => a + (sl.shop === 'payday' ? sl.level * HEAT_PER_PAYDAY_LEVEL : 0), 0);
-}
+// Heat is derived, not stored: every Payday level you own makes every fight harder,
+// plus a temporary bump while a borrower's paperwork is still warm.
+export const paydayHeat = (s: GameState) => s.slots.reduce((a, sl) => a + (sl.shop === 'payday' ? sl.level * HEAT_PER_PAYDAY_LEVEL : 0), 0);
+export const heat = (s: GameState) => paydayHeat(s) + (s.buffs.heat > 0 ? WALKIN_HEAT : 0);
 
 export const renovateCost = (level: number) => Math.round(RENOVATE_BASE * RENOVATE_GROWTH ** (level - 1));
 
@@ -116,9 +123,32 @@ function lineupChanged(s: GameState) {
 }
 
 export function collectFind(s: GameState): string | null {
-  if (!s.find) return 'Nobody walked in';
-  s.boost = WALKIN_SECONDS;
-  log(s, `Somebody pawned a ${s.find.name} at ${s.slots[s.find.slot].label}. Crew hits 50% harder for a minute.`, 'win');
+  const f = s.find;
+  if (!f) return 'Nobody walked in';
   s.find = null;
-  return null;
+  const where = s.slots[f.slot].label;
+  const b = s.buffs;
+  switch (f.kind) {
+    case 'pawn':
+      b.dmg = BUFF_SECONDS;
+      return log(s, `Somebody pawned ${f.name} at ${where}. Crew hits 50% harder for 30 seconds.`, 'win'), null;
+    case 'dojo':
+      b.tough = BUFF_SECONDS;
+      return log(s, `${f.name} went a few rounds with the Bouncers at ${where}. They take 40% less damage for 30 seconds.`, 'win'), null;
+    case 'laundromat':
+      b.regen = BUFF_SECONDS;
+      return log(s, `Found in a dryer at ${where}: ${f.name}. Morale is up. Crew heals 2% a second for 30 seconds.`, 'win'), null;
+    case 'vape': {
+      const tip = incomePerSec(s) * WALKIN_TIP;
+      s.cash += tip;
+      return log(s, `${f.name} bought in bulk at ${where}. +$${fmt(tip)}. Didn't ask for a bag.`, 'win'), null;
+    }
+    case 'payday': {
+      const loan = incomePerSec(s) * WALKIN_LOAN;
+      s.cash += loan;
+      b.heat = WALKIN_HEAT_SECONDS;
+      return log(s, `${f.name} signed at ${where}. +$${fmt(loan)}. The cruisers noticed: +25% Heat for 3 minutes.`, 'loss'), null;
+    }
+  }
+  return WALKINS[f.kind] ? null : 'Unknown walk-in';
 }
