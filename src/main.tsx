@@ -25,17 +25,18 @@ installFrames();
 //   ?region=1       watch the Bypass crew (needs the Bypass found: roster=full does that)
 //   ?away=SEC       pretend the tab was closed SEC seconds ago (stats on the title screen)
 //   ?oldsave=1      show the "lease was renegotiated" notice
-//   ?screen=NAME    boot | howto | story | game (default: boot)
+//   ?screen=NAME    boot | howto | story | game | room (default: boot)
 //   ?story=all      show every story line at once
 //   ?pause=1        freeze the sim (for screenshots)
 //   ?walkin=1       put a walk-in at the first shop
+//   ?room=full      every arcade machine unlocked, 3,000 tickets, a few perks
 const q = new URLSearchParams(location.search);
 const num = (k: string, d: number) => (q.has(k) ? Number(q.get(k)) : d);
 
 if (q.get('fresh') === '1') clearSave();
 const loaded = q.get('fresh') === '1' ? null : loadGame();
 app.oldSave = loaded === 'old' || q.get('oldsave') === '1';
-if (loaded === 'old') clearSave(); // the old plaza lives on at /v0.4/
+if (loaded === 'old') clearSave(); // an old plaza lives on at its own /vX.Y/
 let s = loaded && loaded !== 'old' ? loaded : null;
 app.hasSave = !!s;
 if (!s) s = newGame(q.has('seed') ? num('seed', 1) : undefined);
@@ -67,6 +68,18 @@ if (q.get('roster') === 'full') {
     app.s.equity = 140;
     for (let i = 0; i < 2000; i++) step(app.s);
   }
+}
+if (q.get('room') === 'full') {
+  app.hasSave = true;
+  app.s.crews[0].shops.funzone ??= 5;
+  app.s.room.unlocked = ['pusher', 'whac', 'skee', 'claw', 'pinball', 'cyclone'];
+  app.s.tickets = 3000;
+  app.s.room.perks = { slot: 1, walkins: 1 };
+  app.s.room.attract = { pusher: 1, skee: 2 };
+  app.s.room.board = 2;
+  app.s.room.best = 31250;
+  app.s.room.buffs = { bat: 420 };
+  app.s.crews[0].cash = Math.max(app.s.crews[0].cash, 1e6);
 }
 if (q.get('midbattle') === '1') {
   const c = app.s.crews[app.s.view];

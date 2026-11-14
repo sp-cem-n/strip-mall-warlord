@@ -10,6 +10,7 @@ export const BATTLER_LIST: BattlerDef[] = [
   B('watchman', 'Night Watchman', 'control', 70, 6, 1.4, 'Enemies take 15% more damage.', 'Writes everything down. Reads none of it.', { k: 'mark', v: 0.15 }),
   B('latefee', 'Late-Fee Collector', 'control', 60, 6, 1.5, 'Enemies attack 15% slower.', 'Be kind. Rewind. Pay the $3.', { k: 'slow', v: 0.15 }),
   B('lawyer', 'Lawyer', 'damage', 55, 26, 2.2, 'Slow, huge hits.', 'Paperwork beats paperwork.'),
+  B('tokenkid', 'Token Kid', 'damage', 55, 8, 0.9, 'Quick little hits.', 'Has a roll of quarters in a sock.'),
   B('nailtech', 'Nail Tech', 'buffer', 45, 5, 1.2, 'Hustlers attack 20% faster.', 'Quick hands. Quicker opinions.', { k: 'haste', to: 'hustler', v: 0.2 }),
   B('tanning', 'Tanning Consultant', 'heal', 55, 6, 1.4, 'Tanks regain 1.5% HP a second.', 'Glows faintly in the dark.', { k: 'regen', v: 0.015 }),
   B('karaoke', 'Karaoke Host', 'buffer', 50, 5, 1.4, 'Damage dealers +10% damage.', 'Mic check. Fight check.', { k: 'dmgUp', to: 'damage', v: 0.1 }),

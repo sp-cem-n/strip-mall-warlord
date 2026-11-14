@@ -13,7 +13,7 @@ const list = (k: string, d: number[]) => ((globalThis as { process?: { env: Reco
 export const FIGHT_GROWTH = [list('SMW_G0', [1.6, 1.07, 1.07, 1.07, 1.07, 1.07]), list('SMW_G1', [1.66, 1.07, 1.07, 1.07])] as const;
 // Optional explicit enemy strength per fight (balance tooling only): SMW_STR0=1,1.2,...
 export const STRENGTH = [list('SMW_STR0', []), list('SMW_STR1', [])] as const;
-export const LOT_JUMP = [list('SMW_J0', [2, 1.259, 1.18, 1.176, 0.677, 1.1]), list('SMW_J1', [2.5, 8.59, 1.01, 0.45])] as const; // step entering each lot (entry 0 scales the first fight)
+export const LOT_JUMP = [list('SMW_J0', [2, 1.259, 1.103, 1.286, 0.619, 1.089]), list('SMW_J1', [2.5, 8.59, 1.01, 0.45])] as const; // step entering each lot (entry 0 scales the first fight)
 export const PAY_BASE = [2, 0.2] as const; // Goodwill / Equity per win at a region's first fight. Bypass wins pay thin: most Equity comes from the bank.
 export const PAY_GROWTH = [1.06, env('SMW_P1', 1.09)] as const; // per fight, across the region
 export const BOSS_STRENGTH = env('SMW_BS', 1.15); // a boss is this much over the fight before it

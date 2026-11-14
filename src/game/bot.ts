@@ -4,6 +4,30 @@ import { enemyLineup } from './battle';
 import { advance, bal, buyPatrol, buySlot, convert, curb, forLease, leased, lease, lineupOf, overtime, overtimeCost, patrolBlock, patrolPrice, pave, purse, regionDone, renovate, renovateCost, rentPerSec, retryAfter, setStance, slotPrice, topFight, train, trainCost, view } from './economy';
 import { collectFind } from './sim';
 import type { GameState } from './state';
+import { MACHINE, PERKS, PINBALL_TOP, buffOn, buyPerk, endPlay, perkPrice, postScore, startPlay, type MachineId, type PerkId } from './room';
+import { rand } from './rng';
+
+// The room player: half of online time, at about 70% skill. Keeps a claw toy going, spends tickets at the counter.
+const MIX: [MachineId, number][] = [['pusher', 0.35], ['skee', 0.25], ['whac', 0.15], ['pinball', 0.1], ['cyclone', 0.15]];
+function roomAct(s: GameState, o: BotOpts, dt: number) {
+  o.roomBudget = (o.roomBudget ?? 0) + dt * 0.5;
+  for (const id of Object.keys(PERKS) as PerkId[]) while (s.tickets >= perkPrice(s, id) && !buyPerk(s, id));
+  for (let g = 0; g < 20 && o.roomBudget > 0; g++) {
+    let id: MachineId | undefined;
+    if (s.tickets >= 50 && !buffOn(s, 'bat') && !buffOn(s, 'duck') && s.room.unlocked.includes('claw')) id = 'claw';
+    else {
+      const open = MIX.filter(([m]) => s.room.unlocked.includes(m));
+      if (!open.length) return;
+      let x = rand(s) * open.reduce((a, [, w]) => a + w, 0);
+      id = open.find(([, w]) => (x -= w) < 0)?.[0] ?? open[0][0];
+    }
+    o.roomBudget -= MACHINE[id].secs;
+    if (startPlay(s, id)) continue;
+    const q = id === 'cyclone' ? (rand(s) < 0.12 ? 1 : rand(s) < 0.4 ? 0.5 : 0) : id === 'claw' ? 0.6 : Math.min(1, 0.7 * (0.75 + 0.5 * rand(s)));
+    if (id === 'pinball') postScore(s, Math.round(q * PINBALL_TOP));
+    endPlay(s, id, q, true);
+  }
+}
 
 export interface BotOpts {
   active?: boolean; // grabs walk-ins, calls plays, buys overtime for bosses
@@ -12,6 +36,7 @@ export interface BotOpts {
   doneAt?: number;
   convert?: number; // share of Goodwill converted to Equity once the Bypass is open
   room?: boolean; // plays the arcade / bar half the time it's online
+  roomBudget?: number;
 }
 
 function crewAct(s: GameState, r: RegionId, o: BotOpts) {
@@ -59,7 +84,8 @@ function crewAct(s: GameState, r: RegionId, o: BotOpts) {
   }
 }
 
-export function botAct(s: GameState, o: BotOpts = {}, _dt = 10): GameState {
+export function botAct(s: GameState, o: BotOpts = {}, dt = 10): GameState {
+  if (o.room) roomAct(s, o, dt);
   if (o.active && s.find) collectFind(s);
   if (s.ending) s.ending = 0; // dismiss the win card, keep the lights on
   if (s.bypass) {

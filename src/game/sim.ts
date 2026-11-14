@@ -3,6 +3,7 @@ import { pick } from './rng';
 import { lossReason, startBattle, stepBattle } from './battle';
 import { asphaltMult, autoCovers, available, currencyOf, earn, fightOf, leased, log, rentPerSec, retryAfter, topFight } from './economy';
 import type { Battle, GameState } from './state';
+import { boardBonus, buffOn, perk, tickRoom } from './room';
 import { fmt } from '../ui/format';
 
 // One fixed step. Callers own their own time accumulators.
@@ -12,6 +13,7 @@ export function step(s: GameState, watching = false) {
   s.time += STEP;
   s.totalTime += STEP;
   if (watching) walkIns(s);
+  tickRoom(s, STEP);
   for (const r of s.bypass ? ([0, 1] as const) : ([0] as const)) {
     const c = s.crews[r];
     c.rally = Math.max(0, c.rally - STEP);
@@ -27,7 +29,7 @@ export function step(s: GameState, watching = false) {
   }
 }
 
-export const payFor = (s: GameState, r: RegionId, fight: FightDef = fightOf(s, r), payUp = 0) => fight.pay * (1 + payUp) * asphaltMult(s, r);
+export const payFor = (s: GameState, r: RegionId, fight: FightDef = fightOf(s, r), payUp = 0) => fight.pay * (1 + payUp) * asphaltMult(s, r) * (r === 0 ? boardBonus(s) : 1);
 export function fightLabel(r: RegionId, idx: number) {
   const f = FIGHTS[r][idx];
   const lot = REGIONS[r].lots[f.zone];
@@ -107,7 +109,7 @@ function walkIns(s: GameState) {
     return;
   }
   if ((s.findClock -= STEP) > 0) return;
-  s.findClock = WALKIN_EVERY;
+  s.findClock = perk(s, 'walkins') ? 75 : WALKIN_EVERY;
   const shops = leased(s, s.view);
   if (!shops.length) return;
   const sh = pick(s, shops);
@@ -115,8 +117,9 @@ function walkIns(s: GameState) {
 }
 
 export function walkInValue(s: GameState, kind: WalkInKind): number {
-  if (kind === 'cash') return rentPerSec(s, s.view) * TIP_SECONDS;
-  if (kind === 'referral') return payFor(s, s.view) * REFERRAL_WINS;
+  const troll = s.view === 0 && buffOn(s, 'troll') ? 2 : 1;
+  if (kind === 'cash') return rentPerSec(s, s.view) * TIP_SECONDS * troll;
+  if (kind === 'referral') return payFor(s, s.view) * REFERRAL_WINS * troll;
   return 0;
 }
 

@@ -7,6 +7,7 @@ import { Pylon } from './Pylon';
 import { AskDialog, Boot, HowTo, Story, TipCard, WinCard } from './Screens';
 import { Shops } from './Shops';
 import { BackOffice } from './BackOffice';
+import { GameRoom } from './GameRoom';
 
 function go(screen: typeof app.screen) {
   app.screen = screen;
@@ -39,6 +40,8 @@ export function App() {
   const screen =
     app.screen === 'boot' ? (
       <Boot onNew={onNew} onResume={onResume} />
+    ) : app.screen === 'room' ? (
+      <GameRoom />
     ) : app.screen === 'howto' ? (
       <HowTo />
     ) : app.screen === 'story' ? (

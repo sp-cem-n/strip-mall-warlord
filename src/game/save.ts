@@ -1,5 +1,6 @@
 import { SAVE_VERSION } from './economy';
 import type { GameState } from './state';
+import { newRoom } from './room';
 
 const KEY = 'smw.save';
 
@@ -27,7 +28,7 @@ export function loadGame(): GameState | 'old' | null {
   if (!raw) return null;
   try {
     const s = JSON.parse(raw) as GameState;
-    if (s?.version === SAVE_VERSION && Array.isArray(s.crews)) return s;
+    if (s?.version === SAVE_VERSION && Array.isArray(s.crews)) return ((s.room ??= newRoom()), s);
     const tag = ARCHIVE[s?.version];
     if (tag) {
       old.from = tag;

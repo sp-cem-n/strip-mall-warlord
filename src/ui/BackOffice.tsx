@@ -3,6 +3,7 @@ import { app, tip, toast } from '../app';
 import { BATTLERS, CURRENCY_SHORT, GOODWILL_PER_EQUITY, REGIONS, ROLES, TRAIN_STEP, type RegionId, type Role } from '../game/defs';
 import { autoCovers, bal, buyPatrol, convert, currencyOf, lotReached, patrolBlock, patrolPrice, purse, retryAfter, roster, secLevel, train, trainCost } from '../game/economy';
 import { fmt } from './format';
+import { MACHINES, roomOpen } from '../game/room';
 
 const TRACKS: Record<Role, [string, string]> = {
   tank: ['Conditioning', 'tank HP'],
@@ -88,6 +89,28 @@ function Patrol({ r }: { r: RegionId }) {
   );
 }
 
+function Arcade() {
+  const s = app.s;
+  const open = MACHINES.filter((m) => m.region === 0 && s.room.unlocked.includes(m.id));
+  return (
+    <>
+      <button class="btn big hot arcade-go" onClick={() => ((app.screen = 'room'), (app.tip = null), app.refresh())}>
+        Walk over to the Fun Zone
+      </button>
+      {MACHINES.filter((m) => m.region === 0).map((m) => (
+        <div key={m.id} class="track">
+          <b class={s.room.unlocked.includes(m.id) ? '' : 'dim'}>{m.name}</b>
+          <span class="dim">{s.room.unlocked.includes(m.id) ? (s.room.attract[m.id] ? `Attract Lv ${s.room.attract[m.id]}` : m.blurb) : m.needs}</span>
+          <span />
+        </div>
+      ))}
+      <div class="dim tnote">
+        {fmt(s.tickets)} tickets · {open.length}/6 machines
+      </div>
+    </>
+  );
+}
+
 export function BackOffice() {
   const s = app.s;
   const r = s.view;
@@ -95,6 +118,7 @@ export function BackOffice() {
     ['training', `Training · ${currencyOf(r)}`],
     ['patrol', 'Patrol · $'],
   ];
+  if (r === 0 && roomOpen(s, 0)) tabs.push(['arcade', `Arcade · ${fmt(s.tickets)} tk`]);
   if (!tabs.some(([k]) => k === office.tab)) office.tab = 'training';
   return (
     <section class="glass training backoffice">
@@ -110,6 +134,7 @@ export function BackOffice() {
       </h2>
       {office.tab === 'training' && <Training r={r} />}
       {office.tab === 'patrol' && <Patrol r={r} />}
+      {office.tab === 'arcade' && <Arcade />}
     </section>
   );
 }

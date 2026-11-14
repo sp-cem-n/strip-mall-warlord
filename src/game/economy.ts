@@ -1,6 +1,7 @@
 import { enemyLineup, statsOf } from './battle';
-import { ASPHALT_BONUS, CURRENCY_NAME, type Currency, BATTLERS, FIGHTS, fightIndex, GOODWILL_PER_EQUITY, MAX_SLOTS, OVERTIME_SECONDS, PATROL_DISCOUNT, PATROL_DISCOUNT_CAP, REGIONS, RENO_GROWTH, RENT_GROWTH, RETRY_AFTER, ROLES, SHOPS, SLOT_PRICES, START_SLOTS, SHOP_LIST, START_CASH, TRAIN_BASE, TRAIN_GROWTH, type RegionId, type Role, type ShopDef, type Stance, LOG_KEEP } from './defs';
+import { ASPHALT_BONUS, CURRENCY_NAME, type Currency, BATTLERS, FIGHTS, fightIndex, GOODWILL_PER_EQUITY, MAX_SLOTS, OVERTIME_FIGHTS, OVERTIME_SECONDS, PATROL_DISCOUNT, PATROL_DISCOUNT_CAP, REGIONS, RENO_GROWTH, RENT_GROWTH, RETRY_AFTER, ROLES, SHOPS, SLOT_PRICES, START_SLOTS, SHOP_LIST, START_CASH, TRAIN_BASE, TRAIN_GROWTH, type RegionId, type Role, type ShopDef, type Stance, LOG_KEEP } from './defs';
 import type { Crew, GameState, LogLine, Track } from './state';
+import { newRoom, perk } from './room';
 
 export const SAVE_VERSION = 5;
 const zeroTrack = (): Track => ({ tank: 0, damage: 0, heal: 0, control: 0, buffer: 0 });
@@ -15,6 +16,7 @@ export function newGame(seed = Date.now() % 2147483647): GameState {
     goodwill: 0,
     equity: 0,
     tickets: 0,
+    room: newRoom(),
     asphalt: 0,
     paves: 0,
     crews: [newCrew(0), newCrew(1)],
@@ -100,7 +102,8 @@ export const rentOf = (s: GameState, id: string, level = s.crews[SHOPS[id].regio
 export const rentPerSec = (s: GameState, r: RegionId) => leased(s, r).reduce((a, x) => a + rentOf(s, x.id), 0);
 export const renovateCost = (id: string, level: number) => Math.round(SHOPS[id].reno * RENO_GROWTH ** (level - 1));
 export const trainCost = (r: RegionId, level: number) => Math.round(TRAIN_BASE[r] * TRAIN_GROWTH ** level);
-export const overtimeCost = (s: GameState, r: RegionId) => Math.max(10, Math.round(rentPerSec(s, r) * OVERTIME_SECONDS));
+export const overtimeCost = (s: GameState, r: RegionId) => Math.max(10, Math.round(rentPerSec(s, r) * OVERTIME_SECONDS * (r === 0 ? 1 - 0.25 * perk(s, 'otCheap') : 1)));
+export const overtimeFights = (s: GameState, r: RegionId) => OVERTIME_FIGHTS + (r === 0 ? perk(s, 'otLong') : 0);
 
 export function log(s: GameState, r: RegionId, text: string, tone: LogLine['tone'] = 'info') {
   for (let i = s.log.length - 1; i >= Math.max(0, s.log.length - 3); i--) {
@@ -237,7 +240,7 @@ export function toggleField(s: GameState, r: RegionId, id: string): string | nul
 }
 export const autoPick = (s: GameState, r: RegionId) => (s.crews[r].lineup = null);
 // Arcade and bar perks that add slots (the prize counter, the shuffleboard board). Filled in by the Game Room.
-export const roomSlots = (_s: GameState, _r: RegionId) => 0;
+export const roomSlots = (s: GameState, r: RegionId) => (r === 0 ? perk(s, 'slot') : 0);
 
 export function advance(s: GameState, r: RegionId, dir: 1 | -1): string | null {
   const c = s.crews[r];
@@ -262,8 +265,8 @@ export function overtime(s: GameState, r: RegionId): string | null {
   const cost = overtimeCost(s, r);
   const err = spend(s, r, 'cash', cost);
   if (err) return err;
-  c.overtime = 3;
-  log(s, r, `Overtime approved. Next 3 fights: +25% HP and damage. -$${Math.round(cost)}.`);
+  c.overtime = overtimeFights(s, r);
+  log(s, r, `Overtime approved. Next ${c.overtime} fights: +25% HP and damage. -$${Math.round(cost)}.`);
   return null;
 }
 

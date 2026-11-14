@@ -54,6 +54,7 @@ export const CREW_LOOKS: Record<string, Look> = {
   lawyer: { hair: C.umber, shirt: C.green, pants: C.forest, extra: (g) => { tie(C.red)(g); g.rect(12, 16, 4, 4, C.umber).hline(13, 15, 2, C.ink); } },
   watchman: { hair: C.stone, shirt: C.navy, pants: C.navy, belly: true, extra: (g) => { cap(C.navy)(g); badge(g); g.rect(12, 13, 2, 5, C.sodiumLight).px(12, 12, C.paper); } }, // flashlight
   latefee: { hair: C.umber, shirt: C.blue, sleeves: C.skin, pants: C.night, extra: (g) => g.rect(5, 11, 6, 2, C.sodium).rect(12, 14, 3, 4, C.night).hline(12, 15, 3, C.paper) }, // a tape
+  tokenkid: { hair: C.sodium, shirt: C.mint, sleeves: C.skin, pants: C.blue, shoes: C.red, extra: (g) => { cap(C.red)(g); g.rect(12, 14, 2, 4, C.bone).px(12, 18, C.stone); } }, // the sock of quarters
   nailtech: { hair: C.night, shirt: C.neon, pants: C.night, shoes: C.neon, extra: (g) => g.hline(5, 2, 6, C.night).vline(11, 3, 5, C.night).px(12, 16, C.neon) },
   tanning: { skin: C.sodium, hair: C.sodiumLight, shirt: C.paper, sleeves: C.sodium, pants: C.mint, extra: (g) => g.hline(6, 5, 4, C.ink) }, // goggles
   karaoke: { hair: C.violet, shirt: C.plum, pants: C.night, extra: (g) => { g.vline(8, 10, 6, C.sodiumLight); g.rect(12, 11, 2, 2, C.stone).vline(12, 13, 4, C.ink); } },

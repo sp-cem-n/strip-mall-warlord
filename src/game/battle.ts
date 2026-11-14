@@ -1,6 +1,7 @@
 import { AURA_STEP, BATTLERS, BOSS_STRENGTH, HARD_FOCUS, ENEMY_DMG, FIGHTS, FIGHT_TIMEOUT, FRONT_SHARE, MAIN_GROWTH, OVERTIME_BOOST, RALLY_BOOST, REGIONS, ROLES, SIDE_HP_GROWTH, STANCE, TANK_HP_GROWTH, TELL, TRAIN_STEP, WEAK_BONUS, type BattlerDef, type EnemyDef, type Fx, type RegionId, type Role } from './defs';
 import { asphaltMult, curb, fighters, lineupOf, log } from './economy';
 import { rand } from './rng';
+import { buffOn } from './room';
 import type { Battle, Field, GameState, Unit } from './state';
 
 // Training multiplier for a role on one crew.
@@ -87,7 +88,8 @@ export function startBattle(s: GameState, r: RegionId): Battle | null {
   const crew = team.map(([id, lv]) => {
     const d = BATTLERS[id];
     const st = statsOf(s, r, id, lv);
-    let hp = STANCE[c.stance].hp * ot, dmg = STANCE[c.stance].dmg * ot, haste = 1, dr = d.fx?.k === 'dr' ? d.fx.v : 0;
+    const toy = r === 0 ? (k: 'bat' | 'duck') => (buffOn(s, k) ? 1.3 : 1) : () => 1;
+    let hp = STANCE[c.stance].hp * ot * toy('duck'), dmg = STANCE[c.stance].dmg * ot * toy('bat'), haste = 1, dr = d.fx?.k === 'dr' ? d.fx.v : 0;
     for (const { fx } of aur) {
       if (fx.k === 'hpUp' && targets(fx.to, d)) hp += fx.v;
       if (fx.k === 'dmgUp' && targets(fx.to, d)) dmg += fx.v;

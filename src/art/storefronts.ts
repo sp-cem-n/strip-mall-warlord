@@ -12,12 +12,13 @@ const MATERIAL: Record<Material, { wall: number; trim: number; grime: number }> 
   bypass: { wall: C.paper, trim: C.navy, grime: C.stone }, // EIFS, 1998, still white
 };
 
-type Decor = 'dojo' | 'vape' | 'laundromat' | 'pawn' | 'payday' | 'desk' | 'shelves' | 'chair' | 'mic' | 'beds' | 'gym' | 'pets' | 'phones' | 'tooth' | 'tan' | 'wash' | 'storage' | 'golf' | 'dress' | 'film' | 'pretzel';
+type Decor = 'arcade' | 'dojo' | 'vape' | 'laundromat' | 'pawn' | 'payday' | 'desk' | 'shelves' | 'chair' | 'mic' | 'beds' | 'gym' | 'pets' | 'phones' | 'tooth' | 'tan' | 'wash' | 'storage' | 'golf' | 'dress' | 'film' | 'pretzel';
 interface ShopArt { text: string; bg: number; fg: number; awning: number; decor: Decor; label?: string }
 const A = (text: string, bg: number, fg: number, awning: number, decor: Decor, label?: string): ShopArt => ({ text, bg, fg, awning, decor, label });
 // one sign per shop; Bypass franchises reuse the original's sign
 const SHOP_ART: Record<string, ShopArt> = {
   pawn: A('PAWN', C.sodium, C.ink, C.sodium, 'pawn'),
+  funzone: A('FUNZONE', C.violet, C.sodiumLight, C.neon, 'arcade'),
   dojo: A('DOJO', C.red, C.paper, C.red, 'dojo'),
   laundromat: A('SUDS', C.blue, C.paper, C.blue, 'laundromat'),
   vape: A('VAPE', C.plum, C.neon, C.violet, 'vape'),
@@ -52,6 +53,11 @@ for (const [id, base] of [['dojo2', 'dojo'], ['security2', 'security'], ['laundr
 function interior(g: Grid, art: ShopArt) {
   const label = (c: number) => art.label && g.text(art.label, 6, 26, c);
   switch (art.decor) {
+    case 'arcade': // three cabinets glowing in the dark
+      for (const [x, c] of [[7, C.neon], [19, C.mint], [31, C.sodiumLight]] as const) {
+        g.rect(x, 28, 8, 19, C.ink).rect(x + 1, 29, 6, 3, c).rect(x + 1, 33, 6, 5, C.navy).dither(x + 1, 33, 6, 5, c).rect(x + 1, 39, 6, 2, C.concrete).px(x + 2, 40, C.red).px(x + 5, 40, C.sodium);
+      }
+      break;
     case 'dojo':
       g.rect(5, 42, 36, 5, C.forest).hline(5, 42, 36, C.green);
       g.vline(32, 25, 3, C.stone).block(30, 28, 5, 11, C.red).hline(30, 28, 5, C.brick);

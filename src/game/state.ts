@@ -1,4 +1,5 @@
 import type { RegionId, Role, Stance, Tell, WalkInKind } from './defs';
+import type { RoomState } from './room';
 
 export interface Unit {
   uid: number;
@@ -85,6 +86,7 @@ export interface GameState {
   goodwill: number;
   equity: number;
   tickets: number; // arcade tickets (Route 9's Fun Zone)
+  room: RoomState; // the Fun Zone (and the bar): survives paving
   asphalt: number;
   paves: number;
   crews: [Crew, Crew];

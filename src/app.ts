@@ -2,7 +2,7 @@
 import type { AwaySummary } from './game/sim';
 import type { GameState } from './game/state';
 
-export type Screen = 'boot' | 'howto' | 'story' | 'game';
+export type Screen = 'boot' | 'howto' | 'story' | 'game' | 'room';
 export interface Tip {
   x: number;
   y: number;

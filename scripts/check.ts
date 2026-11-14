@@ -8,6 +8,7 @@ import { CREW_LOOKS, ENEMY_LOOKS } from '../src/art/people';
 import type { GameState } from '../src/game/state';
 import { HOW, STORY } from '../src/game/content/copy';
 import { botAct } from '../src/game/bot';
+import { buyAttract, buyPerk, endPlay, startPlay } from '../src/game/room';
 import { readdirSync, readFileSync } from 'node:fs';
 
 const store = new Map<string, string>();
@@ -26,7 +27,7 @@ const finish = (s: GameState, r: 0 | 1) => ((s.crews[r].frontier = FIGHTS[r].len
 const r9 = SHOP_LIST.filter((x) => x.region === 0);
 const bp = SHOP_LIST.filter((x) => x.region === 1);
 const bosses = (r: 0 | 1) => REGIONS[r].lots.map((l) => l.boss.joins);
-check(`Route 9: ${r9.length} shops + ${bosses(0).length} bosses = 25 battlers`, r9.length + bosses(0).length === 25 && new Set([...r9.map((x) => x.battler), ...bosses(0)]).size === 25);
+check(`Route 9: ${r9.length} shops + ${bosses(0).length} bosses = 26 battlers`, r9.length + bosses(0).length === 26 && new Set([...r9.map((x) => x.battler), ...bosses(0)]).size === 26);
 check(`Bypass: ${bp.length} shops (${bp.filter((x) => !r9.some((y) => y.battler === x.battler)).length} new kinds) + ${bosses(1).length} bosses`, bp.length >= 12 && new Set(bp.map((x) => x.battler)).size === bp.length);
 check('every battler and shop id resolves', SHOP_LIST.every((x) => BATTLERS[x.battler]) && REGIONS.every((r) => r.lots.every((l) => BATTLERS[l.boss.joins])));
 check('every enemy weakness is a battler that region can field', REGIONS.every((r) => r.lots.every((l) => [...l.regulars, l.boss].every((e) => [...SHOP_LIST.filter((x) => x.region === r.id).map((x) => x.battler), ...bosses(r.id)].includes(e.weak)))));
@@ -79,7 +80,7 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   t.crews[0].shops = Object.fromEntries(r9.map((x) => [x.id, 5]));
   finish(t, 0);
   const team = roster(t, 0);
-  check('25 on the crew with every boss joined', team.length === 25);
+  check('26 on the crew with every boss joined', team.length === 26);
   const b = startBattle(t, 0)!;
   check(`${START_SLOTS} fighter slots to start; buffers stand on the curb, not in a slot`, slotsOf(t, 0) === START_SLOTS && b.crew.length === START_SLOTS && b.crew.every((u) => u.role !== 'buffer') && curb(t, 0).length > 0);
   check('aura from the curb: Personal Trainer gives tanks +20% HP', b.crew.find((u) => u.role === 'tank')!.maxHp > statsOf(t, 0, b.crew.find((u) => u.role === 'tank')!.id, 5 + tierOf(r9.find((x) => x.battler === b.crew.find((u) => u.role === 'tank')!.id)?.id ?? 'pawn')).hp * 1.15);
@@ -171,6 +172,28 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   check('a v0.5 save reads as old and is copied where /v0.5/ finds it', loadGame() === 'old' && old.from === 'v0.5' && store.get('smw-v0.5:smw.save') === v5);
   store.set('smw.save', '{nope');
   check('a broken save does not crash', loadGame() === 'old');
+}
+
+// the Fun Zone
+{
+  const t = newGame(13);
+  t.crews[0].cash = 1e9;
+  t.crews[0].frontier = 15;
+  check('the Fun Zone leases at Big-Box and opens the Coin Pusher', lease(t, 'funzone') === null && (step(t), t.room.unlocked.includes('pusher')) && roster(t, 0).some(([id]) => id === 'tokenkid'));
+  const c0 = t.crews[0].cash;
+  check('a quarter in, dollars out', startPlay(t, 'pusher') === null && t.crews[0].cash < c0 && (endPlay(t, 'pusher', 0.8), t.crews[0].cash > c0));
+  check('locked machines stay dark', startPlay(t, 'claw') !== null);
+  t.room.unlocked.push('claw');
+  t.tickets = 49;
+  check('the claw costs 50 tickets', startPlay(t, 'claw') !== null && ((t.tickets = 50), startPlay(t, 'claw') === null) && t.tickets === 0);
+  t.tickets = 7500;
+  check('prize counter: slots 6 and 7 for tickets', buyPerk(t, 'slot') === null && buyPerk(t, 'slot') === null && slotsOf(t, 0) === START_SLOTS + 2 && buyPerk(t, 'slot') !== null);
+  check('Attract Mode plays by itself, rarely', buyAttract(t, 'pusher') === null && (() => { const p = t.room.plays; for (let i = 0; i < 1800 / STEP + 5; i++) step(t); return t.room.plays === p + 1; })());
+  t.crews[0].frontier = FIGHTS[0].length;
+  t.ending = 0;
+  const room = JSON.stringify({ ...t.room, clock: 0, shelf: 0, buffs: 0 });
+  pave(t);
+  check('the Fun Zone survives paving: tickets, perks, unlocks, Attract Mode', JSON.stringify({ ...t.room, clock: 0, shelf: 0, buffs: 0 }) === room && slotsOf(t, 0) === START_SLOTS + 2);
 }
 
 // pre-dawn copy: nothing before the Route 9 ending may hint at the Bypass, Equity or a second crew
