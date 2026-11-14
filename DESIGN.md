@@ -1,47 +1,47 @@
-# Strip Mall Warlord — design (prototype v0.1)
+# Strip Mall Warlord: design (prototype v0.2)
 
-**Pitch.** Fall 1997. Your uncle left you Unit A at Pinewood Plaza, a dying strip mall on Rt. 9. Open shops, and every shop earns money and trains one kind of fighter. Your crew fights its own way across the parking lot toward the rival lots. You get stronger between fights. Tone is grounded and dry: job titles, signage, rent.
+**Pitch.** Fall 1997. Your uncle left you Pinewood Plaza, a dying strip mall on Rt. 9 with four empty units. Every storefront you open earns rent and sends one crew member out to the lot. The crew fights on its own, row by row, toward the rival lots. Your job is deciding what each storefront *is*. Tone is grounded and dry. See `docs/REVISION.md` for why v0.1's systems were cut.
 
-## Core loop
-1. **Shops** earn $/s and train fighters into a bench (cap per shop).
-2. **The crew auto-fights** the next "row" of the current lot. Win = cash + advance a row. Lose = pay rent (half the win payout) and fall back a row, so the crew pushes at the wall and farms the row behind it.
-3. **Clearing a lot's boss row captures it:** new storefront slots, a bigger squad (+2), and a new tenant type.
-4. **Bulldoze** (prestige) once you have stalled: everything resets for Asphalt.
+## The whole game in five rules
+1. **One storefront = one shop = one crew member.** The shop type sets the fighter. The storefront's level sets income and fighter stats.
+2. **Counters.** Every enemy is weak to one crew type, which deals ×2.5 to it. Everyone else deals ×0.5. Enemies hit your front crew member first, so you still need a tank and a medic.
+3. **Rebrand.** Any storefront can become any unlocked shop for that shop's opening fee. Renovations belong to the building, so the level stays.
+4. **Lots.** Win a fight to take the row. Lose and you retry the same row, and the log says why you lost. Taking a lot's boss row captures it: more storefronts, and sometimes a new tenant type.
+5. **Bulldoze.** After Big-Box Plaza, pave everything for Asphalt (1 per row taken). Each point gives +2% income and crew stats, forever.
 
-## Shops → fighters
-| Shop | Open | $/s @Lv1 | Trains | Role | Base HP / dmg / interval | Special |
-|---|---|---|---|---|---|---|
-| Dojo | $15 | 1.2 | Bouncer | tank, front line | 110 / 5 / 1.4s | enemies hit the first crew member standing |
-| Vape Shop | $60 | 2.2 | Hustler | damage | 45 / 13 / 1.0s | 25% dodge, hits the weakest enemy |
-| Laundromat | $300 | 4 | Medic | healer | 55 / 2 / 1.6s | heals the most-hurt ally for 14 |
-| Pawn Shop | $1,400 | 9 | Fixer | debuff + gear | 70 / 7 / 1.3s | −8% enemy HP & dmg per fixer (cap 40%); the shop rolls gear every 40s |
-| Payday Loans | $6,000 | 40 | Lawyer | control | 60 / 4 / 1.8s | 30% stun (cease-and-desist, 1.6s), lawsuit DoT 6/s for 5s; +0.04 Heat/s per level |
+Currencies have one source each: **cash ← shops**, **storefronts ← captures**, **asphalt ← rows**.
 
-- Opening another shop of the same type costs ×2.2 per copy. Unit B/C/D lease for $120 / $900 / $5,000.
-- **Renovate (level up):** cost = base × 1.5^(L−1). Income = base × L × 2^floor(L/10). Fighter stats ×1.09^(L−1). Training speed +8%/level. Bench cap = 2 + floor(L/6) per shop.
-- **Bench depth:** fighters that don't make the squad add +4% stats each to squad members of their type.
-- **Gear** (pawn shop): three crew-wide slots (Weapon +dmg, Outerwear +HP, Kit +speed). Grade improves with pawn level; the best roll auto-equips.
+## Shops → crew
+| Shop | Open / rebrand | $/s @Lv1 | Crew | HP | dmg | every | Note |
+|---|---|---|---|---|---|---|---|
+| Dojo | $15 | 1 | Bouncer | 130 | 4 | 1.4s | front line (crew order: Bouncer, Fixer, Hustler, Lawyer, Medic) |
+| Vape Shop | $50 | 2 | Hustler | 50 | 9 | 1.0s | counters contract security |
+| Laundromat | $200 | 3 | Medic | 60 | heals 15 | 1.6s | heals the worst-off ally, never attacks |
+| Pawn Shop | $800 | 8 | Fixer | 75 | 14 | 1.4s | counters retail and management; unlocked by the Parking Lot |
+| Payday Loans | $4,000 | 35 | Lawyer | 55 | 26 | 2.2s | counters code and HOA; unlocked by Big-Box. **Heat: +2% enemy strength per level** |
 
-## Lots (zones)
-| Lot | Rows | Enemy strength | Win pay (row 1) | Enemies → boss | Capture gives |
-|---|---|---|---|---|---|
-| The Parking Lot | 5 | ×2.4 | $20 | Rent-a-Cop, Lot Attendant → Night Shift Supervisor | 1 slot, Laundromat |
-| Big-Box Plaza | 6 | ×4 | $120 | Loss Prevention Associate, Rent-a-Cop (Senior) → District LP Manager | 2 slots, Pawn Shop |
-| Outlet Mall | 7 | ×10 | $700 | Code Enforcement Officer, HOA President → Outlet Mall GM | 2 slots, Payday Loans |
-| Lifestyle Center | 8 | ×24 | $4,000 | Developer Private Security, Placemaking Consultant → **Regional Property Manager** | region conquered |
+Level L: renovation costs $20 × 1.35^(L−1) (the same for every shop, so a rebrand can't be used to dodge prices). Income is ×1.15^(L−1) and stats are ×1.1^(L−1).
 
-Enemy stats are multiplied by (1 + 0.22 × row) and by (1 + 0.6 × Heat/100). Win pay is multiplied by (1 + 0.35 × row) and by (1 + Heat/200). Squad size is 4, then 6, 8, 10, 12 as lots fall. Fights time out at 30s, which counts as a loss.
+## Lots
+| Lot | Rows | Strength | Weak to (regulars → boss) | Capture gives |
+|---|---|---|---|---|
+| The Parking Lot | 5 | ×1.35 | Rent-a-Cop H, Lot Attendant H → Night Shift Supervisor H | 1 storefront, Pawn Shop |
+| Big-Box Plaza | 6 | ×2.6 | Loss Prevention F, Senior Rent-a-Cop H → District LP Manager F | 2 storefronts, Payday Loans |
+| Outlet Mall | 7 | ×7 | Code Enforcement L, HOA President L → Outlet GM F | 2 storefronts |
+| Lifestyle Center | 8 | ×18 | Private Security H, Placemaking Consultant F → **Regional Property Manager** L | 3 storefronts, region taken (fighting stops) |
 
-## Heat & raids
-Payday shops raise Heat, and it cools 0.05/s. At **60+ Heat** the next fight is a **raid** on your plaza (Code Enforcement plus a State Banking Examiner). Win: 3× boss pay and −35 Heat. Lose: −25% cash and −15 Heat. Heat is both a risk and a payout multiplier.
+H = Hustler, F = Fixer, L = Lawyer. Enemy stats are × strength × (1 + 0.22 × row) × (1 + Heat). Rows have 1–5 enemies, and the boss row is the boss plus one regular. A fight that runs 30s counts as a loss. Regroup takes 3s.
 
 ## Offline
-On reopen (or tab refocus), the sim replays elapsed time up to **8h** at the same fixed step, then shows "While you were away": earned, W/L, rent paid, crew trained, raids, lots captured.
+On reopen or tab refocus, the sim replays the elapsed time (capped at 8h) at the same 0.2s step, then shows a summary: earned, W/L, rows taken, lots captured.
 
-## Prestige: bulldoze into a parking lot
-Unlocks after capturing Big-Box Plaza. Asphalt gained = 2 × lots held + floor(√(run earnings / 25,000)). Each Asphalt gives **+10% shop speed** (income and training) and **+3% crew HP/dmg**, permanently.
+## Balance (scripts/balance.ts, seed 1991, bot acts every 10s)
+| | v0.1 | v0.2 mixed | v0.2 static (never rebrands) | v0.2 Dojo-only |
+|---|---|---|---|---|
+| Parking Lot | 3:21 | **3:05** | 3:04 | 16:22 |
+| Big-Box Plaza | 7:52 | **6:26** | 23:47 | stuck on its boss at 60 min |
+| Outlet Mall | 19:44 | **16:44** | stuck on its boss (needs a Fixer) | — |
+| at 60 min | Lifestyle 4/8 | Lifestyle 7/8 (wall) | Outlet 7/7 | Big-Box 6/6 |
+| with prestige | region at ~56 min (run 4) | region at **~62 min** (run 4) | | |
 
-## Balance targets & results (scripts/balance.ts; greedy bot, acting every 10s)
-- First capture: target 3–5 min, got **3:21**. Big-Box: **7:52**. Outlet Mall: **19:44**. Raids start at about 26 min.
-- No prestige: stalls in the Lifestyle Center (rows 4–7 of 8) from ~25 to 60 min.
-- With prestige: bulldozes at 16 / 33 / 46 min, and **conquers the region at ~56 min on run 4**. After that, runs take minutes.
+In v0.1 the Dojo-only bot *beat* the mixed bot (Lifestyle 6/8 vs 4/8). Now it's stuck in the second lot.

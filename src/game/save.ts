@@ -1,7 +1,7 @@
-import { SAVE_VERSION, newGame } from './economy';
+import { SAVE_VERSION } from './economy';
 import type { GameState } from './state';
 
-const KEY = 'smw.save.v1';
+const KEY = 'smw.save';
 
 export function saveGame(s: GameState) {
   s.savedAt = Date.now();
@@ -19,7 +19,7 @@ export function loadGame(): GameState | null {
     if (!raw) return null;
     const s = JSON.parse(raw) as GameState;
     if (!s || s.version !== SAVE_VERSION || !Array.isArray(s.slots) || typeof s.cash !== 'number') return null;
-    return { ...newGame(), ...s };
+    return s;
   } catch {
     return null;
   }

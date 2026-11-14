@@ -1,24 +1,10 @@
 import type { FighterKind, ShopKind } from './defs';
 
-export interface Shop {
-  kind: ShopKind;
-  level: number;
-  train: number; // 0..1 progress toward next fighter
-}
-
 export interface Slot {
   id: number;
-  label: string; // "Unit 1", "Ex-Blockbuster"
-  origin: 'home' | 'captured';
-  leased: boolean;
-  shop: Shop | null;
-}
-
-export type GearSlot = 'weapon' | 'armor' | 'kit';
-export interface Gear {
-  slot: GearSlot;
-  name: string;
-  bonus: number; // 0.1 = +10%
+  label: string;
+  level: number; // renovations belong to the building
+  shop: ShopKind | null;
 }
 
 export interface Unit {
@@ -29,69 +15,47 @@ export interface Unit {
   title: string;
   maxHp: number;
   hp: number;
-  dmg: number;
+  dmg: number; // heal amount for medics
   interval: number;
   cooldown: number;
-  dodge: number;
-  heal: number;
-  stunChance: number;
-  dot: number;
-  stunned: number;
-  dotLeft: number;
-  dotDps: number;
+  weak: FighterKind | null; // enemies only
   boss: boolean;
-  flash: number; // seconds left of "just hit" highlight
-  acted: number; // seconds left of "just acted" highlight
+  flash: number; // seconds left of "just hit"
+  lastDmg: number; // last damage taken, shown while flashing
+  acted: number;
 }
 
 export interface Battle {
-  kind: 'wave' | 'raid';
   zone: number;
-  wave: number;
+  row: number;
   t: number;
   crew: Unit[];
   enemies: Unit[];
-  debuff: number;
 }
 
 export interface LogLine {
   t: number;
   text: string;
-  tone: 'win' | 'loss' | 'info' | 'hit' | 'capture';
-}
-
-export interface Stats {
-  wins: number;
-  losses: number;
-  raidsWon: number;
-  raidsLost: number;
-  earned: number;
-  rentPaid: number;
-  trained: number;
+  tone: 'win' | 'loss' | 'info' | 'capture';
+  n?: number;
 }
 
 export interface GameState {
   version: number;
   seed: number;
   time: number; // sim seconds this run
-  totalTime: number; // sim seconds all runs
+  totalTime: number; // all runs
   cash: number;
-  heat: number;
   asphalt: number;
   bulldozes: number;
   slots: Slot[];
-  roster: Record<FighterKind, number>;
-  gear: Record<GearSlot, Gear | null>;
-  pawnClock: number;
-  zone: number; // current zone index (== zones captured)
-  wave: number; // current wave inside the zone
+  zone: number; // lots captured == index of current lot
+  row: number;
   battle: Battle | null;
   regroup: number;
-  raidPending: boolean;
   log: LogLine[];
-  stats: Stats;
+  stats: { wins: number; losses: number; earned: number };
   savedAt: number;
   nextUid: number;
-  won: boolean; // region conquered
-  lastCapture: number; // sim time of last capture this run
+  lastCapture: number;
 }

@@ -6,127 +6,59 @@ export type FighterKind = 'bouncer' | 'hustler' | 'medic' | 'fixer' | 'lawyer';
 export interface ShopDef {
   kind: ShopKind;
   name: string;
-  sign: string; // what is painted on the window
   fighter: FighterKind;
-  openCost: number;
-  upgradeBase: number; // cost of going 1 -> 2
-  income: number; // $/s at level 1
-  trainSeconds: number; // seconds per fighter at level 1
-  heat: number; // heat/s at level 1 (payday only)
-  blurb: string;
+  openCost: number; // also the cost to rebrand a storefront into this
+  income: number; // $/s at storefront level 1
 }
 
 export const SHOPS: Record<ShopKind, ShopDef> = {
-  dojo: {
-    kind: 'dojo',
-    name: 'Dojo',
-    sign: 'KRAV MAGA • CARDIO KICKBOXING • FIRST CLASS FREE',
-    fighter: 'bouncer',
-    openCost: 15,
-    upgradeBase: 12,
-    income: 1.2,
-    trainSeconds: 14,
-    heat: 0,
-    blurb: 'Rubber mats, one window unit. Graduates stand in front of things.',
-  },
-  vape: {
-    kind: 'vape',
-    name: 'Vape Shop',
-    sign: 'CLOUD NINE VAPOR — WE BUY SNEAKERS',
-    fighter: 'hustler',
-    openCost: 60,
-    upgradeBase: 45,
-    income: 2.2,
-    trainSeconds: 18,
-    heat: 0,
-    blurb: 'Half the inventory is resale. The staff talk fast and hit faster.',
-  },
-  laundromat: {
-    kind: 'laundromat',
-    name: 'Laundromat',
-    sign: 'SUDS CITY COIN LAUNDRY — OPEN 24 HRS',
-    fighter: 'medic',
-    openCost: 300,
-    upgradeBase: 220,
-    income: 4,
-    trainSeconds: 24,
-    heat: 0,
-    blurb: 'The overnight attendant is an EMT between shifts. Bring quarters.',
-  },
-  pawn: {
-    kind: 'pawn',
-    name: 'Pawn Shop',
-    sign: 'GOLD • GUNS • GUITARS • NO QUESTIONS (SOME QUESTIONS)',
-    fighter: 'fixer',
-    openCost: 1400,
-    upgradeBase: 1000,
-    income: 9,
-    trainSeconds: 30,
-    heat: 0,
-    blurb: 'Stock changes daily. The fixers know what everything is worth.',
-  },
-  payday: {
-    kind: 'payday',
-    name: 'Payday Loans',
-    sign: 'CASH TODAY — NO CREDIT CHECK — SE HABLA ESPAÑOL',
-    fighter: 'lawyer',
-    openCost: 6000,
-    upgradeBase: 4500,
-    income: 40,
-    trainSeconds: 36,
-    heat: 0.04,
-    blurb: 'Very good money. Draws attention. Comes with counsel.',
-  },
+  dojo: { kind: 'dojo', name: 'Dojo', fighter: 'bouncer', openCost: 15, income: 1 },
+  vape: { kind: 'vape', name: 'Vape Shop', fighter: 'hustler', openCost: 50, income: 2 },
+  laundromat: { kind: 'laundromat', name: 'Laundromat', fighter: 'medic', openCost: 200, income: 3 },
+  pawn: { kind: 'pawn', name: 'Pawn Shop', fighter: 'fixer', openCost: 800, income: 8 },
+  payday: { kind: 'payday', name: 'Payday Loans', fighter: 'lawyer', openCost: 4000, income: 35 },
 };
-
 export const SHOP_ORDER: ShopKind[] = ['dojo', 'vape', 'laundromat', 'pawn', 'payday'];
+export const START_SHOPS: ShopKind[] = ['dojo', 'vape', 'laundromat'];
 
 export interface FighterDef {
   kind: FighterKind;
   name: string;
   plural: string;
-  role: string;
   hp: number;
-  dmg: number;
-  interval: number; // seconds between actions
-  dodge: number;
-  heal: number; // medics
-  stunChance: number; // lawyers
-  dot: number; // lawyers: lawsuit dmg/s for DOT_SECONDS
-  blurb: string;
+  dmg: number; // medics: heal amount
+  interval: number;
+  does: string; // one line, shown on the storefront
 }
 
-export const DOT_SECONDS = 5;
-export const STUN_SECONDS = 1.6;
-
 export const FIGHTERS: Record<FighterKind, FighterDef> = {
-  bouncer: { kind: 'bouncer', name: 'Bouncer', plural: 'Bouncers', role: 'Front line', hp: 110, dmg: 5, interval: 1.4, dodge: 0, heal: 0, stunChance: 0, dot: 0, blurb: 'Off-duty MMA guy. Takes the hit so nobody else has to.' },
-  hustler: { kind: 'hustler', name: 'Hustler', plural: 'Hustlers', role: 'Damage', hp: 45, dmg: 13, interval: 1.0, dodge: 0.25, heal: 0, stunChance: 0, dot: 0, blurb: 'Resells sneakers. Gone before the swing lands.' },
-  medic: { kind: 'medic', name: 'Medic', plural: 'Medics', role: 'Support', hp: 55, dmg: 2, interval: 1.6, dodge: 0, heal: 14, stunChance: 0, dot: 0, blurb: 'EMT on the night shift. First-aid kit, two energy drinks.' },
-  fixer: { kind: 'fixer', name: 'Fixer', plural: 'Fixers', role: 'Debuff', hp: 70, dmg: 7, interval: 1.3, dodge: 0.05, heal: 0, stunChance: 0, dot: 0, blurb: 'Knows a guy. Before the fight, the other side’s gear goes missing.' },
-  lawyer: { kind: 'lawyer', name: 'Lawyer', plural: 'Lawyers', role: 'Control', hp: 60, dmg: 4, interval: 1.8, dodge: 0, heal: 0, stunChance: 0.3, dot: 6, blurb: 'Serves cease-and-desists in person. Files suits that bleed.' },
+  bouncer: { kind: 'bouncer', name: 'Bouncer', plural: 'Bouncers', hp: 130, dmg: 4, interval: 1.4, does: 'Stands in front. Enemies hit the front first.' },
+  hustler: { kind: 'hustler', name: 'Hustler', plural: 'Hustlers', hp: 50, dmg: 9, interval: 1.0, does: 'Fast and fragile. Out-talks contract security.' },
+  medic: { kind: 'medic', name: 'Medic', plural: 'Medics', hp: 60, dmg: 15, interval: 1.6, does: 'Patches up whoever is worst off. Never attacks.' },
+  fixer: { kind: 'fixer', name: 'Fixer', plural: 'Fixers', hp: 75, dmg: 14, interval: 1.4, does: 'Knows a guy. Handles retail and management.' },
+  lawyer: { kind: 'lawyer', name: 'Lawyer', plural: 'Lawyers', hp: 55, dmg: 26, interval: 2.2, does: 'Slow, huge hits. Paperwork beats paperwork.' },
 };
+// Front-to-back marching order inside the crew.
+export const FRONT_ORDER: FighterKind[] = ['bouncer', 'fixer', 'hustler', 'lawyer', 'medic'];
 
-export const FIXER_DEBUFF_EACH = 0.08; // -8% enemy dmg & hp per fixer
-export const FIXER_DEBUFF_CAP = 0.4;
-export const BENCH_BONUS = 0.04; // +4% stats to a type's squad members per benched fighter of that type
-export const SQUAD_SIZE = (zonesCaptured: number) => 4 + 2 * zonesCaptured; // 4, 6, 8, 10, 12
+export const WEAK_MULT = 2.5; // the enemy's weak-to type hits this hard
+export const RESIST_MULT = 0.5; // everyone else
 
 export interface EnemyDef {
   name: string;
-  title: string; // dry job-title flavor
+  title: string;
   hp: number;
   dmg: number;
   interval: number;
+  weak: FighterKind;
 }
 
 export interface ZoneDef {
   id: string;
   name: string;
   blurb: string;
-  waves: number; // including the boss wave
-  strength: number; // multiplier on enemy stats
-  reward: number; // $ per win, scaled by wave
+  rows: number; // last row is the boss
+  strength: number;
   regulars: EnemyDef[];
   boss: EnemyDef;
   captureSlots: number;
@@ -139,98 +71,79 @@ export const ZONES: ZoneDef[] = [
     id: 'lot',
     name: 'The Parking Lot',
     blurb: 'Faded lines, one working lamp post, a shopping cart nobody owns.',
-    waves: 5,
-    strength: 2.4,
-    reward: 20,
+    rows: 5,
+    strength: 1.35,
     regulars: [
-      { name: 'Rent-a-Cop', title: 'Contract Security, Part-Time', hp: 40, dmg: 4, interval: 1.6 },
-      { name: 'Lot Attendant', title: 'Parking Enforcement Associate I', hp: 30, dmg: 5, interval: 1.4 },
+      { name: 'Rent-a-Cop', title: 'Contract Security, Part-Time', hp: 40, dmg: 4, interval: 1.6, weak: 'hustler' },
+      { name: 'Lot Attendant', title: 'Parking Enforcement Associate I', hp: 30, dmg: 5, interval: 1.4, weak: 'hustler' },
     ],
-    boss: { name: 'Night Shift Supervisor', title: 'Has a clipboard. Uses it.', hp: 240, dmg: 9, interval: 1.6 },
+    boss: { name: 'Night Shift Supervisor', title: 'Has a clipboard. Uses it.', hp: 200, dmg: 8, interval: 1.6, weak: 'hustler' },
     captureSlots: 1,
-    unlocks: 'laundromat',
+    unlocks: 'pawn',
     captureText: 'The old Blockbuster on the end cap is yours. Smells like carpet.',
   },
   {
     id: 'bigbox',
     name: 'Big-Box Plaza',
     blurb: 'A Circuit City husk and a grocery that keeps changing names.',
-    waves: 6,
-    strength: 4,
-    reward: 120,
+    rows: 6,
+    strength: 2.6,
     regulars: [
-      { name: 'Loss Prevention Associate', title: 'Watches the monitors. Sometimes leaves the room.', hp: 45, dmg: 5, interval: 1.5 },
-      { name: 'Rent-a-Cop (Senior)', title: 'Contract Security, Full-Time w/ Dental', hp: 60, dmg: 4, interval: 1.6 },
+      { name: 'Loss Prevention Associate', title: 'Watches the monitors. Sometimes leaves the room.', hp: 45, dmg: 5, interval: 1.5, weak: 'fixer' },
+      { name: 'Rent-a-Cop (Senior)', title: 'Contract Security, Full-Time w/ Dental', hp: 60, dmg: 4, interval: 1.6, weak: 'hustler' },
     ],
-    boss: { name: 'District Loss Prevention Manager', title: 'Oversees eleven stores and a golf cart.', hp: 260, dmg: 9, interval: 1.5 },
+    boss: { name: 'District Loss Prevention Manager', title: 'Oversees eleven stores and a golf cart.', hp: 260, dmg: 9, interval: 1.5, weak: 'fixer' },
     captureSlots: 2,
-    unlocks: 'pawn',
+    unlocks: 'payday',
     captureText: 'Two storefronts by the Circuit City. One still has the sign.',
   },
   {
     id: 'outlet',
     name: 'Outlet Mall',
     blurb: 'Seventy percent off, permanently. The fountain is off to save water.',
-    waves: 7,
-    strength: 10,
-    reward: 700,
+    rows: 7,
+    strength: 7,
     regulars: [
-      { name: 'Code Enforcement Officer', title: 'Municipal Code §14-210, Signage', hp: 55, dmg: 5, interval: 1.5 },
-      { name: 'HOA President', title: 'Unpaid. Very motivated.', hp: 45, dmg: 7, interval: 1.7 },
+      { name: 'Code Enforcement Officer', title: 'Municipal Code §14-210, Signage', hp: 55, dmg: 5, interval: 1.5, weak: 'lawyer' },
+      { name: 'HOA President', title: 'Unpaid. Very motivated.', hp: 45, dmg: 7, interval: 1.7, weak: 'lawyer' },
     ],
-    boss: { name: 'Outlet Mall General Manager', title: 'Has a lanyard with four keycards.', hp: 320, dmg: 10, interval: 1.5 },
+    boss: { name: 'Outlet Mall General Manager', title: 'Has a lanyard with four keycards.', hp: 320, dmg: 10, interval: 1.5, weak: 'fixer' },
     captureSlots: 2,
-    unlocks: 'payday',
+    unlocks: null,
     captureText: 'A former Bath & Body Works and a kiosk. The kiosk counts.',
   },
   {
     id: 'lifestyle',
     name: 'Lifestyle Center',
     blurb: 'Open-air. Fake brick. A Cheesecake Factory with a two-hour wait.',
-    waves: 8,
-    strength: 24,
-    reward: 4000,
+    rows: 8,
+    strength: 18,
     regulars: [
-      { name: 'Developer Private Security', title: 'Paid by the developer. Paid well.', hp: 65, dmg: 6, interval: 1.4 },
-      { name: 'Placemaking Consultant', title: 'Explains the vision. Also hits people.', hp: 50, dmg: 7, interval: 1.6 },
+      { name: 'Developer Private Security', title: 'Paid by the developer. Paid well.', hp: 65, dmg: 6, interval: 1.4, weak: 'hustler' },
+      { name: 'Placemaking Consultant', title: 'Explains the vision. Also hits people.', hp: 50, dmg: 7, interval: 1.6, weak: 'fixer' },
     ],
-    boss: { name: 'Regional Property Manager', title: 'Oversees “the portfolio.” Has never been inside a dojo.', hp: 420, dmg: 12, interval: 1.4 },
+    boss: { name: 'Regional Property Manager', title: 'Oversees “the portfolio.” Has never been inside a dojo.', hp: 420, dmg: 12, interval: 1.4, weak: 'lawyer' },
     captureSlots: 3,
     unlocks: null,
     captureText: 'The whole region answers to you now. The Cheesecake Factory still has a wait.',
   },
 ];
 
-export const RAID: EnemyDef[] = [
-  { name: 'Code Enforcement Officer', title: 'Here about the signage. And the loans.', hp: 55, dmg: 5, interval: 1.5 },
-  { name: 'State Banking Examiner', title: 'Brought a laptop and a sandwich.', hp: 70, dmg: 6, interval: 1.6 },
-];
-
-// Home mall: units you lease with cash. Unit 0 is the one you inherit.
 export const HOME_UNITS = 4;
-export const LEASE_COSTS = [0, 120, 900, 5000];
-
 export const START_CASH = 20;
-export const UPGRADE_GROWTH = 1.5; // upgrade cost = upgradeBase * growth^(level-1)
-export const LEVEL_INCOME = (level: number) => level * 2 ** Math.floor(level / 10);
-export const LEVEL_STATS = (level: number) => 1.09 ** (level - 1);
-export const FIGHTERS_PER_SHOP = (level: number) => 2 + Math.floor(level / 6);
-export const TRAIN_SPEED = (level: number) => 1 + 0.08 * (level - 1);
 
-export const WAVE_GROWTH = 0.22; // per wave inside a zone
-export const LOSS_RENT = 0.5; // a loss costs half of what that fight would have paid
-export const LOSS_RENT_MIN = 5;
+// Renovation belongs to the storefront, not the shop: rebranding keeps the level.
+export const RENOVATE_BASE = 20;
+export const RENOVATE_GROWTH = 1.35; // cost = base * growth^(level-1)
+export const INCOME_GROWTH = 1.15; // income = shop income * growth^(level-1)
+export const STAT_GROWTH = 1.1; // fighter hp/dmg = base * growth^(level-1)
+
+export const ROW_GROWTH = 0.22; // enemy stats +22% per row inside a lot
+export const HEAT_PER_PAYDAY_LEVEL = 0.02; // +2% enemy strength per Payday level owned
 export const REGROUP_SECONDS = 3;
-export const LOSS_REGROUP_SECONDS = 8;
-export const BATTLE_TIMEOUT = 30; // stalemate = loss
+export const FIGHT_TIMEOUT = 30; // stalemate counts as a loss
 
-export const HEAT_DECAY = 0.05; // per second
-export const HEAT_RAID_AT = 60;
-export const HEAT_ENEMY_BONUS = 0.6; // at 100 heat, enemies +60%
-export const RAID_HEAT_DROP = 35;
-
-export const ASPHALT_BONUS = 0.1; // +10% shop speed (income + training) per asphalt
-export const ASPHALT_CREW = 0.03; // +3% crew HP/damage per asphalt (packed-down ground, better footing)
-export const PRESTIGE_MIN_ZONE = 2; // must have captured this many zones
+export const ASPHALT_BONUS = 0.02; // +2% income and crew stats per asphalt
+export const PRESTIGE_MIN_ZONE = 2; // lots captured before you can bulldoze
 export const OFFLINE_CAP_SECONDS = 8 * 3600;
-export const STEP = 0.2; // fixed sim step in seconds
+export const STEP = 0.2;

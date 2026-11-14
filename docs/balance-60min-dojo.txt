@@ -1,0 +1,22 @@
+Strip Mall Warlord balance — 60 min, seed 1991, strategy dojo, acts every 10s, step 0.2s
+
+Milestones
+   0:32  first loss
+   0:44  first win
+  16:22  CAPTURED The Parking Lot
+
+Every 5 minutes
+   5:00  $    157      11/s  heat +0%  W4/L6  The Parking Lot 5/5  [B9 B9 B8 B8]
+  10:00  $    214      19/s  heat +0%  W4/L15  The Parking Lot 5/5  [B13 B12 B12 B12]
+  15:00  $    496      26/s  heat +0%  W4/L24  The Parking Lot 5/5  [B15 B15 B14 B14]
+  20:00  $    625      38/s  heat +0%  W9/L30  Big-Box Plaza 5/6  [B16 B16 B16 B15 B15]
+  25:00  $  1.75K      46/s  heat +0%  W9/L39  Big-Box Plaza 5/6  [B17 B17 B17 B17 B17]
+  30:00  $  1.64K      55/s  heat +0%  W9/L48  Big-Box Plaza 5/6  [B19 B18 B18 B18 B18]
+  35:00  $  1.88K      63/s  heat +0%  W10/L56  Big-Box Plaza 6/6  [B20 B19 B19 B19 B19]
+  40:00  $  4.39K      71/s  heat +0%  W10/L65  Big-Box Plaza 6/6  [B20 B20 B20 B20 B20]
+  45:00  $  3.10K      79/s  heat +0%  W10/L74  Big-Box Plaza 6/6  [B21 B21 B21 B21 B20]
+  50:00  $  5.94K      86/s  heat +0%  W10/L83  Big-Box Plaza 6/6  [B22 B22 B21 B21 B21]
+  55:00  $  9.04K      94/s  heat +0%  W10/L92  Big-Box Plaza 6/6  [B22 B22 B22 B22 B22]
+  1h 0m  $  5.93K     102/s  heat +0%  W10/L101  Big-Box Plaza 6/6  [B23 B23 B23 B22 B22]
+
+Offline (one shop, 8h cap): +$28.8K, 1W/1733L, rows +1, captured: none

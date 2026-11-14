@@ -1,13 +1,15 @@
 import { app } from '../app';
-import { BATTLE_TIMEOUT, SQUAD_SIZE, ZONES } from '../game/defs';
-import { currentZoneIndex, squad } from '../game/battle';
-import { fmt, lossRent, waveReward } from '../game/sim';
+import { FIGHTERS, FIGHT_TIMEOUT, PRESTIGE_MIN_ZONE, SHOPS, ZONES, type FighterKind } from '../game/defs';
+import { regionTaken } from '../game/economy';
+import { asphaltGain, bulldoze, canBulldoze } from '../game/sim';
+import { saveGame } from '../game/save';
 import type { Unit } from '../game/state';
+import { fmtTime } from './format';
 
-const GLYPH: Record<string, string> = { bouncer: 'B', hustler: 'H', medic: '+', fixer: 'F', lawyer: '§', enemy: '' };
+const GLYPH: Record<string, string> = { bouncer: 'B', hustler: 'H', medic: '+', fixer: 'F', lawyer: '§' };
+const Weak = ({ k }: { k: FighterKind }) => <span class={`weak k-${k}`} title={`Weak to ${FIGHTERS[k].plural}`}>{GLYPH[k]}</span>;
 
 function Token({ u }: { u: Unit }) {
-  const pct = Math.max(0, u.hp / u.maxHp) * 100;
   const dead = u.hp <= 0;
   const initials = u.side === 'enemy' ? u.name.split(/[\s-]+/).map((w) => w[0]).join('').slice(0, 3) : GLYPH[u.kind];
   return (
@@ -16,36 +18,68 @@ function Token({ u }: { u: Unit }) {
       <div class="token-body">
         <div class="token-name">{u.name}</div>
         <div class="hp">
-          <div class="hp-fill" style={{ width: `${pct}%` }} />
+          <div class="hp-fill" style={{ width: `${Math.max(0, u.hp / u.maxHp) * 100}%` }} />
         </div>
         <div class="token-meta">
           {dead ? 'out' : `${Math.ceil(u.hp)}/${u.maxHp}`}
-          {u.stunned > 0 && !dead && <span class="tag stun">C&amp;D</span>}
-          {u.dotLeft > 0 && !dead && <span class="tag sued">SUED</span>}
+          {u.weak && (
+            <span class="dim">
+              weak to <Weak k={u.weak} />
+            </span>
+          )}
+          {u.flash > 0 && !dead && <span class="dmg">−{Math.round(u.lastDmg)}</span>}
         </div>
       </div>
     </div>
   );
 }
 
-export function ZoneTrack() {
+function ZoneTrack() {
   const s = app.s;
+  const ok = canBulldoze(s);
   return (
     <div class="zones">
       {ZONES.map((z, i) => {
         const state = i < s.zone ? 'done' : i === s.zone ? 'current' : 'locked';
+        const weak = [...new Set([...z.regulars.map((e) => e.weak), z.boss.weak])];
         return (
           <div key={z.id} class={`zone ${state}`}>
             <div class="zone-name">{z.name}</div>
             <div class="pips">
-              {Array.from({ length: z.waves }, (_, w) => (
-                <span key={w} class={`pip ${i < s.zone || (i === s.zone && w < s.wave) ? 'won' : i === s.zone && w === s.wave ? 'now' : ''} ${w === z.waves - 1 ? 'boss' : ''}`} />
+              {Array.from({ length: z.rows }, (_, r) => (
+                <span key={r} class={`pip ${i < s.zone || (i === s.zone && r < s.row) ? 'won' : i === s.zone && r === s.row ? 'now' : ''} ${r === z.rows - 1 ? 'boss' : ''}`} />
               ))}
             </div>
-            <div class="zone-sub">{state === 'done' ? 'Captured' : state === 'current' ? `Row ${s.wave + 1} of ${z.waves}` : z.unlocks ? 'Unlocks a tenant' : 'Final lot'}</div>
+            <div class="zone-sub">
+              {state === 'done' ? 'Captured' : (
+                <>
+                  weak to {weak.map((k) => <Weak key={k} k={k} />)}
+                </>
+              )}
+            </div>
           </div>
         );
       })}
+      <div class={`zone pave ${ok ? 'current' : 'locked'}`}>
+        <div class="zone-name">Pave it</div>
+        <div class="zone-sub">
+          {ok ? `+${asphaltGain(s)} asphalt (1 per row taken). +2% to everything each, forever.` : `Bulldoze unlocks after ${ZONES[PRESTIGE_MIN_ZONE - 1].name}.`}
+        </div>
+        {ok && (
+          <button
+            class="btn danger small"
+            onClick={() => {
+              if (!confirm(`Bulldoze everything for +${asphaltGain(s)} asphalt?`)) return;
+              app.s = bulldoze(s);
+              saveGame(app.s);
+              app.refresh();
+            }}
+          >
+            Bulldoze
+          </button>
+        )}
+        {ok && !regionTaken(s) && s.time - s.lastCapture > 300 && <div class="hint">Stuck {fmtTime(s.time - s.lastCapture)}. Paving is the move.</div>}
+      </div>
     </div>
   );
 }
@@ -53,11 +87,9 @@ export function ZoneTrack() {
 export function Battle() {
   const s = app.s;
   const b = s.battle;
-  const z = currentZoneIndex(s);
-  const zd = ZONES[z];
-  const wave = s.won ? zd.waves - 1 : s.wave;
-  const isBoss = wave === zd.waves - 1;
-  const members = squad(s);
+  const done = regionTaken(s);
+  const zd = ZONES[Math.min(s.zone, ZONES.length - 1)];
+  const crew = s.slots.filter((x) => x.shop).length;
   return (
     <section class="panel battle">
       <h2>
@@ -66,34 +98,48 @@ export function Battle() {
       <ZoneTrack />
       <div class="field-head">
         <div>
-          <strong>{b?.kind === 'raid' ? 'RAID — Pinewood Plaza' : zd.name}</strong>
-          <span class="dim"> · {b?.kind === 'raid' ? 'they came to you' : isBoss ? `boss: ${zd.boss.name}` : `row ${wave + 1}/${zd.waves}`}</span>
+          <strong>{done ? 'Region taken' : zd.name}</strong>
+          {!done && <span class="dim"> · {s.row === zd.rows - 1 ? `boss: ${zd.boss.name}` : `row ${s.row + 1}/${zd.rows}`}</span>}
         </div>
-        <div class="dim">
-          {b ? `${b.t.toFixed(0)}s / ${BATTLE_TIMEOUT}s` : members.length ? `Regrouping… ${Math.max(0, s.regroup).toFixed(0)}s` : 'No crew yet. Open a dojo.'}
-          {b && b.debuff > 0 && <span class="tag fix">fixers −{Math.round(b.debuff * 100)}%</span>}
-        </div>
+        <div class="dim">{done ? '' : b ? `${b.t.toFixed(0)}s / ${FIGHT_TIMEOUT}s` : crew ? `Regrouping… ${Math.max(0, s.regroup).toFixed(0)}s` : 'No crew. Open a shop.'}</div>
       </div>
-      <div class={`field ${b?.kind === 'raid' ? 'raid' : ''}`}>
+      <div class="field">
         <div class="side crew">
-          {b
-            ? b.crew.map((u) => <Token key={u.uid} u={u} />)
-            : members.map((k, i) => (
-                <div key={i} class={`token crew k-${k} idle`}>
-                  <div class="chip">{GLYPH[k]}</div>
+          {b?.crew.map((u) => <Token key={u.uid} u={u} />)}
+          {!b &&
+            s.slots
+              .filter((x) => x.shop)
+              .map((x) => (
+                <div key={x.id} class={`token crew k-${SHOPS[x.shop!].fighter} idle`}>
+                  <div class="chip">{GLYPH[SHOPS[x.shop!].fighter]}</div>
                   <div class="token-body">
-                    <div class="token-name">{k[0].toUpperCase() + k.slice(1)}</div>
-                    <div class="token-meta dim">waiting by the cart corral</div>
+                    <div class="token-name">{FIGHTERS[SHOPS[x.shop!].fighter].name}</div>
+                    <div class="token-meta dim">by the cart corral</div>
                   </div>
                 </div>
               ))}
         </div>
         <div class="vs">{b ? 'vs' : ''}</div>
-        <div class="side enemy">{b ? b.enemies.map((u) => <Token key={u.uid} u={u} />) : <div class="dim field-note">{zd.blurb}</div>}</div>
+        <div class="side enemy">{b ? b.enemies.map((u) => <Token key={u.uid} u={u} />) : <div class="dim field-note">{done ? 'Quiet. The developer sends a fruit basket.' : zd.blurb}</div>}</div>
       </div>
-      <div class="field-foot dim">
-        Win: +${fmt(waveReward(s, z, wave))} · Lose: pay ${fmt(lossRent(s, z, wave))} rent, fall back a row · Squad size {members.length}/{SQUAD_SIZE(s.zone)}
-      </div>
+      <div class="field-foot dim">Enemies hit your front crew member first. Their weak-to type deals ×2.5; everyone else deals ×0.5.</div>
+    </section>
+  );
+}
+
+export function Log() {
+  const lines = app.s.log.slice(-40).reverse();
+  return (
+    <section class="panel log">
+      <h2>Incident log</h2>
+      <ul>
+        {lines.map((l, i) => (
+          <li key={`${l.t}-${i}`} class={`log-${l.tone}`}>
+            <span class="t">{fmtTime(l.t)}</span> {l.text}
+            {l.n && <span class="dim"> ×{l.n}</span>}
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

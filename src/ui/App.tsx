@@ -1,86 +1,62 @@
 import { useEffect, useState } from 'preact/hooks';
 import { app } from '../app';
-import { ASPHALT_BONUS, HEAT_RAID_AT, PRESTIGE_MIN_ZONE, ZONES } from '../game/defs';
-import { heatPerSec, incomePerSec } from '../game/economy';
-import { asphaltGain, bulldoze, canBulldoze, fmt, fmtTime } from '../game/sim';
-import { saveGame } from '../game/save';
-import { Battle } from './Battle';
-import { Crew, Log } from './Crew';
+import { ASPHALT_BONUS, ZONES } from '../game/defs';
+import { heat, incomePerSec } from '../game/economy';
+import { Battle, Log } from './Battle';
+import { fmt, fmtTime } from './format';
 import { Shops } from './Shops';
 
 function TopBar() {
   const s = app.s;
-  const net = heatPerSec(s) - 0.05;
+  const h = heat(s);
   return (
     <header class="top">
       <div class="brand">
-        STRIP MALL WARLORD
-        <span class="dim"> · Fall 1997</span>
+        STRIP MALL WARLORD<span class="dim"> · Fall 1997</span>
       </div>
       <div class="stat">
         <span class="k">Cash</span>
         <span class="v">${fmt(s.cash)}</span>
         <span class="dim">+${fmt(incomePerSec(s))}/s</span>
       </div>
-      <div class="stat heat">
+      <div class="stat heat" title="Every Payday Loans level you own makes every enemy stronger. Rebrand it away and Heat goes with it.">
         <span class="k">Heat</span>
-        <div class="meter" title={`Raids start at ${HEAT_RAID_AT}. Payday loan shops raise it; it cools ${0.05}/s.`}>
-          <div class={`meter-fill ${s.heat >= HEAT_RAID_AT ? 'hot' : ''}`} style={{ width: `${s.heat}%` }} />
-          <div class="meter-mark" style={{ left: `${HEAT_RAID_AT}%` }} />
+        <div class="meter">
+          <div class={`meter-fill ${h >= 0.5 ? 'hot' : ''}`} style={{ width: `${Math.min(100, h * 50)}%` }} />
         </div>
-        <span class="dim">
-          {s.heat.toFixed(0)}/100 {net > 0 ? `▲${net.toFixed(2)}/s` : ''}
-        </span>
+        <span class="dim">+{Math.round(h * 100)}% enemy strength</span>
       </div>
       <div class="stat">
         <span class="k">Asphalt</span>
         <span class="v">{s.asphalt}</span>
-        <span class="dim">+{Math.round(s.asphalt * ASPHALT_BONUS * 100)}% speed</span>
+        <span class="dim">+{Math.round(s.asphalt * ASPHALT_BONUS * 100)}% everything</span>
       </div>
       <div class="stat">
-        <span class="k">Territory</span>
+        <span class="k">Lots</span>
         <span class="v">
-          {Math.min(s.zone, ZONES.length)}/{ZONES.length}
+          {s.zone}/{ZONES.length}
         </span>
-        <span class="dim">lots held</span>
+        <span class="dim">
+          {s.stats.wins}W–{s.stats.losses}L · {fmtTime(s.time)}
+        </span>
       </div>
       {app.speed !== 1 && <div class="debug">debug ×{app.speed}</div>}
     </header>
   );
 }
 
-function Prestige() {
-  const s = app.s;
-  const ok = canBulldoze(s);
-  const gain = asphaltGain(s);
-  return (
-    <section class="panel prestige">
-      <h2>Bulldoze into a parking lot</h2>
-      <p class="dim">
-        Tear it all down. Shops, crew, captured lots, cash: gone. You keep Asphalt, and every point makes every shop {Math.round(ASPHALT_BONUS * 100)}% faster at earning and training. Permanently.
-      </p>
-      <button
-        class="btn danger"
-        disabled={!ok}
-        onClick={() => {
-          if (!confirm(`Bulldoze everything for +${gain} asphalt?`)) return;
-          app.s = bulldoze(s);
-          saveGame(app.s);
-          app.refresh();
-        }}
-      >
-        {ok ? `Bulldoze · +${gain} asphalt` : `Capture ${ZONES[PRESTIGE_MIN_ZONE - 1].name} first`}
-      </button>
-      {ok && s.time - s.lastCapture > 300 && !s.won && <p class="hint">No new lot in {fmtTime(s.time - s.lastCapture)}. Paving might be the move.</p>}
-    </section>
-  );
-}
-
 function Away() {
   const a = app.away;
   if (!a) return null;
+  const close = () => ((app.away = null), app.refresh());
+  const rows: [string, string][] = [
+    ['Shops earned', `$${fmt(a.earned)}`],
+    ['Fights won / lost', `${a.wins} / ${a.losses}`],
+    ['Rows taken', `${a.rows}`],
+    ['Lots captured', a.captured.join(', ') || 'nothing new'],
+  ];
   return (
-    <div class="modal-bg" onClick={() => ((app.away = null), app.refresh())}>
+    <div class="modal-bg" onClick={close}>
       <div class="modal" onClick={(e) => e.stopPropagation()}>
         <h2>While you were away</h2>
         <p class="dim">
@@ -88,37 +64,15 @@ function Away() {
         </p>
         <table>
           <tbody>
-            <tr>
-              <td>Shops earned</td>
-              <td>${fmt(a.earned)}</td>
-            </tr>
-            <tr>
-              <td>Fights won / lost</td>
-              <td>
-                {a.wins} / {a.losses}
-              </td>
-            </tr>
-            <tr>
-              <td>Rent &amp; fines paid</td>
-              <td>${fmt(a.rentPaid)}</td>
-            </tr>
-            <tr>
-              <td>New crew</td>
-              <td>{a.trained}</td>
-            </tr>
-            {a.raids > 0 && (
-              <tr>
-                <td>Raids</td>
-                <td>{a.raids}</td>
+            {rows.map(([k, v]) => (
+              <tr key={k}>
+                <td>{k}</td>
+                <td>{v}</td>
               </tr>
-            )}
-            <tr>
-              <td>Captured</td>
-              <td>{a.captured.length ? a.captured.join(', ') : 'nothing new'}</td>
-            </tr>
+            ))}
           </tbody>
         </table>
-        <button class="btn" onClick={() => ((app.away = null), app.refresh())}>
+        <button class="btn" onClick={close}>
           Back to work
         </button>
       </div>
@@ -135,16 +89,10 @@ export function App() {
     <div class="root">
       <TopBar />
       <main class="grid">
-        <div class="col left">
-          <Shops />
-          <Prestige />
-        </div>
-        <div class="col mid">
+        <Shops />
+        <div class="col">
           <Battle />
           <Log />
-        </div>
-        <div class="col right">
-          <Crew />
         </div>
       </main>
       {app.toast && performance.now() < app.toastUntil && <div class="toast">{app.toast}</div>}

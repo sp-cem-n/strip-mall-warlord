@@ -1,9 +1,10 @@
 import { render } from 'preact';
 import { app } from './app';
-import { botAct } from './game/bot';
+import { botAct, type Strategy } from './game/bot';
 import { newGame } from './game/economy';
 import { clearSave, loadGame, saveGame } from './game/save';
-import { simulateAway, step, tick } from './game/sim';
+import { STEP } from './game/defs';
+import { simulateAway, step } from './game/sim';
 import { App } from './ui/App';
 import './ui/styles.css';
 
@@ -13,6 +14,7 @@ import './ui/styles.css';
 //   ?seed=N         fixed RNG seed for a new game
 //   ?advance=SEC    let the greedy bot play SEC seconds before showing
 //   ?bot=1          keep the bot playing live
+//   ?strategy=dojo  which bot plays (mixed | static | dojo)
 //   ?midbattle=1    after advancing, stop a few seconds into a fight
 //   ?away=SEC       pretend the tab was closed SEC seconds ago (shows the summary)
 //   ?pause=1        freeze the sim (for screenshots)
@@ -27,11 +29,12 @@ app.speed = Math.max(0, num('speed', 1));
 app.bot = q.get('bot') === '1';
 app.paused = q.get('pause') === '1';
 
+const strategy = (q.get('strategy') ?? 'mixed') as Strategy;
 const advance = num('advance', 0);
 if (advance > 0) {
-  for (let t = 0; t < advance; t += 2) {
-    app.s = botAct(app.s);
-    for (let i = 0; i < 10; i++) step(app.s);
+  for (let t = 0; t < advance; t += 10) {
+    app.s = botAct(app.s, strategy);
+    for (let i = 0; i < 10 / STEP; i++) step(app.s);
   }
   if (q.get('midbattle') === '1') {
     let guard = 0;
@@ -45,6 +48,7 @@ if (awaySec > 60) app.away = simulateAway(app.s, awaySec);
 render(<App />, document.getElementById('app')!);
 
 let last = performance.now();
+let acc = 0;
 let botClock = 0;
 let saveClock = 0;
 let uiClock = 0;
@@ -53,10 +57,10 @@ function frame(now: number) {
   last = now;
   if (!app.paused && !app.away) {
     const simDt = dt * app.speed;
-    tick(app.s, simDt);
+    for (acc += simDt; acc >= STEP; acc -= STEP) step(app.s);
     if (app.bot && (botClock += simDt) >= 2) {
       botClock = 0;
-      app.s = botAct(app.s);
+      app.s = botAct(app.s, strategy);
     }
   }
   if ((saveClock += dt) >= 5) {
