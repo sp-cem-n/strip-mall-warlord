@@ -1,0 +1,26 @@
+{
+  "name": "strip-mall-warlord",
+  "productName": "Strip Mall Warlord",
+  "version": "0.1.0",
+  "description": "An idle tycoon about a dying 1990s strip mall and the crew it raises.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "build:pages": "tsc --noEmit && vite build --base=/strip-mall-warlord/",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "balance": "bun scripts/balance.ts",
+    "check": "bun scripts/check.ts",
+    "screenshots": "node scripts/screenshots.mjs"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.6",
+    "@types/node": "^22.10.0",
+    "playwright": "^1.65.1",
+    "preact": "^11.1.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5"
+  }
+}

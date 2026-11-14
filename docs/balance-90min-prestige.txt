@@ -1,0 +1,59 @@
+Strip Mall Warlord balance — 90 min, seed 1991, prestige on, acts every 10s, step 0.2s
+
+Milestones
+   0:13  first fighter trained
+   0:33  first loss
+   0:51  first win
+   1:10  leased Unit B
+   3:21  CAPTURED The Parking Lot
+   3:42  leased Unit C
+   7:37  leased Unit D
+   7:52  CAPTURED Big-Box Plaza
+   8:37  first pawn-shop gear
+  15:58  BULLDOZE #1 → asphalt 7
+  17:55  CAPTURED The Parking Lot (run 2)
+  20:24  CAPTURED Big-Box Plaza (run 2)
+  25:04  CAPTURED Outlet Mall (run 2)
+  31:44  heat hits raid threshold
+  32:22  first raid (won)
+  33:08  BULLDOZE #2 → asphalt 19
+  34:38  CAPTURED The Parking Lot (run 3)
+  35:53  CAPTURED Big-Box Plaza (run 3)
+  37:45  CAPTURED Outlet Mall (run 3)
+  45:51  BULLDOZE #3 → asphalt 33
+  47:05  CAPTURED The Parking Lot (run 4)
+  48:05  CAPTURED Big-Box Plaza (run 4)
+  49:29  CAPTURED Outlet Mall (run 4)
+  56:16  CAPTURED Lifestyle Center (run 4)
+  1h 4m  BULLDOZE #4 → asphalt 58
+  1h 5m  CAPTURED The Parking Lot (run 5)
+  1h 6m  CAPTURED Big-Box Plaza (run 5)
+  1h 7m  CAPTURED Outlet Mall (run 5)
+  1h 9m  CAPTURED Lifestyle Center (run 5)
+ 1h 23m  BULLDOZE #5 → asphalt 93
+ 1h 24m  CAPTURED The Parking Lot (run 6)
+ 1h 25m  CAPTURED Big-Box Plaza (run 6)
+ 1h 26m  CAPTURED Outlet Mall (run 6)
+ 1h 27m  CAPTURED Lifestyle Center (run 6)
+
+Every 5 minutes
+   5:00  $  1.42K     102/s  heat   0  W12/L4 R0/0  Big-Box Plaza 5/6  [B8/8 H3/3 M2/2]  shops: dojo13,vape9,dojo13,laundromat5
+  10:00  $  4.13K     301/s  heat   0  W21/L7 R0/0  Outlet Mall 5/7  [B12/12 H8/8 M3/3 F2/2]  shops: dojo16,vape12,dojo16,dojo16,laundromat9,pawn5,vape12
+  15:00  $  7.68K     421/s  heat   0  W28/L12 R0/0  Outlet Mall 7/7  [B15/15 H8/8 M3/3 F3/3]  shops: dojo18,vape15,dojo18,dojo18,laundromat11,pawn8,vape15
+  20:00  $  1.27K     248/s  heat   0  W11/L1 R0/0  Big-Box Plaza 6/6  [B8/8 H3/3 M3/3]  shops: dojo14,vape11,dojo15,laundromat7
+  25:00  $  3.45K     716/s  heat   0  W21/L4 R0/0  Outlet Mall 7/7  [B15/15 H8/8 M3/3 F3/3]  shops: dojo18,vape15,dojo18,vape15,laundromat11,pawn8,dojo18
+  30:00  $  18.9K   1.82K/s  heat  39  W32/L10 R0/0  Lifestyle Center 5/8  [B20/20 H8/8 M4/4 F3/3 L3/3]  shops: dojo20,vape17,dojo21,vape17,laundromat13,pawn10,dojo21,payday6,dojo21
+  35:00  $    291     257/s  heat   0  W7/L0 R0/0  Big-Box Plaza 3/6  [B5/7 H3/3 M2/2]  shops: dojo11,vape8,dojo12,laundromat4
+  40:00  $  30.1K   2.03K/s  heat  12  W24/L2 R0/0  Lifestyle Center 5/8  [B20/20 H8/8 M4/4 F3/3 L2/2]  shops: dojo19,vape16,dojo19,vape16,laundromat12,pawn9,dojo19,payday5,dojo19
+  45:00  $  63.4K   3.65K/s  heat  41  W31/L7 R1/0  Lifestyle Center 7/8  [B20/20 H10/10 M4/4 F4/4 L3/3]  shops: dojo22,vape19,dojo23,vape19,laundromat15,pawn12,dojo23,payday8,dojo23
+  50:00  $  17.4K   2.48K/s  heat   1  W21/L0 R0/0  Lifestyle Center 4/8  [B20/20 H8/8 M3/3 F3/3 L2/2]  shops: dojo18,vape15,dojo18,vape15,laundromat11,pawn7,dojo18,payday3,dojo18
+  55:00  $  66.8K   5.87K/s  heat  63  W28/L5 R0/0  Lifestyle Center 6/8  [B20/20 H10/10 M4/4 F4/4 L3/3]  shops: dojo23,vape19,dojo23,vape20,laundromat16,pawn12,dojo23,payday8,dojo23
+  1h 0m  $  54.4K   10.9K/s  heat  54  W42/L5 R3/0  region held  [B30/30 H20/20 M5/5 F4/4 L3/3]  shops: dojo25,vape21,dojo25,vape21,laundromat18,pawn14,dojo25,payday10,dojo25,vape21,dojo25,vape22
+  1h 5m  $    541      78/s  heat   0  W2/L0 R0/0  The Parking Lot 3/5  [B3/3 H2/2]  shops: dojo6,vape2
+ 1h 10m  $   124K   9.84K/s  heat  30  W29/L0 R0/0  region held  [B25/25 H20/20 M4/4 F3/3 L3/3]  shops: dojo22,vape18,dojo22,dojo22,laundromat15,pawn11,vape18,payday7,dojo22,vape18,dojo22,vape19
+ 1h 15m  $   213K   18.3K/s  heat  58  W49/L0 R2/0  region held  [B30/30 H20/20 M5/5 F4/4 L3/3]  shops: dojo25,vape22,dojo26,dojo26,laundromat18,pawn15,vape22,payday11,dojo26,vape22,dojo26,vape22
+ 1h 20m  $   475K   21.5K/s  heat  46  W74/L0 R6/0  region held  [B30/30 H24/24 M5/5 F4/4 L4/4]  shops: dojo27,vape24,dojo27,dojo27,laundromat20,pawn17,vape24,payday13,dojo27,vape24,dojo28,vape24
+ 1h 25m  $  5.24K   1.57K/s  heat   0  W8/L0 R0/0  Big-Box Plaza 4/6  [B8/8 H3/3 M3/3]  shops: dojo15,vape11,dojo15,laundromat8
+ 1h 30m  $   185K   25.9K/s  heat  54  W38/L0 R0/0  region held  [B30/30 H20/20 M4/4 F4/4 L3/3]  shops: dojo24,vape21,dojo24,dojo24,laundromat17,pawn14,vape21,payday10,dojo25,vape21,dojo25,vape21
+
+Offline (dojo only, 8h cap): +$50.3K earned, 789W/790L, captured: none, trained 2
