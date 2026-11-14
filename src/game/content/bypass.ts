@@ -5,6 +5,7 @@ import { BOSS, E, S } from './make';
 export const BYPASS_SHOPS: ShopDef[] = [
   S('storage', 'Self Storage', 'auction', 1, 0, -1, 0, 2, 'Climate controlled. Emotionally, not.', 'cash', 'Unit 114, behind on rent', 5),
   S('carwash', 'Car Wash', 'detailer', 1, 0, 2, 1, 3, 'The brushes have seen things.', 'rally', 'Wants the hot wax', 10),
+  S('offramp', 'The Off-Ramp', 'bartender', 1, 0, 4, 2, 4, 'Cash only. Darts, pool, and a poker machine by the bathrooms.', 'cash', 'Regular, wants his stool back', 20),
   S('dojo2', 'Dojo (Exit 14)', 'bouncer', 1, 0, 5, 3, 6, 'Same waiver. Bigger parking lot.', 'rally', 'Sparring partner', 62),
   S('urgent', 'Urgent Care', 'nurse', 1, 0, 7, 8, 14, 'Walk-ins welcome. Wait: 3 hours.', 'referral', 'Got stitches, liked it', 300),
   S('security2', 'Security Office (Bypass)', 'watchman', 1, 0, BOSS, 15, 0, 'Same guy. Bigger monitors.', 'referral', 'Retired cop', 750),

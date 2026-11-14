@@ -2,7 +2,7 @@
 // when it's over; the payout itself is game/room.ts's job, so Attract Mode and the bot pay the same way.
 import { glyph } from '../art/font';
 import { C, HEX } from '../art/palette';
-import { HOUSE_SCORES, PINBALL_TOP, type MachineId } from '../game/room';
+import { BAR_HOUSE, HOUSE_SCORES, PINBALL_TOP, POKER_HANDS, SHUFFLE_TOP, type MachineId } from '../game/room';
 
 export interface Pen {
   rect(x: number, y: number, w: number, h: number, c: number): Pen;
@@ -38,6 +38,7 @@ export interface Game {
   draw(p: Pen, t: number): void;
   down(x: number, y: number): void;
   up(x: number, y: number): void;
+  move?(x: number, y: number): void;
 }
 const circle = (p: Pen, cx: number, cy: number, r: number, c: number) => {
   for (let y = -r; y <= r; y++) {
@@ -439,6 +440,347 @@ function cyclone(speed: number, jackpot: string): Game {
   return g;
 }
 
+
+// ================= The Off-Ramp =================
+
+// ---- Darts: the hand drifts; click when it's over the bull. Three darts. ----
+const DART_NUMS = [20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5];
+const BOARD_R = 31;
+function dartAt(dx: number, dy: number) {
+  const d = Math.hypot(dx, dy);
+  const seg = Math.floor(((Math.atan2(dx, -dy) / (2 * Math.PI) + 1) * 20 + 0.5)) % 20;
+  if (d < 2.5) return { ring: 'bull' as const, d, seg, pts: 50, color: C.red };
+  if (d < 5) return { ring: 'outer' as const, d, seg, pts: 25, color: C.green };
+  const odd = seg % 2 === 1;
+  if (d < 16) return { ring: 'single' as const, d, seg, pts: DART_NUMS[seg], color: odd ? C.bone : C.ink };
+  if (d < 18.5) return { ring: 'treble' as const, d, seg, pts: DART_NUMS[seg] * 3, color: odd ? C.green : C.red };
+  if (d < 25) return { ring: 'single' as const, d, seg, pts: DART_NUMS[seg], color: odd ? C.bone : C.ink };
+  if (d < 27.5) return { ring: 'double' as const, d, seg, pts: DART_NUMS[seg] * 2, color: odd ? C.green : C.red };
+  if (d < BOARD_R) return { ring: 'wire' as const, d, seg, pts: 0, color: C.night };
+  return null;
+}
+// the board as horizontal runs of one color, worked out once
+const BOARD_RUNS: [number, number, number, number][] = (() => {
+  const out: [number, number, number, number][] = [];
+  for (let y = -BOARD_R; y <= BOARD_R; y++) {
+    let start = 0, col = -1;
+    for (let x = -BOARD_R; x <= BOARD_R + 1; x++) {
+      const c = x <= BOARD_R ? (dartAt(x, y)?.color ?? -1) : -1;
+      if (c !== col) {
+        if (col >= 0) out.push([start, y, x - start, col]);
+        start = x;
+        col = c;
+      }
+    }
+  }
+  return out;
+})();
+function drawBoard(p: Pen, cx: number, cy: number) {
+  circle(p, cx, cy, BOARD_R + 2, C.umber);
+  for (const [x, y, w, c] of BOARD_RUNS) p.rect(cx + x, cy + y, w, 1, c);
+  for (let i = 0; i < 20; i += 5) {
+    const a = (i / 20) * 2 * Math.PI;
+    const n = String(DART_NUMS[i]);
+    p.text(n, cx + Math.round(Math.sin(a) * 29) - n.length * 2, cy - Math.round(Math.cos(a) * 29) - 2, C.paper);
+  }
+}
+function darts(): Game {
+  let t = 0, done = -1;
+  const thrown: { x: number; y: number; pts: number; q: number; bull: boolean }[] = [];
+  const CX = 39, CY = 37;
+  const hand = () => [CX + Math.sin(t * 1.3) * 17 + Math.sin(t * 3.7) * 6, CY + Math.cos(t * 1.7) * 13 + Math.sin(t * 2.9) * 5] as const;
+  const g: Game = {
+    over: false, q: 0,
+    update(dt) {
+      t += dt;
+      if (done >= 0 && (done += dt) > 1.2) g.over = true;
+    },
+    draw(p) {
+      p.rect(0, 0, p.w, p.h, C.ink);
+      drawBoard(p, CX, CY);
+      for (const d of thrown) p.rect(Math.round(d.x), Math.round(d.y), 1, 1, C.sodiumLight).rect(Math.round(d.x) + 1, Math.round(d.y) + 1, 2, 1, C.red).rect(Math.round(d.x) + 3, Math.round(d.y) + 2, 2, 1, C.paper);
+      if (done < 0) {
+        const [x, y] = hand();
+        p.rect(Math.round(x) - 4, Math.round(y), 3, 1, C.sodiumLight).rect(Math.round(x) + 2, Math.round(y), 3, 1, C.sodiumLight);
+        p.rect(Math.round(x), Math.round(y) - 4, 1, 3, C.sodiumLight).rect(Math.round(x), Math.round(y) + 2, 1, 3, C.sodiumLight);
+      }
+      p.text(thrown.map((d) => (d.bull ? 'BULL' : d.pts)).join(' '), 2, 2, C.mint);
+      p.text(`${3 - thrown.length}`, p.w - 6, 2, C.sodiumLight);
+      if (done >= 0) p.center(g.label ?? '', p.h - 7, C.sodiumLight);
+    },
+    down() {
+      if (done >= 0) return;
+      const [x, y] = hand();
+      const hit = dartAt(x - CX, y - CY);
+      const q = !hit ? 0 : hit.ring === 'bull' ? 1 : hit.ring === 'outer' ? 0.8 : hit.ring === 'treble' ? 0.7 : Math.max(0, 1 - hit.d / BOARD_R) * 0.5;
+      thrown.push({ x, y, pts: hit?.pts ?? 0, q, bull: hit?.ring === 'bull' });
+      if (thrown.length === 3) {
+        const bulls = thrown.filter((d) => d.bull).length;
+        g.q = bulls === 3 ? 1 : Math.min(0.95, thrown.reduce((a, d) => a + d.q, 0) / 3);
+        g.score = thrown.reduce((a, d) => a + d.pts, 0);
+        g.label = bulls === 3 ? 'TON-FIFTY' : `${g.score} SCORED`;
+        done = 0;
+      }
+    },
+    up() {},
+  };
+  return g;
+}
+
+// ---- Pool: six balls racked, six shots. Press on the table, pull back, let go. ----
+const POCKETS = (w: number, h: number) => [[1, 1], [w - 2, 1], [0, h / 2], [w - 1, h / 2], [1, h - 2], [w - 2, h - 2]] as const;
+const BALL_COLORS = [C.sodiumLight, C.blue, C.red, C.violet, C.sodium, C.ink];
+function pool(): Game {
+  const W = 78, H = 101, R = 2.5;
+  type Ball = { x: number; y: number; vx: number; vy: number; c: number; in: boolean; cue?: boolean };
+  const balls: Ball[] = [];
+  const rows = [[39], [36.4, 41.6], [33.8, 39, 44.2]];
+  let k = 0;
+  rows.forEach((row, i) => row.forEach((x) => balls.push({ x, y: 30 - i * 4.6, vx: 0, vy: 0, c: BALL_COLORS[k++], in: false })));
+  const cue: Ball = { x: 39, y: 80, vx: 0, vy: 0, c: C.paper, in: false, cue: true };
+  balls.push(cue);
+  let shots = 6, aim: { x: number; y: number } | null = null, pull: { x: number; y: number } | null = null, end = -1, msg = '';
+  const moving = () => balls.some((b) => !b.in && Math.hypot(b.vx, b.vy) > 0.5);
+  const sunk = () => balls.filter((b) => b.in && !b.cue).length;
+  const g: Game = {
+    over: false, q: 0,
+    update(dt) {
+      for (let n = 0; n < 6; n++) {
+        const h = dt / 6;
+        for (const b of balls) {
+          if (b.in) continue;
+          b.x += b.vx * h;
+          b.y += b.vy * h;
+          const sp = Math.hypot(b.vx, b.vy);
+          const f = Math.max(0, sp - 30 * h) / (sp || 1);
+          b.vx *= f * (1 - 0.4 * h);
+          b.vy *= f * (1 - 0.4 * h);
+          for (const [px, py] of POCKETS(W, H)) if (Math.hypot(b.x - px, b.y - py) < 4.6) ((b.in = true), (b.vx = b.vy = 0), (msg = b.cue ? 'SCRATCH' : 'IN'));
+          if (b.in) continue;
+          if (b.x < R + 1) ((b.x = R + 1), (b.vx = Math.abs(b.vx) * 0.8));
+          if (b.x > W - R - 1) ((b.x = W - R - 1), (b.vx = -Math.abs(b.vx) * 0.8));
+          if (b.y < R + 1) ((b.y = R + 1), (b.vy = Math.abs(b.vy) * 0.8));
+          if (b.y > H - R - 1) ((b.y = H - R - 1), (b.vy = -Math.abs(b.vy) * 0.8));
+        }
+        for (let i = 0; i < balls.length; i++)
+          for (let j = i + 1; j < balls.length; j++) {
+            const a = balls[i], b = balls[j];
+            if (a.in || b.in) continue;
+            const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
+            if (d >= 2 * R || d === 0) continue;
+            const nx = dx / d, ny = dy / d;
+            const push = (2 * R - d) / 2;
+            a.x -= nx * push; a.y -= ny * push; b.x += nx * push; b.y += ny * push;
+            const rel = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
+            if (rel <= 0) continue;
+            a.vx -= rel * nx * 0.96; a.vy -= rel * ny * 0.96; b.vx += rel * nx * 0.96; b.vy += rel * ny * 0.96;
+          }
+      }
+      if (!moving()) {
+        for (const b of balls) if (Math.hypot(b.vx, b.vy) <= 0.5) b.vx = b.vy = 0;
+        if (cue.in && sunk() < 6) Object.assign(cue, { in: false, x: 39, y: 80, vx: 0, vy: 0 });
+        if (end < 0 && (sunk() === 6 || shots === 0)) {
+          end = 0;
+          g.q = sunk() / 6;
+          g.label = sunk() === 6 ? 'RAN THE RACK' : `${sunk()} DOWN`;
+        }
+      }
+      if (end >= 0 && (end += dt) > 1.4) g.over = true;
+    },
+    draw(p) {
+      p.rect(0, 0, W, H, C.forest);
+      p.rect(2, 2, W - 4, H - 4, C.teal);
+      for (let y = 4; y < H - 4; y += 6) for (let x = 4 + (y % 12 ? 3 : 0); x < W - 4; x += 6) p.rect(x, y, 1, 1, C.forest);
+      p.rect(Math.round(W / 2) - 8, 74, 16, 1, C.mint); // the head string
+      for (const [px, py] of POCKETS(W, H)) circle(p, Math.round(px), Math.round(py), 4, C.ink);
+      for (const b of balls) {
+        if (b.in) continue;
+        circle(p, Math.round(b.x), Math.round(b.y), 2, b.c);
+        p.rect(Math.round(b.x) - 1, Math.round(b.y) - 1, 1, 1, b.c === C.ink ? C.concrete : C.paper);
+      }
+      if (aim && pull && !moving() && !cue.in) {
+        const dx = aim.x - pull.x, dy = aim.y - pull.y, len = Math.min(36, Math.hypot(dx, dy));
+        const ux = dx / (Math.hypot(dx, dy) || 1), uy = dy / (Math.hypot(dx, dy) || 1);
+        for (let i = 4; i < 40; i += 3) p.rect(Math.round(cue.x + ux * i), Math.round(cue.y + uy * i), 1, 1, C.paper);
+        for (let i = 0; i < 26; i++) p.rect(Math.round(cue.x - ux * (4 + len / 2 + i)), Math.round(cue.y - uy * (4 + len / 2 + i)), 1, 1, i < 3 ? C.blue : C.sodiumLight);
+        p.rect(W - 5, H - 4 - Math.round(len), 3, Math.round(len), C.red);
+      }
+      p.text(`SHOTS ${shots}`, 4, H - 9, C.paper);
+      p.text(`${sunk()}/6`, W - 18, 4, C.sodiumLight);
+      if (msg && moving()) p.center(msg, 44, C.sodiumLight);
+      if (end >= 0) p.center(g.label ?? '', 44, C.sodiumLight);
+      else if (shots === 6 && !aim && !moving()) p.center('PULL BACK', 88, C.mint);
+    },
+    down(x, y) {
+      if (moving() || end >= 0 || shots <= 0) return;
+      aim = { x, y };
+      pull = { x, y };
+    },
+    move(x, y) {
+      if (aim) pull = { x, y };
+    },
+    up(x, y) {
+      if (!aim) return;
+      const dx = aim.x - x, dy = aim.y - y, len = Math.min(36, Math.hypot(dx, dy));
+      aim = pull = null;
+      if (len < 3 || moving()) return;
+      cue.vx = (dx / Math.hypot(dx, dy)) * len * 7;
+      cue.vy = (dy / Math.hypot(dx, dy)) * len * 7;
+      shots--;
+      msg = '';
+    },
+  };
+  return g;
+}
+
+// ---- Video Poker: Jacks or Better. Click cards to hold, then DRAW. ----
+const SUITS = [
+  [0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0], // hearts
+  [0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0], // diamonds
+  [0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0], // clubs
+  [0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0], // spades
+];
+const RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+export function handTier(cards: number[]): [number, string] {
+  const r = cards.map((c) => c % 13).sort((a, b) => a - b);
+  const flush = cards.every((c) => Math.floor(c / 13) === Math.floor(cards[0] / 13));
+  const uniq = new Set(r).size === 5;
+  const straight = uniq && (r[4] - r[0] === 4 || r.join() === '0,1,2,3,12');
+  const counts = Object.values(r.reduce<Record<number, number>>((a, x) => ((a[x] = (a[x] ?? 0) + 1), a), {})).sort((a, b) => b - a);
+  if (straight && flush) return [4, r[0] === 8 ? 'ROYAL FLUSH' : 'STRAIGHT FLUSH'];
+  if (counts[0] === 4) return [3, 'FOUR OF A KIND'];
+  if (counts[0] === 3 && counts[1] === 2) return [3, 'FULL HOUSE'];
+  if (flush) return [2, 'FLUSH'];
+  if (straight) return [2, 'STRAIGHT'];
+  if (counts[0] === 3) return [2, 'THREE OF A KIND'];
+  if (counts[0] === 2 && counts[1] === 2) return [1, 'TWO PAIR'];
+  if (counts[0] === 2 && r.some((x, i) => x >= 9 && r[i + 1] === x)) return [1, 'JACKS OR BETTER'];
+  return [0, 'NOTHING'];
+}
+function poker(): Game {
+  const deck = Array.from({ length: 52 }, (_, i) => i);
+  for (let i = 51; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  const hand = deck.splice(0, 5);
+  const held = [false, false, false, false, false];
+  let drawn = false, end = 0, flip = 0;
+  const cardX = (i: number) => 3 + i * 15;
+  const g: Game = {
+    over: false, q: 0,
+    update(dt) {
+      flip = Math.max(0, flip - dt);
+      if (drawn && (end += dt) > 1.8) g.over = true;
+    },
+    draw(p, now) {
+      p.rect(0, 0, p.w, p.h, C.navy);
+      const [tier] = handTier(hand);
+      POKER_HANDS.slice(1).reverse().forEach((n, i) => p.text(n, 3, 2 + i * 6, drawn && tier === 4 - i ? (Math.floor(now * 6) % 2 ? C.sodiumLight : C.paper) : C.bone));
+      hand.forEach((c, i) => {
+        const x = cardX(i), y = 28;
+        if (flip > 0 && !held[i] && drawn) return void p.rect(x, y, 14, 20, C.red).rect(x + 2, y + 2, 10, 16, C.brick);
+        p.rect(x, y, 14, 20, C.paper).rect(x, y + 19, 14, 1, C.stone);
+        const suit = Math.floor(c / 13), red = suit < 2;
+        p.text(RANKS[c % 13], x + 1, y + 1, red ? C.red : C.ink);
+        const bits = SUITS[suit];
+        for (let j = 0; j < 25; j++) if (bits[j]) p.rect(x + 2 + (j % 5) * 2, y + 7 + Math.floor(j / 5) * 2, 2, 2, red ? C.red : C.ink);
+        if (held[i]) p.text('HELD', x - 1, y + 22, C.sodiumLight);
+      });
+      p.rect(14, 62, 50, 11, drawn ? C.asphalt : C.sodium);
+      p.rect(14, 72, 50, 1, C.umber);
+      p.center(drawn ? handTier(hand)[1] : 'DRAW', 65, drawn ? C.sodiumLight : C.ink);
+    },
+    down(x, y) {
+      if (drawn) return;
+      if (y >= 28 && y < 52) {
+        const i = Math.floor((x - 3) / 15);
+        if (i >= 0 && i < 5) held[i] = !held[i];
+      } else if (y >= 58) {
+        for (let i = 0; i < 5; i++) if (!held[i]) hand[i] = deck.shift()!;
+        drawn = true;
+        flip = 0.3;
+        const [tier, name] = handTier(hand);
+        g.q = tier / 4;
+        g.label = name;
+      }
+    },
+    up() {},
+  };
+  return g;
+}
+
+// ---- Shuffleboard: the needle sways, hold for power. The far end is worth more; past it is nothing. ----
+const ZONES: [number, number, number][] = [[0, 6, 4], [6, 20, 3], [20, 34, 2], [34, 48, 1]];
+function shuffle(): Game {
+  let t = 0, hold = -1, left = 6, score = 0, end = -1, msg = '';
+  const pucks: { x: number; y: number; red: boolean; pts: number }[] = [];
+  let slide: { x: number; y0: number; y1: number; k: number; red: boolean } | null = null;
+  const zoneOf = (y: number) => (y < 0 ? -1 : ZONES.find(([a, b]) => y >= a && y < b)?.[2] ?? 0);
+  const aimX = () => 39 + Math.sin(t * 2.1) * 22;
+  const g: Game = {
+    over: false, q: 0, score: 0,
+    update(dt) {
+      t += dt;
+      if (hold >= 0) hold += dt;
+      if (slide) {
+        slide.k = Math.min(1, slide.k + dt * 0.9);
+        if (slide.k >= 1) {
+          const pts = zoneOf(slide.y1);
+          if (pts >= 0) pucks.push({ x: slide.x, y: slide.y1, red: slide.red, pts });
+          score += Math.max(0, pts);
+          msg = pts < 0 ? 'OFF THE END' : pts === 4 ? 'HANGER' : pts ? `+${pts}` : 'SHORT';
+          slide = null;
+          if (--left === 0) ((end = 0), (g.score = score), (g.q = Math.min(1, score / SHUFFLE_TOP)), (g.label = `${score} PTS`));
+        }
+      }
+      if (end >= 0 && (end += dt) > 1.5) g.over = true;
+    },
+    draw(p) {
+      p.rect(0, 0, p.w, p.h, C.umber);
+      p.rect(6, 0, 66, p.h, C.bone);
+      for (let y = 1; y < p.h; y += 4) for (let x = 8 + (y % 8 ? 2 : 0); x < 72; x += 5) p.rect(x, y, 1, 1, C.paper); // the sand
+      for (let y = 0; y < p.h; y += 9) p.rect(6, y, 66, 1, C.stone);
+      for (const [a, b, v] of ZONES) {
+        p.rect(6, b, 66, 1, C.red);
+        p.text(String(v), 37, a + Math.floor((b - a) / 2) - 2, v === 4 ? C.red : C.concrete);
+      }
+      p.rect(6, 0, 66, 1, C.ink);
+      p.rect(6, 86, 66, 1, C.blue); // foul line
+      for (const pk of pucks) puck(p, pk.x, pk.y, pk.red);
+      if (slide) {
+        const e = 1 - (1 - slide.k) * (1 - slide.k);
+        puck(p, slide.x, slide.y0 + (slide.y1 - slide.y0) * e, slide.red);
+      } else if (end < 0) {
+        const x = aimX();
+        puck(p, x, 92, left % 2 === 0);
+        p.rect(Math.round(x), 80, 1, 6, C.ink);
+        if (hold >= 0) p.rect(73, 98 - tri(hold, 1.8) * 40, 4, tri(hold, 1.8) * 40, C.red);
+      }
+      p.text(`${score}`, 74 - 4 * String(score).length, 2, C.paper);
+      p.text(`${left}`, 74, p.h - 7, C.paper);
+      if (msg) p.text(msg, 8, 60, C.brick);
+      if (end >= 0) p.center(g.label ?? '', 70, C.red);
+      else if (left === 6 && hold < 0 && !slide) p.center('HOLD', 70, C.blue);
+    },
+    down() {
+      if (!slide && end < 0) hold = 0;
+    },
+    up() {
+      if (hold < 0 || slide) return;
+      const pow = tri(hold, 1.8);
+      hold = -1;
+      slide = { x: aimX(), y0: 92, y1: 92 - pow * 104, k: 0, red: left % 2 === 0 };
+      msg = '';
+    },
+  };
+  return g;
+}
+const puck = (p: Pen, x: number, y: number, red: boolean) => {
+  circle(p, Math.round(x), Math.round(y), 3, red ? C.red : C.blue);
+  p.rect(Math.round(x) - 1, Math.round(y) - 2, 2, 1, C.paper);
+};
+
 export function newGame(id: MachineId, o: { shelf: number; speed: number; jackpot: string; onGrab: (q: number) => boolean }): Game {
   switch (id) {
     case 'pusher': return pusher(o.shelf);
@@ -447,16 +789,41 @@ export function newGame(id: MachineId, o: { shelf: number; speed: number; jackpo
     case 'claw': return claw(o.onGrab);
     case 'pinball': return pinball();
     case 'cyclone': return cyclone(o.speed, o.jackpot);
+    case 'darts': return darts();
+    case 'pool': return pool();
+    case 'poker': return poker();
+    case 'shuffle': return shuffle();
   }
 }
 
 // What a cabinet shows between games: attract-mode lights.
 export function idle(p: Pen, id: MachineId, t: number, extra: string) {
-  p.rect(0, 0, p.w, p.h, C.ink);
   const blink = Math.floor(t * 2) % 2;
+  if (id === 'darts') {
+    p.rect(0, 0, p.w, p.h, C.ink);
+    drawBoard(p, 39, 37);
+    if (extra) (p.rect(0, p.h - 9, p.w, 9, C.ink), p.center(extra, p.h - 7, C.mint));
+    return;
+  }
+  if (id === 'pool') {
+    p.rect(0, 0, p.w, p.h, C.forest).rect(2, 2, p.w - 4, p.h - 4, C.teal);
+    for (const [px, py] of POCKETS(p.w, p.h)) circle(p, Math.round(px), Math.round(py), 4, C.ink);
+    [[39, 30], [36, 26], [42, 26], [33, 21], [39, 21], [45, 21]].forEach(([x, y], i) => circle(p, x, y, 2, BALL_COLORS[i]));
+    p.rect(30, 16, 19, 1, C.umber); // the rack, still on
+    p.center(extra || 'QUARTERS', 60, extra ? C.mint : blink ? C.paper : C.bone);
+    return;
+  }
+  if (id === 'shuffle') {
+    p.rect(0, 0, p.w, p.h, C.umber).rect(6, 0, 66, p.h, C.bone);
+    p.center('HIGH SCORES', 20, C.red);
+    BAR_HOUSE.forEach(([n, v], i) => p.text(`${n} ${v}`, 16, 30 + i * 8, C.ink));
+    p.center(extra || 'QUARTERS', 80, extra ? C.blue : blink ? C.red : C.brick);
+    return;
+  }
+  p.rect(0, 0, p.w, p.h, id === 'poker' ? C.navy : C.ink);
   for (let i = 0; i < 12; i++) p.rect(4 + i * 6, 4, 4, 2, (i + Math.floor(t * 6)) % 3 ? C.asphalt : C.sodium);
-  p.center('INSERT', 20, blink ? C.sodiumLight : C.sodium, 2);
-  p.center('COIN', 33, blink ? C.sodiumLight : C.sodium, 2);
+  p.center(id === 'poker' ? 'DEAL' : 'INSERT', 20, blink ? C.sodiumLight : C.sodium, 2);
+  p.center(id === 'poker' ? 'ME IN' : 'COIN', 33, blink ? C.sodiumLight : C.sodium, 2);
   if (id === 'pinball') {
     p.center('HIGH SCORES', 52, C.mint);
     HOUSE_SCORES.forEach(([n, v], i) => p.text(`${n} ${v}`, 12, 60 + i * 7, C.bone));

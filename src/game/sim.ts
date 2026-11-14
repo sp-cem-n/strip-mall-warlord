@@ -29,7 +29,7 @@ export function step(s: GameState, watching = false) {
   }
 }
 
-export const payFor = (s: GameState, r: RegionId, fight: FightDef = fightOf(s, r), payUp = 0) => fight.pay * (1 + payUp) * asphaltMult(s, r) * (r === 0 ? boardBonus(s) : 1);
+export const payFor = (s: GameState, r: RegionId, fight: FightDef = fightOf(s, r), payUp = 0) => fight.pay * (1 + payUp) * asphaltMult(s, r) * boardBonus(s, r);
 export function fightLabel(r: RegionId, idx: number) {
   const f = FIGHTS[r][idx];
   const lot = REGIONS[r].lots[f.zone];

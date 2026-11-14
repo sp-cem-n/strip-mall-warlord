@@ -12,13 +12,14 @@ const MATERIAL: Record<Material, { wall: number; trim: number; grime: number }> 
   bypass: { wall: C.paper, trim: C.navy, grime: C.stone }, // EIFS, 1998, still white
 };
 
-type Decor = 'arcade' | 'dojo' | 'vape' | 'laundromat' | 'pawn' | 'payday' | 'desk' | 'shelves' | 'chair' | 'mic' | 'beds' | 'gym' | 'pets' | 'phones' | 'tooth' | 'tan' | 'wash' | 'storage' | 'golf' | 'dress' | 'film' | 'pretzel';
+type Decor = 'arcade' | 'bar' | 'dojo' | 'vape' | 'laundromat' | 'pawn' | 'payday' | 'desk' | 'shelves' | 'chair' | 'mic' | 'beds' | 'gym' | 'pets' | 'phones' | 'tooth' | 'tan' | 'wash' | 'storage' | 'golf' | 'dress' | 'film' | 'pretzel';
 interface ShopArt { text: string; bg: number; fg: number; awning: number; decor: Decor; label?: string }
 const A = (text: string, bg: number, fg: number, awning: number, decor: Decor, label?: string): ShopArt => ({ text, bg, fg, awning, decor, label });
 // one sign per shop; Bypass franchises reuse the original's sign
 const SHOP_ART: Record<string, ShopArt> = {
   pawn: A('PAWN', C.sodium, C.ink, C.sodium, 'pawn'),
   funzone: A('FUNZONE', C.violet, C.sodiumLight, C.neon, 'arcade'),
+  offramp: A('OFF-RAMP', C.umber, C.sodiumLight, C.brick, 'bar', 'COLD BEER'),
   dojo: A('DOJO', C.red, C.paper, C.red, 'dojo'),
   laundromat: A('SUDS', C.blue, C.paper, C.blue, 'laundromat'),
   vape: A('VAPE', C.plum, C.neon, C.violet, 'vape'),
@@ -57,6 +58,12 @@ function interior(g: Grid, art: ShopArt) {
       for (const [x, c] of [[7, C.neon], [19, C.mint], [31, C.sodiumLight]] as const) {
         g.rect(x, 28, 8, 19, C.ink).rect(x + 1, 29, 6, 3, c).rect(x + 1, 33, 6, 5, C.navy).dither(x + 1, 33, 6, 5, c).rect(x + 1, 39, 6, 2, C.concrete).px(x + 2, 40, C.red).px(x + 5, 40, C.sodium);
       }
+      break;
+    case 'bar': // a neon beer sign, a row of stools, the glow of the poker machine
+      g.rect(5, 41, 36, 3, C.umber).hline(5, 41, 36, C.tan);
+      for (let x = 8; x < 40; x += 7) g.rect(x, 44, 3, 1, C.red).vline(x + 1, 45, 2, C.stone);
+      g.rect(7, 27, 14, 7, C.ink).hline(8, 28, 12, C.neon).hline(8, 32, 12, C.neon).vline(8, 28, 5, C.neon).text('ON', 10, 29, C.sodiumLight);
+      g.rect(30, 26, 8, 14, C.ink).rect(31, 27, 6, 6, C.navy).dither(31, 27, 6, 6, C.mint).rect(31, 34, 6, 2, C.sodium);
       break;
     case 'dojo':
       g.rect(5, 42, 36, 5, C.forest).hline(5, 42, 36, C.green);

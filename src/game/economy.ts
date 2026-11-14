@@ -240,7 +240,7 @@ export function toggleField(s: GameState, r: RegionId, id: string): string | nul
 }
 export const autoPick = (s: GameState, r: RegionId) => (s.crews[r].lineup = null);
 // Arcade and bar perks that add slots (the prize counter, the shuffleboard board). Filled in by the Game Room.
-export const roomSlots = (s: GameState, r: RegionId) => (r === 0 ? perk(s, 'slot') : 0);
+export const roomSlots = (s: GameState, r: RegionId) => (r === 0 ? perk(s, 'slot') : s.room.shuffle >= 3 ? 1 : 0);
 
 export function advance(s: GameState, r: RegionId, dir: 1 | -1): string | null {
   const c = s.crews[r];

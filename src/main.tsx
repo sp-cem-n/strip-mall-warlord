@@ -29,7 +29,7 @@ installFrames();
 //   ?story=all      show every story line at once
 //   ?pause=1        freeze the sim (for screenshots)
 //   ?walkin=1       put a walk-in at the first shop
-//   ?room=full      every arcade machine unlocked, 3,000 tickets, a few perks
+//   ?room=full      every arcade machine unlocked, 3,000 tickets, a few perks (after roster=full: the bar too)
 const q = new URLSearchParams(location.search);
 const num = (k: string, d: number) => (q.has(k) ? Number(q.get(k)) : d);
 
@@ -80,6 +80,7 @@ if (q.get('room') === 'full') {
   app.s.room.best = 31250;
   app.s.room.buffs = { bat: 420 };
   app.s.crews[0].cash = Math.max(app.s.crews[0].cash, 1e6);
+  if (app.s.bypass) (app.s.crews[1].shops.offramp ??= 3), app.s.room.unlocked.push('darts', 'pool', 'poker', 'shuffle'), (app.s.room.shuffle = 1), (app.s.room.shuffleBest = 12), (app.s.room.buffs.call = 300), (app.s.crews[1].cash = Math.max(app.s.crews[1].cash, 1e7));
 }
 if (q.get('midbattle') === '1') {
   const c = app.s.crews[app.s.view];

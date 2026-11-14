@@ -28,7 +28,7 @@ export function loadGame(): GameState | 'old' | null {
   if (!raw) return null;
   try {
     const s = JSON.parse(raw) as GameState;
-    if (s?.version === SAVE_VERSION && Array.isArray(s.crews)) return ((s.room ??= newRoom()), s);
+    if (s?.version === SAVE_VERSION && Array.isArray(s.crews)) return ((s.room = { ...newRoom(), ...s.room }), s);
     const tag = ARCHIVE[s?.version];
     if (tag) {
       old.from = tag;

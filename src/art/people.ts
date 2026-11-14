@@ -70,6 +70,7 @@ export const CREW_LOOKS: Record<string, Look> = {
   auction: { hair: C.tan, shirt: C.sodium, sleeves: C.skin, pants: C.navy, extra: (g) => { cap(C.sodium)(g); g.rect(12, 14, 4, 4, C.umber).vline(13, 11, 3, C.stone); } }, // bolt cutters
   detailer: { hair: C.night, shirt: C.mint, pants: C.navy, shoes: C.paper, extra: (g) => g.rect(12, 14, 4, 3, C.sodiumLight).px(6, 11, C.paper) },
   nurse: { hair: C.umber, shirt: C.teal, pants: C.teal, shoes: C.paper, extra: (g) => g.vline(7, 10, 4, C.stone).px(7, 14, C.stone).rect(12, 14, 3, 4, C.paper) },
+  bartender: { skin: C.skin, hair: C.umber, shirt: C.paper, sleeves: C.paper, pants: C.ink, wide: true, extra: (g) => g.rect(5, 13, 7, 5, C.ink).hline(5, 9, 7, C.umber).px(12, 14, C.paper) }, // apron, mustache, a bar rag
   bondsman: { skin: C.tan, hair: C.night, shirt: C.night, sleeves: C.night, pants: C.concrete, wide: true, belly: true, extra: (g) => g.hline(5, 2, 7, C.night).px(7, 11, C.sodiumLight).px(8, 12, C.sodiumLight).px(9, 11, C.sodiumLight) }, // gold chain
   preparer: { hair: C.stone, shirt: C.paper, pants: C.concrete, extra: (g) => { tie(C.green)(g); g.rect(12, 12, 4, 5, C.bone).hline(12, 13, 4, C.green); g.hline(6, 6, 4, C.ink); } },
   golfpro: { hair: C.sodium, shirt: C.paper, pants: C.green, shoes: C.paper, extra: (g) => { cap(C.paper)(g); g.vline(13, 8, 10, C.stone).rect(12, 18, 3, 1, C.stone); } },

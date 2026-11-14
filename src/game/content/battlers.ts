@@ -34,6 +34,7 @@ export const BATTLER_LIST: BattlerDef[] = [
   B('auction', 'Auction Hunter', 'damage', 70, 16, 1.6, 'Big hits. Bids on everything.', 'Paid $40 for a unit. Found a jet ski.'),
   B('detailer', 'Detailer', 'buffer', 60, 6, 1.2, 'Whole crew attacks 8% faster.', 'Hand-dried. Every time.', { k: 'haste', to: 'all', v: 0.08 }),
   B('nurse', 'Urgent Care Nurse', 'heal', 70, 18, 1.5, 'Heals whoever is worst off.', 'Seen worse. Today, even.'),
+  B('bartender', 'Bartender', 'tank', 180, 6, 1.6, 'Takes 10% less damage.', 'Has heard it all. Hits back.', { k: 'dr', v: 0.1 }),
   B('bondsman', 'Bail Bondsman', 'tank', 220, 6, 1.6, 'Takes 15% less damage.', 'Always gets his money back.', { k: 'dr', v: 0.15 }),
   B('preparer', 'Tax Preparer', 'control', 65, 7, 1.5, 'Enemies deal 12% less damage.', 'Itemizes your injuries.', { k: 'weaken', v: 0.12 }),
   B('golfpro', 'Golf Pro', 'damage', 65, 18, 1.3, 'Fast, heavy swings.', 'Keep your head down. He will.'),

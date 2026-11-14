@@ -89,15 +89,15 @@ function Patrol({ r }: { r: RegionId }) {
   );
 }
 
-function Arcade() {
+function Arcade({ r }: { r: RegionId }) {
   const s = app.s;
-  const open = MACHINES.filter((m) => m.region === 0 && s.room.unlocked.includes(m.id));
+  const open = MACHINES.filter((m) => m.region === r && s.room.unlocked.includes(m.id));
   return (
     <>
       <button class="btn big hot arcade-go" onClick={() => ((app.screen = 'room'), (app.tip = null), app.refresh())}>
-        Walk over to the Fun Zone
+        {r === 0 ? 'Walk over to the Fun Zone' : 'Stop in at the Off-Ramp'}
       </button>
-      {MACHINES.filter((m) => m.region === 0).map((m) => (
+      {MACHINES.filter((m) => m.region === r).map((m) => (
         <div key={m.id} class="track">
           <b class={s.room.unlocked.includes(m.id) ? '' : 'dim'}>{m.name}</b>
           <span class="dim">{s.room.unlocked.includes(m.id) ? (s.room.attract[m.id] ? `Attract Lv ${s.room.attract[m.id]}` : m.blurb) : m.needs}</span>
@@ -105,7 +105,7 @@ function Arcade() {
         </div>
       ))}
       <div class="dim tnote">
-        {fmt(s.tickets)} tickets · {open.length}/6 machines
+        {r === 0 ? `${fmt(s.tickets)} tickets · ${open.length}/6 machines` : `${open.length}/4 tables`}
       </div>
     </>
   );
@@ -118,7 +118,7 @@ export function BackOffice() {
     ['training', `Training · ${currencyOf(r)}`],
     ['patrol', 'Patrol · $'],
   ];
-  if (r === 0 && roomOpen(s, 0)) tabs.push(['arcade', `Arcade · ${fmt(s.tickets)} tk`]);
+  if (roomOpen(s, r)) tabs.push(['arcade', r === 0 ? `Arcade · ${fmt(s.tickets)} tk` : 'Bar']);
   if (!tabs.some(([k]) => k === office.tab)) office.tab = 'training';
   return (
     <section class="glass training backoffice">
@@ -134,7 +134,7 @@ export function BackOffice() {
       </h2>
       {office.tab === 'training' && <Training r={r} />}
       {office.tab === 'patrol' && <Patrol r={r} />}
-      {office.tab === 'arcade' && <Arcade />}
+      {office.tab === 'arcade' && roomOpen(s, r) && <Arcade r={r} />}
     </section>
   );
 }

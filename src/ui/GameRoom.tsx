@@ -1,10 +1,10 @@
 // The Fun Zone: big cabinets you actually play, the prize counter, and Attract Mode. Its own screen.
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { app, tip, toast } from '../app';
-import { CAB_H, CAB_W, cabinet, carpet, screenOf, type CabinetLook } from '../art/cabinets';
+import { CAB_H, CAB_W, cabinet, carpet, paneling, screenOf, type CabinetLook } from '../art/cabinets';
 import { C } from '../art/palette';
 import { CURRENCY_SHORT } from '../game/defs';
-import { ATTRACT_EVERY, BUFFS, HOUSE_SCORES, MACHINES, PERKS, attractPrice, buffOn, buyAttract, buyPerk, canAfford, endPlay, perk, perkPrice, postScore, serviced, startPlay, type BuffKind, type Cost, type MachineDef, type MachineId, type PerkId } from '../game/room';
+import { ATTRACT_EVERY, BAR_BUFFS, BAR_HOUSE, BUFFS, HOUSE_SCORES, postShuffle, MACHINES, PERKS, attractPrice, buffOn, buyAttract, buyPerk, canAfford, endPlay, perk, perkPrice, postScore, serviced, startPlay, type BuffKind, type Cost, type MachineDef, type MachineId, type PerkId } from '../game/room';
 import { canvasOf, urlOf } from './art';
 import { fmt, fmtTime } from './format';
 import { idle, newGame, pen, type Game } from './machines';
@@ -18,7 +18,12 @@ export const LOOKS: Record<MachineId, CabinetLook> = {
   claw: { body: C.violet, trim: C.neon, marquee: C.neon, ink: C.paper, title: 'CLAW', side: 'stars' },
   pinball: { body: C.navy, trim: C.blue, marquee: C.sodium, ink: C.ink, title: 'NIGHT SHIFT', side: 'moon', tall: true },
   cyclone: { body: C.ink, trim: C.red, marquee: C.red, ink: C.sodiumLight, title: 'CYCLONE', side: 'stripes' },
+  darts: { body: C.umber, trim: C.red, marquee: C.neon, ink: C.paper, title: 'DARTS', side: 'dots', bar: 'darts' },
+  pool: { body: C.umber, trim: C.blue, marquee: C.mint, ink: C.paper, title: 'POOL', side: 'dots', tall: true, bar: 'pool' },
+  poker: { body: C.night, trim: C.sodium, marquee: C.sodium, ink: C.ink, title: 'JACKS OR BETTER', side: 'stars' },
+  shuffle: { body: C.umber, trim: C.sodium, marquee: C.sodiumLight, ink: C.paper, title: 'SHUFFLEBOARD', side: 'dots', tall: true, bar: 'shuffle' },
 };
+const BAR_IDS = new Set(BAR_BUFFS.map(([b]) => b));
 export const costText = (c: Cost) => (c.cur === 'tickets' ? `${fmt(c.n)} tickets` : c.cur === 'cash' ? `$${fmt(c.n)}` : `${fmt(c.n)} ${CURRENCY_SHORT[c.cur]}`);
 
 function Cabinet({ m }: { m: MachineDef }) {
@@ -65,8 +70,10 @@ function Cabinet({ m }: { m: MachineDef }) {
     let text = g.label ?? '';
     if (m.id !== 'claw') {
       if (m.id === 'pinball' && g.score !== undefined && postScore(app.s, g.score)) text += ' NEW HIGH';
+      if (m.id === 'shuffle' && g.score !== undefined && postShuffle(app.s, g.score)) text += ' NEW HIGH';
+      if (m.id === 'poker' && g.q > 0) text = g.label ?? text;
       const rw = endPlay(app.s, m.id, g.q);
-      const got = [rw.cash && `+$${fmt(rw.cash)}`, rw.goodwill && `+${fmt(rw.goodwill)} GW`, rw.tickets && `+${fmt(rw.tickets)} TICKETS`, rw.equity && `+${fmt(rw.equity)} EQ`].filter(Boolean).join(' ');
+      const got = m.id === 'poker' ? '' : [rw.cash && `+$${fmt(rw.cash)}`, rw.goodwill && `+${fmt(rw.goodwill)} GW`, rw.tickets && `+${fmt(rw.tickets)} TICKETS`, rw.equity && `+${fmt(rw.equity)} EQ`].filter(Boolean).join(' ');
       text = got || text;
       if (rw.cash || rw.tickets) register();
     }
@@ -110,6 +117,7 @@ function Cabinet({ m }: { m: MachineDef }) {
           const [x, y] = local(e);
           game.current.down(x, y);
         }}
+        onPointerMove={(e) => game.current?.move?.(...local(e))}
         onPointerUp={(e) => game.current?.up(...local(e))}
         onPointerLeave={(e) => game.current?.up(...local(e))}
       />
@@ -124,7 +132,7 @@ function Cabinet({ m }: { m: MachineDef }) {
               class="btn small"
               disabled={!ap || !canAfford(s, m.region, ap)}
               onClick={() => (toast(buyAttract(s, m.id) ?? `Attract Mode Lv ${lv + 1}`), app.refresh())}
-              {...tip('Attract Mode', 'Plays itself while you are away. Badly.', lv ? `Lv ${lv}: one game every ${ATTRACT_EVERY[lv] / 60} min.` : 'Off.')}
+              {...tip('Attract Mode', m.region ? 'The regulars play it while you are away. Badly.' : 'Plays itself while you are away. Badly.', lv ? `Lv ${lv}: one game every ${ATTRACT_EVERY[lv] / 60} min.` : 'Off.')}
             >
               {ap ? `Attract ${lv ? `Lv ${lv + 1}` : 'on'} ${costText(ap)}` : `Attract Lv ${lv}`}
             </button>
@@ -132,6 +140,36 @@ function Cabinet({ m }: { m: MachineDef }) {
         )}
       </div>
     </div>
+  );
+}
+
+function BarCounter() {
+  const s = app.s;
+  const on = BAR_BUFFS.filter(([b]) => buffOn(s, b));
+  return (
+    <section class="counter pub">
+      <h2>Behind the bar</h2>
+      <h3>On the house</h3>
+      {on.map(([b]) => (
+        <div key={b} class="perk">
+          <span>
+            <b>{BUFFS[b].name}</b> <span class="dim">{BUFFS[b].does}</span>
+          </span>
+          <span class="dim">{fmtTime(s.room.buffs[b] ?? 0)}</span>
+        </div>
+      ))}
+      {!on.length && <div class="dim">Nothing from the poker machine yet.</div>}
+      <h3>Shuffleboard board</h3>
+      {BAR_HOUSE.map(([n, v], i) => (
+        <div key={n} class={`perk ${i < s.room.shuffle ? 'beat' : ''}`}>
+          <span>{n}</span>
+          <span>{v}</span>
+        </div>
+      ))}
+      <div class="dim">
+        Yours: {s.room.shuffleBest} · Equity per win +{Math.round(s.room.shuffle * 6)}%{s.room.shuffle >= 3 ? ' · +1 fighter slot' : ''}
+      </div>
+    </section>
   );
 }
 
@@ -160,7 +198,7 @@ function Counter() {
         );
       })}
       <h3>On the shelf</h3>
-      {(Object.keys(BUFFS) as BuffKind[]).filter((b) => buffOn(s, b)).map((b) => (
+      {(Object.keys(BUFFS) as BuffKind[]).filter((b) => !BAR_IDS.has(b) && buffOn(s, b)).map((b) => (
         <div key={b} class="perk">
           <span>
             <b>{BUFFS[b].name}</b> <span class="dim">{BUFFS[b].does}</span>
@@ -168,7 +206,7 @@ function Counter() {
           <span class="dim">{fmtTime(s.room.buffs[b] ?? 0)}</span>
         </div>
       ))}
-      {!(Object.keys(BUFFS) as BuffKind[]).some((b) => buffOn(s, b)) && <div class="dim">Nothing from the claw yet.</div>}
+      {!(Object.keys(BUFFS) as BuffKind[]).some((b) => !BAR_IDS.has(b) && buffOn(s, b)) && <div class="dim">Nothing from the claw yet.</div>}
       <h3>Night Shift board</h3>
       {HOUSE_SCORES.map(([n, v], i) => (
         <div key={n} class={`perk ${i < s.room.board ? 'beat' : ''}`}>
@@ -189,30 +227,39 @@ export function GameRoom() {
     return () => clearInterval(id);
   }, []);
   const back = () => ((app.screen = 'game'), (app.tip = null), app.refresh());
+  const bar = s.view === 1;
   return (
-    <div class="screen room" style={{ backgroundImage: `url(${urlOf('carpet', carpet)})` }}>
+    <div class={`screen room ${bar ? 'pub' : ''}`} style={{ backgroundImage: `url(${bar ? urlOf('paneling', paneling) : urlOf('carpet', carpet)})` }}>
       <header class="room-bar">
-        <span class="room-sign">FUN ZONE ARCADE</span>
+        <span class="room-sign">{bar ? 'THE OFF-RAMP' : 'FUN ZONE ARCADE'}</span>
         <span class="tenant t-cash">
-          <span class="k">Cash</span> <span class="v">${fmt(s.crews[0].cash)}</span>
+          <span class="k">Cash</span> <span class="v">${fmt(s.crews[s.view].cash)}</span>
         </span>
-        <span class="tenant t-goodwill">
-          <span class="k">Goodwill</span> <span class="v">{fmt(s.goodwill)}</span>
-        </span>
-        <span class="tenant t-tickets">
-          <span class="k">Tickets</span> <span class="v">{fmt(s.tickets)}</span>
-        </span>
+        {bar ? (
+          <span class="tenant t-equity">
+            <span class="k">Equity</span> <span class="v">{fmt(s.equity)}</span>
+          </span>
+        ) : (
+          <>
+            <span class="tenant t-goodwill">
+              <span class="k">Goodwill</span> <span class="v">{fmt(s.goodwill)}</span>
+            </span>
+            <span class="tenant t-tickets">
+              <span class="k">Tickets</span> <span class="v">{fmt(s.tickets)}</span>
+            </span>
+          </>
+        )}
         <button class="btn big" onClick={back}>
-          Back to the plaza
+          {bar ? 'Back to the Bypass' : 'Back to the plaza'}
         </button>
       </header>
       <div class="room-floor">
-        <div class="cabs">
-          {MACHINES.filter((m) => m.region === 0).map((m) => (
+        <div class={`cabs ${bar ? 'four' : ''}`}>
+          {MACHINES.filter((m) => m.region === s.view).map((m) => (
             <Cabinet key={m.id} m={m} />
           ))}
         </div>
-        <Counter />
+        {bar ? <BarCounter /> : <Counter />}
       </div>
     </div>
   );

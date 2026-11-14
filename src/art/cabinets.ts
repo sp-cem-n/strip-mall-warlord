@@ -3,13 +3,14 @@
 import { Grid, hash, textWidth } from './grid';
 import { C } from './palette';
 
-export interface CabinetLook { body: number; trim: number; marquee: number; ink: number; title: string; side: 'stars' | 'stripes' | 'bolts' | 'dots' | 'moon' | 'rings'; tall?: boolean }
+export interface CabinetLook { body: number; trim: number; marquee: number; ink: number; title: string; side: 'stars' | 'stripes' | 'bolts' | 'dots' | 'moon' | 'rings'; tall?: boolean; bar?: 'darts' | 'pool' | 'shuffle' }
 export const CAB_W = 96;
 export const CAB_H = 160;
 // screen rectangle inside the cabinet (pinball's playfield is taller)
 export const screenOf = (tall?: boolean) => (tall ? { x: 9, y: 25, w: 78, h: 101 } : { x: 9, y: 27, w: 78, h: 76 });
 
 export function cabinet(l: CabinetLook, lit: boolean, sign?: string): Grid {
+  if (l.bar) return barPiece(l, lit, sign);
   const g = new Grid(CAB_W, CAB_H);
   const body = lit ? l.body : C.asphalt;
   const trim = lit ? l.trim : C.concrete;
@@ -59,20 +60,84 @@ export function cabinet(l: CabinetLook, lit: boolean, sign?: string): Grid {
   g.rect(38, cy + 13, 20, 5, lit ? C.paper : C.concrete).text('25C', 42, cy + 13, C.red);
   // feet and kick plate
   g.rect(2, 155, 92, 3, C.ink).rect(6, 158, 10, 2, C.ink).rect(80, 158, 10, 2, C.ink);
-  if (sign) {
-    // a paper sign taped over the dark screen
-    g.boxed(sc.x + 6, sc.y + 20, sc.w - 12, 26, C.paper);
-    g.text('OUT OF', 48 - Math.floor(textWidth('OUT OF') / 2), sc.y + 23, C.red).text('ORDER', 48 - Math.floor(textWidth('ORDER') / 2), sc.y + 30, C.red);
-    const words = sign.toUpperCase().split(' ');
-    let line = '';
-    let y = sc.y + 49;
-    const lines: string[] = [];
-    for (const w of words) ((line + ' ' + w).trim().length * 4 > sc.w - 4 ? (lines.push(line), (line = w)) : (line = (line + ' ' + w).trim()));
-    lines.push(line);
-    g.boxed(sc.x + 2, y - 2, sc.w - 4, lines.length * 7 + 3, C.bone);
-    for (const ln of lines) (g.text(ln, 48 - Math.floor(textWidth(ln) / 2), y, C.ink), (y += 7));
-  }
+  if (sign) paperSign(g, sc, sign, 'OUT OF', 'ORDER');
   return g.outline();
+}
+
+function paperSign(g: Grid, sc: { x: number; y: number; w: number; h: number }, sign: string, a: string, b: string) {
+  g.boxed(sc.x + 6, sc.y + 20, sc.w - 12, 26, C.paper);
+  g.text(a, 48 - Math.floor(textWidth(a) / 2), sc.y + 23, C.red).text(b, 48 - Math.floor(textWidth(b) / 2), sc.y + 30, C.red);
+  const lines: string[] = [];
+  let line = '';
+  for (const w of sign.toUpperCase().split(' ')) ((line + ' ' + w).trim().length * 4 > sc.w - 4 ? (lines.push(line), (line = w)) : (line = (line + ' ' + w).trim()));
+  lines.push(line);
+  let y = sc.y + 49;
+  g.boxed(sc.x + 2, y - 2, sc.w - 4, lines.length * 7 + 3, C.bone);
+  for (const ln of lines) (g.text(ln, 48 - Math.floor(textWidth(ln) / 2), y, C.ink), (y += 7));
+}
+
+// The bar's pieces: a dartboard cabinet on the wall, a pool table and a shuffleboard table seen from above.
+// Same 96x160 footprint and screen rectangle as the cabinets, so the room lays them out the same way.
+function barPiece(l: CabinetLook, lit: boolean, sign?: string): Grid {
+  const g = new Grid(CAB_W, CAB_H);
+  const wood = lit ? C.tan : C.asphalt, dark = lit ? C.umber : C.night, glow = lit ? l.marquee : C.concrete;
+  const sc = screenOf(l.tall);
+  // neon tube sign on the paneling above it
+  const tw = textWidth(l.title, 2) <= 84 ? 2 : 1;
+  const tx = 48 - Math.floor(textWidth(l.title, tw) / 2);
+  g.rect(tx - 4, 3, textWidth(l.title, tw) + 8, tw === 2 ? 16 : 11, C.ink);
+  if (lit) g.text(l.title, tx + 1, 6, l.trim, tw);
+  g.text(l.title, tx, 5, glow, tw);
+  if (l.bar === 'darts') {
+    // wall cabinet: doors open on both sides, chalkboards inside
+    g.rect(sc.x - 6, sc.y - 5, sc.w + 12, sc.h + 10, dark).rect(sc.x - 4, sc.y - 3, sc.w + 8, sc.h + 6, wood);
+    for (let y = sc.y - 3; y < sc.y + sc.h + 3; y += 5) g.hline(sc.x - 4, y, sc.w + 8, dark);
+    g.rect(sc.x - 2, sc.y - 1, sc.w + 4, sc.h + 2, C.ink);
+    g.rect(sc.x, sc.y, sc.w, sc.h, C.ink);
+    // chalkboard and tally under it
+    const cy = sc.y + sc.h + 8;
+    g.boxed(10, cy, 76, 26, dark).rect(12, cy + 2, 72, 22, lit ? C.forest : C.night);
+    if (lit) {
+      g.text('HOME', 15, cy + 4, C.bone).text('AWAY', 55, cy + 4, C.bone);
+      for (let i = 0; i < 7; i++) g.vline(16 + i * 3 + (i > 3 ? 2 : 0), cy + 12, 6, C.paper);
+      g.hline(14, cy + 15, 14, C.paper);
+      for (let i = 0; i < 3; i++) g.vline(57 + i * 3, cy + 12, 6, C.paper);
+      g.rect(46, cy + 2, 1, 22, C.bone);
+    }
+    // the oche: tape on the floor
+    g.rect(14, 152, 68, 3, lit ? C.sodium : C.concrete).hline(14, 152, 68, lit ? C.sodiumLight : C.stone);
+  } else {
+    // a table from above: heavy rails, diamonds, six pockets
+    g.rect(sc.x - 7, sc.y - 6, sc.w + 14, sc.h + 12, dark).rect(sc.x - 5, sc.y - 4, sc.w + 10, sc.h + 8, wood);
+    g.hline(sc.x - 5, sc.y - 4, sc.w + 10, lit ? C.sodiumLight : C.stone);
+    for (let i = 1; i < 4; i++) g.px(sc.x + Math.round((sc.w * i) / 4), sc.y - 2, lit ? C.paper : C.stone).px(sc.x + Math.round((sc.w * i) / 4), sc.y + sc.h + 1, lit ? C.paper : C.stone);
+    for (let i = 1; i < 8; i++) g.px(sc.x - 3, sc.y + Math.round((sc.h * i) / 8), lit ? C.paper : C.stone).px(sc.x + sc.w + 2, sc.y + Math.round((sc.h * i) / 8), lit ? C.paper : C.stone);
+    g.rect(sc.x, sc.y, sc.w, sc.h, C.ink);
+    if (l.bar === 'pool') for (const [x, y] of [[0, 0], [1, 0], [0, 0.5], [1, 0.5], [0, 1], [1, 1]]) g.rect(sc.x - 4 + x * (sc.w + 2), sc.y - 4 + y * (sc.h + 2), 6, 6, C.ink);
+    const by = sc.y + sc.h + 9;
+    if (l.bar === 'pool') {
+      // the cue rack and the chalk
+      g.rect(8, by, 80, 3, dark);
+      for (let i = 0; i < 5; i++) g.rect(14 + i * 15, by + 3, 2, 14, lit ? C.bone : C.concrete).px(14 + i * 15, by + 3, lit ? C.blue : C.asphalt);
+      g.rect(80, by + 10, 4, 4, lit ? C.blue : C.asphalt);
+    } else {
+      // a can of shuffleboard wax and the spare pucks
+      g.rect(12, by + 2, 8, 10, lit ? C.sodium : C.asphalt).rect(12, by + 2, 8, 2, lit ? C.paper : C.concrete);
+      for (let i = 0; i < 4; i++) g.rect(30 + i * 13, by + 6, 8, 6, i % 2 ? (lit ? C.red : C.brick) : (lit ? C.blue : C.navy)).hline(31 + i * 13, by + 6, 6, lit ? C.paper : C.stone);
+    }
+  }
+  if (sign) paperSign(g, sc, sign, 'TABLE', 'CLOSED');
+  return g.outline();
+}
+
+// The Off-Ramp's wood paneling, 64x64: vertical boards, a chair rail, nail heads.
+export function paneling(): Grid {
+  const g = new Grid(64, 64);
+  g.rect(0, 0, 64, 64, C.umber);
+  for (let x = 0; x < 64; x += 8) g.vline(x, 0, 64, C.ink).vline(x + 1, 0, 64, C.tan);
+  for (let i = 0; i < 40; i++) g.vline(Math.floor(hash(i, 5) * 64), Math.floor(hash(9, i) * 64), 3 + (i % 5), C.brick); // grain
+  g.rect(0, 40, 64, 3, C.tan).hline(0, 40, 64, C.sodium).hline(0, 43, 64, C.ink);
+  return g;
 }
 
 // The Fun Zone carpet: black-light confetti on navy. Tiles at 64x64.

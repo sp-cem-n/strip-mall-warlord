@@ -8,7 +8,8 @@ import { CREW_LOOKS, ENEMY_LOOKS } from '../src/art/people';
 import type { GameState } from '../src/game/state';
 import { HOW, STORY } from '../src/game/content/copy';
 import { botAct } from '../src/game/bot';
-import { buyAttract, buyPerk, endPlay, startPlay } from '../src/game/room';
+import { BAR_BUFFS, BUFFS, MACHINES, PERKS, buffOn, buyAttract, buyPerk, endPlay, postShuffle, startPlay } from '../src/game/room';
+import { handTier } from '../src/ui/machines';
 import { readdirSync, readFileSync } from 'node:fs';
 
 const store = new Map<string, string>();
@@ -196,6 +197,29 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   check('the Fun Zone survives paving: tickets, perks, unlocks, Attract Mode', JSON.stringify({ ...t.room, clock: 0, shelf: 0, buffs: 0 }) === room && slotsOf(t, 0) === START_SLOTS + 2);
 }
 
+// the Off-Ramp
+{
+  const t = newGame(14);
+  finish(t, 0);
+  t.bypass = true;
+  view(t, 1);
+  t.equity = 50;
+  t.crews[1].frontier = 5;
+  check('the Off-Ramp leases at Exit 14 fight 4 for 2 Equity and opens Darts', SHOPS.offramp.lease === 2 && lease(t, 'offramp') === null && (step(t), t.room.unlocked.includes('darts')) && roster(t, 1).some(([id]) => id === 'bartender') && BATTLERS.bartender.role === 'tank');
+  const c0 = t.crews[1].cash = 1e6;
+  check('darts take the Bypass till and pay it back on a good round', startPlay(t, 'darts') === null && t.crews[1].cash < c0 && (endPlay(t, 'darts', 0.9), t.crews[1].cash > c0));
+  check('the bar takes no tickets: Attract Mode upgrades cost $', (t.tickets = 0, buyAttract(t, 'darts') === null && buyAttract(t, 'darts') === null));
+  t.room.unlocked.push('poker');
+  check('video poker: a full house is +30% for 10 minutes, nothing pays nothing', !endPlay(t, 'poker', 0).buff && endPlay(t, 'poker', 0.75).buff === 'top' && t.room.buffs.top === 600);
+  const hp = (r: 0 | 1) => { const u = startBattle(t, r)!.crew; return u.reduce((a, x) => a + x.maxHp, 0); };
+  const withBuff = hp(1);
+  t.room.buffs = {};
+  check('bar buffs only lift the Bypass crew', withBuff > hp(1) * 1.25 && !BAR_BUFFS.some(([b]) => buffOn(t, b)));
+  check('hands: royal, full house, jacks, low pair', handTier([12, 11, 10, 9, 8]).join() === '4,ROYAL FLUSH' && handTier([0, 13, 26, 1, 14])[0] === 3 && handTier([9, 22, 2, 30, 45])[0] === 1 && handTier([0, 13, 5, 30, 45])[0] === 0);
+  const s0 = slotsOf(t, 1);
+  check('shuffleboard: each house score is +6% Equity per win, the third adds a slot', postShuffle(t, 14) === 2 && slotsOf(t, 1) === s0 && postShuffle(t, 17) === 1 && slotsOf(t, 1) === s0 + 1);
+}
+
 // pre-dawn copy: nothing before the Route 9 ending may hint at the Bypass, Equity or a second crew
 {
   const LEAK = /bypass|equity|second crew|both crews|each crew|other crew|this crew only|only this crew|own till|exit 14|route 9 north/i;
@@ -204,6 +228,9 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   for (const id of [...r9.map((x) => x.battler), ...bosses(0)]) texts.push(BATTLERS[id].name, BATTLERS[id].does, BATTLERS[id].line);
   for (const l of REGIONS[0].lots) texts.push(l.name, l.blurb, l.clearText, ...[...l.regulars, l.boss].flatMap((e) => [e.name, e.title]));
   texts.push(REGIONS[0].name, ...Object.values(REGIONS[0].chrome));
+  for (const m of MACHINES.filter((x) => x.region === 0)) texts.push(m.name, m.blurb, m.needs);
+  for (const [k, b] of Object.entries(BUFFS)) if (!BAR_BUFFS.some(([x]) => x === k)) texts.push(b.name, b.does);
+  for (const p of Object.values(PERKS)) texts.push(p.name, p.does);
   let t = newGame(12);
   let next = 0;
   while (!t.bypass && t.totalTime < 30 * 3600) {
