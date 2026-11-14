@@ -3,6 +3,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 permissions:
@@ -19,17 +21,69 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Always build latest main at the site root, even when this
+          # workflow was triggered by pushing a version tag.
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+          fetch-tags: true
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+
       - uses: oven-sh/setup-bun@v2
+
       - run: npm ci
+
       - run: bun scripts/check.ts
-      - run: npm run build
+
+      - name: Build latest main
+        run: npm run build
         env:
           # project sites live at https://<user>.github.io/<repo>/
           BASE_PATH: /${{ github.event.repository.name }}/
+
+      - name: Build archived tagged versions
+        env:
+          REPO: ${{ github.event.repository.name }}
+        run: |
+          set -euo pipefail
+          git fetch --tags --force
+
+          mapfile -t tags < <(git tag -l 'v*' --sort=v:refname)
+          if [ ${#tags[@]} -eq 0 ]; then
+            echo "No version tags matching v* found; skipping archives."
+          else
+            for tag in "${tags[@]}"; do
+              echo "::group::Build $tag"
+              worktree="/tmp/smw-archive/${tag}"
+              rm -rf "$worktree"
+              git worktree add --detach "$worktree" "$tag"
+              base="/${REPO}/${tag}/"
+              (
+                cd "$worktree"
+                npm ci
+                if grep -q BASE_PATH vite.config.ts vite.config.js vite.config.mjs vite.config.cjs 2>/dev/null; then
+                  BASE_PATH="$base" npm run build
+                else
+                  npm exec -- vite build --base="$base"
+                fi
+              )
+              python3 "${GITHUB_WORKSPACE}/.github/scripts/inject-storage-namespace.py" \
+                "$worktree/dist/index.html" "$tag"
+              mkdir -p "${GITHUB_WORKSPACE}/dist/${tag}"
+              cp -a "$worktree/dist/." "${GITHUB_WORKSPACE}/dist/${tag}/"
+              git worktree remove --force "$worktree"
+              echo "::endgroup::"
+            done
+          fi
+
+          python3 "${GITHUB_WORKSPACE}/.github/scripts/write-versions-page.py" \
+            --repo "$REPO" --out "${GITHUB_WORKSPACE}/dist/versions/index.html" \
+            ${tags[@]+"${tags[@]}"}
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
