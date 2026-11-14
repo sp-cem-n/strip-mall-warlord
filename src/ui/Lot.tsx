@@ -1,20 +1,20 @@
+// The parking lot: the whole crew in ranks by role, the fight ladder, and the two calls an active player gets to make.
 import { useEffect, useRef } from 'preact/hooks';
-import { app, ask, tip } from '../app';
+import { app, tip, toast } from '../app';
 import { glyph } from '../art/font';
 import { C, HEX } from '../art/palette';
-import { FIGHTERS, PRESTIGE_MIN_ZONE, SHOPS, SMOKE_BREAK_AFTER, WEAK_MULT, RESIST_MULT, ZONES, type FighterKind } from '../game/defs';
-import { heat, regionTaken } from '../game/economy';
-import { asphaltGain, bulldoze, canBulldoze } from '../game/sim';
-import { saveGame } from '../game/save';
+import { BATTLERS, FIGHTS, OVERTIME_FIGHTS, REGIONS, ROLES, SECURITY_LEVELS, STANCE, WEAK_BONUS, type RegionId, type Role, type Stance } from '../game/defs';
+import { advance, autoCovers, lotsTaken, overtime, overtimeCost, regionDone, roster, setStance, topFight, view } from '../game/economy';
+import { enemyLineup } from '../game/battle';
 import type { Unit } from '../game/state';
 import { crewArt, enemyArt, fieldArt } from './art';
 import { hit } from './audio';
-import { fmtTime } from './format';
+import { fmt } from './format';
 
 const W = 320;
 const H = 150;
 const SCALE = 2;
-const KIND_COLOR: Record<FighterKind, number> = { bouncer: C.red, hustler: C.violet, medic: C.blue, fixer: C.sodium, lawyer: C.green };
+export const ROLE_COLOR: Record<Role, number> = { tank: C.red, damage: C.sodium, control: C.green, heal: C.blue, buffer: C.violet };
 
 function text(ctx: CanvasRenderingContext2D, s: string, x: number, y: number, c: number, shadow = true) {
   for (const pass of shadow ? [1, 0] : [0]) {
@@ -29,25 +29,26 @@ function text(ctx: CanvasRenderingContext2D, s: string, x: number, y: number, c:
 }
 const center = (s: string, x: number) => x - Math.floor((s.length * 4 - 1) / 2);
 
-// feet positions: crew in ranks left of the lamp, enemies right. 30px columns so nobody stands in anybody.
-function spot(side: 'crew' | 'enemy', i: number): [number, number] {
-  const col = Math.floor(i / 3);
-  const row = i % 3;
-  const stagger = row === 1 ? 12 : 0;
-  const x = side === 'crew' ? 140 - col * 30 - stagger : 182 + col * 30 + stagger;
-  return [x, 88 + row * 20];
+// Feet positions. The crew stands in ranks, 4 deep, front rank (tanks) nearest the lamp, then damage, control, heal, buffers.
+// Columns are 17px apart so no two sprites overlap side to side; odd columns sit half a row lower.
+function crewSpots(roles: Role[]): [number, number][] {
+  return roles.map((_, i) => {
+    const col = Math.floor(i / 4);
+    return [150 - col * 17, 82 + (i % 4) * 18 + (col % 2 ? 9 : 0)];
+  });
 }
-const BOSS_SPOT: [number, number] = [262, 132];
+const enemySpot = (i: number): [number, number] => [184 + Math.floor(i / 3) * 24 + (i % 3 === 1 ? 12 : 0), 88 + (i % 3) * 20];
+const BOSS_SPOT: [number, number] = [262, 134];
 const lastFlash = new Map<number, number>();
+const downAt = new Map<number, number>();
 
-function drawUnit(ctx: CanvasRenderingContext2D, u: Unit, i: number, t: number) {
+function drawUnit(ctx: CanvasRenderingContext2D, u: Unit, [x, y]: [number, number], t: number) {
   const big = u.boss;
   const flash = u.hp > 0 && u.flash > 0.2;
-  const art = u.side === 'crew' ? crewArt(u.kind as FighterKind, flash) : enemyArt(u.name, flash);
+  const art = u.side === 'crew' ? crewArt(u.id, flash) : enemyArt(u.name, flash);
   const k = big ? 2 : 1;
-  let [x, y] = big ? BOSS_SPOT : spot(u.side, i);
   const was = lastFlash.get(u.uid) ?? 0;
-  if (u.flash > was + 0.05) hit(u.boss || u.kind === 'bouncer');
+  if (u.side === 'enemy' && u.flash > was + 0.05) hit(u.boss);
   lastFlash.set(u.uid, u.flash);
   const dir = u.side === 'crew' ? 1 : -1;
   if (u.acted > 0) x += dir * 3; // lunge
@@ -55,8 +56,12 @@ function drawUnit(ctx: CanvasRenderingContext2D, u: Unit, i: number, t: number) 
   const w = 16 * k;
   const h = 24 * k;
   if (u.hp <= 0) {
+    // fallen fighters fade out and leave the lot instead of piling up
+    const at = downAt.get(u.uid) ?? (downAt.set(u.uid, t), t);
+    const a = 0.5 - (t - at) * 0.6;
+    if (a <= 0) return;
     ctx.save();
-    ctx.globalAlpha = 0.45;
+    ctx.globalAlpha = a;
     ctx.translate(x, y - 4);
     ctx.rotate((dir * Math.PI) / 2);
     ctx.drawImage(art, -w / 2, -h / 2, w, h);
@@ -65,75 +70,65 @@ function drawUnit(ctx: CanvasRenderingContext2D, u: Unit, i: number, t: number) 
   }
   const bob = Math.round(Math.sin(t * 4 + u.uid) * 0.6);
   ctx.drawImage(art, x - w / 2, y - h + bob, w, h);
-  // hp bar
-  const bw = big ? 28 : 14;
-  const top = y - h - 4;
-  ctx.fillStyle = HEX[C.ink];
-  ctx.fillRect(x - bw / 2 - 1, top - 1, bw + 2, 4);
-  ctx.fillStyle = HEX[u.side === 'crew' ? C.green : C.red];
-  ctx.fillRect(x - bw / 2, top, Math.ceil((bw * u.hp) / u.maxHp), 2);
+  const top = y - h - 3;
+  if (u.hp < u.maxHp) {
+    const bw = big ? 28 : 12;
+    ctx.fillStyle = HEX[C.ink];
+    ctx.fillRect(x - bw / 2 - 1, top - 1, bw + 2, 3);
+    ctx.fillStyle = HEX[u.side === 'crew' ? C.green : C.red];
+    ctx.fillRect(x - bw / 2, top, Math.ceil((bw * u.hp) / u.maxHp), 1);
+  }
+  if (u.side !== 'enemy') return;
   if (u.weak) {
+    const d = BATTLERS[u.weak];
     ctx.fillStyle = HEX[C.ink];
     ctx.fillRect(x - 4, top - 9, 7, 7);
-    ctx.fillStyle = HEX[KIND_COLOR[u.weak]];
+    ctx.fillStyle = HEX[ROLE_COLOR[d.role]];
     ctx.fillRect(x - 3, top - 8, 5, 5);
-    text(ctx, FIGHTERS[u.weak].name[0], x - 2, top - 8, C.paper, false);
+    text(ctx, d.name[0], x - 2, top - 8, C.paper, false);
   }
   if (u.flash > 0) {
-    const label = u.lastTag || `-${Math.round(u.lastDmg)}`;
-    const color = u.lastTag ? C.paper : u.lastMult > 1 ? C.sodiumLight : u.lastMult < 1 ? C.stone : C.red;
-    text(ctx, label, center(label, x), top - 16 - Math.round((0.35 - u.flash) * 30), color);
+    const label = `-${fmt(u.lastDmg)}`;
+    text(ctx, label, center(label, x), top - 16 - Math.round((0.35 - u.flash) * 30), u.lastWeak ? C.sodiumLight : C.paper);
   }
 }
 
-function draw(ctx: CanvasRenderingContext2D, t: number) {
+function draw(ctx: CanvasRenderingContext2D, t: number, r: RegionId) {
   const s = app.s;
-  const zd = ZONES[Math.min(s.zone, ZONES.length - 1)];
+  const c = s.crews[r];
+  const f = FIGHTS[r][Math.min(c.at, FIGHTS[r].length - 1)];
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(fieldArt(zd.id), 0, 0);
-  // heat: cruiser lights at the lot entrance
-  if (heat(s) > 0) {
-    const on = Math.floor(t * 3) % 2;
-    for (const cx of s.buffs.heat > 0 ? [4, 18] : [4]) {
-      ctx.fillStyle = HEX[on ? C.red : C.blue];
-      ctx.fillRect(cx, 56, 4, 2);
-      ctx.fillStyle = HEX[on ? C.blue : C.red];
-      ctx.fillRect(cx + 4, 56, 4, 2);
-    }
-  }
-  const b = s.battle;
+  ctx.drawImage(fieldArt(REGIONS[r].lots[f.zone].id), 0, 0);
+  const b = c.battle;
   if (b) {
-    const order = (list: Unit[]) => list.map((u, i) => [u, i] as const).sort((a, c) => spot(a[0].side, a[1])[1] - spot(c[0].side, c[1])[1]);
-    for (const [u, i] of order(b.crew)) drawUnit(ctx, u, i, t);
-    for (const [u, i] of order(b.enemies.filter((e) => !e.boss))) drawUnit(ctx, u, i, t);
-    for (const u of b.enemies.filter((e) => e.boss)) drawUnit(ctx, u, 0, t);
+    const spots = crewSpots(b.crew.map((u) => u.role as Role));
+    const order = b.crew.map((u, i) => [u, spots[i]] as const).sort((a, z) => a[1][1] - z[1][1]);
+    for (const [u, p] of order) drawUnit(ctx, u, p, t);
+    const regs = b.enemies.filter((e) => !e.boss);
+    regs.map((u, i) => [u, enemySpot(i)] as const).sort((a, z) => a[1][1] - z[1][1]).forEach(([u, p]) => drawUnit(ctx, u, p, t));
+    for (const u of b.enemies.filter((e) => e.boss)) drawUnit(ctx, u, BOSS_SPOT, t);
+    const down = b.crew.filter((u) => u.hp <= 0).length;
+    if (down) text(ctx, `${down} DOWN`, 4, 140, C.red);
   } else {
-    s.slots
-      .filter((x) => x.shop)
-      .forEach((x, i) => {
-        const [px, py] = spot('crew', i);
-        ctx.drawImage(crewArt(SHOPS[x.shop!].fighter), px - 8, py - 24);
-      });
-    const msg = regionTaken(s) ? 'THE REGION IS YOURS' : s.lossStreak >= SMOKE_BREAK_AFTER ? `SMOKE BREAK ${Math.ceil(s.regroup)}S` : s.slots.some((x) => x.shop) ? 'REGROUPING' : 'OPEN A SHOP';
-    text(ctx, msg, center(msg, 230), 96, s.lossStreak >= SMOKE_BREAK_AFTER ? C.sodium : C.bone);
+    const team = roster(s, r);
+    const spots = crewSpots(team.map(([id]) => BATTLERS[id].role));
+    team.map((m, i) => [m[0], spots[i]] as const).sort((a, z) => a[1][1] - z[1][1]).forEach(([id, [x, y]]) => ctx.drawImage(crewArt(id), x - 8, y - 24));
+    text(ctx, 'REGROUPING', center('REGROUPING', 236), 96, C.bone);
   }
-  const buffs = [
-    ['+50% DMG', s.buffs.dmg, C.sodiumLight],
-    ['BOUNCERS TOUGH', s.buffs.tough, C.red],
-    ['PATCHING UP', s.buffs.regen, C.mint],
-    ['+25% HEAT', s.buffs.heat, C.neon],
-  ] as const;
-  let by = 140;
-  for (const [label, left, c] of buffs) if (left > 0) text(ctx, `${label} ${Math.ceil(left)}S`, 4, (by -= 8) + 8, c);
+  let by = 132;
+  if (c.rally > 0) text(ctx, `RALLY +25% ${Math.ceil(c.rally)}S`, 196, (by += 8), C.sodiumLight);
+  if (c.overtime > 0 || b?.overtime) text(ctx, `OVERTIME ${b?.overtime ? 'ON' : ''}`, 196, by - 8, C.mint);
 }
 
-function Field() {
+function Field({ r }: { r: RegionId }) {
   const ref = useRef<HTMLCanvasElement>(null);
+  const rr = useRef(r);
+  rr.current = r;
   useEffect(() => {
     let id = 0;
     const loop = (now: number) => {
       const ctx = ref.current?.getContext('2d');
-      if (ctx) draw(ctx, now / 1000);
+      if (ctx) draw(ctx, now / 1000, rr.current);
       id = requestAnimationFrame(loop);
     };
     id = requestAnimationFrame(loop);
@@ -142,116 +137,139 @@ function Field() {
   return <canvas ref={ref} width={W} height={H} class="field" style={{ width: `${W * SCALE}px`, height: `${H * SCALE}px` }} />;
 }
 
-function Weak({ k, zone }: { k: FighterKind; zone: number }) {
-  const z = ZONES[zone];
-  const who = [...new Set([...z.regulars, z.boss].filter((e) => e.weak === k).map((e) => e.name))];
+function Weak({ id, r, zone }: { id: string; r: RegionId; zone: number }) {
+  const lot = REGIONS[r].lots[zone];
+  const d = BATTLERS[id];
+  const who = [...lot.regulars, lot.boss].filter((e) => e.weak === id).map((e) => e.name);
   return (
-    <span class={`weak k-${k}`} {...tip(`Weak to ${FIGHTERS[k].plural}`, `${who.join(', ')}.`, `×${WEAK_MULT} damage from ${FIGHTERS[k].plural}, ×${RESIST_MULT} from everyone else.`, FIGHTERS[k].quip)}>
-      {FIGHTERS[k].name[0]}
+    <span class={`weak role-bg-${d.role}`} {...tip(`Weak to the ${d.name}`, `${who.join(', ')}.`, `+${WEAK_BONUS * 100}% damage from them. Nice to have, never required.`, d.line)}>
+      {d.name[0]}
     </span>
   );
 }
 
-function ZoneTrack() {
+function ZoneTrack({ r }: { r: RegionId }) {
   const s = app.s;
-  const ok = canBulldoze(s);
-  const stuck = ok && (regionTaken(s) || s.lossStreak >= SMOKE_BREAK_AFTER);
+  const c = s.crews[r];
   return (
     <div class="zones">
-      {ZONES.map((z, i) => {
-        const state = i < s.zone ? 'done' : i === s.zone ? 'current' : 'locked';
+      {REGIONS[r].lots.map((z, i) => {
+        const start = FIGHTS[r].findIndex((f) => f.zone === i);
+        const total = z.fights + 1;
+        const won = Math.max(0, Math.min(total, c.frontier - start));
+        const state = won >= total ? 'done' : c.frontier >= start ? 'current' : 'locked';
+        const auto = autoCovers(s, r, i);
         return (
           <div key={z.id} class={`zone ${state}`}>
-            <div class="zone-name" {...tip(z.name, z.blurb, ...[...z.regulars, z.boss].map((e) => `${e.name}: ${e.title}`))}>
-              {z.name}
+            <div class="zone-name" {...tip(z.name, z.blurb, ...[...z.regulars, z.boss].map((e) => `${e.name}: ${e.title}${e.tell ? ` (${e.tell === 'tanky' ? 'tanky' : 'hits hard'})` : ''}`))}>
+              {z.short}
             </div>
-            <div class="pips">
-              {Array.from({ length: z.rows }, (_, r) => (
-                <span key={r} class={`pip ${i < s.zone || (i === s.zone && r < s.row) ? 'won' : i === s.zone && r === s.row ? 'now' : ''} ${r === z.rows - 1 ? 'boss' : ''}`} />
-              ))}
+            <div class="bar">
+              <i style={{ width: `${(won / total) * 100}%` }} />
             </div>
-            <div class="zone-sub">{state === 'done' ? 'Captured' : [...new Set([...z.regulars.map((e) => e.weak), z.boss.weak])].map((k) => <Weak key={k} k={k} zone={i} />)}</div>
+            <div class="zone-sub">
+              {state === 'done' ? (
+                'Captured'
+              ) : state === 'locked' ? (
+                '???'
+              ) : (
+                <>
+                  {won}/{total} {[...new Set([...z.regulars, z.boss].map((e) => e.weak))].map((k) => <Weak key={k} id={k} r={r} zone={i} />)}
+                </>
+              )}
+            </div>
+            <div class={`auto ${auto ? 'on' : ''}`} {...tip(auto ? 'Auto-advance: on' : 'Auto-advance: off', i === 0 ? 'The first lot always moves up by itself.' : `Security Office Lv ${SECURITY_LEVELS(i)} watches this lot.`)}>
+              {auto ? 'AUTO' : `SEC ${SECURITY_LEVELS(i)}`}
+            </div>
           </div>
         );
       })}
-      <div class={`zone pave ${ok ? 'current' : 'locked'} ${stuck ? 'glow' : ''}`}>
-        <div class="zone-name">Pave it</div>
-        {ok ? (
-          <button
-            class="btn small danger"
-            onClick={() =>
-              ask(`Bulldoze Pinewood Plaza and everything you captured for +${asphaltGain(s)} asphalt? You start over with your uncle's vape shop. Everything runs ${asphaltGain(s) * 2}% better, forever.`, 'Pave it', 'Not yet', () => {
-                app.s = bulldoze(app.s);
-                saveGame(app.s);
-                app.refresh();
-              })
-            }
-          >
-            +{asphaltGain(s)} asphalt
-          </button>
-        ) : (
-          <div class="zone-sub">after {ZONES[PRESTIGE_MIN_ZONE - 1].name}</div>
-        )}
-      </div>
+    </div>
+  );
+}
+
+const PLAYS: [Stance, string, string][] = [
+  ['even', 'Even', 'No adjustments.'],
+  ['rush', 'Rush', `+${Math.round((STANCE.rush.dmg - 1) * 100)}% damage, ${Math.round((STANCE.rush.hp - 1) * 100)}% HP. For tanky enemies and running out the clock.`],
+  ['dig', 'Dig In', `+${Math.round((STANCE.dig.hp - 1) * 100)}% HP, ${Math.round((STANCE.dig.dmg - 1) * 100)}% damage. For enemies who hit hard.`],
+];
+
+function Calls({ r }: { r: RegionId }) {
+  const s = app.s;
+  const c = s.crews[r];
+  const cost = overtimeCost(s, r);
+  return (
+    <div class="calls">
+      <span class="dim">The play:</span>
+      {PLAYS.map(([k, label, what]) => (
+        <button key={k} class={`btn small ${c.stance === k ? 'hot' : ''}`} onClick={() => (setStance(s, r, k), app.refresh())} {...tip(`${label}`, what, 'Applies from the next fight. Stays until you change it.')}>
+          {label}
+        </button>
+      ))}
+      <button
+        class={`btn small ${c.overtime ? 'hot' : ''}`}
+        disabled={c.overtime > 0 || c.cash < cost}
+        onClick={() => {
+          const err = overtime(s, r);
+          if (err) toast(err);
+          app.refresh();
+        }}
+        {...tip('Overtime', `Two minutes of rent: $${fmt(cost)}.`, `The next ${OVERTIME_FIGHTS} fights: +25% HP and damage for the whole crew.`, 'For the boss you almost beat.')}
+      >
+        {c.overtime ? `Overtime ×${c.overtime}` : `Overtime $${fmt(cost)}`}
+      </button>
     </div>
   );
 }
 
 export function Lot() {
   const s = app.s;
-  const b = s.battle;
-  const zd = ZONES[Math.min(s.zone, ZONES.length - 1)];
-  const boss = b?.enemies.find((e) => e.boss);
+  const r = s.view;
+  const c = s.crews[r];
+  const ladder = FIGHTS[r];
+  const done = regionDone(s, r);
+  const f = ladder[Math.min(c.at, ladder.length - 1)];
+  const lot = REGIONS[r].lots[f.zone];
+  const atFrontier = c.at === c.frontier;
+  const lineup = enemyLineup(r, Math.min(c.at, ladder.length - 1));
+  const tells = [...new Set(lineup.map((e) => e.def.tell).filter(Boolean))];
+  const boss = f.boss ? lot.boss : null;
   return (
     <section class="glass lot">
       <h2>
-        The Lot <span class="dim">· fights run themselves</span>
-      </h2>
-      <ZoneTrack />
-      <div class="field-head">
-        <span>{regionTaken(s) ? 'Region taken' : `${zd.name} · row ${s.row + 1}/${zd.rows}`}</span>
-        <span class="dim">{b ? `${b.t.toFixed(0)}s` : ''}</span>
-      </div>
-      <Field />
-      {boss && (
-        <div class="boss-card">
-          <strong>{boss.name}</strong> <span class="dim">{boss.title}</span>
-        </div>
-      )}
-      <div class="legend dim">Enemies hit your front crew member first. The colored badge is who they're weak to: ×2.5 from them, ×0.5 from everyone else.</div>
-    </section>
-  );
-}
-
-const FOOTERS = ['NO REFUNDS. NO EXCEPTIONS.', 'PARKING VALIDATED: NEVER', 'THANK YOU FOR SHOPPING PINEWOOD PLAZA', 'ASK ABOUT OUR VACANCIES', 'NOT A RECEIPT FOR TAX PURPOSES', 'HAVE A NICE NIGHT. NO LOITERING.'];
-
-// The log is the management office's receipt printer. Red ink for losses, like a real two-color printer.
-export function Receipt() {
-  const s = app.s;
-  return (
-    <section class="printer">
-      <div class="printer-head">
-        <span>PINEWOOD PLAZA MGMT · ACTIVITY</span>
-        <span class="printer-light" />
-      </div>
-      <div class="paper">
-        <div class="r-rule">--------------------------------------------</div>
-        <ul>
-          {s.log
-            .slice(-7)
-            .reverse()
-            .map((l, i) => (
-              <li key={`${l.t}-${i}`} class={`r-${l.tone}`}>
-                <span class="t">{fmtTime(l.t)}</span>
-                <span>
-                  {l.tone === 'capture' ? `*** ${l.text} ***` : l.text}
-                  {l.n && <b> x{l.n}</b>}
-                </span>
-              </li>
+        <span>
+          The Lot <span class="dim">· fights run themselves</span>
+        </span>
+        {s.bypass && (
+          <span class="tabs">
+            {REGIONS.map((reg) => (
+              <button key={reg.id} class={`tab ${r === reg.id ? 'on' : ''}`} onClick={() => (view(s, reg.id), app.refresh())} {...tip(reg.name, `${lotsTaken(s, reg.id)}/${reg.lots.length} lots. Its own crew, its own till.`, 'Both crews fight all the time. This picks which one you manage.')}>
+                {reg.name}
+              </button>
             ))}
-        </ul>
-        <div class="r-rule">--------------------------------------------</div>
-        <div class="r-foot">{FOOTERS[(s.stats.wins + s.bulldozes) % FOOTERS.length]}</div>
+          </span>
+        )}
+      </h2>
+      <ZoneTrack r={r} />
+      <div class="field-head">
+        <button class="btn small" disabled={c.at === 0} onClick={() => (advance(s, r, -1), app.refresh())} {...tip('Back one fight', 'Farm an easier fight. Wins still pay.')}>
+          ◂
+        </button>
+        <span class="fh-main">
+          <b>{boss ? boss.name : `${lot.name} · fight ${f.i + 1}/${lot.fights}`}</b>
+          <span class="dim">
+            {done && c.at === ladder.length - 2 ? ' · keeping the lights on' : atFrontier ? ` · ${c.kills}/${f.need} wins to move up` : ` · farming (${c.farmed} wins)`}
+            {tells.length ? ` · ${tells.map((t) => (t === 'tanky' ? 'tanky' : 'hits hard')).join(', ')}` : ''}
+          </span>
+        </span>
+        <button class="btn small" disabled={c.at >= topFight(s, r)} onClick={() => (advance(s, r, 1), app.refresh())} {...tip('Advance', 'Move up a fight now instead of waiting.', autoCovers(s, r, f.zone) ? 'This lot moves up by itself after the crew farms a while.' : 'Nobody is watching this lot yet: advance by hand.')}>
+          ▸
+        </button>
+      </div>
+      <Field r={r} />
+      <Calls r={r} />
+      <div class="legend dim">
+        Front to back: {ROLES.map((ro) => <b key={ro} class={`role-${ro}`}>{ro} </b>)}. Enemies hit the front first. The badge is who they're weak to (+{WEAK_BONUS * 100}%).
       </div>
     </section>
   );

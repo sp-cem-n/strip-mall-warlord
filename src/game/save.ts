@@ -1,4 +1,4 @@
-import { SAVE_VERSION, noBuffs } from './economy';
+import { SAVE_VERSION } from './economy';
 import type { GameState } from './state';
 
 const KEY = 'smw.save';
@@ -12,24 +12,21 @@ export function saveGame(s: GameState) {
   }
 }
 
-// Never crash on a bad save: fall back to a new game.
-export function loadGame(): GameState | null {
+// 'old' = a save from before v0.5. The loop changed too much to carry it over.
+export function loadGame(): GameState | 'old' | null {
+  let raw: string | null = null;
   try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return null;
-    const s = JSON.parse(raw) as GameState & { boost?: number };
-    if (!s || typeof s !== 'object' || !Array.isArray(s.slots) || typeof s.cash !== 'number') return null;
-    if (s.version === 2) {
-      // v0.3 -> v0.4: one generic walk-in became per-shop walk-ins with their own effects
-      s.buffs = noBuffs();
-      s.find = null;
-      delete s.boost;
-      s.version = SAVE_VERSION;
-    }
-    if (s.version !== SAVE_VERSION || !s.buffs) return null;
-    return s;
+    raw = localStorage.getItem(KEY);
   } catch {
     return null;
+  }
+  if (!raw) return null;
+  try {
+    const s = JSON.parse(raw) as GameState;
+    if (s?.version === SAVE_VERSION && Array.isArray(s.crews)) return s;
+    return 'old';
+  } catch {
+    return 'old';
   }
 }
 

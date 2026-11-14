@@ -2,11 +2,11 @@ import { useEffect, useState } from 'preact/hooks';
 import { app, ask } from '../app';
 import { newGame } from '../game/economy';
 import { saveGame } from '../game/save';
-import { Book } from './Book';
-import { Lot, Receipt } from './Lot';
+import { Lot } from './Lot';
 import { Pylon } from './Pylon';
-import { AskDialog, Boot, HowTo, Story, TipCard } from './Screens';
+import { AskDialog, Boot, HowTo, Story, TipCard, WinCard } from './Screens';
 import { Shops } from './Shops';
+import { Training } from './Training';
 
 function go(screen: typeof app.screen) {
   app.screen = screen;
@@ -18,12 +18,13 @@ function startOver() {
   app.s = newGame();
   app.away = null;
   app.hasSave = true;
+  app.oldSave = false;
   saveGame(app.s);
   go('story');
 }
 
 const onNew = () =>
-  app.hasSave && app.s.time > 30 ? ask('Start over? The lease, the shops and the crew go in the dumpster behind Unit D.', 'Start over', 'Never mind', startOver) : startOver();
+  app.hasSave && app.s.totalTime > 30 ? ask('Start over? Both crews, every lease and all the Goodwill go in the dumpster behind Unit D.', 'Start over', 'Never mind', startOver) : startOver();
 
 const onResume = () => {
   app.away = null;
@@ -49,16 +50,16 @@ export function App() {
           <Shops />
           <div class="col">
             <Lot />
-            <Receipt />
+            <Training />
           </div>
         </main>
-        <Book />
       </div>
     );
   return (
     <>
       {screen}
       {app.toast && performance.now() < app.toastUntil && <div class="toast">{app.toast}</div>}
+      <WinCard />
       <AskDialog />
       <TipCard />
     </>

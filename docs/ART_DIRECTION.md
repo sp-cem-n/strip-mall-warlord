@@ -45,7 +45,7 @@
 4. **Materials say where a building came from:** home = tan stucco; Parking Lot capture = video-store navy and yellow; Big-Box = beige panel with red trim; Outlet = white stucco with mint; Lifestyle = fake brick.
 5. **Motion is tiny and readable:** 0.6px idle bob, a 3px lunge on attack, knockback plus a 1-frame paper silhouette on hit, a rising damage number (yellow = weak hit, grey = resisted, "C&D" for a Lawyer landing one), and downed units lie flat at 45% opacity.
 
-## The page around the game (v0.4)
+## The page around the game (v0.4, still current)
 The page uses the same palette and the same frame rules; there are no default HTML boxes. Every frame is a generated sprite installed as a CSS `border-image` at 2×.
 - **Top bar = the roadside pylon sign.** A cabinet with the title, then three stacked tenant panels (cash on paper, Heat on red, asphalt on navy), on two concrete legs in the grass by Rt. 9. W/L, clock and lots are on a rented red **LED board** with an unlit-dot background. The speaker toggle sits next to it.
 - **Plaza = painted cinderblock** behind the strip, with an aluminum cap.
@@ -53,6 +53,14 @@ The page uses the same palette and the same frame rules; there are no default HT
 - **Log = the receipt printer:** a plastic printer head with a green status light, and a paper tape with a torn edge. Losses print in red ink, like a real two-color printer.
 - **Title, how-to, story and dialogs = brick** frames. **Hover cards, notes and walk-ins = price tags** (paper, ink outline). The **sample book** is a navy binder with paper pages.
 - Zone cards are bolted lot signs: grey for future lots, sodium for the current one, green once captured.
+
+## v0.5 additions
+- **Storefronts:** 34 facades. New Route 9 signs (tanning, karaoke, checks, driving, pets, copies, dentist, beds, phones, gym, party) and the Bypass's 9 new kinds (storage, car wash, urgent care, bail, tax, golf, bridal, cineplex, pretzel). Franchises reuse the Route 9 sign on the Bypass's concrete-panel material. Unleased shops are whitewashed with scaffolding.
+- **Lots:** Office Park and Pinewood Commons skylines, plus four Bypass lots (power center boxes, a campus with a pond, Phase II cranes, the Galleria atrium). All are under the same sodium lamp.
+- **People:** a look for every battler, regular and boss (40 + 40). Bosses who join reuse their enemy look.
+- **Dawn:** the boot scene with a dawn sky and the sign turned off, for the ending card.
+- **Icons:** Goodwill (heart) and Equity (bars) replace Heat.
+- The full sheet is `docs/spritesheet.png` (`bun scripts/spritesheet.ts`).
 
 ## No real brands
 Parody names only: Circuit **Barn** (with the second word's tubes out), Foodway, Pine Creek Outlets, The Promenade. Walk-in items are generic ("a 4-Cell Flashlight", "a Chirp Phone").

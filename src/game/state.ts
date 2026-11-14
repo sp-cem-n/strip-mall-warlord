@@ -1,75 +1,95 @@
-import type { FighterKind, ShopKind } from './defs';
-
-// seconds left on each walk-in effect
-export interface Buffs {
-  dmg: number;
-  tough: number;
-  regen: number;
-  heat: number;
-}
-
-export interface Slot {
-  id: number;
-  label: string;
-  level: number; // renovations belong to the building
-  shop: ShopKind | null;
-}
+import type { RegionId, Role, Stance, Tell, WalkInKind } from './defs';
 
 export interface Unit {
   uid: number;
   side: 'crew' | 'enemy';
-  kind: FighterKind | 'enemy';
+  id: string; // battler id, or enemy name
+  role: Role | 'enemy';
   name: string;
-  title: string;
   maxHp: number;
   hp: number;
-  dmg: number; // heal amount for medics
+  dmg: number; // heal amount for healers
   interval: number;
   cooldown: number;
-  weak: FighterKind | null; // enemies only
+  dr: number; // damage reduction
+  twin: boolean;
+  weak: string | null; // enemies only
+  tell: Tell;
   boss: boolean;
   flash: number; // seconds left of "just hit"
-  lastDmg: number; // last damage taken, shown while flashing
-  lastMult: number; // 2.5 weak hit, 0.5 resisted
-  lastTag: string; // 'C&D' when a lawyer lands one
+  lastDmg: number;
+  lastWeak: boolean;
   acted: number;
 }
 
+// Auras, compiled when a fight starts.
+export interface Field {
+  mark: number;
+  slow: number;
+  weaken: number;
+  stun: number;
+  confuse: number;
+  regen: number;
+  revive: number;
+  payUp: number;
+}
+
 export interface Battle {
-  zone: number;
-  row: number;
+  fight: number; // index into FIGHTS[region]
   t: number;
   crew: Unit[];
   enemies: Unit[];
+  field: Field;
+  revived: boolean;
+  overtime: boolean;
 }
 
 export interface LogLine {
   t: number;
+  r: RegionId;
   text: string;
   tone: 'win' | 'loss' | 'info' | 'capture';
   n?: number;
 }
 
+export type Track = Record<Role, number>;
+
+// One region's crew: its own shops, till, training and place on the fight ladder.
+export interface Crew {
+  cash: number;
+  shops: Record<string, number>; // leased shops -> renovation level
+  train: Track; // Route 9: bought with Goodwill. The Bypass: bought with Equity.
+  frontier: number; // first fight not yet cleared (== ladder length when the region is done)
+  at: number; // the fight the crew is on; always <= frontier
+  kills: number; // wins on the frontier fight
+  farmed: number; // wins below the frontier since the last try
+  streak: number; // losses in a row
+  battle: Battle | null;
+  regroup: number;
+  stance: Stance;
+  overtime: number; // fights left
+  rally: number; // seconds left
+  wins: number;
+  losses: number;
+}
+
 export interface GameState {
   version: number;
   seed: number;
-  time: number; // sim seconds this run
+  time: number; // sim seconds this run of Route 9
   totalTime: number; // all runs
-  cash: number;
+  goodwill: number;
+  equity: number;
   asphalt: number;
-  bulldozes: number;
-  slots: Slot[];
-  zone: number; // lots captured == index of current lot
-  row: number;
-  battle: Battle | null;
-  regroup: number;
+  paves: number;
+  crews: [Crew, Crew];
+  view: RegionId; // which crew you're watching and managing
+  bypass: boolean; // region 2 found (survives paving)
+  ending: 0 | 1 | 2; // a win card waiting to be seen (region + 1)
   log: LogLine[];
-  stats: { wins: number; losses: number; earned: number };
+  stats: { earned: number; goodwill: number; equity: number; banked: number }; // equity = from Bypass wins, banked = from Goodwill
   savedAt: number;
   nextUid: number;
-  lastCapture: number;
-  lossStreak: number; // 3 in a row on one row = smoke break
-  find: { slot: number; kind: ShopKind; name: string; left: number } | null; // walk-in, only while you're watching
+  find: { shop: string; kind: WalkInKind; name: string; left: number } | null; // walk-in, only while you're watching
   findClock: number;
-  buffs: Buffs;
 }

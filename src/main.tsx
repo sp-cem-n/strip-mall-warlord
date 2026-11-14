@@ -1,16 +1,15 @@
 import { render } from 'preact';
 import { app, type Screen } from './app';
-import { botAct, type Strategy } from './game/bot';
-import { newGame } from './game/economy';
+import { botAct } from './game/bot';
+import { FIGHTS, SHOP_LIST, STEP } from './game/defs';
+import { lotsTaken, newGame, rentPerSec } from './game/economy';
 import { clearSave, loadGame, saveGame } from './game/save';
-import { STEP } from './game/defs';
 import { simulateAway, step } from './game/sim';
 import { App } from './ui/App';
 import '@fontsource/pixelify-sans/latin-500.css';
 import '@fontsource/vt323/latin-400.css';
 import { installFrames } from './ui/art';
 import { jingle, register, squeak, unlockAudio } from './ui/audio';
-import { incomePerSec } from './game/economy';
 import './ui/styles.css';
 
 installFrames();
@@ -19,50 +18,70 @@ installFrames();
 //   ?fresh=1        ignore and wipe the save
 //   ?speed=N        run the sim N× faster
 //   ?seed=N         fixed RNG seed for a new game
-//   ?advance=SEC    let the greedy bot play SEC seconds before showing
-//   ?strategy=dojo  which bot plays (mixed | static | dojo)
+//   ?advance=SEC    let the scripted player play SEC seconds before showing (?active=1: grabs walk-ins, calls plays)
 //   ?midbattle=1    after advancing, stop a few seconds into a fight
+//   ?roster=full    Route 9 finished: all 19 shops at Lv 45 and the 6 bosses on the crew (25 on the field)
+//   ?win=1          with roster=full: show the dawn win card
+//   ?region=1       watch the Bypass crew (needs the Bypass found: roster=full does that)
 //   ?away=SEC       pretend the tab was closed SEC seconds ago (stats on the title screen)
+//   ?oldsave=1      show the "lease was renegotiated" notice
 //   ?screen=NAME    boot | howto | story | game (default: boot)
 //   ?story=all      show every story line at once
-//   ?book=SLOT      open the sign sample book for a storefront
 //   ?pause=1        freeze the sim (for screenshots)
-//   ?walkin=1       put a walk-in at the first open storefront
+//   ?walkin=1       put a walk-in at the first shop
 const q = new URLSearchParams(location.search);
 const num = (k: string, d: number) => (q.has(k) ? Number(q.get(k)) : d);
 
 if (q.get('fresh') === '1') clearSave();
-let s = q.get('fresh') === '1' ? null : loadGame();
+const loaded = q.get('fresh') === '1' ? null : loadGame();
+app.oldSave = loaded === 'old' || q.get('oldsave') === '1';
+if (loaded === 'old') clearSave(); // the old plaza lives on at /v0.4/
+let s = loaded && loaded !== 'old' ? loaded : null;
 app.hasSave = !!s;
 if (!s) s = newGame(q.has('seed') ? num('seed', 1) : undefined);
 app.s = s;
 app.speed = Math.max(0, num('speed', 1));
 app.paused = q.get('pause') === '1';
 
-const strategy = (q.get('strategy') ?? 'mixed') as Strategy;
 const advance = num('advance', 0);
+const opts = { active: q.get('active') === '1' };
 if (advance > 0) {
   app.hasSave = true;
   for (let t = 0; t < advance; t += 10) {
-    app.s = botAct(app.s, strategy);
-    for (let i = 0; i < 10 / STEP; i++) step(app.s);
-  }
-  if (q.get('midbattle') === '1') {
-    let guard = 0;
-    const hit = () => [...app.s.battle!.crew, ...app.s.battle!.enemies].some((u) => u.flash > 0.25 && u.hp > 0);
-    while (!(app.s.battle && app.s.battle.t > 4 && hit() && app.s.battle.crew.some((u) => u.acted > 0)) && guard++ < 20000) step(app.s);
+    app.s = botAct(app.s, opts);
+    for (let i = 0; i < 10 / STEP; i++) step(app.s, opts.active);
   }
 }
-
+if (q.get('roster') === 'full') {
+  app.hasSave = true;
+  const c = app.s.crews[0];
+  for (const sh of SHOP_LIST) if (sh.region === 0) c.shops[sh.id] = 45;
+  c.frontier = FIGHTS[0].length;
+  c.at = FIGHTS[0].length - 2;
+  c.cash = rentPerSec(app.s, 0) * 60;
+  app.s.goodwill = 42000;
+  app.s.bypass = true;
+  app.s.ending = q.get('win') === '1' ? 1 : 0;
+  if (q.get('region') === '1') {
+    app.s.view = 1;
+    app.s.equity = 140;
+    for (let i = 0; i < 2000; i++) step(app.s);
+  }
+}
+if (q.get('midbattle') === '1') {
+  const c = app.s.crews[app.s.view];
+  let guard = 0;
+  const hit = () => [...c.battle!.crew, ...c.battle!.enemies].some((u) => u.flash > 0.25 && u.hp > 0);
+  while (!(c.battle && c.battle.t > 3 && hit() && c.battle.crew.some((u) => u.acted > 0)) && guard++ < 20000) step(app.s);
+}
 if (q.get('walkin') === '1') {
-  const sl = app.s.slots.find((x) => x.shop === 'pawn') ?? app.s.slots.find((x) => x.shop)!;
-  app.s.find = { slot: sl.id, kind: sl.shop!, name: sl.shop === 'pawn' ? 'a 4-Cell Flashlight' : 'Ex-Golden Gloves (Regional)', left: 18 };
+  const sh = SHOP_LIST.find((x) => x.region === app.s.view && app.s.crews[app.s.view].shops[x.id])!;
+  app.s.find = { shop: sh.id, kind: sh.walkin.kind, name: 'a 4-Cell Flashlight', left: 18 };
 }
 
 const awaySec = q.has('away') ? num('away', 0) : (Date.now() - app.s.savedAt) / 1000;
 if (app.hasSave && awaySec > 60) app.away = simulateAway(app.s, awaySec);
 app.screen = (q.get('screen') as Screen) ?? 'boot';
-if (q.has('book')) app.book = num('book', 0);
 
 // audio waits for a gesture (browser rule, and good manners)
 for (const ev of ['pointerdown', 'keydown']) addEventListener(ev, unlockAudio);
@@ -74,7 +93,8 @@ let acc = 0;
 let saveClock = 0;
 let uiClock = 0;
 let rentClock = 0;
-let prev = { zone: app.s.zone, find: !!app.s.find };
+const lotsNow = () => lotsTaken(app.s, 0) + lotsTaken(app.s, 1);
+let prev = { lots: lotsNow(), find: !!app.s.find };
 function frame(now: number) {
   const dt = Math.min(1, (now - last) / 1000);
   last = now;
@@ -85,11 +105,11 @@ function frame(now: number) {
     for (acc += simDt; acc >= STEP; acc -= STEP) step(app.s, playing);
   }
   if (playing) {
-    if (app.s.zone > prev.zone) jingle();
+    if (lotsNow() > prev.lots) jingle();
     if (app.s.find && !prev.find) squeak();
-    if ((rentClock += dt) >= 30 && incomePerSec(app.s) > 0) (rentClock = 0), register();
+    if ((rentClock += dt) >= 30 && rentPerSec(app.s, app.s.view) > 0) (rentClock = 0), register();
   }
-  prev = { zone: app.s.zone, find: !!app.s.find };
+  prev = { lots: lotsNow(), find: !!app.s.find };
   if (app.hasSave && !app.paused && (saveClock += dt) >= 5) {
     saveClock = 0;
     saveGame(app.s);
@@ -111,7 +131,6 @@ document.addEventListener('visibilitychange', () => {
       // back after a while: the title screen shows what happened
       app.away = simulateAway(app.s, gap);
       app.screen = 'boot';
-      app.book = null;
       saveGame(app.s);
     }
     last = performance.now();

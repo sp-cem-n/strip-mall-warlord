@@ -2,16 +2,17 @@
 // Usage: bun scripts/spritesheet.ts [out=docs/spritesheet.png]
 import { writeFileSync } from 'node:fs';
 import { deflateSync } from 'node:zlib';
-import { ZONES, type FighterKind, SHOP_ORDER } from '../src/game/defs';
+import { BATTLERS, REGIONS, SHOP_LIST } from '../src/game/defs';
 import { Grid } from '../src/art/grid';
 import { C, PALETTE } from '../src/art/palette';
 import { crewSprite, enemySprite } from '../src/art/people';
 import * as S from '../src/art/scenes';
-import { battlefield, buttonFrame, facade, ICONS, panelFrame, type Material } from '../src/art/scenes';
+import { battlefield, buttonFrame, facade, ICONS, panelFrame } from '../src/art/scenes';
 
 const out = process.argv[2] ?? 'docs/spritesheet.png';
 const W = 660;
-const sheet = new Grid(W, 940);
+const lots = REGIONS.flatMap((r) => r.lots);
+const sheet = new Grid(W, 1700);
 sheet.rect(0, 0, W, sheet.h, C.night);
 const label = (t: string, x: number, y: number) => sheet.text(t, x, y, C.bone);
 const scaled = (g: Grid, k: number) => {
@@ -26,48 +27,53 @@ y += 10;
 PALETTE.slice(1).forEach(([n], i) => sheet.rect(6 + i * 28, y, 26, 14, C[n]).text(String(i + 1), 8 + i * 28, y + 16, C.stone));
 y += 30;
 
-label('CREW 16X24 (SHOWN 2X)', 6, y);
+label(`CREW 16X24 (SHOWN 2X): ${Object.keys(BATTLERS).length} BATTLERS, BOTH CREWS, BOSSES WHO JOIN INCLUDED`, 6, y);
 y += 8;
-(['bouncer', 'hustler', 'medic', 'fixer', 'lawyer'] as FighterKind[]).forEach((k, i) => {
-  sheet.blit(scaled(crewSprite(k), 2), 6 + i * 40, y);
-  sheet.text(k.slice(0, 7), 6 + i * 40, y + 50, C.stone);
+Object.keys(BATTLERS).forEach((id, i) => {
+  const x = 6 + (i % 16) * 40;
+  const yy = y + Math.floor(i / 16) * 60;
+  sheet.blit(scaled(crewSprite(id), 2), x, yy);
+  sheet.text(id.slice(0, 8), x, yy + 50, C.stone);
 });
-y += 60;
-label('ENEMIES (FLIPPED) + BOSSES', 6, y);
+y += 132;
+label('ENEMIES (FLIPPED)', 6, y);
 y += 8;
-const regulars = [...new Set(ZONES.flatMap((z) => z.regulars.map((e) => e.name)))];
-regulars.forEach((n, i) => sheet.blit(scaled(enemySprite(n), 2), 6 + i * 40, y));
-y += 54;
-ZONES.forEach((z, i) => sheet.blit(scaled(enemySprite(z.boss.name), 3), 6 + i * 60, y));
-y += 78;
+const regulars = [...new Set(lots.flatMap((z) => z.regulars.map((e) => e.name)))];
+regulars.forEach((n, i) => sheet.blit(scaled(enemySprite(n), 2), 6 + (i % 16) * 40, y + Math.floor(i / 16) * 54));
+y += 108;
+label('BOSSES (3X)', 6, y);
+y += 8;
+lots.forEach((z, i) => sheet.blit(scaled(enemySprite(z.boss.name), 3), 6 + (i % 10) * 60, y + Math.floor(i / 10) * 78));
+y += 164;
 
-label('STOREFRONTS 64X56 (+ SCAFFOLDING)', 6, y);
+label(`STOREFRONTS 64X56: ALL ${SHOP_LIST.length}, IN THEIR LOT MATERIALS (+ VACANT, SCAFFOLDING)`, 6, y);
 y += 8;
-[...SHOP_ORDER, null].forEach((k, i) => sheet.blit(facade(k, 'home', i + 1), 6 + i * 68, y));
-sheet.blit(facade('dojo', 'home', 1), 414, y).blit(S.scaffold(), 414, y).blit(S.signSample('pawn', 3), 486, y + 4).blit(S.signSample('payday', 4), 486, y + 22);
-y += 60;
-label('CAPTURED-LOT MATERIALS', 6, y);
-y += 8;
-(['lot', 'bigbox', 'outlet', 'lifestyle'] as Material[]).forEach((m, i) => sheet.blit(facade(SHOP_ORDER[i], m, 20 + i), 6 + i * 68, y));
-y += 62;
+const mats = ['home', 'bigbox', 'outlet', 'office', 'lifestyle'] as const;
+[...SHOP_LIST.map((s) => s.id), null, 'scaffold'].forEach((id, i) => {
+  const sh = SHOP_LIST.find((x) => x.id === id);
+  const x = 6 + (i % 9) * 72;
+  const yy = y + Math.floor(i / 9) * 62;
+  if (id === 'scaffold') sheet.blit(facade('dojo', 'home', 1), x, yy).blit(S.scaffold(), x, yy);
+  else sheet.blit(facade(id, sh ? (sh.region === 1 ? 'bypass' : mats[sh.zone]) : 'home', i + 1), x, yy);
+});
+y += 62 * 4 + 6;
 
-label('BATTLEFIELDS 320X150 (SHOWN 1X)', 6, y);
+label('BATTLEFIELDS 320X150 (SHOWN 1X): ROUTE 9 + THE BYPASS', 6, y);
 y += 8;
-ZONES.forEach((z, i) => sheet.blit(battlefield(z.id), 6 + (i % 2) * 326, y + Math.floor(i / 2) * 154));
-y += 310;
+lots.forEach((z, i) => sheet.blit(battlefield(z.id), 6 + (i % 2) * 326, y + Math.floor(i / 2) * 154));
+y += 154 * 5 + 6;
 label('UI FRAMES + ICONS (4X)', 6, y);
 sheet.blit(scaled(panelFrame(), 4), 130, y - 2).blit(scaled(buttonFrame(), 4), 184, y - 2);
 Object.values(ICONS).forEach((f, i) => sheet.blit(scaled(f(), 4), 220 + i * 40, y - 2));
 y += 44;
-label('TITLE SCENE 320X180 (1X) + PAGE FRAMES AND TILES (3X)', 6, y);
+label('TITLE SCENE + THE DAWN WIN CARD 320X180 (1X)', 6, y);
 y += 8;
-sheet.blit(S.bootScene(['vape', 'dojo', null, 'pawn']), 6, y);
-let fx = 336;
-let fy = y;
+sheet.blit(S.bootScene(['pawn', 'dojo', 'laundromat', 'vape']), 6, y).blit(S.bootScene(['pawn', 'dojo', 'laundromat', 'vape'], true), 332, y);
+y += 186;
+let fx = 6;
 for (const f of [S.glassFrame, S.brickFrame, S.pylonFrame, S.printerFrame, S.binderFrame, S.tagFrame, () => S.signFrame(C.sodium), S.cinderTile, S.roadTile, S.tearTile]) {
   const g = scaled(f(), 3);
-  if (fx + g.w > W - 6) (fx = 336), (fy += 84);
-  sheet.blit(g, fx, fy);
+  sheet.blit(g, fx, y);
   fx += g.w + 8;
 }
 

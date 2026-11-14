@@ -97,3 +97,22 @@ Net: no new stats or currencies. Systems are 8 → 9 (walk-ins). The smoke break
 | Nits | 30px crew ranks (no bunching), walk-in tags that wrap (no clipping), straight stall lines with wheel stops (no rain) | — |
 
 Tuning: walk-in effects were cut to 30s so a perfect clicker doesn't skip the bulldoze loop entirely. Idle pacing is unchanged because walk-ins never run in the idle sim. Saves: v3 (a v0.3 save migrates in place: walk-in cleared, buffs zeroed).
+
+## Pass 6 (v0.5): Josh's answers, region 2, and what an active player does
+| Problem | Fix | Deleted |
+|---|---|---|
+| Choosing and rebranding shops was busywork; Heat was a tax | A fixed order, one of each. Rebrands and Heat are gone | Heat, rebrands, the sample Book, `Book.tsx` |
+| Fights were all-or-nothing rows | A fight ladder (wins to move up) and pay growing with each fight. Fall back after 3 losses | per-lot strength |
+| 25 sprites didn't fit | Ranks 4 deep, columns 17px apart, fallen fade out, "N DOWN" | per-row bunching |
+| Pressing Advance before Security | The Parking Lot is always auto; Security Lv 1 + 5(k−1) covers lot k | — |
+| Pure idle stalled at Big-Box (Security unlocked inside it) | Security now comes from the Parking Lot boss | — |
+| Bosses just died | They quit and join (6 + 4) | — |
+| "What does an active player do?" | Tells + The play (Rush / Dig In), Overtime (a $ sink), push / fall back, walk-in rallies, and pave timing | — |
+| $ had one job | Renovations are ~90% of $, and Overtime is the active sink. Bypass leases cost Equity, so the Bypass till is pure renovation | — |
+| After the ending: nothing | Dawn card: keep the lights on / pave / drive north to the hidden Bypass (new crew, 15 shops, 4 lots, Equity) | the old pave stop on the zone track |
+| Conversion didn't matter (Bypass wins paid most of the Equity) | Bypass wins pay thin. The bank (10 GW → 1 EQ) is ~65% of Equity, and skipping it doubles the Bypass time | — |
+| The final boss farmed while he was on your crew | Keep the lights on farms the fight before him | — |
+| A new region you couldn't win at Lv 1 | The Bypass starts at strength 1, with a check that a bare crew wins fight 1 | — |
+| Accidental hints (an EXIT 14 sign on the lot) | The sign says RT 9; the Bypass appears only on the dawn card | — |
+
+Saves: v4. Any older save resets, with a notice on the title screen that links to `/v0.4/`.

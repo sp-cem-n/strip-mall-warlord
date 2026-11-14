@@ -20,13 +20,13 @@ export const app = {
   s: null as unknown as GameState,
   screen: 'boot' as Screen,
   hasSave: false,
+  oldSave: false, // a pre-v0.5 save was found and set aside
   speed: 1,
   paused: false,
   away: null as AwaySummary | null,
   tip: null as Tip | null,
   ask: null as Ask | null,
-  book: null as number | null, // storefront whose sample book is open
-  raising: {} as Record<number, number>, // slot -> performance.now() when the new sign is up
+  raising: {} as Record<string, number>, // shop id -> performance.now() when the scaffolding comes down
   toast: '' as string,
   toastUntil: 0,
   refresh: () => {},

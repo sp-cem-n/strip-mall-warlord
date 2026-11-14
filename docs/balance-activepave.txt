@@ -1,0 +1,695 @@
+Strip Mall Warlord balance: 60h, seed 1991, active, paves after 0h of farming, converts 50% of Goodwill, acts every 10s, step 0.2s (18.4s wall)
+
+Milestones
+    0:00  Route 9: leased Pawn Shop
+    0:00  The Bypass: leased Self Storage
+    0:05  first win
+    1:40  Route 9: leased Dojo
+    5:45  Route 9: leased Laundromat
+    9:58  Route 9: leased Vape Shop
+   12:03  Route 9: CAPTURED The Parking Lot
+   12:08  Route 9: leased Security Office
+   16:58  Route 9: leased Video Rental
+   33:49  Route 9: CAPTURED Big-Box Plaza
+   33:58  Route 9: leased Payday Loans
+   38:54  Route 9: leased Nail Salon
+   50:27  Route 9: leased Tanning Salon
+  1h 11m  Route 9: leased Karaoke Bar
+  1h 16m  Route 9: CAPTURED Outlet Mall
+  1h 21m  Route 9: leased Check Cashing
+  1h 45m  Route 9: leased Driving School
+  2h 22m  Route 9: leased Pet Grooming
+  2h 44m  Route 9: CAPTURED Sunrise Office Park
+  3h 11m  Route 9: leased Copy Center
+  4h 15m  Route 9: leased Dentist
+  5h 35m  Route 9: CAPTURED Lifestyle Center
+  5h 38m  Route 9: leased Mattress Store
+  7h 30m  Route 9: leased Cell Phone Kiosk
+  9h 43m  Route 9: leased Gym
+  13h 1m  Route 9: leased Party Supply
+ 13h 11m  Route 9: CAPTURED Pinewood Commons
+ 13h 11m  ROUTE 9 ENDING. The Bypass found. Goodwill banked 26.5K
+ 13h 11m  Route 9: leased Pawn Shop (run 2)
+ 13h 11m  The Bypass: leased Self Storage
+ 13h 11m  PAVE #1 -> asphalt 144
+ 13h 12m  Route 9: leased Dojo (run 2)
+ 13h 15m  Route 9: leased Laundromat (run 2)
+ 13h 15m  The Bypass: leased Car Wash
+ 13h 17m  Route 9: leased Vape Shop (run 2)
+ 13h 19m  Route 9: CAPTURED The Parking Lot (run 2)
+ 13h 19m  Route 9: leased Security Office (run 2)
+ 13h 22m  Route 9: leased Video Rental (run 2)
+ 13h 23m  The Bypass: leased Dojo (Exit 14)
+ 13h 30m  The Bypass: leased Urgent Care
+ 13h 32m  Route 9: CAPTURED Big-Box Plaza (run 2)
+ 13h 32m  Route 9: leased Payday Loans (run 2)
+ 13h 36m  Route 9: leased Nail Salon (run 2)
+ 13h 40m  The Bypass: CAPTURED Exit 14 Power Center
+ 13h 40m  The Bypass: leased Security Office (Bypass)
+ 13h 43m  Route 9: leased Tanning Salon (run 2)
+ 13h 44m  The Bypass: leased Bail Bonds
+ 13h 55m  Route 9: leased Karaoke Bar (run 2)
+ 13h 59m  Route 9: CAPTURED Outlet Mall (run 2)
+ 13h 59m  Route 9: leased Check Cashing (run 2)
+  14h 5m  Route 9: leased Driving School (run 2)
+ 14h 14m  The Bypass: leased Tax Prep
+ 14h 17m  Route 9: leased Pet Grooming (run 2)
+ 14h 31m  The Bypass: CAPTURED Corporate Campus
+ 14h 31m  The Bypass: leased Wash-n-Fold
+ 14h 35m  Route 9: leased Copy Center (run 2)
+ 14h 44m  The Bypass: leased Golf Superstore
+ 14h 47m  Route 9: CAPTURED Sunrise Office Park (run 2)
+ 14h 48m  Route 9: leased Dentist (run 2)
+  15h 5m  Route 9: leased Mattress Store (run 2)
+ 15h 15m  The Bypass: leased Payday Loans (Bypass)
+ 15h 36m  Route 9: leased Cell Phone Kiosk (run 2)
+ 15h 58m  The Bypass: leased Bridal Boutique
+ 16h 10m  Route 9: CAPTURED Lifestyle Center (run 2)
+ 16h 11m  Route 9: leased Gym (run 2)
+ 16h 50m  The Bypass: CAPTURED Town Center, Phase II
+ 16h 58m  The Bypass: leased Party Supply (Bypass)
+  17h 6m  Route 9: leased Party Supply (run 2)
+ 17h 28m  The Bypass: leased Cineplex
+ 18h 49m  The Bypass: leased Pet Grooming (Bypass)
+ 18h 51m  Route 9: CAPTURED Pinewood Commons (run 2)
+ 18h 51m  Route 9: leased Pawn Shop (run 3)
+ 18h 51m  The Bypass: leased Self Storage
+ 18h 51m  The Bypass: leased Car Wash
+ 18h 51m  The Bypass: leased Dojo (Exit 14)
+ 18h 51m  The Bypass: leased Urgent Care
+ 18h 51m  The Bypass: leased Security Office (Bypass)
+ 18h 51m  The Bypass: leased Bail Bonds
+ 18h 51m  The Bypass: leased Tax Prep
+ 18h 51m  The Bypass: leased Wash-n-Fold
+ 18h 51m  The Bypass: leased Golf Superstore
+ 18h 51m  The Bypass: leased Payday Loans (Bypass)
+ 18h 51m  The Bypass: leased Bridal Boutique
+ 18h 51m  The Bypass: leased Party Supply (Bypass)
+ 18h 51m  The Bypass: leased Cineplex
+ 18h 51m  The Bypass: leased Pet Grooming (Bypass)
+ 18h 51m  PAVE #2 -> asphalt 288
+ 18h 52m  Route 9: leased Dojo (run 3)
+ 18h 55m  Route 9: leased Laundromat (run 3)
+ 18h 57m  Route 9: leased Vape Shop (run 3)
+ 18h 59m  Route 9: CAPTURED The Parking Lot (run 3)
+ 18h 59m  Route 9: leased Security Office (run 3)
+  19h 2m  Route 9: leased Video Rental (run 3)
+ 19h 12m  Route 9: CAPTURED Big-Box Plaza (run 3)
+ 19h 12m  Route 9: leased Payday Loans (run 3)
+ 19h 15m  Route 9: leased Nail Salon (run 3)
+ 19h 23m  Route 9: leased Tanning Salon (run 3)
+ 19h 34m  Route 9: leased Karaoke Bar (run 3)
+ 19h 37m  Route 9: CAPTURED Outlet Mall (run 3)
+ 19h 37m  Route 9: leased Check Cashing (run 3)
+ 19h 44m  Route 9: leased Driving School (run 3)
+ 19h 54m  Route 9: leased Pet Grooming (run 3)
+ 20h 11m  Route 9: leased Copy Center (run 3)
+ 20h 22m  Route 9: CAPTURED Sunrise Office Park (run 3)
+ 20h 23m  Route 9: leased Dentist (run 3)
+ 20h 31m  Route 9: leased Mattress Store (run 3)
+ 20h 45m  Route 9: leased Cell Phone Kiosk (run 3)
+  21h 6m  Route 9: leased Gym (run 3)
+ 21h 36m  Route 9: CAPTURED Lifestyle Center (run 3)
+ 21h 38m  Route 9: leased Party Supply (run 3)
+ 22h 22m  The Bypass: leased Pretzel Stand
+ 23h 41m  Route 9: CAPTURED Pinewood Commons (run 3)
+ 23h 41m  Route 9: leased Pawn Shop (run 4)
+ 23h 41m  The Bypass: leased Self Storage
+ 23h 41m  The Bypass: leased Car Wash
+ 23h 41m  The Bypass: leased Dojo (Exit 14)
+ 23h 41m  The Bypass: leased Urgent Care
+ 23h 41m  The Bypass: leased Security Office (Bypass)
+ 23h 41m  The Bypass: leased Bail Bonds
+ 23h 41m  The Bypass: leased Tax Prep
+ 23h 41m  The Bypass: leased Wash-n-Fold
+ 23h 41m  The Bypass: leased Golf Superstore
+ 23h 41m  The Bypass: leased Payday Loans (Bypass)
+ 23h 41m  The Bypass: leased Bridal Boutique
+ 23h 41m  The Bypass: leased Party Supply (Bypass)
+ 23h 41m  The Bypass: leased Cineplex
+ 23h 41m  The Bypass: leased Pet Grooming (Bypass)
+ 23h 41m  The Bypass: leased Pretzel Stand
+ 23h 41m  PAVE #3 -> asphalt 432
+ 23h 42m  Route 9: leased Dojo (run 4)
+ 23h 45m  Route 9: leased Laundromat (run 4)
+ 23h 47m  Route 9: leased Vape Shop (run 4)
+ 23h 49m  Route 9: CAPTURED The Parking Lot (run 4)
+ 23h 49m  Route 9: leased Security Office (run 4)
+ 23h 52m  Route 9: leased Video Rental (run 4)
+  24h 2m  Route 9: CAPTURED Big-Box Plaza (run 4)
+  24h 2m  Route 9: leased Payday Loans (run 4)
+  24h 5m  Route 9: leased Nail Salon (run 4)
+ 24h 12m  Route 9: leased Tanning Salon (run 4)
+ 24h 23m  Route 9: leased Karaoke Bar (run 4)
+ 24h 27m  Route 9: CAPTURED Outlet Mall (run 4)
+ 24h 27m  Route 9: leased Check Cashing (run 4)
+ 24h 33m  Route 9: leased Driving School (run 4)
+ 24h 44m  Route 9: leased Pet Grooming (run 4)
+  25h 0m  Route 9: leased Copy Center (run 4)
+ 25h 10m  Route 9: CAPTURED Sunrise Office Park (run 4)
+ 25h 11m  Route 9: leased Dentist (run 4)
+ 25h 19m  Route 9: leased Mattress Store (run 4)
+ 25h 32m  Route 9: leased Cell Phone Kiosk (run 4)
+ 25h 52m  Route 9: leased Gym (run 4)
+ 26h 22m  Route 9: CAPTURED Lifestyle Center (run 4)
+ 26h 23m  Route 9: leased Party Supply (run 4)
+ 28h 14m  Route 9: CAPTURED Pinewood Commons (run 4)
+ 28h 14m  Route 9: leased Pawn Shop (run 5)
+ 28h 14m  The Bypass: leased Self Storage
+ 28h 14m  The Bypass: leased Car Wash
+ 28h 14m  The Bypass: leased Dojo (Exit 14)
+ 28h 14m  The Bypass: leased Urgent Care
+ 28h 14m  The Bypass: leased Security Office (Bypass)
+ 28h 14m  The Bypass: leased Bail Bonds
+ 28h 14m  The Bypass: leased Tax Prep
+ 28h 14m  The Bypass: leased Wash-n-Fold
+ 28h 14m  The Bypass: leased Golf Superstore
+ 28h 14m  The Bypass: leased Payday Loans (Bypass)
+ 28h 14m  The Bypass: leased Bridal Boutique
+ 28h 14m  The Bypass: leased Party Supply (Bypass)
+ 28h 14m  The Bypass: leased Cineplex
+ 28h 14m  The Bypass: leased Pet Grooming (Bypass)
+ 28h 14m  The Bypass: leased Pretzel Stand
+ 28h 14m  PAVE #4 -> asphalt 576
+ 28h 16m  Route 9: leased Dojo (run 5)
+ 28h 18m  Route 9: leased Laundromat (run 5)
+ 28h 21m  Route 9: leased Vape Shop (run 5)
+ 28h 22m  Route 9: CAPTURED The Parking Lot (run 5)
+ 28h 22m  Route 9: leased Security Office (run 5)
+ 28h 26m  Route 9: leased Video Rental (run 5)
+ 28h 35m  Route 9: CAPTURED Big-Box Plaza (run 5)
+ 28h 35m  Route 9: leased Payday Loans (run 5)
+ 28h 39m  Route 9: leased Nail Salon (run 5)
+ 28h 46m  Route 9: leased Tanning Salon (run 5)
+ 28h 56m  Route 9: leased Karaoke Bar (run 5)
+  29h 0m  Route 9: CAPTURED Outlet Mall (run 5)
+  29h 0m  Route 9: leased Check Cashing (run 5)
+  29h 6m  Route 9: leased Driving School (run 5)
+ 29h 17m  Route 9: leased Pet Grooming (run 5)
+ 29h 32m  Route 9: leased Copy Center (run 5)
+ 29h 43m  Route 9: CAPTURED Sunrise Office Park (run 5)
+ 29h 43m  Route 9: leased Dentist (run 5)
+ 29h 51m  Route 9: leased Mattress Store (run 5)
+  30h 4m  Route 9: leased Cell Phone Kiosk (run 5)
+ 30h 23m  Route 9: leased Gym (run 5)
+ 30h 53m  Route 9: CAPTURED Lifestyle Center (run 5)
+ 30h 54m  Route 9: leased Party Supply (run 5)
+  32h 1m  The Bypass: CAPTURED Bypass Galleria
+ 32h 41m  Route 9: CAPTURED Pinewood Commons (run 5)
+ 32h 41m  Route 9: leased Pawn Shop (run 6)
+ 32h 41m  The Bypass: leased Self Storage
+ 32h 41m  The Bypass: leased Car Wash
+ 32h 41m  The Bypass: leased Dojo (Exit 14)
+ 32h 41m  The Bypass: leased Urgent Care
+ 32h 41m  The Bypass: leased Security Office (Bypass)
+ 32h 41m  The Bypass: leased Bail Bonds
+ 32h 41m  The Bypass: leased Tax Prep
+ 32h 41m  The Bypass: leased Wash-n-Fold
+ 32h 41m  The Bypass: leased Golf Superstore
+ 32h 41m  The Bypass: leased Payday Loans (Bypass)
+ 32h 41m  The Bypass: leased Bridal Boutique
+ 32h 41m  The Bypass: leased Party Supply (Bypass)
+ 32h 41m  The Bypass: leased Cineplex
+ 32h 41m  The Bypass: leased Pet Grooming (Bypass)
+ 32h 41m  The Bypass: leased Pretzel Stand
+ 32h 41m  PAVE #5 -> asphalt 720
+ 32h 42m  Route 9: leased Dojo (run 6)
+ 32h 45m  Route 9: leased Laundromat (run 6)
+ 32h 48m  Route 9: leased Vape Shop (run 6)
+ 32h 49m  Route 9: CAPTURED The Parking Lot (run 6)
+ 32h 49m  Route 9: leased Security Office (run 6)
+ 32h 53m  Route 9: leased Video Rental (run 6)
+  33h 2m  Route 9: CAPTURED Big-Box Plaza (run 6)
+  33h 2m  Route 9: leased Payday Loans (run 6)
+  33h 6m  Route 9: leased Nail Salon (run 6)
+ 33h 12m  Route 9: leased Tanning Salon (run 6)
+ 33h 23m  Route 9: leased Karaoke Bar (run 6)
+ 33h 27m  Route 9: CAPTURED Outlet Mall (run 6)
+ 33h 27m  Route 9: leased Check Cashing (run 6)
+ 33h 33m  Route 9: leased Driving School (run 6)
+ 33h 43m  Route 9: leased Pet Grooming (run 6)
+ 33h 58m  Route 9: leased Copy Center (run 6)
+  34h 9m  Route 9: CAPTURED Sunrise Office Park (run 6)
+  34h 9m  Route 9: leased Dentist (run 6)
+ 34h 16m  Route 9: leased Mattress Store (run 6)
+ 34h 29m  Route 9: leased Cell Phone Kiosk (run 6)
+ 34h 49m  Route 9: leased Gym (run 6)
+ 35h 18m  Route 9: CAPTURED Lifestyle Center (run 6)
+ 35h 18m  Route 9: leased Party Supply (run 6)
+  37h 4m  Route 9: CAPTURED Pinewood Commons (run 6)
+  37h 4m  Route 9: leased Pawn Shop (run 7)
+  37h 4m  The Bypass: leased Self Storage
+  37h 4m  The Bypass: leased Car Wash
+  37h 4m  The Bypass: leased Dojo (Exit 14)
+  37h 4m  The Bypass: leased Urgent Care
+  37h 4m  The Bypass: leased Security Office (Bypass)
+  37h 4m  The Bypass: leased Bail Bonds
+  37h 4m  The Bypass: leased Tax Prep
+  37h 4m  The Bypass: leased Wash-n-Fold
+  37h 4m  The Bypass: leased Golf Superstore
+  37h 4m  The Bypass: leased Payday Loans (Bypass)
+  37h 4m  The Bypass: leased Bridal Boutique
+  37h 4m  The Bypass: leased Party Supply (Bypass)
+  37h 4m  The Bypass: leased Cineplex
+  37h 4m  The Bypass: leased Pet Grooming (Bypass)
+  37h 4m  The Bypass: leased Pretzel Stand
+  37h 4m  PAVE #6 -> asphalt 864
+  37h 5m  Route 9: leased Dojo (run 7)
+  37h 8m  Route 9: leased Laundromat (run 7)
+ 37h 11m  Route 9: leased Vape Shop (run 7)
+ 37h 12m  Route 9: CAPTURED The Parking Lot (run 7)
+ 37h 12m  Route 9: leased Security Office (run 7)
+ 37h 15m  Route 9: leased Video Rental (run 7)
+ 37h 25m  Route 9: CAPTURED Big-Box Plaza (run 7)
+ 37h 25m  Route 9: leased Payday Loans (run 7)
+ 37h 28m  Route 9: leased Nail Salon (run 7)
+ 37h 35m  Route 9: leased Tanning Salon (run 7)
+ 37h 46m  Route 9: leased Karaoke Bar (run 7)
+ 37h 49m  Route 9: CAPTURED Outlet Mall (run 7)
+ 37h 49m  Route 9: leased Check Cashing (run 7)
+ 37h 55m  Route 9: leased Driving School (run 7)
+  38h 6m  Route 9: leased Pet Grooming (run 7)
+ 38h 21m  Route 9: leased Copy Center (run 7)
+ 38h 31m  Route 9: CAPTURED Sunrise Office Park (run 7)
+ 38h 31m  Route 9: leased Dentist (run 7)
+ 38h 39m  Route 9: leased Mattress Store (run 7)
+ 38h 51m  Route 9: leased Cell Phone Kiosk (run 7)
+ 39h 10m  Route 9: leased Gym (run 7)
+ 39h 40m  Route 9: CAPTURED Lifestyle Center (run 7)
+ 39h 40m  Route 9: leased Party Supply (run 7)
+ 41h 24m  Route 9: CAPTURED Pinewood Commons (run 7)
+ 41h 25m  Route 9: leased Pawn Shop (run 8)
+ 41h 25m  The Bypass: leased Self Storage
+ 41h 25m  The Bypass: leased Car Wash
+ 41h 25m  The Bypass: leased Dojo (Exit 14)
+ 41h 25m  The Bypass: leased Urgent Care
+ 41h 25m  The Bypass: leased Security Office (Bypass)
+ 41h 25m  The Bypass: leased Bail Bonds
+ 41h 25m  The Bypass: leased Tax Prep
+ 41h 25m  The Bypass: leased Wash-n-Fold
+ 41h 25m  The Bypass: leased Golf Superstore
+ 41h 25m  The Bypass: leased Payday Loans (Bypass)
+ 41h 25m  The Bypass: leased Bridal Boutique
+ 41h 25m  The Bypass: leased Party Supply (Bypass)
+ 41h 25m  The Bypass: leased Cineplex
+ 41h 25m  The Bypass: leased Pet Grooming (Bypass)
+ 41h 25m  The Bypass: leased Pretzel Stand
+ 41h 25m  PAVE #7 -> asphalt 1008
+ 41h 26m  Route 9: leased Dojo (run 8)
+ 41h 28m  Route 9: leased Laundromat (run 8)
+ 41h 31m  Route 9: leased Vape Shop (run 8)
+ 41h 32m  Route 9: CAPTURED The Parking Lot (run 8)
+ 41h 32m  Route 9: leased Security Office (run 8)
+ 41h 36m  Route 9: leased Video Rental (run 8)
+ 41h 45m  Route 9: CAPTURED Big-Box Plaza (run 8)
+ 41h 45m  Route 9: leased Payday Loans (run 8)
+ 41h 49m  Route 9: leased Nail Salon (run 8)
+ 41h 56m  Route 9: leased Tanning Salon (run 8)
+  42h 6m  Route 9: leased Karaoke Bar (run 8)
+ 42h 10m  Route 9: CAPTURED Outlet Mall (run 8)
+ 42h 10m  Route 9: leased Check Cashing (run 8)
+ 42h 16m  Route 9: leased Driving School (run 8)
+ 42h 26m  Route 9: leased Pet Grooming (run 8)
+ 42h 41m  Route 9: leased Copy Center (run 8)
+ 42h 51m  Route 9: CAPTURED Sunrise Office Park (run 8)
+ 42h 52m  Route 9: leased Dentist (run 8)
+ 42h 59m  Route 9: leased Mattress Store (run 8)
+ 43h 12m  Route 9: leased Cell Phone Kiosk (run 8)
+ 43h 31m  Route 9: leased Gym (run 8)
+ 43h 59m  Route 9: CAPTURED Lifestyle Center (run 8)
+ 43h 59m  Route 9: leased Party Supply (run 8)
+ 45h 43m  Route 9: CAPTURED Pinewood Commons (run 8)
+ 45h 43m  Route 9: leased Pawn Shop (run 9)
+ 45h 43m  The Bypass: leased Self Storage
+ 45h 43m  The Bypass: leased Car Wash
+ 45h 43m  The Bypass: leased Dojo (Exit 14)
+ 45h 43m  The Bypass: leased Urgent Care
+ 45h 43m  The Bypass: leased Security Office (Bypass)
+ 45h 43m  The Bypass: leased Bail Bonds
+ 45h 43m  The Bypass: leased Tax Prep
+ 45h 43m  The Bypass: leased Wash-n-Fold
+ 45h 43m  The Bypass: leased Golf Superstore
+ 45h 43m  The Bypass: leased Payday Loans (Bypass)
+ 45h 43m  The Bypass: leased Bridal Boutique
+ 45h 43m  The Bypass: leased Party Supply (Bypass)
+ 45h 43m  The Bypass: leased Cineplex
+ 45h 43m  The Bypass: leased Pet Grooming (Bypass)
+ 45h 43m  The Bypass: leased Pretzel Stand
+ 45h 43m  PAVE #8 -> asphalt 1152
+ 45h 45m  Route 9: leased Dojo (run 9)
+ 45h 47m  Route 9: leased Laundromat (run 9)
+ 45h 50m  Route 9: leased Vape Shop (run 9)
+ 45h 51m  Route 9: CAPTURED The Parking Lot (run 9)
+ 45h 51m  Route 9: leased Security Office (run 9)
+ 45h 55m  Route 9: leased Video Rental (run 9)
+  46h 4m  Route 9: CAPTURED Big-Box Plaza (run 9)
+  46h 4m  Route 9: leased Payday Loans (run 9)
+  46h 8m  Route 9: leased Nail Salon (run 9)
+ 46h 15m  Route 9: leased Tanning Salon (run 9)
+ 46h 25m  Route 9: leased Karaoke Bar (run 9)
+ 46h 29m  Route 9: CAPTURED Outlet Mall (run 9)
+ 46h 29m  Route 9: leased Check Cashing (run 9)
+ 46h 35m  Route 9: leased Driving School (run 9)
+ 46h 45m  Route 9: leased Pet Grooming (run 9)
+  47h 0m  Route 9: leased Copy Center (run 9)
+ 47h 10m  Route 9: CAPTURED Sunrise Office Park (run 9)
+ 47h 10m  Route 9: leased Dentist (run 9)
+ 47h 18m  Route 9: leased Mattress Store (run 9)
+ 47h 30m  Route 9: leased Cell Phone Kiosk (run 9)
+ 47h 49m  Route 9: leased Gym (run 9)
+ 48h 17m  Route 9: CAPTURED Lifestyle Center (run 9)
+ 48h 17m  Route 9: leased Party Supply (run 9)
+  50h 1m  Route 9: CAPTURED Pinewood Commons (run 9)
+  50h 1m  Route 9: leased Pawn Shop (run 10)
+  50h 1m  The Bypass: leased Self Storage
+  50h 1m  The Bypass: leased Car Wash
+  50h 1m  The Bypass: leased Dojo (Exit 14)
+  50h 1m  The Bypass: leased Urgent Care
+  50h 1m  The Bypass: leased Security Office (Bypass)
+  50h 1m  The Bypass: leased Bail Bonds
+  50h 1m  The Bypass: leased Tax Prep
+  50h 1m  The Bypass: leased Wash-n-Fold
+  50h 1m  The Bypass: leased Golf Superstore
+  50h 1m  The Bypass: leased Payday Loans (Bypass)
+  50h 1m  The Bypass: leased Bridal Boutique
+  50h 1m  The Bypass: leased Party Supply (Bypass)
+  50h 1m  The Bypass: leased Cineplex
+  50h 1m  The Bypass: leased Pet Grooming (Bypass)
+  50h 1m  The Bypass: leased Pretzel Stand
+  50h 1m  PAVE #9 -> asphalt 1296
+  50h 2m  Route 9: leased Dojo (run 10)
+  50h 5m  Route 9: leased Laundromat (run 10)
+  50h 8m  Route 9: leased Vape Shop (run 10)
+  50h 9m  Route 9: CAPTURED The Parking Lot (run 10)
+  50h 9m  Route 9: leased Security Office (run 10)
+ 50h 12m  Route 9: leased Video Rental (run 10)
+ 50h 22m  Route 9: CAPTURED Big-Box Plaza (run 10)
+ 50h 22m  Route 9: leased Payday Loans (run 10)
+ 50h 25m  Route 9: leased Nail Salon (run 10)
+ 50h 32m  Route 9: leased Tanning Salon (run 10)
+ 50h 43m  Route 9: leased Karaoke Bar (run 10)
+ 50h 46m  Route 9: CAPTURED Outlet Mall (run 10)
+ 50h 46m  Route 9: leased Check Cashing (run 10)
+ 50h 52m  Route 9: leased Driving School (run 10)
+  51h 2m  Route 9: leased Pet Grooming (run 10)
+ 51h 17m  Route 9: leased Copy Center (run 10)
+ 51h 27m  Route 9: CAPTURED Sunrise Office Park (run 10)
+ 51h 28m  Route 9: leased Dentist (run 10)
+ 51h 35m  Route 9: leased Mattress Store (run 10)
+ 51h 48m  Route 9: leased Cell Phone Kiosk (run 10)
+  52h 6m  Route 9: leased Gym (run 10)
+ 52h 34m  Route 9: CAPTURED Lifestyle Center (run 10)
+ 52h 34m  Route 9: leased Party Supply (run 10)
+ 54h 18m  Route 9: CAPTURED Pinewood Commons (run 10)
+ 54h 18m  Route 9: leased Pawn Shop (run 11)
+ 54h 18m  The Bypass: leased Self Storage
+ 54h 18m  The Bypass: leased Car Wash
+ 54h 18m  The Bypass: leased Dojo (Exit 14)
+ 54h 18m  The Bypass: leased Urgent Care
+ 54h 18m  The Bypass: leased Security Office (Bypass)
+ 54h 18m  The Bypass: leased Bail Bonds
+ 54h 18m  The Bypass: leased Tax Prep
+ 54h 18m  The Bypass: leased Wash-n-Fold
+ 54h 18m  The Bypass: leased Golf Superstore
+ 54h 18m  The Bypass: leased Payday Loans (Bypass)
+ 54h 18m  The Bypass: leased Bridal Boutique
+ 54h 18m  The Bypass: leased Party Supply (Bypass)
+ 54h 18m  The Bypass: leased Cineplex
+ 54h 18m  The Bypass: leased Pet Grooming (Bypass)
+ 54h 18m  The Bypass: leased Pretzel Stand
+ 54h 18m  PAVE #10 -> asphalt 1440
+ 54h 19m  Route 9: leased Dojo (run 11)
+ 54h 21m  Route 9: leased Laundromat (run 11)
+ 54h 24m  Route 9: leased Vape Shop (run 11)
+ 54h 25m  Route 9: CAPTURED The Parking Lot (run 11)
+ 54h 25m  Route 9: leased Security Office (run 11)
+ 54h 29m  Route 9: leased Video Rental (run 11)
+ 54h 38m  Route 9: CAPTURED Big-Box Plaza (run 11)
+ 54h 38m  Route 9: leased Payday Loans (run 11)
+ 54h 42m  Route 9: leased Nail Salon (run 11)
+ 54h 49m  Route 9: leased Tanning Salon (run 11)
+ 54h 59m  Route 9: leased Karaoke Bar (run 11)
+  55h 3m  Route 9: CAPTURED Outlet Mall (run 11)
+  55h 3m  Route 9: leased Check Cashing (run 11)
+  55h 9m  Route 9: leased Driving School (run 11)
+ 55h 19m  Route 9: leased Pet Grooming (run 11)
+ 55h 34m  Route 9: leased Copy Center (run 11)
+ 55h 44m  Route 9: CAPTURED Sunrise Office Park (run 11)
+ 55h 44m  Route 9: leased Dentist (run 11)
+ 55h 52m  Route 9: leased Mattress Store (run 11)
+  56h 4m  Route 9: leased Cell Phone Kiosk (run 11)
+ 56h 23m  Route 9: leased Gym (run 11)
+ 56h 50m  Route 9: CAPTURED Lifestyle Center (run 11)
+ 56h 51m  Route 9: leased Party Supply (run 11)
+ 58h 33m  Route 9: CAPTURED Pinewood Commons (run 11)
+ 58h 33m  Route 9: leased Pawn Shop (run 12)
+ 58h 33m  The Bypass: leased Self Storage
+ 58h 33m  The Bypass: leased Car Wash
+ 58h 33m  The Bypass: leased Dojo (Exit 14)
+ 58h 33m  The Bypass: leased Urgent Care
+ 58h 33m  The Bypass: leased Security Office (Bypass)
+ 58h 33m  The Bypass: leased Bail Bonds
+ 58h 33m  The Bypass: leased Tax Prep
+ 58h 33m  The Bypass: leased Wash-n-Fold
+ 58h 33m  The Bypass: leased Golf Superstore
+ 58h 33m  The Bypass: leased Payday Loans (Bypass)
+ 58h 33m  The Bypass: leased Bridal Boutique
+ 58h 33m  The Bypass: leased Party Supply (Bypass)
+ 58h 33m  The Bypass: leased Cineplex
+ 58h 33m  The Bypass: leased Pet Grooming (Bypass)
+ 58h 33m  The Bypass: leased Pretzel Stand
+ 58h 33m  PAVE #11 -> asphalt 1584
+ 58h 35m  Route 9: leased Dojo (run 12)
+ 58h 37m  Route 9: leased Laundromat (run 12)
+ 58h 40m  Route 9: leased Vape Shop (run 12)
+ 58h 41m  Route 9: CAPTURED The Parking Lot (run 12)
+ 58h 41m  Route 9: leased Security Office (run 12)
+ 58h 45m  Route 9: leased Video Rental (run 12)
+ 58h 54m  Route 9: CAPTURED Big-Box Plaza (run 12)
+ 58h 54m  Route 9: leased Payday Loans (run 12)
+ 58h 58m  Route 9: leased Nail Salon (run 12)
+  59h 5m  Route 9: leased Tanning Salon (run 12)
+ 59h 15m  Route 9: leased Karaoke Bar (run 12)
+ 59h 18m  Route 9: CAPTURED Outlet Mall (run 12)
+ 59h 19m  Route 9: leased Check Cashing (run 12)
+ 59h 25m  Route 9: leased Driving School (run 12)
+ 59h 35m  Route 9: leased Pet Grooming (run 12)
+ 59h 50m  Route 9: leased Copy Center (run 12)
+
+Every 30 minutes
+   30:00  R9 $ 2.62K   300/s GW     36 +0.9/s W412/L0 fight 10/10 at Big-Box Plaza [Pawn28 Dojo28 Laun23 Vape17 Secu6 Vide10]
+   1h 0m  R9 $ 24.6K 1.26K/s GW    318 +2.3/s W892/L0 fight 10/12 at Outlet Mall [Pawn33 Dojo33 Laun27 Vape21 Secu11 Vide14 Payd11 Nail8 Tann5]
+  1h 30m  R9 $ 85.0K 3.21K/s GW    413 +3.7/s W1358/L0 fight 6/14 at Sunrise Office Park [Pawn36 Dojo36 Laun30 Vape25 Secu16 Vide18 Payd14 Nail11 Tann8 Kara5 Chec3]
+   2h 0m  R9 $  168K 6.21K/s GW    653 +4.6/s W1751/L0 fight 11/14 at Sunrise Office Park [Pawn39 Dojo39 Laun33 Vape28 Secu16 Vide21 Payd17 Nail14 Tann11 Kara8 Chec6 Driv3]
+  2h 30m  R9 $  184K 10.5K/s GW  1.46K +4.8/s W2078/L0 fight 13/14 at Sunrise Office Park [Pawn42 Dojo41 Laun36 Vape30 Secu16 Vide23 Payd19 Nail16 Tann13 Kara11 Chec8 Driv5 Pet2]
+   3h 0m  R9 $ 90.2K 13.8K/s GW  1.22K +8.7/s W2510/L0 fight 5/16 at Lifestyle Center [Pawn43 Dojo43 Laun37 Vape32 Secu21 Vide25 Payd21 Nail18 Tann15 Kara13 Chec10 Driv7 Pet4]
+  3h 30m  R9 $ 1.16M 19.8K/s GW  3.66K +10/s W2893/L0 fight 9/16 at Lifestyle Center [Pawn45 Dojo45 Laun39 Vape33 Secu21 Vide26 Payd22 Nail19 Tann16 Kara14 Chec11 Driv8 Pet5 Copy2]
+   4h 0m  R9 $ 1.03M 24.8K/s GW  4.67K +9.2/s W3180/L0 fight 12/16 at Lifestyle Center [Pawn46 Dojo46 Laun40 Vape34 Secu21 Vide27 Payd24 Nail20 Tann18 Kara15 Chec12 Driv10 Pet7 Copy4]
+  4h 30m  R9 $  827K 35.4K/s GW  4.54K +9.9/s W3455/L0 fight 14/16 at Lifestyle Center [Pawn47 Dojo47 Laun41 Vape35 Secu21 Vide28 Payd25 Nail21 Tann19 Kara16 Chec13 Driv11 Pet8 Copy5 Dent2]
+   5h 0m  R9 $ 3.28M 41.1K/s GW  5.25K +9.9/s W3705/L0 fight 15/16 at Lifestyle Center [Pawn48 Dojo48 Laun42 Vape37 Secu21 Vide29 Payd26 Nail23 Tann20 Kara17 Chec14 Driv12 Pet9 Copy6 Dent3]
+  5h 30m  R9 $ 1.10M 47.2K/s GW    566 +11/s W3967/L0 fight 16/16 at Lifestyle Center [Pawn49 Dojo49 Laun43 Vape38 Secu21 Vide30 Payd27 Nail24 Tann21 Kara18 Chec15 Driv13 Pet10 Copy7 Dent4]
+   6h 0m  R9 $  103K 65.2K/s GW  10.0K +23/s W4375/L0 fight 5/18 at Pinewood Commons [Pawn50 Dojo50 Laun44 Vape38 Secu21 Vide31 Payd27 Nail24 Tann22 Kara19 Chec16 Driv14 Pet10 Copy8 Dent5 Matt2]
+  6h 30m  R9 $ 5.49M 73.7K/s GW  6.56K +17/s W4630/L0 fight 8/18 at Pinewood Commons [Pawn51 Dojo51 Laun45 Vape39 Secu21 Vide32 Payd28 Nail25 Tann22 Kara20 Chec17 Driv14 Pet11 Copy9 Dent6 Matt3]
+   7h 0m  R9 $ 2.25M 82.8K/s GW  6.82K +17/s W4857/L0 fight 10/18 at Pinewood Commons [Pawn51 Dojo51 Laun46 Vape40 Secu21 Vide33 Payd29 Nail26 Tann23 Kara21 Chec18 Driv15 Pet12 Copy9 Dent7 Matt4]
+  7h 30m  R9 $ 68.5M 87.9K/s GW  4.60K +12/s W5009/L0 fight 11/18 at Pinewood Commons [Pawn52 Dojo52 Laun46 Vape40 Secu21 Vide33 Payd30 Nail26 Tann24 Kara21 Chec18 Driv16 Pet13 Copy10 Dent7 Matt4]
+   8h 0m  R9 $ 18.4M  119K/s GW  2.65K +15/s W5185/L0 fight 12/18 at Pinewood Commons [Pawn53 Dojo53 Laun47 Vape41 Secu21 Vide34 Payd30 Nail27 Tann24 Kara22 Chec19 Driv16 Pet13 Copy10 Dent8 Matt5 Cell2]
+  8h 30m  R9 $ 24.4M  132K/s GW  7.27K +17/s W5366/L0 fight 13/18 at Pinewood Commons [Pawn53 Dojo53 Laun47 Vape42 Secu21 Vide34 Payd31 Nail28 Tann25 Kara22 Chec20 Driv17 Pet14 Copy11 Dent8 Matt6 Cell3]
+   9h 0m  R9 $ 24.1M  141K/s GW  4.09K +14/s W5514/L0 fight 14/18 at Pinewood Commons [Pawn54 Dojo54 Laun48 Vape42 Secu21 Vide35 Payd32 Nail28 Tann26 Kara23 Chec20 Driv18 Pet14 Copy12 Dent9 Matt6 Cell3]
+  9h 30m  R9 $ 14.0M  156K/s GW    382 +18/s W5688/L0 fight 14/18 at Pinewood Commons [Pawn54 Dojo54 Laun48 Vape43 Secu21 Vide36 Payd32 Nail29 Tann26 Kara24 Chec21 Driv18 Pet15 Copy12 Dent10 Matt7 Cell4]
+  10h 0m  R9 $ 3.18M  201K/s GW  21.8K +16/s W5835/L0 fight 15/18 at Pinewood Commons [Pawn55 Dojo55 Laun49 Vape43 Secu21 Vide36 Payd32 Nail29 Tann26 Kara24 Chec21 Driv18 Pet15 Copy13 Dent10 Matt7 Cell4 Gym2]
+ 10h 30m  R9 $ 19.4M  216K/s GW  14.1K +15/s W5975/L0 fight 16/18 at Pinewood Commons [Pawn55 Dojo55 Laun49 Vape44 Secu21 Vide36 Payd33 Nail30 Tann27 Kara24 Chec22 Driv19 Pet16 Copy13 Dent10 Matt8 Cell5 Gym2]
+  11h 0m  R9 $ 1.86M  232K/s GW  27.4K +15/s W6104/L0 fight 16/18 at Pinewood Commons [Pawn56 Dojo56 Laun50 Vape44 Secu21 Vide37 Payd33 Nail30 Tann28 Kara25 Chec22 Driv19 Pet16 Copy14 Dent11 Matt8 Cell5 Gym3]
+ 11h 30m  R9 $ 20.9M  249K/s GW  8.62K +16/s W6243/L0 fight 17/18 at Pinewood Commons [Pawn56 Dojo56 Laun50 Vape45 Secu21 Vide37 Payd34 Nail31 Tann28 Kara25 Chec23 Driv20 Pet17 Copy14 Dent11 Matt9 Cell6 Gym3]
+  12h 0m  R9 $ 35.8M  262K/s GW  21.5K +18/s W6389/L0 fight 17/18 at Pinewood Commons [Pawn57 Dojo57 Laun51 Vape45 Secu21 Vide38 Payd34 Nail31 Tann28 Kara26 Chec23 Driv20 Pet17 Copy14 Dent12 Matt9 Cell6 Gym4]
+ 12h 30m  R9 $ 69.3M  279K/s GW  32.0K +19/s W6538/L0 fight 18/18 at Pinewood Commons [Pawn57 Dojo57 Laun51 Vape45 Secu21 Vide38 Payd35 Nail32 Tann29 Kara26 Chec23 Driv21 Pet18 Copy15 Dent12 Matt9 Cell7 Gym4]
+  13h 0m  R9 $  320M  286K/s GW    886 +20/s W6696/L0 fight 18/18 at Pinewood Commons [Pawn57 Dojo57 Laun51 Vape46 Secu21 Vide39 Payd35 Nail32 Tann29 Kara26 Chec24 Driv21 Pet18 Copy15 Dent12 Matt10 Cell7 Gym4]
+ 13h 30m  R9 $ 26.4K 2.28K/s GW    223 +15/s W399/L0 fight 9/10 at Big-Box Plaza [Pawn33 Dojo33 Laun27 Vape22 Secu6 Vide15]
+          BP $ 8.45K   247/s EQ     97 +0.2/s wins +1.5/s bank W283/L0 fight 8/10 at Exit 14 Power Center [Self28 Car25 Dojo19]
+  14h 0m  R9 $  177K 21.0K/s GW    989 +15/s W1118/L0 fight 1/14 at Sunrise Office Park [Pawn40 Dojo40 Laun34 Vape29 Secu16 Vide21 Payd18 Nail15 Tann12 Kara9 Chec6]
+          BP $ 7.82K 1.02K/s EQ    194 +0.3/s wins +0.3/s bank W770/L0 fight 8/12 at Corporate Campus [Self34 Car31 Dojo25 Urge20 Secu6 Bail16]
+ 14h 30m  R9 $  543K 71.4K/s GW  1.45K +31/s W1853/L0 fight 12/14 at Sunrise Office Park [Pawn46 Dojo45 Laun40 Vape34 Secu16 Vide27 Payd23 Nail20 Tann17 Kara15 Chec12 Driv9 Pet6]
+          BP $ 28.3K 2.01K/s EQ    291 +0.2/s wins +0.8/s bank W1131/L0 fight 12/12 at Corporate Campus [Self37 Car35 Dojo28 Urge23 Secu6 Bail19 Tax12]
+  15h 0m  R9 $ 2.83M  175K/s GW  6.55K +51/s W2558/L0 fight 6/16 at Lifestyle Center [Pawn49 Dojo49 Laun43 Vape37 Secu21 Vide30 Payd26 Nail23 Tann21 Kara18 Chec15 Driv12 Pet9 Copy7 Dent4]
+          BP $  128K 4.12K/s EQ    265 +0.5/s wins +1.6/s bank W1578/L0 fight 8/14 at Town Center, Phase II [Self39 Car37 Dojo31 Urge25 Secu11 Bail21 Tax14 Wash11 Golf7]
+ 15h 30m  R9 $ 6.62M  329K/s GW  9.17K +77/s W3228/L0 fight 12/16 at Lifestyle Center [Pawn52 Dojo52 Laun46 Vape40 Secu21 Vide33 Payd29 Nail26 Tann23 Kara21 Chec18 Driv15 Pet12 Copy10 Dent7 Matt4]
+          BP $  558K 6.65K/s EQ    459 +0.4/s wins +3.2/s bank W1831/L0 fight 10/14 at Town Center, Phase II [Self41 Car39 Dojo33 Urge27 Secu11 Bail23 Tax16 Wash13 Golf9 Payd6]
+  16h 0m  R9 $ 17.7M  547K/s GW  10.1K +87/s W3813/L0 fight 16/16 at Lifestyle Center [Pawn54 Dojo54 Laun48 Vape42 Secu21 Vide35 Payd32 Nail28 Tann26 Kara23 Chec20 Driv18 Pet14 Copy12 Dent9 Matt6 Cell3]
+          BP $  345K 10.1K/s EQ    381 +0.5/s wins +4.6/s bank W2053/L0 fight 12/14 at Town Center, Phase II [Self43 Car40 Dojo34 Urge29 Secu11 Bail25 Tax18 Wash14 Golf11 Payd8 Brid4]
+ 16h 30m  R9 $ 12.0M  885K/s GW  22.6K +146/s W4496/L0 fight 7/18 at Pinewood Commons [Pawn56 Dojo56 Laun50 Vape44 Secu21 Vide37 Payd33 Nail30 Tann27 Kara25 Chec22 Driv19 Pet16 Copy13 Dent11 Matt8 Cell5 Gym3]
+          BP $ 1.02M 12.6K/s EQ  1.47K +0.5/s wins +6.7/s bank W2262/L0 fight 14/14 at Town Center, Phase II [Self44 Car42 Dojo36 Urge30 Secu11 Bail26 Tax19 Wash16 Golf13 Payd9 Brid6]
+  17h 0m  R9 $ 7.29M 1.11M/s GW  31.2K +171/s W5060/L0 fight 11/18 at Pinewood Commons [Pawn57 Dojo57 Laun51 Vape46 Secu21 Vide38 Payd35 Nail32 Tann29 Kara26 Chec24 Driv21 Pet18 Copy15 Dent12 Matt10 Cell7 Gym4]
+          BP $ 1.37M 17.8K/s EQ  1.95K +0.9/s wins +9.9/s bank W2531/L0 fight 3/16 at Bypass Galleria [Self45 Car43 Dojo37 Urge31 Secu11 Bail27 Tax20 Wash17 Golf14 Payd11 Brid8 Part3]
+ 17h 30m  R9 $ 53.5M 1.64M/s GW  39.8K +188/s W5564/L0 fight 14/18 at Pinewood Commons [Pawn58 Dojo58 Laun52 Vape47 Secu21 Vide40 Payd36 Nail33 Tann30 Kara28 Chec25 Driv22 Pet19 Copy16 Dent14 Matt11 Cell8 Gym5 Part3]
+          BP $ 1.96M 25.3K/s EQ  1.86K +0.9/s wins +13/s bank W2749/L0 fight 6/16 at Bypass Galleria [Self46 Car44 Dojo38 Urge32 Secu11 Bail28 Tax21 Wash18 Golf15 Payd12 Brid9 Part5 Cine2]
+  18h 0m  R9 $ 24.9M 1.95M/s GW  36.3K +195/s W6021/L0 fight 16/18 at Pinewood Commons [Pawn60 Dojo60 Laun54 Vape48 Secu21 Vide41 Payd37 Nail34 Tann31 Kara29 Chec26 Driv23 Pet20 Copy18 Dent15 Matt12 Cell9 Gym7 Part4]
+          BP $ 3.95M 29.3K/s EQ  4.70K +1.1/s wins +18/s bank W2952/L0 fight 8/16 at Bypass Galleria [Self47 Car45 Dojo39 Urge34 Secu11 Bail29 Tax22 Wash19 Golf16 Payd13 Brid10 Part6 Cine3]
+ 18h 30m  R9 $  206M 2.24M/s GW  29.9K +193/s W6430/L0 fight 17/18 at Pinewood Commons [Pawn61 Dojo61 Laun55 Vape49 Secu21 Vide42 Payd38 Nail35 Tann32 Kara30 Chec27 Driv24 Pet21 Copy19 Dent16 Matt13 Cell10 Gym8 Part5]
+          BP $ 1.92M 33.6K/s EQ  12.3K +0.8/s wins +14/s bank W3085/L6 fight 9/16 at Bypass Galleria [Self48 Car46 Dojo40 Urge35 Secu11 Bail30 Tax23 Wash20 Golf17 Payd14 Brid11 Part7 Cine4]
+  19h 0m  R9 $ 30.7K 2.28K/s GW     79 +183/s W163/L0 fight 2/10 at Big-Box Plaza [Pawn31 Dojo31 Laun25 Vape20 Secu6]
+          BP $ 7.04M 45.3K/s EQ    382 +0.8/s wins +14/s bank W3205/L8 fight 10/16 at Bypass Galleria [Self49 Car47 Dojo41 Urge35 Secu11 Bail31 Tax24 Wash21 Golf18 Payd14 Brid11 Part8 Cine5 Pet2]
+ 19h 30m  R9 $  937K 29.8K/s GW  1.19K +20/s W914/L0 fight 10/12 at Outlet Mall [Pawn42 Dojo42 Laun36 Vape30 Secu11 Vide23 Payd20 Nail17 Tann14]
+          BP $ 5.00M 51.3K/s EQ  2.65K +0.8/s wins +0.3/s bank W3308/L10 fight 11/16 at Bypass Galleria [Self50 Car48 Dojo41 Urge36 Secu11 Bail32 Tax25 Wash22 Golf18 Payd15 Brid12 Part9 Cine6 Pet3]
+  20h 0m  R9 $ 3.02M  163K/s GW  3.01K +49/s W1688/L0 fight 10/14 at Sunrise Office Park [Pawn47 Dojo47 Laun41 Vape36 Secu16 Vide29 Payd25 Nail22 Tann19 Kara17 Chec14 Driv11 Pet8]
+          BP $ 5.57M 57.6K/s EQ     14 +0.9/s wins +1.1/s bank W3421/L13 fight 11/16 at Bypass Galleria [Self50 Car48 Dojo42 Urge37 Secu11 Bail33 Tax25 Wash22 Golf19 Payd16 Brid13 Part10 Cine7 Pet4]
+ 20h 30m  R9 $ 4.34M  429K/s GW  11.2K +86/s W2442/L0 fight 4/16 at Lifestyle Center [Pawn51 Dojo51 Laun45 Vape40 Secu21 Vide33 Payd29 Nail26 Tann23 Kara20 Chec18 Driv15 Pet12 Copy9 Dent6]
+          BP $ 9.31M 61.5K/s EQ  6.51K +0.8/s wins +2.6/s bank W3520/L28 fight 12/16 at Bypass Galleria [Self51 Car49 Dojo43 Urge37 Secu11 Bail33 Tax26 Wash23 Golf20 Payd17 Brid14 Part10 Cine7 Pet4]
+  21h 0m  R9 $ 10.7M 1.06M/s GW  4.05K +142/s W3187/L0 fight 12/16 at Lifestyle Center [Pawn54 Dojo54 Laun49 Vape43 Secu21 Vide36 Payd32 Nail29 Tann26 Kara24 Chec21 Driv18 Pet15 Copy12 Dent10 Matt7 Cell4]
+          BP $ 9.50M 67.5K/s EQ  11.1K +0.8/s wins +5.2/s bank W3615/L46 fight 12/16 at Bypass Galleria [Self52 Car49 Dojo43 Urge38 Secu11 Bail34 Tax27 Wash24 Golf20 Payd17 Brid14 Part11 Cine8 Pet5]
+ 21h 30m  R9 $ 16.7M 1.93M/s GW  14.7K +179/s W3873/L0 fight 16/16 at Lifestyle Center [Pawn57 Dojo57 Laun51 Vape46 Secu21 Vide38 Payd35 Nail32 Tann29 Kara26 Chec24 Driv21 Pet18 Copy15 Dent12 Matt10 Cell7 Gym4]
+          BP $ 3.74M 71.5K/s EQ  27.5K +0.5/s wins +8.4/s bank W3678/L75 fight 13/16 at Bypass Galleria [Self52 Car50 Dojo44 Urge39 Secu11 Bail35 Tax27 Wash24 Golf21 Payd18 Brid15 Part11 Cine8 Pet5]
+  22h 0m  R9 $  146M 3.23M/s GW  15.7K +311/s W4649/L0 fight 8/18 at Pinewood Commons [Pawn59 Dojo59 Laun53 Vape48 Secu21 Vide41 Payd37 Nail34 Tann31 Kara28 Chec26 Driv23 Pet20 Copy17 Dent14 Matt12 Cell9 Gym6 Part4]
+          BP $ 23.2M 77.6K/s EQ  52.4K +0.5/s wins +12/s bank W3735/L103 fight 13/16 at Bypass Galleria [Self53 Car50 Dojo44 Urge39 Secu11 Bail35 Tax28 Wash25 Golf21 Payd18 Brid15 Part12 Cine9 Pet6]
+ 22h 30m  R9 $  298M 4.13M/s GW  28.6K +395/s W5332/L0 fight 13/18 at Pinewood Commons [Pawn61 Dojo61 Laun55 Vape50 Secu21 Vide42 Payd39 Nail36 Tann33 Kara30 Chec27 Driv25 Pet22 Copy19 Dent16 Matt14 Cell11 Gym8 Part5]
+          BP $ 15.1M 98.5K/s EQ  2.52K +0.7/s wins +19/s bank W3812/L120 fight 13/16 at Bypass Galleria [Self53 Car51 Dojo45 Urge39 Secu11 Bail35 Tax28 Wash25 Golf22 Payd19 Brid16 Part12 Cine9 Pet6 Pret3]
+  23h 0m  R9 $  256M 5.11M/s GW  86.9K +445/s W5954/L0 fight 16/18 at Pinewood Commons [Pawn63 Dojo62 Laun57 Vape51 Secu21 Vide44 Payd40 Nail37 Tann34 Kara32 Chec29 Driv26 Pet23 Copy20 Dent18 Matt15 Cell12 Gym10 Part7]
+          BP $ 19.5M  108K/s EQ  3.86K +0.7/s wins +32/s bank W3893/L133 fight 14/16 at Bypass Galleria [Self53 Car51 Dojo45 Urge40 Secu11 Bail36 Tax29 Wash25 Golf22 Payd19 Brid16 Part13 Cine10 Pet7 Pret4]
+ 23h 30m  R9 $  329M 5.94M/s GW  87.6K +483/s W6536/L0 fight 18/18 at Pinewood Commons [Pawn64 Dojo64 Laun58 Vape52 Secu21 Vide45 Payd41 Nail38 Tann35 Kara33 Chec30 Driv27 Pet24 Copy22 Dent19 Matt16 Cell13 Gym11 Part8]
+          BP $ 23.4M  112K/s EQ  4.01K +0.6/s wins +31/s bank W3956/L157 fight 14/16 at Bypass Galleria [Self54 Car52 Dojo46 Urge40 Secu11 Bail36 Tax29 Wash26 Golf23 Payd20 Brid16 Part13 Cine10 Pet7 Pret4]
+  24h 0m  R9 $  142K 12.0K/s GW    768 +231/s W410/L0 fight 10/10 at Big-Box Plaza [Pawn39 Dojo38 Laun33 Vape27 Secu6 Vide20]
+          BP $ 15.1M  121K/s EQ  4.94K +0.9/s wins +15/s bank W4048/L166 fight 14/16 at Bypass Galleria [Self54 Car52 Dojo46 Urge41 Secu11 Bail37 Tax29 Wash26 Golf23 Payd20 Brid17 Part14 Cine11 Pet7 Pret5]
+ 24h 30m  R9 $ 3.47M  118K/s GW  3.52K +42/s W1175/L0 fight 2/14 at Sunrise Office Park [Pawn46 Dojo46 Laun40 Vape34 Secu16 Vide27 Payd24 Nail20 Tann18 Kara15 Chec12]
+          BP $ 5.97M  126K/s EQ  8.11K +0.9/s wins +0.8/s bank W4133/L178 fight 15/16 at Bypass Galleria [Self55 Car53 Dojo47 Urge41 Secu11 Bail37 Tax30 Wash27 Golf23 Payd20 Brid17 Part14 Cine11 Pet8 Pret5]
+  25h 0m  R9 $ 15.2M  399K/s GW  10.9K +88/s W1956/L0 fight 13/14 at Sunrise Office Park [Pawn51 Dojo51 Laun45 Vape40 Secu16 Vide32 Payd29 Nail26 Tann23 Kara20 Chec18 Driv15 Pet12]
+          BP $ 7.96M  132K/s EQ  14.9K +1.0/s wins +2.4/s bank W4229/L183 fight 15/16 at Bypass Galleria [Self55 Car53 Dojo47 Urge42 Secu11 Bail38 Tax30 Wash27 Golf24 Payd21 Brid18 Part14 Cine11 Pet8 Pret5]
+ 25h 30m  R9 $ 37.9M 1.24M/s GW  19.2K +159/s W2745/L0 fight 8/16 at Lifestyle Center [Pawn55 Dojo55 Laun49 Vape43 Secu21 Vide36 Payd32 Nail29 Tann26 Kara24 Chec21 Driv18 Pet15 Copy13 Dent10 Matt7]
+          BP $ 22.1M  143K/s EQ  10.4K +0.9/s wins +4.9/s bank W4309/L195 fight 16/16 at Bypass Galleria [Self55 Car53 Dojo47 Urge42 Secu11 Bail38 Tax31 Wash27 Golf24 Payd21 Brid18 Part15 Cine12 Pet9 Pret6]
+  26h 0m  R9 $ 79.6M 2.91M/s GW  31.9K +235/s W3485/L0 fight 14/16 at Lifestyle Center [Pawn58 Dojo58 Laun52 Vape46 Secu21 Vide39 Payd35 Nail32 Tann29 Kara27 Chec24 Driv21 Pet18 Copy15 Dent13 Matt10 Cell7 Gym5]
+          BP $ 1.60M  147K/s EQ  13.7K +0.9/s wins +8.9/s bank W4390/L206 fight 16/16 at Bypass Galleria [Self56 Car54 Dojo48 Urge42 Secu11 Bail38 Tax31 Wash28 Golf25 Payd21 Brid18 Part15 Cine12 Pet9 Pret6]
+ 26h 30m  R9 $  164M 5.30M/s GW  41.4K +340/s W4246/L0 fight 4/18 at Pinewood Commons [Pawn60 Dojo60 Laun54 Vape49 Secu21 Vide42 Payd38 Nail35 Tann32 Kara29 Chec27 Driv24 Pet21 Copy18 Dent15 Matt13 Cell10 Gym7 Part5]
+          BP $ 32.6M  151K/s EQ  7.66K +1.1/s wins +14/s bank W4487/L208 fight 16/16 at Bypass Galleria [Self56 Car54 Dojo48 Urge43 Secu11 Bail39 Tax31 Wash28 Golf25 Payd22 Brid19 Part15 Cine12 Pet9 Pret6]
+  27h 0m  R9 $  407M 7.11M/s GW  12.3K +553/s W5031/L0 fight 11/18 at Pinewood Commons [Pawn62 Dojo62 Laun56 Vape51 Secu21 Vide44 Payd40 Nail37 Tann34 Kara32 Chec29 Driv26 Pet23 Copy20 Dent18 Matt15 Cell12 Gym9 Part7]
+          BP $ 21.4M  160K/s EQ  1.28K +0.9/s wins +24/s bank W4568/L228 The Chairman [Self56 Car54 Dojo48 Urge43 Secu11 Bail39 Tax31 Wash28 Golf25 Payd22 Brid19 Part16 Cine13 Pet9 Pret7]
+ 27h 30m  R9 $ 30.1M 8.81M/s GW  68.4K +686/s W5754/L0 fight 15/18 at Pinewood Commons [Pawn64 Dojo64 Laun58 Vape52 Secu21 Vide45 Payd42 Nail39 Tann36 Kara33 Chec30 Driv28 Pet25 Copy22 Dent19 Matt16 Cell14 Gym11 Part8]
+          BP $ 71.7M  164K/s EQ  5.15K +0.9/s wins +33/s bank W4642/L253 fight 16/16 at Bypass Galleria [Self56 Car54 Dojo48 Urge43 Secu11 Bail39 Tax32 Wash28 Golf25 Payd22 Brid19 Part16 Cine13 Pet10 Pret7]
+  28h 0m  R9 $  870M 10.4M/s GW   150K +770/s W6428/L0 fight 17/18 at Pinewood Commons [Pawn65 Dojo65 Laun59 Vape54 Secu21 Vide47 Payd43 Nail40 Tann37 Kara34 Chec32 Driv29 Pet26 Copy23 Dent20 Matt18 Cell15 Gym12 Part9]
+          BP $ 36.5M  167K/s EQ  15.2K +0.9/s wins +46/s bank W4718/L280 fight 16/16 at Bypass Galleria [Self57 Car55 Dojo48 Urge43 Secu11 Bail39 Tax32 Wash29 Golf25 Payd22 Brid19 Part16 Cine13 Pet10 Pret7]
+ 28h 30m  R9 $  234K 17.0K/s GW    178 +465/s W328/L0 fight 8/10 at Big-Box Plaza [Pawn39 Dojo39 Laun33 Vape28 Secu6 Vide21]
+          BP $ 60.6M  169K/s EQ  17.3K +0.9/s wins +30/s bank W4797/L307 fight 16/16 at Bypass Galleria [Self57 Car55 Dojo49 Urge43 Secu11 Bail39 Tax32 Wash29 Golf26 Payd22 Brid19 Part16 Cine13 Pet10 Pret7]
+  29h 0m  R9 $ 1.05M  142K/s GW  2.75K +47/s W1088/L0 fight 12/12 at Outlet Mall [Pawn47 Dojo47 Laun41 Vape35 Secu11 Vide28 Payd25 Nail22 Tann19 Kara16]
+          BP $ 4.07M  173K/s EQ  20.7K +1.0/s wins +0.8/s bank W4881/L331 The Chairman [Self57 Car55 Dojo49 Urge44 Secu11 Bail39 Tax32 Wash29 Golf26 Payd23 Brid20 Part16 Cine13 Pet10 Pret7]
+ 29h 30m  R9 $ 16.3M  608K/s GW  12.5K +113/s W1889/L0 fight 12/14 at Sunrise Office Park [Pawn52 Dojo52 Laun46 Vape41 Secu16 Vide34 Payd30 Nail27 Tann24 Kara22 Chec19 Driv16 Pet13]
+          BP $ 22.4M  176K/s EQ  28.1K +0.9/s wins +2.8/s bank W4961/L358 fight 16/16 at Bypass Galleria [Self57 Car55 Dojo49 Urge44 Secu11 Bail40 Tax32 Wash29 Golf26 Payd23 Brid20 Part17 Cine13 Pet10 Pret7]
+  30h 0m  R9 $ 29.8M 1.93M/s GW  24.4K +201/s W2690/L0 fight 7/16 at Lifestyle Center [Pawn56 Dojo56 Laun50 Vape44 Secu21 Vide37 Payd34 Nail31 Tann28 Kara25 Chec22 Driv20 Pet17 Copy14 Dent11 Matt8]
+          BP $ 39.7M  184K/s EQ  7.73K +0.9/s wins +5.8/s bank W5038/L385 fight 16/16 at Bypass Galleria [Self57 Car55 Dojo49 Urge44 Secu11 Bail40 Tax32 Wash29 Golf26 Payd23 Brid20 Part17 Cine14 Pet10 Pret8]
+ 30h 30m  R9 $  142M 4.70M/s GW  40.2K +306/s W3449/L0 fight 14/16 at Lifestyle Center [Pawn59 Dojo59 Laun53 Vape48 Secu21 Vide40 Payd37 Nail34 Tann31 Kara28 Chec25 Driv23 Pet20 Copy17 Dent14 Matt12 Cell9 Gym6]
+          BP $ 97.8M  189K/s EQ  3.34K +1.0/s wins +11/s bank W5121/L409 The Chairman [Self57 Car55 Dojo49 Urge44 Secu11 Bail40 Tax33 Wash29 Golf26 Payd23 Brid20 Part17 Cine14 Pet11 Pret8]
+  31h 0m  R9 $  318M 8.35M/s GW  28.2K +439/s W4217/L0 fight 3/18 at Pinewood Commons [Pawn62 Dojo62 Laun56 Vape50 Secu21 Vide43 Payd39 Nail36 Tann34 Kara31 Chec28 Driv25 Pet22 Copy20 Dent17 Matt14 Cell11 Gym9 Part6]
+          BP $ 91.8M  191K/s EQ  10.8K +0.9/s wins +17/s bank W5201/L436 fight 16/16 at Bypass Galleria [Self58 Car55 Dojo49 Urge44 Secu11 Bail40 Tax33 Wash30 Golf26 Payd23 Brid20 Part17 Cine14 Pet11 Pret8]
+ 31h 30m  R9 $  442M 11.4M/s GW  44.5K +732/s W5024/L0 fight 11/18 at Pinewood Commons [Pawn64 Dojo64 Laun58 Vape52 Secu21 Vide45 Payd42 Nail38 Tann36 Kara33 Chec30 Driv28 Pet25 Copy22 Dent19 Matt16 Cell14 Gym11 Part8]
+          BP $  101M  192K/s EQ  31.6K +1.0/s wins +30/s bank W5286/L460 The Chairman [Self58 Car56 Dojo50 Urge44 Secu11 Bail40 Tax33 Wash30 Golf26 Payd23 Brid20 Part17 Cine14 Pet11 Pret8]
+  32h 0m  R9 $  492M 14.4M/s GW   123K +925/s W5773/L0 fight 15/18 at Pinewood Commons [Pawn66 Dojo65 Laun60 Vape54 Secu21 Vide47 Payd43 Nail40 Tann37 Kara35 Chec32 Driv29 Pet26 Copy23 Dent21 Matt18 Cell15 Gym13 Part10]
+          BP $ 54.4M  196K/s EQ  40.7K +0.9/s wins +45/s bank W5362/L490 fight 16/16 at Bypass Galleria [Self58 Car56 Dojo50 Urge44 Secu11 Bail40 Tax33 Wash30 Golf27 Payd24 Brid20 Part17 Cine14 Pet11 Pret8]
+ 32h 30m  R9 $ 1.67B 16.9M/s GW   170K +1.06K/s W6480/L0 fight 18/18 at Pinewood Commons [Pawn67 Dojo67 Laun61 Vape55 Secu21 Vide48 Payd44 Nail41 Tann39 Kara36 Chec33 Driv31 Pet27 Copy25 Dent22 Matt19 Cell16 Gym14 Part11]
+          BP $ 43.8M  200K/s EQ  23.9K +2.3/s wins +66/s bank W5492/L492 done [Self58 Car56 Dojo50 Urge45 Secu11 Bail41 Tax33 Wash30 Golf27 Payd24 Brid21 Part17 Cine14 Pet11 Pret8]
+  33h 0m  R9 $  788K 28.5K/s GW    537 +521/s W404/L0 fight 9/10 at Big-Box Plaza [Pawn41 Dojo41 Laun36 Vape30 Secu6 Vide23]
+          BP $ 63.9M  212K/s EQ  25.8K +2.0/s wins +29/s bank W5627/L492 done [Self58 Car56 Dojo50 Urge45 Secu11 Bail41 Tax33 Wash30 Golf27 Payd24 Brid21 Part18 Cine15 Pet11 Pret9]
+ 33h 30m  R9 $ 8.07M  283K/s GW  3.52K +69/s W1187/L0 fight 3/14 at Sunrise Office Park [Pawn49 Dojo49 Laun43 Vape37 Secu16 Vide30 Payd26 Nail23 Tann21 Kara18 Chec15]
+          BP $ 75.9M  218K/s EQ  33.1K +2.1/s wins +1.2/s bank W5764/L492 done [Self59 Car56 Dojo50 Urge45 Secu11 Bail41 Tax34 Wash30 Golf27 Payd24 Brid21 Part18 Cine15 Pet12 Pret9]
+  34h 0m  R9 $ 21.1M 1.15M/s GW  7.43K +147/s W1989/L0 fight 13/14 at Sunrise Office Park [Pawn54 Dojo54 Laun48 Vape43 Secu16 Vide35 Payd32 Nail29 Tann26 Kara23 Chec20 Driv18 Pet15 Copy11]
+          BP $ 83.8M  221K/s EQ  44.0K +2.1/s wins +3.7/s bank W5904/L492 done [Self59 Car57 Dojo51 Urge45 Secu11 Bail41 Tax34 Wash31 Golf27 Payd24 Brid21 Part18 Cine15 Pet12 Pret9]
+ 34h 30m  R9 $ 58.6M 3.48M/s GW  30.0K +272/s W2805/L0 fight 9/16 at Lifestyle Center [Pawn58 Dojo58 Laun52 Vape46 Secu21 Vide39 Payd35 Nail32 Tann30 Kara27 Chec24 Driv22 Pet18 Copy16 Dent13 Matt10 Cell3]
+          BP $ 44.2M  228K/s EQ  7.20K +2.1/s wins +7.9/s bank W6046/L492 done [Self59 Car57 Dojo51 Urge45 Secu11 Bail41 Tax34 Wash31 Golf28 Payd25 Brid22 Part18 Cine15 Pet12 Pret9]
+  35h 0m  R9 $  165M 7.32M/s GW  38.3K +397/s W3565/L0 fight 14/16 at Lifestyle Center [Pawn61 Dojo61 Laun55 Vape49 Secu21 Vide42 Payd39 Nail35 Tann33 Kara30 Chec27 Driv25 Pet22 Copy19 Dent16 Matt13 Cell10 Gym8]
+          BP $ 14.2M  233K/s EQ  38.8K +2.2/s wins +15/s bank W6189/L492 done [Self59 Car57 Dojo51 Urge46 Secu11 Bail42 Tax34 Wash31 Golf28 Payd25 Brid22 Part19 Cine15 Pet12 Pret9]
+ 35h 30m  R9 $  566M 13.4M/s GW  16.7K +612/s W4372/L0 fight 5/18 at Pinewood Commons [Pawn63 Dojo63 Laun58 Vape52 Secu21 Vide45 Payd41 Nail38 Tann35 Kara33 Chec30 Driv27 Pet24 Copy21 Dent19 Matt16 Cell13 Gym11 Part8]
+          BP $  147M  243K/s EQ  31.7K +2.2/s wins +24/s bank W6334/L492 done [Self59 Car57 Dojo51 Urge46 Secu11 Bail42 Tax34 Wash31 Golf28 Payd25 Brid22 Part19 Cine16 Pet12 Pret10]
+  36h 0m  R9 $  635M 17.7M/s GW  95.1K +949/s W5165/L0 fight 12/18 at Pinewood Commons [Pawn66 Dojo65 Laun60 Vape54 Secu21 Vide47 Payd43 Nail40 Tann37 Kara35 Chec32 Driv29 Pet26 Copy23 Dent21 Matt18 Cell15 Gym13 Part10]
+          BP $ 91.2M  251K/s EQ  53.7K +2.2/s wins +40/s bank W6481/L492 done [Self60 Car57 Dojo51 Urge46 Secu11 Bail42 Tax35 Wash31 Golf28 Payd25 Brid22 Part19 Cine16 Pet13 Pret10]
+ 36h 30m  R9 $ 1.72B 21.8M/s GW   192K +1.20K/s W5920/L0 fight 15/18 at Pinewood Commons [Pawn67 Dojo67 Laun61 Vape56 Secu21 Vide48 Payd45 Nail42 Tann39 Kara36 Chec33 Driv31 Pet28 Copy25 Dent22 Matt20 Cell17 Gym14 Part11]
+          BP $  186M  253K/s EQ  21.9K +2.3/s wins +60/s bank W6635/L492 done [Self60 Car58 Dojo51 Urge46 Secu11 Bail42 Tax35 Wash32 Golf28 Payd25 Brid22 Part19 Cine16 Pet13 Pret10]
+  37h 0m  R9 $  826M 26.3M/s GW  71.2K +1.39K/s W6646/L0 fight 18/18 at Pinewood Commons [Pawn68 Dojo68 Laun62 Vape57 Secu21 Vide50 Payd46 Nail43 Tann40 Kara38 Chec35 Driv32 Pet29 Copy26 Dent24 Matt21 Cell18 Gym15 Part13]
+          BP $ 56.3M  259K/s EQ  39.0K +2.4/s wins +87/s bank W6792/L492 done [Self60 Car58 Dojo52 Urge46 Secu11 Bail42 Tax35 Wash32 Golf29 Payd26 Brid22 Part19 Cine16 Pet13 Pret10]
+ 37h 30m  R9 $ 1.95M 87.2K/s GW  1.32K +322/s W591/L0 fight 4/12 at Outlet Mall [Pawn44 Dojo44 Laun39 Vape33 Secu11 Vide26 Payd22 Nail19]
+          BP $  120M  263K/s EQ  10.1K +2.4/s wins +21/s bank W6953/L492 done [Self60 Car58 Dojo52 Urge47 Secu11 Bail42 Tax35 Wash32 Golf29 Payd26 Brid23 Part19 Cine16 Pet13 Pret10]
+  38h 0m  R9 $ 13.3M  623K/s GW  1.56K +104/s W1395/L0 fight 6/14 at Sunrise Office Park [Pawn51 Dojo51 Laun46 Vape40 Secu16 Vide33 Payd29 Nail26 Tann23 Kara21 Chec18 Driv15]
+          BP $  196M  268K/s EQ  18.5K +2.5/s wins +2.1/s bank W7116/L492 done [Self60 Car58 Dojo52 Urge47 Secu11 Bail43 Tax35 Wash32 Golf29 Payd26 Brid23 Part20 Cine16 Pet13 Pret10]
+ 38h 30m  R9 $ 66.2M 1.91M/s GW  20.4K +195/s W2180/L0 fight 14/14 at Sunrise Office Park [Pawn56 Dojo56 Laun50 Vape45 Secu16 Vide38 Payd34 Nail31 Tann28 Kara26 Chec23 Driv20 Pet17 Copy14]
+          BP $ 59.4M  285K/s EQ  33.5K +2.5/s wins +5.6/s bank W7279/L492 done [Self60 Car58 Dojo52 Urge47 Secu11 Bail43 Tax35 Wash32 Golf29 Payd26 Brid23 Part20 Cine17 Pet14 Pret11]
+  39h 0m  R9 $  163M 5.96M/s GW  41.7K +378/s W3007/L0 fight 10/16 at Lifestyle Center [Pawn60 Dojo60 Laun54 Vape48 Secu21 Vide41 Payd38 Nail34 Tann32 Kara29 Chec26 Driv24 Pet20 Copy18 Dent15 Matt12 Cell9]
+          BP $  146M  288K/s EQ  59.4K +2.5/s wins +11/s bank W7444/L492 done [Self61 Car58 Dojo52 Urge47 Secu11 Bail43 Tax36 Wash32 Golf29 Payd26 Brid23 Part20 Cine17 Pet14 Pret11]
+ 39h 30m  R9 $  157M 11.4M/s GW  68.7K +513/s W3769/L0 fight 15/16 at Lifestyle Center [Pawn63 Dojo63 Laun57 Vape51 Secu21 Vide44 Payd41 Nail37 Tann35 Kara32 Chec29 Driv27 Pet23 Copy21 Dent18 Matt15 Cell12 Gym10]
+          BP $  170M  291K/s EQ  8.87K +2.6/s wins +21/s bank W7618/L492 done [Self61 Car59 Dojo52 Urge47 Secu11 Bail43 Tax36 Wash33 Golf29 Payd26 Brid23 Part20 Cine17 Pet14 Pret11]
+  40h 0m  R9 $  514M 19.5M/s GW  78.0K +863/s W4604/L0 fight 8/18 at Pinewood Commons [Pawn65 Dojo65 Laun59 Vape54 Secu21 Vide46 Payd43 Nail40 Tann37 Kara34 Chec31 Driv29 Pet26 Copy23 Dent20 Matt18 Cell15 Gym12 Part9]
+          BP $  197M  295K/s EQ  75.5K +2.6/s wins +34/s bank W7792/L492 done [Self61 Car59 Dojo53 Urge47 Secu11 Bail43 Tax36 Wash33 Golf30 Payd26 Brid23 Part20 Cine17 Pet14 Pret11]
+ 40h 30m  R9 $ 1.09B 25.4M/s GW   111K +1.24K/s W5391/L0 fight 13/18 at Pinewood Commons [Pawn67 Dojo67 Laun61 Vape55 Secu21 Vide48 Payd45 Nail42 Tann39 Kara36 Chec33 Driv31 Pet28 Copy25 Dent22 Matt19 Cell17 Gym14 Part11]
+          BP $  180M  301K/s EQ  87.3K +2.7/s wins +55/s bank W7967/L492 done [Self61 Car59 Dojo53 Urge47 Secu11 Bail43 Tax36 Wash33 Golf30 Payd27 Brid24 Part20 Cine17 Pet14 Pret11]
+  41h 0m  R9 $  283M 31.9M/s GW   228K +1.51K/s W6144/L0 fight 16/18 at Pinewood Commons [Pawn68 Dojo68 Laun63 Vape57 Secu21 Vide50 Payd46 Nail43 Tann40 Kara38 Chec35 Driv32 Pet29 Copy26 Dent24 Matt21 Cell18 Gym16 Part13]
+          BP $  149M  304K/s EQ  57.2K +2.8/s wins +84/s bank W8149/L492 done [Self61 Car59 Dojo53 Urge48 Secu11 Bail44 Tax36 Wash33 Golf30 Payd27 Brid24 Part20 Cine17 Pet14 Pret11]
+ 41h 30m  R9 $ 86.1K 7.67K/s GW    161 +1.51K/s W91/L0 fight 6/8 at The Parking Lot [Pawn34 Dojo33 Laun28]
+          BP $  123M  316K/s EQ  37.9K +2.8/s wins +106/s bank W8331/L492 done [Self61 Car59 Dojo53 Urge48 Secu11 Bail44 Tax36 Wash33 Golf30 Payd27 Brid24 Part21 Cine17 Pet14 Pret12]
+  42h 0m  R9 $ 2.95M  219K/s GW  5.36K +61/s W841/L0 fight 9/12 at Outlet Mall [Pawn48 Dojo48 Laun42 Vape37 Secu11 Vide29 Payd26 Nail23 Tann20]
+          BP $  107M  328K/s EQ  45.1K +2.8/s wins +0.9/s bank W8514/L492 done [Self61 Car59 Dojo53 Urge48 Secu11 Bail44 Tax36 Wash33 Golf30 Payd27 Brid24 Part21 Cine18 Pet15 Pret12]
+ 42h 30m  R9 $ 12.6M 1.33M/s GW  1.25K +154/s W1648/L0 fight 10/14 at Sunrise Office Park [Pawn54 Dojo54 Laun48 Vape43 Secu16 Vide35 Payd32 Nail29 Tann26 Kara23 Chec21 Driv18 Pet15]
+          BP $ 90.2M  331K/s EQ  57.0K +2.8/s wins +3.5/s bank W8698/L492 done [Self62 Car59 Dojo53 Urge48 Secu11 Bail44 Tax37 Wash33 Golf30 Payd27 Brid24 Part21 Cine18 Pet15 Pret12]
+  43h 0m  R9 $ 18.4M 4.01M/s GW  33.3K +289/s W2461/L0 fight 5/16 at Lifestyle Center [Pawn58 Dojo58 Laun52 Vape47 Secu21 Vide40 Payd36 Nail33 Tann30 Kara28 Chec25 Driv22 Pet19 Copy16 Dent13 Matt5]
+          BP $ 2.90M  335K/s EQ  77.8K +2.9/s wins +8.3/s bank W8888/L492 done [Self62 Car60 Dojo53 Urge48 Secu11 Bail44 Tax37 Wash34 Golf30 Payd27 Brid24 Part21 Cine18 Pet15 Pret12]
+ 43h 30m  R9 $  324M 9.13M/s GW  38.7K +494/s W3264/L0 fight 12/16 at Lifestyle Center [Pawn62 Dojo62 Laun56 Vape50 Secu21 Vide43 Payd40 Nail36 Tann34 Kara31 Chec28 Driv26 Pet22 Copy20 Dent17 Matt14 Cell11]
+          BP $  276M  336K/s EQ   113K +2.9/s wins +16/s bank W9079/L492 done [Self62 Car60 Dojo54 Urge48 Secu11 Bail44 Tax37 Wash34 Golf30 Payd27 Brid24 Part21 Cine18 Pet15 Pret12]
+  44h 0m  R9 $  222M 18.8M/s GW   118K +676/s W4030/L0 fight 1/18 at Pinewood Commons [Pawn65 Dojo65 Laun59 Vape53 Secu21 Vide46 Payd42 Nail39 Tann36 Kara34 Chec31 Driv28 Pet25 Copy22 Dent20 Matt17 Cell14 Gym12 Part3]
+          BP $  143M  342K/s EQ  46.3K +2.9/s wins +27/s bank W9271/L492 done [Self62 Car60 Dojo54 Urge48 Secu11 Bail44 Tax37 Wash34 Golf31 Payd28 Brid24 Part21 Cine18 Pet15 Pret12]
+ 44h 30m  R9 $  317M 28.6M/s GW   199K +1.20K/s W4890/L0 fight 10/18 at Pinewood Commons [Pawn67 Dojo67 Laun61 Vape55 Secu21 Vide48 Payd45 Nail41 Tann39 Kara36 Chec33 Driv31 Pet27 Copy25 Dent22 Matt19 Cell16 Gym14 Part11]
+          BP $ 27.9M  348K/s EQ  15.3K +2.9/s wins +47/s bank W9464/L492 done [Self62 Car60 Dojo54 Urge49 Secu11 Bail44 Tax37 Wash34 Golf31 Payd28 Brid25 Part21 Cine18 Pet15 Pret12]
+  45h 0m  R9 $ 2.00B 37.0M/s GW  55.4K +1.56K/s W5666/L0 fight 14/18 at Pinewood Commons [Pawn68 Dojo68 Laun63 Vape57 Secu21 Vide50 Payd46 Nail43 Tann40 Kara38 Chec35 Driv32 Pet29 Copy26 Dent24 Matt21 Cell18 Gym16 Part13]
+          BP $  296M  350K/s EQ  31.6K +3.0/s wins +73/s bank W9659/L492 done [Self62 Car60 Dojo54 Urge49 Secu11 Bail45 Tax37 Wash34 Golf31 Payd28 Brid25 Part21 Cine18 Pet15 Pret12]
+ 45h 30m  R9 $  513M 43.8M/s GW  76.6K +1.86K/s W6414/L0 fight 17/18 at Pinewood Commons [Pawn70 Dojo70 Laun64 Vape58 Secu21 Vide51 Payd48 Nail44 Tann42 Kara39 Chec36 Driv34 Pet31 Copy28 Dent25 Matt22 Cell19 Gym17 Part14]
+          BP $  190M  364K/s EQ   107K +3.0/s wins +106/s bank W9855/L492 done [Self62 Car60 Dojo54 Urge49 Secu11 Bail45 Tax37 Wash34 Golf31 Payd28 Brid25 Part22 Cine18 Pet15 Pret13]
+  46h 0m  R9 $ 1.58M 60.0K/s GW  1.33K +1.06K/s W352/L0 fight 8/10 at Big-Box Plaza [Pawn44 Dojo43 Laun38 Vape32 Secu6 Vide25]
+          BP $ 47.1M  377K/s EQ  88.6K +3.1/s wins +74/s bank W10055/L492 done [Self62 Car60 Dojo54 Urge49 Secu11 Bail45 Tax37 Wash34 Golf31 Payd28 Brid25 Part22 Cine19 Pet16 Pret13]
+ 46h 30m  R9 $ 6.02M  625K/s GW  4.36K +100/s W1127/L0 fight 1/14 at Sunrise Office Park [Pawn51 Dojo51 Laun45 Vape40 Secu16 Vide33 Payd29 Nail26 Tann23 Kara21 Chec17]
+          BP $  343M  380K/s EQ  97.7K +3.1/s wins +1.8/s bank W10255/L492 done [Self62 Car60 Dojo54 Urge49 Secu11 Bail45 Tax38 Wash34 Golf31 Payd28 Brid25 Part22 Cine19 Pet16 Pret13]
+  47h 0m  R9 $ 28.1M 2.15M/s GW  11.5K +226/s W1947/L0 fight 12/14 at Sunrise Office Park [Pawn57 Dojo57 Laun51 Vape45 Secu16 Vide38 Payd34 Nail31 Tann29 Kara26 Chec23 Driv21 Pet17]
+          BP $  226M  383K/s EQ   114K +3.2/s wins +5.7/s bank W10461/L492 done [Self63 Car60 Dojo54 Urge49 Secu11 Bail45 Tax38 Wash35 Golf31 Payd28 Brid25 Part22 Cine19 Pet16 Pret13]
+ 47h 30m  R9 $  220M 7.02M/s GW  3.82K +421/s W2775/L0 fight 8/16 at Lifestyle Center [Pawn61 Dojo60 Laun55 Vape49 Secu21 Vide42 Payd38 Nail35 Tann32 Kara30 Chec27 Driv24 Pet21 Copy18 Dent16 Matt13]
+          BP $  474M  385K/s EQ   143K +3.2/s wins +12/s bank W10671/L492 done [Self63 Car61 Dojo54 Urge49 Secu11 Bail45 Tax38 Wash35 Golf31 Payd28 Brid25 Part22 Cine19 Pet16 Pret13]
+  48h 0m  R9 $  482M 17.0M/s GW  39.0K +635/s W3559/L0 fight 14/16 at Lifestyle Center [Pawn64 Dojo64 Laun58 Vape52 Secu21 Vide45 Payd41 Nail38 Tann36 Kara33 Chec30 Driv27 Pet24 Copy22 Dent19 Matt16 Cell13 Gym11]
+          BP $  256M  390K/s EQ  32.0K +3.2/s wins +22/s bank W10882/L492 done [Self63 Car61 Dojo55 Urge49 Secu11 Bail45 Tax38 Wash35 Golf32 Payd28 Brid25 Part22 Cine19 Pet16 Pret13]
+ 48h 30m  R9 $  412M 29.7M/s GW  33.2K +996/s W4395/L0 fight 6/18 at Pinewood Commons [Pawn66 Dojo66 Laun60 Vape55 Secu21 Vide47 Payd44 Nail41 Tann38 Kara35 Chec33 Driv30 Pet27 Copy24 Dent21 Matt19 Cell16 Gym13 Part10]
+          BP $  496M  394K/s EQ   111K +3.3/s wins +40/s bank W11095/L492 done [Self63 Car61 Dojo55 Urge49 Secu11 Bail45 Tax38 Wash35 Golf32 Payd29 Brid25 Part22 Cine19 Pet16 Pret13]
+  49h 0m  R9 $  635M 39.3M/s GW   189K +1.53K/s W5201/L0 fight 12/18 at Pinewood Commons [Pawn68 Dojo68 Laun62 Vape57 Secu21 Vide50 Payd46 Nail43 Tann40 Kara37 Chec35 Driv32 Pet29 Copy26 Dent23 Matt21 Cell18 Gym15 Part12]
+          BP $  172M  400K/s EQ  78.1K +3.3/s wins +66/s bank W11311/L492 done [Self63 Car61 Dojo55 Urge50 Secu11 Bail45 Tax38 Wash35 Golf32 Payd29 Brid26 Part22 Cine19 Pet16 Pret13]
+ 49h 30m  R9 $ 2.45B 49.3M/s GW  31.1K +1.93K/s W5972/L0 fight 16/18 at Pinewood Commons [Pawn70 Dojo70 Laun64 Vape58 Secu21 Vide51 Payd47 Nail44 Tann42 Kara39 Chec36 Driv34 Pet30 Copy28 Dent25 Matt22 Cell19 Gym17 Part14]
+          BP $  387M  402K/s EQ   104K +3.3/s wins +98/s bank W11527/L492 done [Self63 Car61 Dojo55 Urge50 Secu11 Bail46 Tax38 Wash35 Golf32 Payd29 Brid26 Part22 Cine19 Pet16 Pret13]
+  50h 0m  R9 $ 4.31B 58.5M/s GW   437K +2.26K/s W6722/L0 fight 18/18 at Pinewood Commons [Pawn71 Dojo71 Laun65 Vape59 Secu21 Vide52 Payd49 Nail46 Tann43 Kara40 Chec37 Driv35 Pet32 Copy29 Dent26 Matt23 Cell21 Gym18 Part15]
+          BP $ 62.5M  418K/s EQ  12.8K +3.4/s wins +148/s bank W11748/L492 done [Self63 Car61 Dojo55 Urge50 Secu11 Bail46 Tax38 Wash35 Golf32 Payd29 Brid26 Part23 Cine19 Pet16 Pret14]
+ 50h 30m  R9 $ 5.78M  214K/s GW  2.85K +267/s W672/L0 fight 6/12 at Outlet Mall [Pawn48 Dojo48 Laun42 Vape36 Secu11 Vide29 Payd26 Nail23]
+          BP $  304M  426K/s EQ  65.2K +3.4/s wins +25/s bank W11969/L492 done [Self63 Car61 Dojo55 Urge50 Secu11 Bail46 Tax38 Wash35 Golf32 Payd29 Brid26 Part23 Cine20 Pet16 Pret14]
+  51h 0m  R9 $ 27.0M 1.39M/s GW  16.8K +167/s W1482/L0 fight 8/14 at Sunrise Office Park [Pawn54 Dojo54 Laun49 Vape43 Secu16 Vide36 Payd32 Nail29 Tann26 Kara24 Chec21 Driv18]
+          BP $  543M  434K/s EQ  78.8K +3.4/s wins +3.6/s bank W12192/L492 done [Self63 Car61 Dojo55 Urge50 Secu11 Bail46 Tax38 Wash35 Golf32 Payd29 Brid26 Part23 Cine20 Pet17 Pret14]
+ 51h 30m  R9 $ 28.3M 5.00M/s GW  15.9K +322/s W2282/L0 fight 2/16 at Lifestyle Center [Pawn59 Dojo59 Laun53 Vape47 Secu21 Vide40 Payd37 Nail33 Tann31 Kara28 Chec25 Driv23 Pet19 Copy17 Dent14]
+          BP $  171M  438K/s EQ   102K +3.5/s wins +9.2/s bank W12417/L492 done [Self64 Car61 Dojo55 Urge50 Secu11 Bail46 Tax39 Wash35 Golf32 Payd29 Brid26 Part23 Cine20 Pet17 Pret14]
+  52h 0m  R9 $  176M 13.2M/s GW  63.1K +590/s W3113/L0 fight 11/16 at Lifestyle Center [Pawn63 Dojo63 Laun57 Vape51 Secu21 Vide44 Payd40 Nail37 Tann35 Kara32 Chec29 Driv26 Pet23 Copy21 Dent18 Matt15 Cell12]
+          BP $  434M  441K/s EQ   143K +3.7/s wins +18/s bank W12655/L492 done [Self64 Car61 Dojo55 Urge50 Secu11 Bail46 Tax39 Wash36 Golf32 Payd29 Brid26 Part23 Cine20 Pet17 Pret14]
+ 52h 30m  R9 $  321M 24.8M/s GW  74.9K +813/s W3899/L0 fight 16/16 at Lifestyle Center [Pawn66 Dojo65 Laun60 Vape54 Secu21 Vide47 Payd43 Nail40 Tann37 Kara35 Chec32 Driv29 Pet26 Copy23 Dent21 Matt18 Cell15 Gym13]
+          BP $  610M  443K/s EQ  4.58K +3.7/s wins +33/s bank W12893/L492 done [Self64 Car62 Dojo55 Urge50 Secu11 Bail46 Tax39 Wash36 Golf32 Payd29 Brid26 Part23 Cine20 Pet17 Pret14]
+  53h 0m  R9 $  361M 41.8M/s GW   167K +1.43K/s W4757/L0 fight 9/18 at Pinewood Commons [Pawn68 Dojo68 Laun62 Vape56 Secu21 Vide49 Payd45 Nail42 Tann40 Kara37 Chec34 Driv32 Pet28 Copy26 Dent23 Matt20 Cell17 Gym15 Part12]
+          BP $  115M  448K/s EQ   108K +3.8/s wins +53/s bank W13138/L492 done [Self64 Car62 Dojo56 Urge50 Secu11 Bail46 Tax39 Wash36 Golf33 Payd29 Brid26 Part23 Cine20 Pet17 Pret14]
+ 53h 30m  R9 $ 2.33B 54.2M/s GW   327K +1.93K/s W5546/L0 fight 14/18 at Pinewood Commons [Pawn70 Dojo70 Laun64 Vape58 Secu21 Vide51 Payd47 Nail44 Tann41 Kara39 Chec36 Driv33 Pet30 Copy27 Dent25 Matt22 Cell19 Gym17 Part14]
+          BP $  295M  453K/s EQ  75.0K +3.8/s wins +92/s bank W13382/L492 done [Self64 Car62 Dojo56 Urge50 Secu11 Bail46 Tax39 Wash36 Golf33 Payd30 Brid26 Part23 Cine20 Pet17 Pret14]
+  54h 0m  R9 $ 2.71B 65.5M/s GW   177K +2.34K/s W6307/L0 fight 17/18 at Pinewood Commons [Pawn71 Dojo71 Laun65 Vape60 Secu21 Vide52 Payd49 Nail46 Tann43 Kara40 Chec37 Driv35 Pet32 Copy29 Dent26 Matt23 Cell21 Gym18 Part15]
+          BP $  417M  458K/s EQ   112K +3.8/s wins +131/s bank W13628/L492 done [Self64 Car62 Dojo56 Urge50 Secu11 Bail46 Tax39 Wash36 Golf33 Payd30 Brid27 Part23 Cine20 Pet17 Pret14]
+ 54h 30m  R9 $  610K 57.9K/s GW    410 +1.70K/s W248/L0 fight 5/10 at Big-Box Plaza [Pawn42 Dojo42 Laun36 Vape31 Secu6 Vide22]
+          BP $  528M  460K/s EQ   125K +3.8/s wins +117/s bank W13876/L492 done [Self64 Car62 Dojo56 Urge51 Secu11 Bail46 Tax39 Wash36 Golf33 Payd30 Brid27 Part23 Cine20 Pet17 Pret14]
+  55h 0m  R9 $ 6.28M  605K/s GW  9.90K +105/s W1018/L0 fight 12/12 at Outlet Mall [Pawn52 Dojo52 Laun46 Vape40 Secu11 Vide33 Payd30 Nail27 Tann24 Kara16]
+          BP $  654M  463K/s EQ   136K +3.8/s wins +1.8/s bank W14123/L492 done [Self64 Car62 Dojo56 Urge51 Secu11 Bail47 Tax39 Wash36 Golf33 Payd30 Brid27 Part23 Cine20 Pet17 Pret14]
+ 55h 30m  R9 $ 89.0M 2.92M/s GW  18.1K +262/s W1841/L0 fight 11/14 at Sunrise Office Park [Pawn57 Dojo57 Laun52 Vape46 Secu16 Vide39 Payd35 Nail32 Tann29 Kara27 Chec24 Driv21 Pet18]
+          BP $  106M  481K/s EQ   154K +3.8/s wins +6.3/s bank W14371/L492 done [Self64 Car62 Dojo56 Urge51 Secu11 Bail47 Tax39 Wash36 Golf33 Payd30 Brid27 Part24 Cine20 Pet17 Pret15]
+  56h 0m  R9 $  209M 9.66M/s GW  17.4K +485/s W2672/L0 fight 7/16 at Lifestyle Center [Pawn61 Dojo61 Laun55 Vape50 Secu21 Vide43 Payd39 Nail36 Tann33 Kara30 Chec28 Driv25 Pet22 Copy19 Dent16 Matt14]
+          BP $  316M  489K/s EQ   188K +3.8/s wins +14/s bank W14620/L492 done [Self64 Car62 Dojo56 Urge51 Secu11 Bail47 Tax39 Wash36 Golf33 Payd30 Brid27 Part24 Cine21 Pet17 Pret15]
+ 56h 30m  R9 $  562M 23.9M/s GW  14.6K +770/s W3473/L0 fight 14/16 at Lifestyle Center [Pawn65 Dojo65 Laun59 Vape53 Secu21 Vide46 Payd42 Nail39 Tann36 Kara34 Chec31 Driv28 Pet25 Copy22 Dent20 Matt17 Cell14 Gym12]
+          BP $  519M  499K/s EQ   247K +3.8/s wins +28/s bank W14869/L492 done [Self64 Car62 Dojo56 Urge51 Secu11 Bail47 Tax39 Wash36 Golf33 Payd30 Brid27 Part24 Cine21 Pet18 Pret15]
+  57h 0m  R9 $  460M 43.5M/s GW  23.0K +1.16K/s W4301/L0 fight 5/18 at Pinewood Commons [Pawn67 Dojo67 Laun61 Vape56 Secu21 Vide49 Payd45 Nail42 Tann39 Kara36 Chec34 Driv31 Pet28 Copy25 Dent22 Matt20 Cell17 Gym14 Part12]
+          BP $  682M  502K/s EQ  70.1K +3.8/s wins +46/s bank W15118/L492 done [Self64 Car62 Dojo56 Urge51 Secu11 Bail47 Tax40 Wash36 Golf33 Payd30 Brid27 Part24 Cine21 Pet18 Pret15]
+ 57h 30m  R9 $ 1.00B 59.8M/s GW  86.8K +1.85K/s W5123/L0 fight 11/18 at Pinewood Commons [Pawn69 Dojo69 Laun63 Vape58 Secu21 Vide51 Payd47 Nail44 Tann41 Kara39 Chec36 Driv33 Pet30 Copy27 Dent25 Matt22 Cell19 Gym17 Part14]
+          BP $ 31.3M  507K/s EQ   209K +3.9/s wins +73/s bank W15368/L492 done [Self65 Car62 Dojo56 Urge51 Secu11 Bail47 Tax40 Wash37 Golf33 Payd30 Brid27 Part24 Cine21 Pet18 Pret15]
+  58h 0m  R9 $ 3.72B 72.6M/s GW   331K +2.39K/s W5907/L0 fight 15/18 at Pinewood Commons [Pawn71 Dojo71 Laun65 Vape60 Secu21 Vide52 Payd49 Nail46 Tann43 Kara40 Chec37 Driv35 Pet32 Copy29 Dent26 Matt23 Cell21 Gym18 Part15]
+          BP $  129M  509K/s EQ   163K +3.9/s wins +119/s bank W15618/L492 done [Self65 Car63 Dojo56 Urge51 Secu11 Bail47 Tax40 Wash37 Golf33 Payd30 Brid27 Part24 Cine21 Pet18 Pret15]
+ 58h 30m  R9 $ 5.74B 87.6M/s GW   433K +2.79K/s W6663/L0 fight 18/18 at Pinewood Commons [Pawn72 Dojo72 Laun66 Vape61 Secu21 Vide54 Payd50 Nail47 Tann44 Kara41 Chec39 Driv36 Pet33 Copy30 Dent27 Matt25 Cell22 Gym19 Part17]
+          BP $  240M  511K/s EQ   207K +3.8/s wins +169/s bank W15867/L492 done [Self65 Car63 Dojo57 Urge51 Secu11 Bail47 Tax40 Wash37 Golf33 Payd30 Brid27 Part24 Cine21 Pet18 Pret15]
+  59h 0m  R9 $ 5.22M  268K/s GW  3.03K +551/s W609/L0 fight 5/12 at Outlet Mall [Pawn48 Dojo48 Laun42 Vape37 Secu11 Vide30 Payd26 Nail23]
+          BP $  298M  516K/s EQ  24.4K +3.9/s wins +43/s bank W16118/L492 done [Self65 Car63 Dojo57 Urge51 Secu11 Bail47 Tax40 Wash37 Golf34 Payd30 Brid27 Part24 Cine21 Pet18 Pret15]
+ 59h 30m  R9 $ 10.5M 1.90M/s GW  10.2K +190/s W1417/L0 fight 7/14 at Sunrise Office Park [Pawn55 Dojo55 Laun49 Vape44 Secu16 Vide37 Payd33 Nail30 Tann27 Kara24 Chec22 Driv19]
+          BP $  298M  521K/s EQ  38.8K +3.9/s wins +3.7/s bank W16369/L492 done [Self65 Car63 Dojo57 Urge51 Secu11 Bail47 Tax40 Wash37 Golf34 Payd31 Brid27 Part24 Cine21 Pet18 Pret15]
+  60h 0m  R9 $  122M 5.73M/s GW  23.7K +360/s W2215/L0 fight 14/14 at Sunrise Office Park [Pawn60 Dojo60 Laun54 Vape48 Secu16 Vide41 Payd38 Nail34 Tann32 Kara29 Chec26 Driv24 Pet21 Copy18]
+          BP $  354M  527K/s EQ  65.0K +3.8/s wins +10/s bank W16618/L492 done [Self65 Car63 Dojo57 Urge51 Secu11 Bail47 Tax40 Wash37 Golf34 Payd31 Brid28 Part24 Cine21 Pet18 Pret15]
+
+Offline (1 min of play, then 8h away): +$66.6K, +3.99K Goodwill, 1346W/635L, fights cleared +7, captured: none

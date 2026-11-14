@@ -1,0 +1,264 @@
+Strip Mall Warlord balance: 60h, seed 1991, checks in, converts 50% of Goodwill, acts every 10s, step 0.2s (13.8s wall)
+
+Milestones
+    0:00  Route 9: leased Pawn Shop
+    0:00  The Bypass: leased Self Storage
+    0:05  first win
+    1:40  Route 9: leased Dojo
+    5:45  Route 9: leased Laundromat
+    9:48  Route 9: leased Vape Shop
+   12:03  Route 9: CAPTURED The Parking Lot
+   12:08  Route 9: leased Security Office
+   17:18  Route 9: leased Video Rental
+   35:26  Route 9: CAPTURED Big-Box Plaza
+   35:30  Route 9: leased Payday Loans
+   41:16  Route 9: leased Nail Salon
+   52:19  Route 9: leased Tanning Salon
+  1h 13m  Route 9: leased Karaoke Bar
+  1h 18m  Route 9: CAPTURED Outlet Mall
+  1h 29m  Route 9: leased Check Cashing
+  1h 57m  Route 9: leased Driving School
+  2h 41m  Route 9: leased Pet Grooming
+  2h 51m  Route 9: CAPTURED Sunrise Office Park
+  3h 35m  Route 9: leased Copy Center
+  4h 47m  Route 9: leased Dentist
+   6h 0m  Route 9: CAPTURED Lifestyle Center
+  6h 23m  Route 9: leased Mattress Store
+  8h 33m  Route 9: leased Cell Phone Kiosk
+  11h 3m  Route 9: leased Gym
+ 14h 45m  Route 9: leased Party Supply
+ 14h 52m  Route 9: CAPTURED Pinewood Commons
+ 14h 52m  ROUTE 9 ENDING. The Bypass found. Goodwill banked 30.5K
+ 14h 56m  The Bypass: leased Car Wash
+  15h 4m  The Bypass: leased Dojo (Exit 14)
+ 15h 11m  The Bypass: leased Urgent Care
+ 15h 21m  The Bypass: CAPTURED Exit 14 Power Center
+ 15h 22m  The Bypass: leased Security Office (Bypass)
+ 15h 26m  The Bypass: leased Bail Bonds
+ 15h 55m  The Bypass: leased Tax Prep
+ 16h 11m  The Bypass: CAPTURED Corporate Campus
+ 16h 11m  The Bypass: leased Wash-n-Fold
+ 16h 22m  The Bypass: leased Golf Superstore
+ 16h 55m  The Bypass: leased Payday Loans (Bypass)
+ 17h 39m  The Bypass: leased Bridal Boutique
+ 18h 27m  The Bypass: CAPTURED Town Center, Phase II
+ 18h 52m  The Bypass: leased Party Supply (Bypass)
+ 20h 11m  The Bypass: leased Cineplex
+  23h 2m  The Bypass: leased Pet Grooming (Bypass)
+  30h 8m  The Bypass: leased Pretzel Stand
+  44h 4m  The Bypass: CAPTURED Bypass Galleria
+
+Every 30 minutes
+   30:00  R9 $ 7.17K   253/s GW      5 +0.9/s W398/L0 fight 9/10 at Big-Box Plaza [Pawn27 Dojo27 Laun21 Vape16 Secu6 Vide9]
+   1h 0m  R9 $ 22.5K 1.06K/s GW     95 +2.3/s W874/L0 fight 10/12 at Outlet Mall [Pawn32 Dojo32 Laun26 Vape20 Secu11 Vide13 Payd10 Nail6 Tann4]
+  1h 30m  R9 $ 63.2K 2.69K/s GW    577 +3.6/s W1329/L0 fight 5/14 at Sunrise Office Park [Pawn35 Dojo35 Laun29 Vape24 Secu16 Vide16 Payd13 Nail10 Tann7 Kara4 Chec1]
+   2h 0m  R9 $  206K 5.14K/s GW    979 +4.2/s W1700/L0 fight 10/14 at Sunrise Office Park [Pawn38 Dojo38 Laun32 Vape26 Secu16 Vide19 Payd16 Nail12 Tann10 Kara7 Chec4 Driv2]
+  2h 30m  R9 $  272K 7.32K/s GW    370 +4.3/s W2004/L0 fight 13/14 at Sunrise Office Park [Pawn40 Dojo40 Laun35 Vape29 Secu16 Vide22 Payd18 Nail15 Tann12 Kara10 Chec7 Driv4]
+   3h 0m  R9 $  425K 11.5K/s GW    792 +7.0/s W2383/L0 fight 3/16 at Lifestyle Center [Pawn42 Dojo42 Laun36 Vape30 Secu21 Vide23 Payd20 Nail17 Tann14 Kara11 Chec8 Driv6 Pet3]
+  3h 30m  R9 $ 1.22M 14.0K/s GW    653 +9.8/s W2781/L0 fight 8/16 at Lifestyle Center [Pawn44 Dojo44 Laun38 Vape32 Secu21 Vide25 Payd21 Nail18 Tann15 Kara13 Chec10 Driv7 Pet4]
+   4h 0m  R9 $ 1.60M 20.5K/s GW  2.38K +8.4/s W3061/L0 fight 11/16 at Lifestyle Center [Pawn45 Dojo45 Laun39 Vape33 Secu21 Vide26 Payd22 Nail19 Tann17 Kara14 Chec11 Driv8 Pet5 Copy3]
+  4h 30m  R9 $ 2.82M 24.8K/s GW  2.88K +9.4/s W3334/L0 fight 13/16 at Lifestyle Center [Pawn46 Dojo46 Laun40 Vape34 Secu21 Vide27 Payd24 Nail20 Tann18 Kara15 Chec12 Driv10 Pet7 Copy4]
+   5h 0m  R9 $ 3.12M 34.1K/s GW  4.05K +8.9/s W3569/L0 fight 14/16 at Lifestyle Center [Pawn47 Dojo47 Laun41 Vape35 Secu21 Vide28 Payd24 Nail21 Tann19 Kara16 Chec13 Driv10 Pet7 Copy5 Dent2]
+  5h 30m  R9 $ 2.97M 39.8K/s GW  2.03K +8.8/s W3785/L0 fight 15/16 at Lifestyle Center [Pawn48 Dojo48 Laun42 Vape36 Secu21 Vide29 Payd25 Nail22 Tann20 Kara17 Chec14 Driv12 Pet8 Copy6 Dent3]
+   6h 0m  R9 $  934K 45.0K/s GW  1.20K +10/s W4020/L0 the Regional Property Manager [Pawn49 Dojo49 Laun43 Vape37 Secu21 Vide30 Payd26 Nail23 Tann21 Kara18 Chec15 Driv12 Pet9 Copy7 Dent4]
+  6h 30m  R9 $ 2.44M 60.6K/s GW  1.82K +23/s W4417/L0 fight 6/18 at Pinewood Commons [Pawn49 Dojo49 Laun43 Vape38 Secu21 Vide31 Payd27 Nail24 Tann21 Kara18 Chec16 Driv13 Pet10 Copy7 Dent4 Matt2]
+   7h 0m  R9 $ 8.21M 66.9K/s GW  8.70K +15/s W4646/L0 fight 8/18 at Pinewood Commons [Pawn50 Dojo50 Laun44 Vape39 Secu21 Vide31 Payd28 Nail25 Tann22 Kara19 Chec16 Driv14 Pet11 Copy8 Dent5 Matt2]
+  7h 30m  R9 $ 10.8M 75.0K/s GW  4.06K +15/s W4847/L0 fight 10/18 at Pinewood Commons [Pawn51 Dojo51 Laun45 Vape39 Secu21 Vide32 Payd28 Nail25 Tann23 Kara20 Chec17 Driv15 Pet11 Copy9 Dent6 Matt3]
+   8h 0m  R9 $ 13.3M 82.8K/s GW  13.3K +12/s W5002/L0 fight 11/18 at Pinewood Commons [Pawn51 Dojo51 Laun46 Vape40 Secu21 Vide33 Payd29 Nail26 Tann23 Kara21 Chec18 Driv15 Pet12 Copy9 Dent7 Matt4]
+  8h 30m  R9 $ 51.3M 87.9K/s GW  10.1K +13/s W5159/L0 fight 12/18 at Pinewood Commons [Pawn52 Dojo52 Laun46 Vape40 Secu21 Vide33 Payd30 Nail26 Tann24 Kara21 Chec18 Driv16 Pet13 Copy10 Dent7 Matt4]
+   9h 0m  R9 $ 7.58M  118K/s GW  7.81K +14/s W5313/L0 fight 13/18 at Pinewood Commons [Pawn52 Dojo52 Laun47 Vape41 Secu21 Vide34 Payd30 Nail27 Tann24 Kara22 Chec19 Driv16 Pet13 Copy10 Dent8 Matt5 Cell2]
+  9h 30m  R9 $ 22.4M  128K/s GW  17.2K +15/s W5469/L0 fight 13/18 at Pinewood Commons [Pawn53 Dojo53 Laun47 Vape41 Secu21 Vide34 Payd31 Nail28 Tann25 Kara22 Chec19 Driv17 Pet14 Copy11 Dent8 Matt5 Cell3]
+  10h 0m  R9 $ 17.7M  137K/s GW  9.63K +16/s W5625/L0 fight 14/18 at Pinewood Commons [Pawn54 Dojo54 Laun48 Vape42 Secu21 Vide35 Payd31 Nail28 Tann25 Kara23 Chec20 Driv17 Pet14 Copy11 Dent9 Matt6 Cell3]
+ 10h 30m  R9 $ 23.9M  148K/s GW  17.2K +14/s W5759/L0 fight 15/18 at Pinewood Commons [Pawn54 Dojo54 Laun48 Vape43 Secu21 Vide35 Payd32 Nail29 Tann26 Kara23 Chec20 Driv18 Pet15 Copy12 Dent9 Matt6 Cell4]
+  11h 0m  R9 $  124M  156K/s GW  21.8K +12/s W5874/L0 fight 15/18 at Pinewood Commons [Pawn54 Dojo54 Laun48 Vape43 Secu21 Vide36 Payd32 Nail29 Tann26 Kara24 Chec21 Driv18 Pet15 Copy12 Dent10 Matt7 Cell4]
+ 11h 30m  R9 $ 27.6M  203K/s GW  23.8K +14/s W5999/L0 fight 16/18 at Pinewood Commons [Pawn55 Dojo55 Laun49 Vape43 Secu21 Vide36 Payd32 Nail29 Tann27 Kara24 Chec21 Driv19 Pet15 Copy13 Dent10 Matt7 Cell4 Gym2]
+  12h 0m  R9 $ 5.84M  218K/s GW  6.02K +16/s W6140/L0 fight 16/18 at Pinewood Commons [Pawn55 Dojo55 Laun49 Vape44 Secu21 Vide37 Payd33 Nail30 Tann27 Kara25 Chec22 Driv19 Pet16 Copy13 Dent10 Matt8 Cell5 Gym2]
+ 12h 30m  R9 $ 33.7M  232K/s GW  11.0K +16/s W6271/L0 fight 17/18 at Pinewood Commons [Pawn56 Dojo56 Laun50 Vape44 Secu21 Vide37 Payd33 Nail30 Tann28 Kara25 Chec22 Driv19 Pet16 Copy14 Dent11 Matt8 Cell5 Gym3]
+  13h 0m  R9 $ 56.9M  247K/s GW  17.0K +16/s W6404/L0 fight 17/18 at Pinewood Commons [Pawn56 Dojo56 Laun50 Vape45 Secu21 Vide37 Payd34 Nail31 Tann28 Kara25 Chec22 Driv20 Pet17 Copy14 Dent11 Matt9 Cell6 Gym3]
+ 13h 30m  R9 $ 35.4M  262K/s GW  15.0K +16/s W6529/L0 fight 18/18 at Pinewood Commons [Pawn57 Dojo56 Laun51 Vape45 Secu21 Vide38 Payd34 Nail31 Tann28 Kara26 Chec23 Driv20 Pet17 Copy14 Dent12 Matt9 Cell6 Gym4]
+  14h 0m  R9 $ 67.3M  272K/s GW  13.1K +16/s W6651/L0 fight 18/18 at Pinewood Commons [Pawn57 Dojo57 Laun51 Vape45 Secu21 Vide38 Payd35 Nail31 Tann29 Kara26 Chec23 Driv21 Pet18 Copy15 Dent12 Matt9 Cell6 Gym4]
+ 14h 30m  R9 $ 84.5M  286K/s GW  9.89K +15/s W6768/L5 The Developer [Pawn57 Dojo57 Laun51 Vape46 Secu21 Vide39 Payd35 Nail32 Tann29 Kara26 Chec24 Driv21 Pet18 Copy15 Dent12 Matt10 Cell7 Gym4]
+  15h 0m  R9 $ 40.7M  367K/s GW  7.23K +16/s W6861/L21 done [Pawn57 Dojo57 Laun51 Vape46 Secu21 Vide39 Payd35 Nail32 Tann29 Kara27 Chec24 Driv21 Pet18 Copy15 Dent13 Matt10 Cell7 Gym4 Part2]
+          BP $   918    69/s EQ     26 +0.1/s wins +1.8/s bank W133/L0 fight 5/10 at Exit 14 Power Center [Self21 Car19]
+ 15h 30m  R9 $ 21.1M  384K/s GW  4.91K +22/s W7000/L21 done [Pawn58 Dojo58 Laun52 Vape46 Secu21 Vide39 Payd35 Nail32 Tann30 Kara27 Chec24 Driv22 Pet18 Copy16 Dent13 Matt10 Cell7 Gym5 Part2]
+          BP $ 32.5K   704/s EQ    328 +0.3/s wins +2.4/s bank W585/L0 fight 5/12 at Corporate Campus [Self31 Car29 Dojo23 Urge17 Secu6 Bail13]
+  16h 0m  R9 $ 84.8M  401K/s GW  4.81K +23/s W7142/L21 done [Pawn58 Dojo58 Laun52 Vape47 Secu21 Vide39 Payd36 Nail33 Tann30 Kara27 Chec24 Driv22 Pet19 Copy16 Dent13 Matt11 Cell8 Gym5 Part2]
+          BP $ 29.3K 1.62K/s EQ    104 +0.2/s wins +2.3/s bank W1017/L0 fight 11/12 at Corporate Campus [Self35 Car33 Dojo27 Urge22 Secu6 Bail18 Tax10]
+ 16h 30m  R9 $  106M  431K/s GW  4.93K +23/s W7286/L21 done [Pawn58 Dojo58 Laun52 Vape47 Secu21 Vide40 Payd36 Nail33 Tann30 Kara28 Chec25 Driv22 Pet19 Copy16 Dent14 Matt11 Cell8 Gym6 Part3]
+          BP $  182K 3.48K/s EQ    642 +0.4/s wins +2.4/s bank W1461/L0 fight 6/14 at Town Center, Phase II [Self38 Car35 Dojo29 Urge24 Secu11 Bail20 Tax13 Wash10 Golf6]
+  17h 0m  R9 $ 80.0M  441K/s GW  4.76K +23/s W7432/L21 done [Pawn59 Dojo59 Laun53 Vape47 Secu21 Vide40 Payd36 Nail33 Tann31 Kara28 Chec25 Driv23 Pet19 Copy17 Dent14 Matt11 Cell8 Gym6 Part3]
+          BP $  208K 5.79K/s EQ    783 +0.5/s wins +2.4/s bank W1759/L0 fight 9/14 at Town Center, Phase II [Self40 Car38 Dojo32 Urge26 Secu11 Bail22 Tax15 Wash12 Golf8 Payd5]
+ 17h 30m  R9 $ 23.9M  462K/s GW  5.22K +24/s W7581/L21 done [Pawn59 Dojo59 Laun53 Vape48 Secu21 Vide40 Payd37 Nail34 Tann31 Kara28 Chec25 Driv23 Pet20 Copy17 Dent14 Matt12 Cell9 Gym6 Part3]
+          BP $  845K 7.57K/s EQ  1.34K +0.5/s wins +2.4/s bank W2006/L0 fight 12/14 at Town Center, Phase II [Self42 Car40 Dojo33 Urge28 Secu11 Bail24 Tax17 Wash14 Golf10 Payd7]
+  18h 0m  R9 $ 72.0M  485K/s GW  4.95K +24/s W7731/L21 done [Pawn59 Dojo59 Laun53 Vape48 Secu21 Vide41 Payd37 Nail34 Tann31 Kara29 Chec26 Driv23 Pet20 Copy17 Dent15 Matt12 Cell9 Gym6 Part4]
+          BP $ 1.19M 11.5K/s EQ    776 +0.4/s wins +2.5/s bank W2206/L0 fight 13/14 at Town Center, Phase II [Self43 Car41 Dojo35 Urge29 Secu11 Bail25 Tax18 Wash15 Golf12 Payd9 Brid6]
+ 18h 30m  R9 $ 60.3M  502K/s GW  5.25K +25/s W7885/L21 done [Pawn60 Dojo60 Laun54 Vape48 Secu21 Vide41 Payd37 Nail34 Tann31 Kara29 Chec26 Driv23 Pet20 Copy18 Dent15 Matt12 Cell9 Gym7 Part4]
+          BP $  517K 13.7K/s EQ  1.94K +0.7/s wins +2.5/s bank W2445/L0 fight 1/16 at Bypass Galleria [Self45 Car42 Dojo36 Urge31 Secu11 Bail27 Tax20 Wash16 Golf13 Payd10 Brid7]
+  19h 0m  R9 $ 42.3M  521K/s GW  5.36K +26/s W8044/L21 done [Pawn60 Dojo60 Laun54 Vape48 Secu21 Vide41 Payd38 Nail34 Tann32 Kara29 Chec26 Driv24 Pet21 Copy18 Dent15 Matt12 Cell10 Gym7 Part4]
+          BP $  666K 19.1K/s EQ  1.39K +1.0/s wins +2.6/s bank W2703/L0 fight 5/16 at Bypass Galleria [Self45 Car43 Dojo37 Urge32 Secu11 Bail28 Tax21 Wash17 Golf14 Payd11 Brid8 Part5]
+ 19h 30m  R9 $  182M  534K/s GW  5.45K +26/s W8205/L21 done [Pawn60 Dojo60 Laun54 Vape49 Secu21 Vide41 Payd38 Nail35 Tann32 Kara29 Chec27 Driv24 Pet21 Copy18 Dent15 Matt13 Cell10 Gym7 Part4]
+          BP $ 2.90M 22.0K/s EQ  7.35K +0.7/s wins +2.6/s bank W2843/L0 fight 7/16 at Bypass Galleria [Self46 Car44 Dojo38 Urge33 Secu11 Bail29 Tax22 Wash18 Golf15 Payd12 Brid9 Part6]
+  20h 0m  R9 $ 52.1M  570K/s GW  5.43K +26/s W8369/L21 done [Pawn60 Dojo60 Laun54 Vape49 Secu21 Vide42 Payd38 Nail35 Tann32 Kara30 Chec27 Driv24 Pet21 Copy18 Dent16 Matt13 Cell10 Gym8 Part5]
+          BP $ 3.08M 25.1K/s EQ  13.7K +0.9/s wins +2.7/s bank W2991/L0 fight 8/16 at Bypass Galleria [Self47 Car45 Dojo39 Urge34 Secu11 Bail30 Tax22 Wash19 Golf16 Payd13 Brid10 Part7]
+ 20h 30m  R9 $  104M  578K/s GW  5.56K +27/s W8536/L21 done [Pawn61 Dojo61 Laun55 Vape49 Secu21 Vide42 Payd38 Nail35 Tann32 Kara30 Chec27 Driv24 Pet21 Copy19 Dent16 Matt13 Cell10 Gym8 Part5]
+          BP $ 2.64M 33.4K/s EQ  3.55K +0.5/s wins +2.7/s bank W3073/L21 fight 9/16 at Bypass Galleria [Self48 Car46 Dojo40 Urge34 Secu11 Bail30 Tax23 Wash20 Golf17 Payd14 Brid11 Part7 Cine4]
+  21h 0m  R9 $  155M  589K/s GW  5.55K +28/s W8707/L21 done [Pawn61 Dojo61 Laun55 Vape49 Secu21 Vide42 Payd39 Nail35 Tann33 Kara30 Chec27 Driv25 Pet22 Copy19 Dent16 Matt13 Cell10 Gym8 Part5]
+          BP $ 7.38M 36.8K/s EQ  9.16K +0.3/s wins +2.8/s bank W3124/L54 fight 9/16 at Bypass Galleria [Self49 Car47 Dojo41 Urge35 Secu11 Bail31 Tax24 Wash21 Golf17 Payd14 Brid11 Part8 Cine5]
+ 21h 30m  R9 $  161M  611K/s GW  5.71K +28/s W8881/L21 done [Pawn61 Dojo61 Laun55 Vape50 Secu21 Vide42 Payd39 Nail36 Tann33 Kara30 Chec27 Driv25 Pet22 Copy19 Dent16 Matt14 Cell11 Gym8 Part5]
+          BP $ 3.84M 41.4K/s EQ  15.1K +0.4/s wins +2.8/s bank W3197/L75 fight 9/16 at Bypass Galleria [Self50 Car47 Dojo41 Urge36 Secu11 Bail32 Tax25 Wash21 Golf18 Payd15 Brid12 Part9 Cine6]
+  22h 0m  R9 $  136M  634K/s GW  5.71K +28/s W9057/L21 done [Pawn61 Dojo61 Laun55 Vape50 Secu21 Vide43 Payd39 Nail36 Tann33 Kara31 Chec28 Driv25 Pet22 Copy19 Dent16 Matt14 Cell11 Gym8 Part6]
+          BP $ 8.95M 44.5K/s EQ  21.7K +0.8/s wins +2.9/s bank W3306/L76 fight 10/16 at Bypass Galleria [Self50 Car48 Dojo42 Urge37 Secu11 Bail32 Tax25 Wash22 Golf19 Payd16 Brid13 Part9 Cine6]
+ 22h 30m  R9 $  334M  657K/s GW  5.84K +29/s W9234/L21 done [Pawn61 Dojo61 Laun56 Vape50 Secu21 Vide43 Payd39 Nail36 Tann33 Kara31 Chec28 Driv25 Pet22 Copy19 Dent17 Matt14 Cell11 Gym9 Part6]
+          BP $ 10.6M 48.3K/s EQ  27.9K +0.6/s wins +2.9/s bank W3380/L96 fight 11/16 at Bypass Galleria [Self51 Car49 Dojo42 Urge37 Secu11 Bail33 Tax26 Wash23 Golf19 Payd16 Brid13 Part10 Cine7]
+  23h 0m  R9 $  197M  667K/s GW  6.12K +30/s W9420/L21 done [Pawn62 Dojo62 Laun56 Vape50 Secu21 Vide43 Payd39 Nail36 Tann34 Kara31 Chec28 Driv25 Pet22 Copy20 Dent17 Matt14 Cell11 Gym9 Part6]
+          BP $ 14.5M 51.6K/s EQ  34.4K +0.6/s wins +3.0/s bank W3454/L116 fight 11/16 at Bypass Galleria [Self51 Car49 Dojo43 Urge38 Secu11 Bail34 Tax26 Wash23 Golf20 Payd17 Brid14 Part10 Cine7]
+ 23h 30m  R9 $ 43.7M  689K/s GW  6.22K +30/s W9607/L21 done [Pawn62 Dojo62 Laun56 Vape50 Secu21 Vide43 Payd40 Nail36 Tann34 Kara31 Chec28 Driv26 Pet23 Copy20 Dent17 Matt14 Cell12 Gym9 Part6]
+          BP $ 8.90M 67.5K/s EQ    328 +0.5/s wins +3.1/s bank W3522/L141 fight 11/16 at Bypass Galleria [Self52 Car49 Dojo43 Urge38 Secu11 Bail34 Tax27 Wash24 Golf20 Payd17 Brid14 Part11 Cine8 Pet5]
+  24h 0m  R9 $  190M  702K/s GW  6.65K +31/s W9798/L21 done [Pawn62 Dojo62 Laun56 Vape51 Secu21 Vide43 Payd40 Nail37 Tann34 Kara31 Chec28 Driv26 Pet23 Copy20 Dent17 Matt15 Cell12 Gym9 Part6]
+          BP $ 18.8M 71.1K/s EQ    206 +0.5/s wins +3.1/s bank W3582/L170 fight 12/16 at Bypass Galleria [Self52 Car50 Dojo44 Urge39 Secu11 Bail34 Tax27 Wash24 Golf21 Payd18 Brid15 Part11 Cine8 Pet5]
+ 24h 30m  R9 $  333M  726K/s GW  6.60K +32/s W9994/L21 done [Pawn62 Dojo62 Laun56 Vape51 Secu21 Vide44 Payd40 Nail37 Tann34 Kara31 Chec29 Driv26 Pet23 Copy20 Dent17 Matt15 Cell12 Gym9 Part7]
+          BP $ 6.22M 77.6K/s EQ    150 +0.7/s wins +3.2/s bank W3670/L183 fight 12/16 at Bypass Galleria [Self53 Car50 Dojo44 Urge39 Secu11 Bail35 Tax28 Wash25 Golf21 Payd18 Brid15 Part12 Cine9 Pet6]
+  25h 0m  R9 $  390M  754K/s GW  6.65K +31/s W10189/L21 done [Pawn62 Dojo62 Laun56 Vape51 Secu21 Vide44 Payd40 Nail37 Tann34 Kara32 Chec29 Driv26 Pet23 Copy20 Dent18 Matt15 Cell12 Gym10 Part7]
+          BP $ 20.6M 81.3K/s EQ  6.95K +0.6/s wins +3.2/s bank W3740/L209 fight 13/16 at Bypass Galleria [Self53 Car51 Dojo45 Urge39 Secu11 Bail35 Tax28 Wash25 Golf22 Payd19 Brid16 Part12 Cine9 Pet6]
+ 25h 30m  R9 $  417M  757K/s GW  6.62K +32/s W10390/L21 done [Pawn63 Dojo63 Laun57 Vape51 Secu21 Vide44 Payd40 Nail37 Tann34 Kara32 Chec29 Driv26 Pet23 Copy20 Dent18 Matt15 Cell12 Gym10 Part7]
+          BP $ 6.56M 88.1K/s EQ  13.8K +0.5/s wins +3.3/s bank W3800/L238 fight 13/16 at Bypass Galleria [Self53 Car51 Dojo45 Urge40 Secu11 Bail36 Tax29 Wash25 Golf22 Payd19 Brid16 Part13 Cine10 Pet7]
+  26h 0m  R9 $  445M  771K/s GW  6.86K +33/s W10594/L21 done [Pawn63 Dojo63 Laun57 Vape51 Secu21 Vide44 Payd40 Nail37 Tann35 Kara32 Chec29 Driv27 Pet23 Copy21 Dent18 Matt15 Cell12 Gym10 Part7]
+          BP $ 6.52M 91.1K/s EQ  20.6K +0.5/s wins +3.3/s bank W3853/L268 fight 13/16 at Bypass Galleria [Self54 Car52 Dojo46 Urge40 Secu11 Bail36 Tax29 Wash26 Golf23 Payd19 Brid16 Part13 Cine10 Pet7]
+ 26h 30m  R9 $  462M  793K/s GW  6.66K +33/s W10799/L21 done [Pawn63 Dojo63 Laun57 Vape51 Secu21 Vide44 Payd41 Nail37 Tann35 Kara32 Chec29 Driv27 Pet24 Copy21 Dent18 Matt15 Cell13 Gym10 Part7]
+          BP $ 29.2M 94.6K/s EQ  27.7K +0.6/s wins +3.4/s bank W3918/L293 fight 13/16 at Bypass Galleria [Self54 Car52 Dojo46 Urge41 Secu11 Bail37 Tax29 Wash26 Golf23 Payd20 Brid17 Part13 Cine10 Pet7]
+  27h 0m  R9 $  414M  808K/s GW  6.90K +33/s W11006/L21 done [Pawn63 Dojo63 Laun57 Vape52 Secu21 Vide44 Payd41 Nail38 Tann35 Kara32 Chec29 Driv27 Pet24 Copy21 Dent18 Matt16 Cell13 Gym10 Part7]
+          BP $ 16.5M  102K/s EQ  34.9K +0.6/s wins +3.4/s bank W3984/L315 fight 14/16 at Bypass Galleria [Self55 Car52 Dojo46 Urge41 Secu11 Bail37 Tax30 Wash26 Golf23 Payd20 Brid17 Part14 Cine11 Pet8]
+ 27h 30m  R9 $  351M  835K/s GW  6.87K +34/s W11214/L21 done [Pawn63 Dojo63 Laun57 Vape52 Secu21 Vide45 Payd41 Nail38 Tann35 Kara32 Chec30 Driv27 Pet24 Copy21 Dent18 Matt16 Cell13 Gym10 Part8]
+          BP $ 25.6M  105K/s EQ  41.9K +0.5/s wins +3.4/s bank W4041/L347 fight 13/16 at Bypass Galleria [Self55 Car53 Dojo47 Urge41 Secu11 Bail37 Tax30 Wash27 Golf24 Payd20 Brid17 Part14 Cine11 Pet8]
+  28h 0m  R9 $  152M  868K/s GW  6.94K +34/s W11422/L21 done [Pawn63 Dojo63 Laun57 Vape52 Secu21 Vide45 Payd41 Nail38 Tann35 Kara33 Chec30 Driv27 Pet24 Copy21 Dent19 Matt16 Cell13 Gym11 Part8]
+          BP $ 22.8M  109K/s EQ  48.9K +0.5/s wins +3.4/s bank W4093/L380 fight 13/16 at Bypass Galleria [Self55 Car53 Dojo47 Urge42 Secu11 Bail38 Tax30 Wash27 Golf24 Payd21 Brid18 Part14 Cine11 Pet8]
+ 28h 30m  R9 $  517M  870K/s GW  6.84K +34/s W11630/L21 done [Pawn64 Dojo63 Laun58 Vape52 Secu21 Vide45 Payd41 Nail38 Tann35 Kara33 Chec30 Driv27 Pet24 Copy21 Dent19 Matt16 Cell13 Gym11 Part8]
+          BP $ 22.5M  117K/s EQ  56.1K +0.6/s wins +3.4/s bank W4156/L406 fight 13/16 at Bypass Galleria [Self55 Car53 Dojo47 Urge42 Secu11 Bail38 Tax31 Wash27 Golf24 Payd21 Brid18 Part15 Cine12 Pet9]
+  29h 0m  R9 $  277M  882K/s GW  7.14K +34/s W11840/L21 done [Pawn64 Dojo64 Laun58 Vape52 Secu21 Vide45 Payd41 Nail38 Tann36 Kara33 Chec30 Driv27 Pet24 Copy22 Dent19 Matt16 Cell13 Gym11 Part8]
+          BP $ 3.56M  119K/s EQ  63.3K +0.6/s wins +3.4/s bank W4216/L435 fight 14/16 at Bypass Galleria [Self56 Car54 Dojo48 Urge42 Secu11 Bail38 Tax31 Wash28 Golf24 Payd21 Brid18 Part15 Cine12 Pet9]
+ 29h 30m  R9 $ 27.1M  896K/s GW  6.72K +34/s W12049/L21 done [Pawn64 Dojo64 Laun58 Vape52 Secu21 Vide45 Payd42 Nail38 Tann36 Kara33 Chec30 Driv28 Pet25 Copy22 Dent19 Matt16 Cell13 Gym11 Part8]
+          BP $ 27.7M  124K/s EQ  70.5K +0.6/s wins +3.5/s bank W4276/L462 fight 14/16 at Bypass Galleria [Self56 Car54 Dojo48 Urge42 Secu11 Bail38 Tax31 Wash28 Golf25 Payd22 Brid19 Part15 Cine12 Pet9]
+  30h 0m  R9 $  353M  914K/s GW  6.91K +34/s W12260/L21 done [Pawn64 Dojo64 Laun58 Vape52 Secu21 Vide45 Payd42 Nail39 Tann36 Kara33 Chec30 Driv28 Pet25 Copy22 Dent19 Matt16 Cell14 Gym11 Part8]
+          BP $ 53.5M  127K/s EQ  78.0K +0.7/s wins +3.4/s bank W4347/L482 fight 14/16 at Bypass Galleria [Self56 Car54 Dojo48 Urge43 Secu11 Bail39 Tax31 Wash28 Golf25 Payd22 Brid19 Part16 Cine12 Pet9]
+ 30h 30m  R9 $  668M  929K/s GW  7.00K +34/s W12472/L21 done [Pawn64 Dojo64 Laun58 Vape53 Secu21 Vide45 Payd42 Nail39 Tann36 Kara33 Chec30 Driv28 Pet25 Copy22 Dent19 Matt17 Cell14 Gym11 Part8]
+          BP $ 34.3M  160K/s EQ  2.16K +0.6/s wins +3.5/s bank W4404/L509 fight 15/16 at Bypass Galleria [Self56 Car54 Dojo48 Urge43 Secu11 Bail39 Tax31 Wash28 Golf25 Payd22 Brid19 Part16 Cine13 Pet9 Pret7]
+  31h 0m  R9 $  286M  961K/s GW  7.21K +34/s W12685/L21 done [Pawn64 Dojo64 Laun58 Vape53 Secu21 Vide46 Payd42 Nail39 Tann36 Kara33 Chec31 Driv28 Pet25 Copy22 Dent19 Matt17 Cell14 Gym11 Part9]
+          BP $ 40.9M  166K/s EQ    143 +0.6/s wins +3.5/s bank W4459/L532 fight 15/16 at Bypass Galleria [Self57 Car54 Dojo48 Urge43 Secu11 Bail39 Tax32 Wash29 Golf25 Payd22 Brid19 Part16 Cine13 Pet10 Pret7]
+ 31h 30m  R9 $  509M  976K/s GW  6.70K +34/s W12896/L21 done [Pawn64 Dojo64 Laun58 Vape53 Secu21 Vide46 Payd42 Nail39 Tann36 Kara34 Chec31 Driv28 Pet25 Copy22 Dent20 Matt17 Cell14 Gym11 Part9]
+          BP $ 5.72M  170K/s EQ    524 +0.7/s wins +3.5/s bank W4524/L549 fight 15/16 at Bypass Galleria [Self57 Car55 Dojo49 Urge43 Secu11 Bail39 Tax32 Wash29 Golf26 Payd23 Brid19 Part16 Cine13 Pet10 Pret7]
+  32h 0m  R9 $  689M  999K/s GW  6.97K +34/s W13108/L21 done [Pawn64 Dojo64 Laun59 Vape53 Secu21 Vide46 Payd42 Nail39 Tann36 Kara34 Chec31 Driv28 Pet25 Copy22 Dent20 Matt17 Cell14 Gym12 Part9]
+          BP $ 48.0M  174K/s EQ    117 +0.8/s wins +3.5/s bank W4599/L559 fight 15/16 at Bypass Galleria [Self57 Car55 Dojo49 Urge44 Secu11 Bail40 Tax32 Wash29 Golf26 Payd23 Brid20 Part16 Cine13 Pet10 Pret7]
+ 32h 30m  R9 $ 46.4M 1.01M/s GW  7.48K +35/s W13325/L21 done [Pawn65 Dojo65 Laun59 Vape53 Secu21 Vide46 Payd42 Nail39 Tann36 Kara34 Chec31 Driv28 Pet25 Copy23 Dent20 Matt17 Cell14 Gym12 Part9]
+          BP $ 5.64M  188K/s EQ    145 +1.0/s wins +3.5/s bank W4684/L566 fight 16/16 at Bypass Galleria [Self57 Car55 Dojo49 Urge44 Secu11 Bail40 Tax32 Wash29 Golf26 Payd23 Brid20 Part17 Cine14 Pet11 Pret8]
+  33h 0m  R9 $  224M 1.02M/s GW  7.08K +35/s W13542/L21 done [Pawn65 Dojo65 Laun59 Vape53 Secu21 Vide46 Payd42 Nail39 Tann37 Kara34 Chec31 Driv29 Pet25 Copy23 Dent20 Matt17 Cell14 Gym12 Part9]
+          BP $ 49.9M  191K/s EQ  3.32K +1.1/s wins +3.6/s bank W4778/L573 fight 16/16 at Bypass Galleria [Self58 Car55 Dojo49 Urge44 Secu11 Bail40 Tax33 Wash30 Golf26 Payd23 Brid20 Part17 Cine14 Pet11 Pret8]
+ 33h 30m  R9 $  399M 1.03M/s GW  7.48K +35/s W13760/L21 done [Pawn65 Dojo65 Laun59 Vape53 Secu21 Vide46 Payd43 Nail39 Tann37 Kara34 Chec31 Driv29 Pet26 Copy23 Dent20 Matt17 Cell14 Gym12 Part9]
+          BP $ 61.2M  194K/s EQ  1.25K +1.1/s wins +3.6/s bank W4874/L584 fight 16/16 at Bypass Galleria [Self58 Car56 Dojo50 Urge44 Secu11 Bail40 Tax33 Wash30 Golf27 Payd23 Brid20 Part17 Cine14 Pet11 Pret8]
+  34h 0m  R9 $  517M 1.05M/s GW  7.13K +35/s W13979/L21 done [Pawn65 Dojo65 Laun59 Vape53 Secu21 Vide46 Payd43 Nail40 Tann37 Kara34 Chec31 Driv29 Pet26 Copy23 Dent20 Matt17 Cell15 Gym12 Part9]
+          BP $ 55.3M  199K/s EQ  4.17K +0.9/s wins +3.6/s bank W4953/L610 The Chairman [Self58 Car56 Dojo50 Urge45 Secu11 Bail40 Tax33 Wash30 Golf27 Payd24 Brid21 Part17 Cine14 Pet11 Pret8]
+ 34h 30m  R9 $  609M 1.07M/s GW  7.58K +36/s W14204/L21 done [Pawn65 Dojo65 Laun59 Vape54 Secu21 Vide46 Payd43 Nail40 Tann37 Kara34 Chec31 Driv29 Pet26 Copy23 Dent20 Matt18 Cell15 Gym12 Part9]
+          BP $ 53.4M  208K/s EQ    267 +0.9/s wins +3.7/s bank W5027/L641 fight 16/16 at Bypass Galleria [Self58 Car56 Dojo50 Urge45 Secu11 Bail41 Tax33 Wash30 Golf27 Payd24 Brid21 Part18 Cine14 Pet11 Pret9]
+  35h 0m  R9 $  710M 1.08M/s GW  7.52K +37/s W14430/L21 done [Pawn65 Dojo65 Laun59 Vape54 Secu21 Vide47 Payd43 Nail40 Tann37 Kara34 Chec32 Driv29 Pet26 Copy23 Dent20 Matt18 Cell15 Gym12 Part9]
+          BP $ 58.0M  217K/s EQ  1.79K +0.9/s wins +3.7/s bank W5106/L666 The Chairman [Self58 Car56 Dojo50 Urge45 Secu11 Bail41 Tax34 Wash30 Golf27 Payd24 Brid21 Part18 Cine15 Pet12 Pret9]
+ 35h 30m  R9 $  729M 1.11M/s GW  7.55K +37/s W14656/L21 done [Pawn65 Dojo65 Laun59 Vape54 Secu21 Vide47 Payd43 Nail40 Tann37 Kara35 Chec32 Driv29 Pet26 Copy23 Dent20 Matt18 Cell15 Gym12 Part10]
+          BP $ 34.1M  220K/s EQ  3.30K +0.9/s wins +3.7/s bank W5185/L695 fight 16/16 at Bypass Galleria [Self59 Car57 Dojo50 Urge45 Secu11 Bail41 Tax34 Wash31 Golf27 Payd24 Brid21 Part18 Cine15 Pet12 Pret9]
+  36h 0m  R9 $  625M 1.15M/s GW  7.44K +37/s W14883/L21 done [Pawn65 Dojo65 Laun59 Vape54 Secu21 Vide47 Payd43 Nail40 Tann37 Kara35 Chec32 Driv29 Pet26 Copy23 Dent21 Matt18 Cell15 Gym13 Part10]
+          BP $  129M  223K/s EQ  4.95K +1.0/s wins +3.7/s bank W5268/L722 fight 16/16 at Bypass Galleria [Self59 Car57 Dojo51 Urge45 Secu11 Bail41 Tax34 Wash31 Golf28 Payd24 Brid21 Part18 Cine15 Pet12 Pret9]
+ 36h 30m  R9 $  508M 1.15M/s GW  7.70K +37/s W15110/L21 done [Pawn66 Dojo65 Laun60 Vape54 Secu21 Vide47 Payd43 Nail40 Tann37 Kara35 Chec32 Driv29 Pet26 Copy23 Dent21 Matt18 Cell15 Gym13 Part10]
+          BP $ 50.3M  229K/s EQ  6.46K +0.9/s wins +3.7/s bank W5347/L752 The Chairman [Self59 Car57 Dojo51 Urge46 Secu11 Bail41 Tax34 Wash31 Golf28 Payd25 Brid22 Part18 Cine15 Pet12 Pret9]
+  37h 0m  R9 $  381M 1.16M/s GW  7.45K +38/s W15344/L21 done [Pawn66 Dojo66 Laun60 Vape54 Secu21 Vide47 Payd43 Nail40 Tann37 Kara35 Chec32 Driv29 Pet26 Copy24 Dent21 Matt18 Cell15 Gym13 Part10]
+          BP $  138M  233K/s EQ  6.20K +0.9/s wins +3.9/s bank W5426/L782 fight 16/16 at Bypass Galleria [Self59 Car57 Dojo51 Urge46 Secu11 Bail42 Tax34 Wash31 Golf28 Payd25 Brid22 Part19 Cine15 Pet12 Pret9]
+ 37h 30m  R9 $  257M 1.17M/s GW  7.70K +38/s W15580/L21 done [Pawn66 Dojo66 Laun60 Vape54 Secu21 Vide47 Payd43 Nail40 Tann38 Kara35 Chec32 Driv30 Pet26 Copy24 Dent21 Matt18 Cell15 Gym13 Part10]
+          BP $ 71.2M  248K/s EQ  5.94K +0.9/s wins +3.9/s bank W5505/L812 fight 16/16 at Bypass Galleria [Self59 Car57 Dojo51 Urge46 Secu11 Bail42 Tax34 Wash31 Golf28 Payd25 Brid22 Part19 Cine16 Pet13 Pret10]
+  38h 0m  R9 $  122M 1.18M/s GW  7.71K +38/s W15816/L21 done [Pawn66 Dojo66 Laun60 Vape54 Secu21 Vide47 Payd44 Nail40 Tann38 Kara35 Chec32 Driv30 Pet27 Copy24 Dent21 Matt18 Cell15 Gym13 Part10]
+          BP $  164M  251K/s EQ  5.79K +1.0/s wins +3.9/s bank W5588/L840 The Chairman [Self60 Car57 Dojo51 Urge46 Secu11 Bail42 Tax35 Wash31 Golf28 Payd25 Brid22 Part19 Cine16 Pet13 Pret10]
+ 38h 30m  R9 $ 1.11B 1.21M/s GW  7.72K +38/s W16053/L21 done [Pawn66 Dojo66 Laun60 Vape54 Secu21 Vide47 Payd44 Nail40 Tann38 Kara35 Chec32 Driv30 Pet27 Copy24 Dent21 Matt18 Cell16 Gym13 Part10]
+          BP $ 33.5M  254K/s EQ  5.71K +1.0/s wins +3.9/s bank W5673/L869 fight 16/16 at Bypass Galleria [Self60 Car58 Dojo52 Urge46 Secu11 Bail42 Tax35 Wash32 Golf28 Payd25 Brid22 Part19 Cine16 Pet13 Pret10]
+  39h 0m  R9 $  859M 1.21M/s GW  7.85K +39/s W16292/L21 done [Pawn66 Dojo66 Laun60 Vape55 Secu21 Vide47 Payd44 Nail41 Tann38 Kara35 Chec32 Driv30 Pet27 Copy24 Dent21 Matt18 Cell16 Gym13 Part10]
+          BP $ 69.5M  259K/s EQ  5.62K +1.0/s wins +3.9/s bank W5755/L898 The Chairman [Self60 Car58 Dojo52 Urge46 Secu11 Bail42 Tax35 Wash32 Golf29 Payd26 Brid22 Part19 Cine16 Pet13 Pret10]
+ 39h 30m  R9 $  600M 1.23M/s GW  8.04K +40/s W16536/L21 done [Pawn66 Dojo66 Laun60 Vape55 Secu21 Vide47 Payd44 Nail41 Tann38 Kara35 Chec33 Driv30 Pet27 Copy24 Dent21 Matt19 Cell16 Gym13 Part10]
+          BP $  102M  263K/s EQ  3.18K +1.1/s wins +4.0/s bank W5845/L924 The Chairman [Self60 Car58 Dojo52 Urge47 Secu11 Bail42 Tax35 Wash32 Golf29 Payd26 Brid23 Part19 Cine16 Pet13 Pret10]
+  40h 0m  R9 $  292M 1.27M/s GW  7.98K +39/s W16779/L21 done [Pawn66 Dojo66 Laun60 Vape55 Secu21 Vide48 Payd44 Nail41 Tann38 Kara35 Chec33 Driv30 Pet27 Copy24 Dent21 Matt19 Cell16 Gym13 Part11]
+          BP $  137M  268K/s EQ    568 +1.0/s wins +4.0/s bank W5927/L953 fight 16/16 at Bypass Galleria [Self60 Car58 Dojo52 Urge47 Secu11 Bail43 Tax35 Wash32 Golf29 Payd26 Brid23 Part20 Cine16 Pet13 Pret10]
+ 40h 30m  R9 $ 1.23B 1.28M/s GW  7.89K +39/s W17021/L21 done [Pawn66 Dojo66 Laun60 Vape55 Secu21 Vide48 Payd44 Nail41 Tann38 Kara36 Chec33 Driv30 Pet27 Copy24 Dent21 Matt19 Cell16 Gym13 Part11]
+          BP $  184M  280K/s EQ  9.57K +1.0/s wins +4.0/s bank W6015/L980 fight 16/16 at Bypass Galleria [Self60 Car58 Dojo52 Urge47 Secu11 Bail43 Tax35 Wash32 Golf29 Payd26 Brid23 Part20 Cine17 Pet13 Pret11]
+  41h 0m  R9 $  690M 1.32M/s GW  7.97K +40/s W17266/L21 done [Pawn66 Dojo66 Laun60 Vape55 Secu21 Vide48 Payd44 Nail41 Tann38 Kara36 Chec33 Driv30 Pet27 Copy24 Dent22 Matt19 Cell16 Gym14 Part11]
+          BP $  233M  287K/s EQ  7.08K +1.0/s wins +4.0/s bank W6101/L1007 fight 16/16 at Bypass Galleria [Self60 Car58 Dojo52 Urge47 Secu11 Bail43 Tax36 Wash32 Golf29 Payd26 Brid23 Part20 Cine17 Pet14 Pret11]
+ 41h 30m  R9 $  117M 1.32M/s GW  7.80K +39/s W17509/L21 done [Pawn67 Dojo66 Laun61 Vape55 Secu21 Vide48 Payd44 Nail41 Tann38 Kara36 Chec33 Driv30 Pet27 Copy24 Dent22 Matt19 Cell16 Gym14 Part11]
+          BP $  261M  290K/s EQ  4.61K +1.0/s wins +4.0/s bank W6189/L1034 fight 16/16 at Bypass Galleria [Self61 Car58 Dojo52 Urge47 Secu11 Bail43 Tax36 Wash33 Golf29 Payd26 Brid23 Part20 Cine17 Pet14 Pret11]
+  42h 0m  R9 $ 1.02B 1.32M/s GW  8.04K +41/s W17761/L21 done [Pawn67 Dojo67 Laun61 Vape55 Secu21 Vide48 Payd44 Nail41 Tann38 Kara36 Chec33 Driv30 Pet27 Copy24 Dent22 Matt19 Cell16 Gym14 Part11]
+          BP $  243M  292K/s EQ  2.34K +1.0/s wins +4.1/s bank W6276/L1063 The Chairman [Self61 Car59 Dojo53 Urge47 Secu11 Bail43 Tax36 Wash33 Golf29 Payd26 Brid23 Part20 Cine17 Pet14 Pret11]
+ 42h 30m  R9 $  434M 1.34M/s GW  8.10K +41/s W18014/L21 done [Pawn67 Dojo67 Laun61 Vape55 Secu21 Vide48 Payd44 Nail41 Tann39 Kara36 Chec33 Driv30 Pet27 Copy25 Dent22 Matt19 Cell16 Gym14 Part11]
+          BP $  202M  298K/s EQ  11.6K +1.0/s wins +4.1/s bank W6363/L1091 fight 16/16 at Bypass Galleria [Self61 Car59 Dojo53 Urge47 Secu11 Bail43 Tax36 Wash33 Golf30 Payd27 Brid23 Part20 Cine17 Pet14 Pret11]
+  43h 0m  R9 $ 1.35B 1.35M/s GW  8.12K +41/s W18269/L21 done [Pawn67 Dojo67 Laun61 Vape55 Secu21 Vide48 Payd44 Nail41 Tann39 Kara36 Chec33 Driv31 Pet27 Copy25 Dent22 Matt19 Cell16 Gym14 Part11]
+          BP $  153M  303K/s EQ  6.07K +1.1/s wins +4.2/s bank W6453/L1118 fight 16/16 at Bypass Galleria [Self61 Car59 Dojo53 Urge48 Secu11 Bail43 Tax36 Wash33 Golf30 Payd27 Brid24 Part20 Cine17 Pet14 Pret11]
+ 43h 30m  R9 $  751M 1.36M/s GW  8.37K +42/s W18528/L21 done [Pawn67 Dojo67 Laun61 Vape55 Secu21 Vide48 Payd45 Nail41 Tann39 Kara36 Chec33 Driv31 Pet28 Copy25 Dent22 Matt19 Cell16 Gym14 Part11]
+          BP $  104M  309K/s EQ    551 +1.0/s wins +4.2/s bank W6540/L1145 fight 16/16 at Bypass Galleria [Self61 Car59 Dojo53 Urge48 Secu11 Bail44 Tax36 Wash33 Golf30 Payd27 Brid24 Part21 Cine17 Pet14 Pret11]
+  44h 0m  R9 $ 20.2M 1.39M/s GW  8.31K +42/s W18787/L21 done [Pawn67 Dojo67 Laun61 Vape55 Secu21 Vide48 Payd45 Nail42 Tann39 Kara36 Chec33 Driv31 Pet28 Copy25 Dent22 Matt19 Cell17 Gym14 Part11]
+          BP $ 63.3M  322K/s EQ  10.1K +1.1/s wins +4.2/s bank W6630/L1172 fight 16/16 at Bypass Galleria [Self61 Car59 Dojo53 Urge48 Secu11 Bail44 Tax36 Wash33 Golf30 Payd27 Brid24 Part21 Cine18 Pet14 Pret12]
+ 44h 30m  R9 $  887M 1.39M/s GW  8.59K +42/s W19047/L21 done [Pawn67 Dojo67 Laun61 Vape56 Secu21 Vide48 Payd45 Nail42 Tann39 Kara36 Chec33 Driv31 Pet28 Copy25 Dent22 Matt19 Cell17 Gym14 Part11]
+          BP $ 21.1M  330K/s EQ  7.33K +2.5/s wins +4.2/s bank W6783/L1176 done [Self61 Car59 Dojo53 Urge48 Secu11 Bail44 Tax37 Wash33 Golf30 Payd27 Brid24 Part21 Cine18 Pet15 Pret12]
+  45h 0m  R9 $ 87.5M 1.42M/s GW  8.71K +43/s W19313/L21 done [Pawn67 Dojo67 Laun61 Vape56 Secu21 Vide48 Payd45 Nail42 Tann39 Kara36 Chec34 Driv31 Pet28 Copy25 Dent22 Matt20 Cell17 Gym14 Part11]
+          BP $  286M  331K/s EQ  4.77K +2.5/s wins +4.4/s bank W6954/L1176 done [Self62 Car59 Dojo53 Urge48 Secu11 Bail44 Tax37 Wash33 Golf30 Payd27 Brid24 Part21 Cine18 Pet15 Pret12]
+ 45h 30m  R9 $  975M 1.42M/s GW  8.50K +43/s W19579/L21 done [Pawn67 Dojo67 Laun61 Vape56 Secu21 Vide49 Payd45 Nail42 Tann39 Kara36 Chec34 Driv31 Pet28 Copy25 Dent22 Matt20 Cell17 Gym14 Part11]
+          BP $  191M  335K/s EQ  2.34K +2.6/s wins +4.4/s bank W7129/L1176 done [Self62 Car60 Dojo53 Urge48 Secu11 Bail44 Tax37 Wash34 Golf30 Payd27 Brid24 Part21 Cine18 Pet15 Pret12]
+  46h 0m  R9 $ 1.82B 1.46M/s GW  8.61K +43/s W19847/L21 done [Pawn67 Dojo67 Laun61 Vape56 Secu21 Vide49 Payd45 Nail42 Tann39 Kara36 Chec34 Driv31 Pet28 Copy25 Dent22 Matt20 Cell17 Gym14 Part12]
+          BP $ 48.1M  339K/s EQ  15.0K +2.6/s wins +4.4/s bank W7306/L1176 done [Self62 Car60 Dojo54 Urge48 Secu11 Bail44 Tax37 Wash34 Golf31 Payd27 Brid24 Part21 Cine18 Pet15 Pret12]
+ 46h 30m  R9 $  740M 1.48M/s GW  8.66K +43/s W20112/L21 done [Pawn67 Dojo67 Laun61 Vape56 Secu21 Vide49 Payd45 Nail42 Tann39 Kara37 Chec34 Driv31 Pet28 Copy25 Dent23 Matt20 Cell17 Gym14 Part12]
+          BP $  263M  342K/s EQ  8.10K +2.6/s wins +4.3/s bank W7484/L1176 done [Self62 Car60 Dojo54 Urge48 Secu11 Bail44 Tax37 Wash34 Golf31 Payd28 Brid24 Part21 Cine18 Pet15 Pret12]
+  47h 0m  R9 $ 1.47B 1.52M/s GW  8.47K +43/s W20378/L21 done [Pawn67 Dojo67 Laun61 Vape56 Secu21 Vide49 Payd45 Nail42 Tann39 Kara37 Chec34 Driv31 Pet28 Copy25 Dent23 Matt20 Cell17 Gym15 Part12]
+          BP $ 87.4M  348K/s EQ  1.31K +2.7/s wins +4.4/s bank W7663/L1176 done [Self62 Car60 Dojo54 Urge49 Secu11 Bail44 Tax37 Wash34 Golf31 Payd28 Brid25 Part21 Cine18 Pet15 Pret12]
+ 47h 30m  R9 $  218M 1.52M/s GW  8.66K +43/s W20645/L21 done [Pawn68 Dojo67 Laun62 Vape56 Secu21 Vide49 Payd45 Nail42 Tann39 Kara37 Chec34 Driv31 Pet28 Copy25 Dent23 Matt20 Cell17 Gym15 Part12]
+          BP $  314M  350K/s EQ  14.0K +2.7/s wins +4.4/s bank W7843/L1176 done [Self62 Car60 Dojo54 Urge49 Secu11 Bail45 Tax37 Wash34 Golf31 Payd28 Brid25 Part21 Cine18 Pet15 Pret12]
+  48h 0m  R9 $  957M 1.52M/s GW  8.86K +44/s W20919/L21 done [Pawn68 Dojo68 Laun62 Vape56 Secu21 Vide49 Payd45 Nail42 Tann39 Kara37 Chec34 Driv31 Pet28 Copy25 Dent23 Matt20 Cell17 Gym15 Part12]
+          BP $  143M  364K/s EQ  7.42K +2.7/s wins +4.5/s bank W8023/L1176 done [Self62 Car60 Dojo54 Urge49 Secu11 Bail45 Tax37 Wash34 Golf31 Payd28 Brid25 Part22 Cine18 Pet15 Pret13]
+ 48h 30m  R9 $ 1.70B 1.54M/s GW  8.83K +44/s W21193/L21 done [Pawn68 Dojo68 Laun62 Vape56 Secu21 Vide49 Payd45 Nail42 Tann39 Kara37 Chec34 Driv31 Pet28 Copy26 Dent23 Matt20 Cell17 Gym15 Part12]
+          BP $  394M  370K/s EQ    899 +2.7/s wins +4.5/s bank W8204/L1176 done [Self62 Car60 Dojo54 Urge49 Secu11 Bail45 Tax37 Wash34 Golf31 Payd28 Brid25 Part22 Cine19 Pet15 Pret13]
+  49h 0m  R9 $  426M 1.55M/s GW  8.66K +44/s W21467/L21 done [Pawn68 Dojo68 Laun62 Vape56 Secu21 Vide49 Payd45 Nail42 Tann40 Kara37 Chec34 Driv32 Pet28 Copy26 Dent23 Matt20 Cell17 Gym15 Part12]
+          BP $  226M  380K/s EQ  13.9K +2.7/s wins +4.5/s bank W8387/L1176 done [Self62 Car60 Dojo54 Urge49 Secu11 Bail45 Tax38 Wash34 Golf31 Payd28 Brid25 Part22 Cine19 Pet16 Pret13]
+ 49h 30m  R9 $ 1.19B 1.55M/s GW  8.99K +45/s W21745/L21 done [Pawn68 Dojo68 Laun62 Vape56 Secu21 Vide49 Payd46 Nail42 Tann40 Kara37 Chec34 Driv32 Pet28 Copy26 Dent23 Matt20 Cell17 Gym15 Part12]
+          BP $ 15.1M  383K/s EQ  7.66K +2.8/s wins +4.5/s bank W8575/L1176 done [Self63 Car60 Dojo54 Urge49 Secu11 Bail45 Tax38 Wash35 Golf31 Payd28 Brid25 Part22 Cine19 Pet16 Pret13]
+  50h 0m  R9 $ 1.93B 1.57M/s GW  8.82K +45/s W22023/L21 done [Pawn68 Dojo68 Laun62 Vape56 Secu21 Vide49 Payd46 Nail42 Tann40 Kara37 Chec34 Driv32 Pet29 Copy26 Dent23 Matt20 Cell17 Gym15 Part12]
+          BP $  217M  385K/s EQ  21.0K +2.9/s wins +4.6/s bank W8767/L1176 done [Self63 Car61 Dojo54 Urge49 Secu11 Bail45 Tax38 Wash35 Golf31 Payd28 Brid25 Part22 Cine19 Pet16 Pret13]
+ 50h 30m  R9 $  466M 1.60M/s GW  9.13K +45/s W22303/L21 done [Pawn68 Dojo68 Laun62 Vape56 Secu21 Vide49 Payd46 Nail43 Tann40 Kara37 Chec34 Driv32 Pet29 Copy26 Dent23 Matt20 Cell18 Gym15 Part12]
+          BP $  410M  387K/s EQ  9.15K +2.9/s wins +4.6/s bank W8959/L1176 done [Self63 Car61 Dojo55 Urge49 Secu11 Bail45 Tax38 Wash35 Golf31 Payd28 Brid25 Part22 Cine19 Pet16 Pret13]
+  51h 0m  R9 $ 1.14B 1.60M/s GW  9.14K +45/s W22583/L21 done [Pawn68 Dojo68 Laun62 Vape57 Secu21 Vide49 Payd46 Nail43 Tann40 Kara37 Chec34 Driv32 Pet29 Copy26 Dent23 Matt20 Cell18 Gym15 Part12]
+          BP $ 67.3M  394K/s EQ  22.7K +2.9/s wins +4.6/s bank W9154/L1176 done [Self63 Car61 Dojo55 Urge49 Secu11 Bail45 Tax38 Wash35 Golf32 Payd29 Brid25 Part22 Cine19 Pet16 Pret13]
+ 51h 30m  R9 $ 1.80B 1.62M/s GW  9.29K +46/s W22867/L21 done [Pawn68 Dojo68 Laun62 Vape57 Secu21 Vide49 Payd46 Nail43 Tann40 Kara37 Chec34 Driv32 Pet29 Copy26 Dent23 Matt21 Cell18 Gym15 Part12]
+          BP $  242M  399K/s EQ  11.0K +2.9/s wins +4.6/s bank W9351/L1176 done [Self63 Car61 Dojo55 Urge49 Secu11 Bail45 Tax38 Wash35 Golf32 Payd29 Brid26 Part22 Cine19 Pet16 Pret13]
+  52h 0m  R9 $  229M 1.64M/s GW  9.08K +46/s W23149/L21 done [Pawn68 Dojo68 Laun62 Vape57 Secu21 Vide50 Payd46 Nail43 Tann40 Kara37 Chec35 Driv32 Pet29 Copy26 Dent23 Matt21 Cell18 Gym15 Part12]
+          BP $  420M  400K/s EQ  24.7K +3.0/s wins +4.6/s bank W9550/L1176 done [Self63 Car61 Dojo55 Urge50 Secu11 Bail45 Tax38 Wash35 Golf32 Payd29 Brid26 Part22 Cine19 Pet16 Pret13]
+ 52h 30m  R9 $  819M 1.68M/s GW  9.13K +46/s W23432/L21 done [Pawn68 Dojo68 Laun62 Vape57 Secu21 Vide50 Payd46 Nail43 Tann40 Kara37 Chec35 Driv32 Pet29 Copy26 Dent23 Matt21 Cell18 Gym15 Part13]
+          BP $ 56.1M  408K/s EQ  13.1K +3.0/s wins +4.6/s bank W9749/L1176 done [Self63 Car61 Dojo55 Urge50 Secu11 Bail46 Tax38 Wash35 Golf32 Payd29 Brid26 Part23 Cine19 Pet16 Pret13]
+  53h 0m  R9 $ 1.39B 1.69M/s GW  9.00K +46/s W23715/L21 done [Pawn68 Dojo68 Laun62 Vape57 Secu21 Vide50 Payd46 Nail43 Tann40 Kara38 Chec35 Driv32 Pet29 Copy26 Dent23 Matt21 Cell18 Gym15 Part13]
+          BP $  247M  418K/s EQ  1.59K +3.0/s wins +4.6/s bank W9950/L1176 done [Self63 Car61 Dojo55 Urge50 Secu11 Bail46 Tax38 Wash35 Golf32 Payd29 Brid26 Part23 Cine19 Pet16 Pret14]
+ 53h 30m  R9 $ 1.87B 1.71M/s GW  8.95K +46/s W23997/L21 done [Pawn68 Dojo68 Laun62 Vape57 Secu21 Vide50 Payd46 Nail43 Tann40 Kara38 Chec35 Driv32 Pet29 Copy26 Dent24 Matt21 Cell18 Gym15 Part13]
+          BP $  453M  426K/s EQ  15.4K +3.0/s wins +4.6/s bank W10153/L1176 done [Self63 Car61 Dojo55 Urge50 Secu11 Bail46 Tax38 Wash35 Golf32 Payd29 Brid26 Part23 Cine20 Pet16 Pret14]
+  54h 0m  R9 $ 2.32B 1.74M/s GW  9.20K +46/s W24281/L21 done [Pawn68 Dojo68 Laun62 Vape57 Secu21 Vide50 Payd46 Nail43 Tann40 Kara38 Chec35 Driv32 Pet29 Copy26 Dent24 Matt21 Cell18 Gym16 Part13]
+          BP $ 88.1M  436K/s EQ  3.90K +3.0/s wins +4.6/s bank W10356/L1176 done [Self63 Car61 Dojo55 Urge50 Secu11 Bail46 Tax39 Wash35 Golf32 Payd29 Brid26 Part23 Cine20 Pet17 Pret14]
+ 54h 30m  R9 $ 89.5M 1.75M/s GW  9.09K +46/s W24564/L21 done [Pawn69 Dojo68 Laun63 Vape57 Secu21 Vide50 Payd46 Nail43 Tann40 Kara38 Chec35 Driv32 Pet29 Copy26 Dent24 Matt21 Cell18 Gym16 Part13]
+          BP $  273M  438K/s EQ  17.9K +3.1/s wins +4.6/s bank W10564/L1176 done [Self64 Car61 Dojo55 Urge50 Secu11 Bail46 Tax39 Wash35 Golf32 Payd29 Brid26 Part23 Cine20 Pet17 Pret14]
+  55h 0m  R9 $  539M 1.75M/s GW  9.30K +47/s W24851/L21 done [Pawn69 Dojo69 Laun63 Vape57 Secu21 Vide50 Payd46 Nail43 Tann40 Kara38 Chec35 Driv32 Pet29 Copy26 Dent24 Matt21 Cell18 Gym16 Part13]
+          BP $  457M  441K/s EQ  32.1K +3.2/s wins +4.7/s bank W10778/L1176 done [Self64 Car61 Dojo55 Urge50 Secu11 Bail46 Tax39 Wash36 Golf32 Payd29 Brid26 Part23 Cine20 Pet17 Pret14]
+ 55h 30m  R9 $  981M 1.77M/s GW  9.17K +46/s W25136/L21 done [Pawn69 Dojo69 Laun63 Vape57 Secu21 Vide50 Payd46 Nail43 Tann40 Kara38 Chec35 Driv32 Pet29 Copy27 Dent24 Matt21 Cell18 Gym16 Part13]
+          BP $  593M  443K/s EQ  13.5K +3.2/s wins +4.7/s bank W10994/L1176 done [Self64 Car62 Dojo55 Urge50 Secu11 Bail46 Tax39 Wash36 Golf32 Payd29 Brid26 Part23 Cine20 Pet17 Pret14]
+  56h 0m  R9 $ 1.44B 1.77M/s GW  9.35K +47/s W25423/L21 done [Pawn69 Dojo69 Laun63 Vape57 Secu21 Vide50 Payd46 Nail43 Tann41 Kara38 Chec35 Driv32 Pet29 Copy27 Dent24 Matt21 Cell18 Gym16 Part13]
+          BP $ 30.3M  448K/s EQ  27.8K +3.3/s wins +4.7/s bank W11212/L1176 done [Self64 Car62 Dojo56 Urge50 Secu11 Bail46 Tax39 Wash36 Golf33 Payd29 Brid26 Part23 Cine20 Pet17 Pret14]
+ 56h 30m  R9 $ 1.90B 1.78M/s GW  9.16K +47/s W25711/L21 done [Pawn69 Dojo69 Laun63 Vape57 Secu21 Vide50 Payd46 Nail43 Tann41 Kara38 Chec35 Driv33 Pet29 Copy27 Dent24 Matt21 Cell18 Gym16 Part13]
+          BP $  114M  453K/s EQ  9.47K +3.3/s wins +4.7/s bank W11435/L1176 done [Self64 Car62 Dojo56 Urge50 Secu11 Bail46 Tax39 Wash36 Golf33 Payd30 Brid26 Part23 Cine20 Pet17 Pret14]
+  57h 0m  R9 $ 2.37B 1.79M/s GW  9.32K +47/s W26001/L21 done [Pawn69 Dojo69 Laun63 Vape57 Secu21 Vide50 Payd47 Nail43 Tann41 Kara38 Chec35 Driv33 Pet29 Copy27 Dent24 Matt21 Cell18 Gym16 Part13]
+          BP $  206M  458K/s EQ  24.0K +3.3/s wins +4.7/s bank W11657/L1176 done [Self64 Car62 Dojo56 Urge50 Secu11 Bail46 Tax39 Wash36 Golf33 Payd30 Brid27 Part23 Cine20 Pet17 Pret14]
+ 57h 30m  R9 $ 2.82B 1.80M/s GW  9.29K +47/s W26292/L21 done [Pawn69 Dojo69 Laun63 Vape57 Secu21 Vide50 Payd47 Nail43 Tann41 Kara38 Chec35 Driv33 Pet30 Copy27 Dent24 Matt21 Cell18 Gym16 Part13]
+          BP $  303M  460K/s EQ  5.78K +3.4/s wins +4.8/s bank W11882/L1176 done [Self64 Car62 Dojo56 Urge51 Secu11 Bail46 Tax39 Wash36 Golf33 Payd30 Brid27 Part23 Cine20 Pet17 Pret14]
+  58h 0m  R9 $  271M 1.84M/s GW  9.37K +47/s W26582/L21 done [Pawn69 Dojo69 Laun63 Vape57 Secu21 Vide50 Payd47 Nail44 Tann41 Kara38 Chec35 Driv33 Pet30 Copy27 Dent24 Matt21 Cell19 Gym16 Part13]
+          BP $  400M  463K/s EQ  20.4K +3.4/s wins +4.8/s bank W12108/L1176 done [Self64 Car62 Dojo56 Urge51 Secu11 Bail47 Tax39 Wash36 Golf33 Payd30 Brid27 Part23 Cine20 Pet17 Pret14]
+ 58h 30m  R9 $  597M 1.84M/s GW  9.42K +47/s W26873/L21 done [Pawn69 Dojo69 Laun63 Vape58 Secu21 Vide50 Payd47 Nail44 Tann41 Kara38 Chec35 Driv33 Pet30 Copy27 Dent24 Matt21 Cell19 Gym16 Part13]
+          BP $  504M  469K/s EQ  2.29K +3.4/s wins +4.8/s bank W12336/L1176 done [Self64 Car62 Dojo56 Urge51 Secu11 Bail47 Tax39 Wash36 Golf33 Payd30 Brid27 Part24 Cine20 Pet17 Pret14]
+  59h 0m  R9 $  892M 1.87M/s GW  9.34K +48/s W27167/L21 done [Pawn69 Dojo69 Laun63 Vape58 Secu21 Vide50 Payd47 Nail44 Tann41 Kara38 Chec35 Driv33 Pet30 Copy27 Dent24 Matt22 Cell19 Gym16 Part13]
+          BP $  622M  481K/s EQ  17.1K +3.4/s wins +4.8/s bank W12563/L1176 done [Self64 Car62 Dojo56 Urge51 Secu11 Bail47 Tax39 Wash36 Golf33 Payd30 Brid27 Part24 Cine20 Pet17 Pret15]
+ 59h 30m  R9 $ 1.22B 1.88M/s GW  9.53K +48/s W27461/L21 done [Pawn69 Dojo69 Laun63 Vape58 Secu21 Vide50 Payd47 Nail44 Tann41 Kara38 Chec36 Driv33 Pet30 Copy27 Dent24 Matt22 Cell19 Gym16 Part13]
+          BP $  752M  489K/s EQ  32.0K +3.4/s wins +4.8/s bank W12793/L1176 done [Self64 Car62 Dojo56 Urge51 Secu11 Bail47 Tax39 Wash36 Golf33 Payd30 Brid27 Part24 Cine21 Pet17 Pret15]
+  60h 0m  R9 $ 1.56B 1.88M/s GW  9.56K +48/s W27755/L21 done [Pawn69 Dojo69 Laun63 Vape58 Secu21 Vide51 Payd47 Nail44 Tann41 Kara38 Chec36 Driv33 Pet30 Copy27 Dent24 Matt22 Cell19 Gym16 Part13]
+          BP $  105M  502K/s EQ  14.1K +3.5/s wins +4.8/s bank W13027/L1176 done [Self64 Car62 Dojo56 Urge51 Secu11 Bail47 Tax40 Wash36 Golf33 Payd30 Brid27 Part24 Cine21 Pet18 Pret15]
+
+Offline (1 min of play, then 8h away): +$66.6K, +3.99K Goodwill, 1346W/635L, fights cleared +7, captured: none

@@ -1,11 +1,10 @@
 // Browser side of the art: palette grids -> cached canvases / data URLs.
-import { ZONES } from '../game/defs';
+import { SHOPS } from '../game/defs';
 import type { Grid } from '../art/grid';
 import { C } from '../art/palette';
 import { crewSprite, enemySprite } from '../art/people';
 import * as S from '../art/scenes';
 import { battlefield, buttonFrame, facade, ICONS, panelFrame, type Material } from '../art/scenes';
-import type { FighterKind, ShopKind } from '../game/defs';
 
 const cache = new Map<string, HTMLCanvasElement>();
 export function canvasOf(key: string, make: () => Grid): HTMLCanvasElement {
@@ -23,28 +22,18 @@ export function canvasOf(key: string, make: () => Grid): HTMLCanvasElement {
 const urls = new Map<string, string>();
 export const urlOf = (key: string, make: () => Grid) => urls.get(key) ?? (urls.set(key, canvasOf(key, make).toDataURL()), urls.get(key)!);
 
-export const crewArt = (k: FighterKind, flash = false) => canvasOf(`crew:${k}:${flash}`, () => (flash ? crewSprite(k).silhouette(C.paper) : crewSprite(k)));
+export const crewArt = (id: string, flash = false) => canvasOf(`crew:${id}:${flash}`, () => (flash ? crewSprite(id).silhouette(C.paper) : crewSprite(id)));
 export const enemyArt = (n: string, flash = false) => canvasOf(`enemy:${n}:${flash}`, () => (flash ? enemySprite(n).silhouette(C.paper) : enemySprite(n)));
 export const fieldArt = (zoneId: string) => canvasOf(`field:${zoneId}`, () => battlefield(zoneId));
 export const icon = (k: keyof typeof ICONS) => urlOf(`icon:${k}`, ICONS[k]);
-export const crewURL = (k: FighterKind) => urlOf(`crewurl:${k}`, () => crewSprite(k));
+export const crewURL = (id: string) => urlOf(`crewurl:${id}`, () => crewSprite(id));
 
-// storefront material comes from where the building was captured
-const MATERIALS: Material[] = ['lot', 'bigbox', 'outlet', 'lifestyle'];
-export function materialOf(slotId: number): Material {
-  let id = 4;
-  for (let z = 0; z < ZONES.length; z++) {
-    if (slotId < id) return z === 0 ? 'home' : MATERIALS[z - 1];
-    id += ZONES[z].captureSlots;
-  }
-  return slotId < id ? MATERIALS[ZONES.length - 1] : 'home';
-}
-export const facadeURL = (kind: ShopKind | null, slotId: number) => urlOf(`facade:${kind}:${slotId}`, () => facade(kind, materialOf(slotId), slotId + 1));
-
-export const signURL = (kind: ShopKind, seed: number) => urlOf(`sign:${kind}:${seed}`, () => S.signSample(kind, seed));
+// storefront material comes from where the shop turns up
+const MATERIALS: Material[] = ['home', 'bigbox', 'outlet', 'office', 'lifestyle'];
+export const materialOf = (id: string): Material => (SHOPS[id].region === 1 ? 'bypass' : MATERIALS[SHOPS[id].zone] ?? 'home');
+export const facadeURL = (id: string, leased: boolean) => urlOf(`facade:${id}:${leased}`, () => facade(leased ? id : null, materialOf(id), id.length * 7 + id.charCodeAt(0), SHOPS[id].region === 1 ? 'COMING' : 'SHOES'));
 export const scaffoldURL = () => urlOf('scaffold', S.scaffold);
-export const bootURL = (kinds: (ShopKind | null)[]) => urlOf(`boot:${kinds.join(',')}`, () => S.bootScene(kinds));
-
+export const bootURL = (kinds: (string | null)[], dawn = false) => urlOf(`boot:${kinds.join(',')}:${dawn}`, () => S.bootScene(kinds, dawn));
 // frames and tiles as CSS variables (border-image / background)
 export function installFrames() {
   const root = document.documentElement.style;
