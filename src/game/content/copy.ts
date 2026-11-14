@@ -10,6 +10,7 @@ export const HOW = [
   ['The play', 'Even, Rush or Dig In. Rush beats tanky. Dig In beats hard hitters.'],
   ['Overtime', 'Two minutes of rent: +25% HP and damage for the next three fights.'],
   ['Walk-ins', 'While you watch, somebody walks into a shop: cash, a referral, or a rally. Click them.'],
+  ['The Fun Zone', 'Lease it and the Back Office gets an Arcade tab. Quarters go in, money, Goodwill and tickets come out. Tickets buy slots and perks at the prize counter. The claw takes tickets.'],
 ];
 
 export const STORY: { text: string; note?: boolean }[] = [

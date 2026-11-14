@@ -10,7 +10,7 @@ export const HARD_FOCUS = env('SMW_HF', 0.75); // share of a hard hitter's hits 
 export const FRONT_SHARE = env('SMW_FS', 0.6); // enemy hits that go to the front tank; the rest land on anyone. Hard hitters and bosses pick the weakest.
 const list = (k: string, d: number[]) => ((globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env[k]?.split(',').map(Number) ?? d);
 // Enemy HP and damage growth per fight, one entry per lot: steep while the plaza fills up, gentler once renovations get expensive.
-export const FIGHT_GROWTH = [list('SMW_G0', [1.6, 1.07, 1.07, 1.07, 1.07, 1.07]), list('SMW_G1', [1.66, 1.07, 1.07, 1.07])] as const;
+export const FIGHT_GROWTH = [list('SMW_G0', [1.6, 1.07, 1.07, 1.07, 1.07, 1.07]), list('SMW_G1', [1.66, 1.0825, 1.0825, 1.0825])] as const;
 // Optional explicit enemy strength per fight (balance tooling only): SMW_STR0=1,1.2,...
 export const STRENGTH = [list('SMW_STR0', []), list('SMW_STR1', [])] as const;
 export const LOT_JUMP = [list('SMW_J0', [2, 1.259, 1.103, 1.286, 0.619, 1.089]), list('SMW_J1', [2.5, 8.59, 1.01, 0.45])] as const; // step entering each lot (entry 0 scales the first fight)

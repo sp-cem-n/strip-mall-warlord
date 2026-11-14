@@ -1,6 +1,6 @@
-# Strip Mall Warlord v0.6: design (for review, not built)
+# Strip Mall Warlord v0.6: design (built; see §14 for what changed)
 
-Status: **approved by Josh, building.** Answers to the open questions are folded in (§13). v0.5 stays live and archived at `/v0.5/`. Numbers marked *(start)* are starting values. The balance bot sets the final ones, and a build doesn't merge until the §9 targets pass. Tone stays Sodium Night: 1997, Rt. 9, dry.
+Status: **built and shipped as v0.6.** §14 has the final numbers and every place the build differs from this doc. Answers to the open questions are folded in (§13). v0.5 stays live and archived at `/v0.5/`. Numbers marked *(start)* are starting values. The balance bot sets the final ones, and a build doesn't merge until the §9 targets pass. Tone stays Sodium Night: 1997, Rt. 9, dry.
 
 Principle: **delete before adding.** Every new system in this doc replaces an older one or reuses its code.
 
@@ -216,3 +216,27 @@ Rule of thumb: $ builds buildings and buys convenience (contracts, Overtime, pla
 3. **Arcade progress survives paving** (tickets, prize-counter perks, high scores, Attract Mode levels, machine unlocks).
 4. **Parking Lot contract: $50 from the start.**
 5. **9-slot cap as specced** (Route 9: 2 prize counter + 2 Goodwill; the Bypass: 3 Equity + shuffleboard).
+
+## 14. As built (v0.6)
+
+### 14.1 Final balance (balance bot, `--pave=1`, 50h)
+| Milestone | Check-in 1991 / 7 | Idle 1991 / 7 | Active 1991 / 7 | Active + room 1991 / 7 | Target (check-in / active / +room) |
+|---|---|---|---|---|---|
+| Parking Lot boss | 14:47 / 17:02 | 14:47 / 17:02 | 14:00 / 11:45 | 14:00 / 11:45 | 12–18 / 10–15 min |
+| Fun Zone leased | 23 min | 23 min | 19 min | 19 min | ~50 / ~40 min **(early)** |
+| Outlet | 1h30 / 1h34 | 1h32 / 1h21 | 1h03 / 1h09 | 1h01 / 1h00 | ~1.5h / ~1.3h / ~1.1h |
+| **Route 9 ending** | **14h39 / 15h05** | 14h10 / 15h39 | **12h15 / 12h43** | **9h59 / 10h23** | 15h ±1 / ~12.5h / 9–10.5h |
+| Galleria | 34h43 / 36h05 | 33h46 / 37h01 | 27h30 / 28h22 | 20h00 / 18h10 | ~35h / ~30h / 22–25h |
+
+- Losses: frontier fights lose 13–46% per lot (above the 10–30% band at the Commons and on the Bypass). Counting every fight, Route 9 lots lose 5–31% and the Bypass 4–44%; the overall 3–10% target is missed (the crew falls back to farm after one loss, and farm wins don't cover it).
+- Bypass bar: active + room takes the Galleria 27% (1991) and 36% (7) sooner than active alone (target 25–30%).
+
+### 14.2 Where the build differs from this doc
+- **Combat:** fight strength is normalized by threat (sum HP × sum DPS of the enemy group), so adding enemies doesn't spike a fight. Enemy targeting is deterministic and spread: 60% of hits go to the front tank, the rest rotate; bosses hit the lowest-HP fighter, hard hitters do 75% of the time. One loss drops the crew back a fight (`FALL_BACK_AFTER = 1`). A purchase no longer forces a retry.
+- **Renovations:** tanks gain HP only; everyone else gets main stat ×1.1 and HP ×1.08 per level. Shops have tiers (`tierOf`).
+- **Knobs:** `RENT_GROWTH` 1.2, `RENO_GROWTH` 1.35; `FIGHT_GROWTH` Route 9 `[1.6, 1.07…]`, Bypass `[1.66, 1.0825…]`; `LOT_JUMP` Route 9 `[2, 1.259, 1.103, 1.286, 0.619, 1.089]`, Bypass `[2.5, 8.59, 1.01, 0.45]`. Patrol prices Route 9 $50 / 40K / 100K / 250K / 4M / 15M; Bypass 500 / 50K / 80K / 2M.
+- **Balance bot:** check-in also acts every minute for the first 30 minutes (a new player watches the start).
+- **The room:** machine unlocks survive a pave without re-leasing the Fun Zone (Josh's answer 3). Attract Mode Lv 1 costs 10 minutes of rent; at the bar, Lv 2/3 cost $ (30/90 minutes of Bypass rent) because the bar has no tickets.
+- **Coin Pusher:** pays 0.4–3.0× its cost by timing and the shelf; the Rent Check is a rare 2-minute-of-rent drop on a near-perfect play.
+- **The bar:** Pool pays 1.2 wins of Equity per ball (running the rack: 10 wins + 5 × lot). Video Poker buffs: Jacks or Better / two pair +10% dmg 5 min; trips / straight / flush +20% 8 min; full house / quads +30% dmg and HP 10 min; straight or royal flush +50% 15 min (10 min out of service). Shuffleboard: six pucks, 4/3/2/1 zones, house scores 10–22; each beaten is +6% Equity per win, the third adds the Bypass's 9th slot.
+- **Not built:** bar and arcade sound effects beyond the register/jingle, the jukebox / TV / change-machine room props.

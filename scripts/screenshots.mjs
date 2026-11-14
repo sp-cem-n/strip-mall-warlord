@@ -4,33 +4,69 @@ import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright';
 
 const base = process.env.URL ?? 'http://localhost:4173/';
-const out = process.env.OUT ?? 'screenshots/v5';
+const out = process.env.OUT ?? 'screenshots/v6';
 const g = '?fresh=1&seed=1991&pause=1';
-// [file, query, optional selector to hover]
+const room = `${g}&advance=3600&room=full&screen=room`;
+const bar = `${g}&roster=full&region=1&room=full&screen=room`;
+// a cabinet: click it to put a quarter in, then optional extra steps
+const cab = (i) => [['click', `.cab:nth-child(${i}) canvas`]];
+// [file, query, steps: ['click' | 'hover', selector] | ['wait', ms] | ['drag', selector, [x0, y0, x1, y1] in art px], clip selector?]
 const shots = [
-  ['01-title-screen.png', `${g}&advance=900&away=5400&oldsave=1&screen=boot`],
-  ['02-how-to-play.png', `${g}&screen=howto`],
-  ['03-story-intro.png', `${g}&screen=story&story=all`],
-  ['04-early-game.png', `${g}&advance=900&walkin=1&midbattle=1&screen=game`],
-  ['05-full-25-battler-field.png', `${g}&roster=full&midbattle=1&screen=game`],
-  ['06-unit-card-readout.png', `${g}&advance=3600&screen=game`, '.unit .crewline'],
-  ['07-training-panel.png', `${g}&roster=full&screen=game`, '.track span'],
-  ['08-win-card-bypass-unlock.png', `${g}&roster=full&win=1&screen=game`],
-  ['09-the-bypass.png', `${g}&roster=full&region=1&midbattle=1&screen=game`],
+  ['01-title.png', `${g}&advance=900&away=5400&oldsave=1&screen=boot`],
+  ['02-early-game-back-office.png', `${g}&advance=900&walkin=1&midbattle=1&screen=game`],
+  ['03-receipt-history-open.png', `${g}&advance=2400&screen=game`, [['click', '.printer-head']]],
+  ['04-lineup-and-slots.png', `${g}&advance=5400&active=1&screen=game`, [['hover', '.slots']]],
+  ['05-auto-advance-contracts.png', `${g}&advance=5400&screen=game`, [['click', '.tabs .tab:nth-child(2)']]],
+  ['06-combat-spread-hits.png', `${g}&advance=7200&midbattle=1&screen=game`],
+  ['07-arcade.png', room],
+  ['08-arcade-coin-pusher.png', room, [...cab(1), ['wait', 900]], '.cab:nth-child(1)'],
+  ['09-arcade-whac.png', room, [...cab(2), ['wait', 1500]], '.cab:nth-child(2)'],
+  ['10-arcade-skee-ball.png', room, [...cab(3), ['hold', '.cab:nth-child(3) canvas', 500]], '.cab:nth-child(3)'],
+  ['11-arcade-claw.png', room, [...cab(4), ['wait', 600]], '.cab:nth-child(4)'],
+  ['12-arcade-pinball.png', room, [...cab(5), ['wait', 1200]], '.cab:nth-child(5)'],
+  ['13-arcade-cyclone.png', room, [...cab(6), ['wait', 300]], '.cab:nth-child(6)'],
+  ['14-bar.png', bar],
+  ['15-bar-darts.png', bar, [...cab(1), ['click', '.cab:nth-child(1) canvas'], ['wait', 300], ['click', '.cab:nth-child(1) canvas']], '.cab:nth-child(1)'],
+  ['16-bar-pool.png', bar, [...cab(2), ['drag', '.cab:nth-child(2) canvas', [39, 82, 41, 96]], ['wait', 450]], '.cab:nth-child(2)'],
+  ['17-bar-video-poker.png', bar, [...cab(3), ['click', '.cab:nth-child(3) canvas']], '.cab:nth-child(3)'],
+  ['18-bar-shuffleboard.png', bar, [...cab(4), ['hold', '.cab:nth-child(4) canvas', 700], ['wait', 600], ['hold', '.cab:nth-child(4) canvas', 400]], '.cab:nth-child(4)'],
+  ['19-win-card.png', `${g}&roster=full&win=1&screen=game`],
 ];
 mkdirSync(out, { recursive: true });
 const browser = await chromium.launch();
-const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
-page.on('pageerror', (e) => console.error('pageerror', e.message));
-for (const [file, query, hover] of shots) {
+const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
+let errors = 0;
+page.on('pageerror', (e) => (errors++, console.error('pageerror', e.message)));
+page.on('console', (m) => m.type() === 'error' && (errors++, console.error('console', m.text())));
+for (const [file, query, steps = [], clip] of shots) {
   await page.goto(base + query);
   await page.waitForSelector('.screen, .root');
-  await page.waitForTimeout(query.includes('story') ? 1200 : 500);
-  if (hover) {
-    await page.hover(hover);
-    await page.waitForTimeout(200);
+  await page.waitForTimeout(500);
+  for (const [kind, sel, arg] of steps) {
+    if (kind === 'wait') await page.waitForTimeout(sel);
+    else if (kind === 'hover') await page.hover(sel);
+    else if (kind === 'click') await page.click(sel, { position: undefined });
+    else {
+      const b = await page.locator(sel).boundingBox();
+      if (kind === 'hold') {
+        await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+        await page.mouse.down();
+        await page.waitForTimeout(arg);
+        await page.mouse.up();
+      } else {
+        // art px inside the tall screen (9, 25) at 3x
+        const at = (x, y) => [b.x + (9 + x) * 3, b.y + (25 + y) * 3];
+        await page.mouse.move(...at(arg[0], arg[1]));
+        await page.mouse.down();
+        await page.mouse.move(...at(arg[2], arg[3]), { steps: 6 });
+        await page.mouse.up();
+      }
+    }
+    await page.waitForTimeout(150);
   }
-  await page.screenshot({ path: `${out}/${file}`, fullPage: true });
+  if (clip) await page.locator(clip).screenshot({ path: `${out}/${file}` });
+  else await page.screenshot({ path: `${out}/${file}`, fullPage: true });
   console.log('saved', `${out}/${file}`);
 }
 await browser.close();
+if (errors) (console.error(`${errors} page errors`), process.exit(1));
