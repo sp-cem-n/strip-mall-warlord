@@ -12,7 +12,11 @@ export function saveGame(s: GameState) {
   }
 }
 
-// 'old' = a save from before v0.5. The loop changed too much to carry it over.
+// The version an old save came from: 'v0.5' saves are copied where /v0.5/ reads them, so that plaza is still yours there.
+export const old = { from: 'v0.4' };
+const ARCHIVE: Record<number, string> = { 4: 'v0.5' };
+
+// 'old' = a save from an earlier loop. The loop changed too much to carry it over.
 export function loadGame(): GameState | 'old' | null {
   let raw: string | null = null;
   try {
@@ -24,6 +28,11 @@ export function loadGame(): GameState | 'old' | null {
   try {
     const s = JSON.parse(raw) as GameState;
     if (s?.version === SAVE_VERSION && Array.isArray(s.crews)) return s;
+    const tag = ARCHIVE[s?.version];
+    if (tag) {
+      old.from = tag;
+      if (!localStorage.getItem(`smw-${tag}:${KEY}`)) localStorage.setItem(`smw-${tag}:${KEY}`, raw);
+    }
     return 'old';
   } catch {
     return 'old';

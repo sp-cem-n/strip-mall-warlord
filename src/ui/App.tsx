@@ -6,7 +6,7 @@ import { Lot } from './Lot';
 import { Pylon } from './Pylon';
 import { AskDialog, Boot, HowTo, Story, TipCard, WinCard } from './Screens';
 import { Shops } from './Shops';
-import { Training } from './Training';
+import { BackOffice } from './BackOffice';
 
 function go(screen: typeof app.screen) {
   app.screen = screen;
@@ -50,7 +50,7 @@ export function App() {
           <Shops />
           <div class="col">
             <Lot />
-            <Training />
+            <BackOffice />
           </div>
         </main>
       </div>

@@ -1,5 +1,5 @@
-import { BATTLERS, FIGHTS, FIGHT_TIMEOUT, OVERTIME_BOOST, RALLY_BOOST, REGIONS, STANCE, STAT_GROWTH, TELL, TRAIN_STEP, WEAK_BONUS, type BattlerDef, type EnemyDef, type Fx, type RegionId, type Role } from './defs';
-import { asphaltMult, log, roster } from './economy';
+import { AURA_STEP, BATTLERS, BOSS_STRENGTH, HARD_FOCUS, ENEMY_DMG, FIGHTS, FIGHT_TIMEOUT, FRONT_SHARE, MAIN_GROWTH, OVERTIME_BOOST, RALLY_BOOST, REGIONS, ROLES, SIDE_HP_GROWTH, STANCE, TANK_HP_GROWTH, TELL, TRAIN_STEP, WEAK_BONUS, type BattlerDef, type EnemyDef, type Fx, type RegionId, type Role } from './defs';
+import { asphaltMult, curb, fighters, lineupOf, log } from './economy';
 import { rand } from './rng';
 import type { Battle, Field, GameState, Unit } from './state';
 
@@ -7,14 +7,18 @@ import type { Battle, Field, GameState, Unit } from './state';
 export const trackMult = (s: GameState, role: Role, region: RegionId) => 1 + TRAIN_STEP * s.crews[region].train[role];
 
 // One battler's numbers at a level, before auras. Used by the fight and the unit card.
+// A renovation grows the one thing a unit does: tanks get HP; damage, heal and control get their hit (plus a little HP); auras grow +4% of base.
 export function statsOf(s: GameState, region: RegionId, id: string, level: number) {
   const d = BATTLERS[id];
-  const m = STAT_GROWTH ** (level - 1) * asphaltMult(s, region);
+  const L = level - 1;
+  const a = asphaltMult(s, region);
   const t = trackMult(s, d.role, region);
+  const fights = d.role !== 'tank' && d.role !== 'buffer';
   return {
-    hp: Math.round(d.hp * m * (d.role === 'tank' ? t : 1)),
-    dmg: d.dmg * m * (d.role === 'damage' || d.role === 'heal' || d.role === 'control' ? t : 1),
+    hp: Math.round(d.hp * a * (d.role === 'tank' ? TANK_HP_GROWTH ** L * t : d.role === 'buffer' ? 1 : SIDE_HP_GROWTH ** L)),
+    dmg: d.dmg * a * (fights ? MAIN_GROWTH ** L * t : 1),
     interval: d.interval,
+    aura: 1 + AURA_STEP * L,
   };
 }
 
@@ -22,44 +26,58 @@ const CAPS: Partial<Record<Fx['k'], number>> = { stun: 0.35, confuse: 0.35, slow
 const targets = (to: string, d: BattlerDef) => to === 'all' || to === d.role || to === d.id;
 
 // Every aura on the crew, scaled by the Paperwork (control) and Team Building (buffer) tracks.
-export function auras(s: GameState, ids: string[], region: RegionId): { from: string; fx: Fx }[] {
+export function auras(s: GameState, members: [string, number][], region: RegionId): { from: string; fx: Fx }[] {
   const out: { from: string; fx: Fx }[] = [];
-  for (const id of ids) {
+  const scaleOf = (id: string, lv: number) => (BATTLERS[id].role === 'control' || BATTLERS[id].role === 'buffer' ? trackMult(s, BATTLERS[id].role, region) * (1 + AURA_STEP * (lv - 1)) : 1);
+  for (const [id, lv] of members) {
     const d = BATTLERS[id];
     if (!d.fx || d.fx.k === 'copy' || d.fx.k === 'twin') continue;
-    const scale = d.role === 'control' || d.role === 'buffer' ? trackMult(s, d.role, region) : 1;
+    const scale = scaleOf(id, lv);
     out.push({ from: id, fx: 'v' in d.fx ? { ...d.fx, v: d.fx.v * scale } : d.fx });
   }
-  for (const id of ids) {
+  for (const [id, lv] of members) {
     const d = BATTLERS[id];
     if (d.fx?.k !== 'copy') continue;
     const best = out.filter((a) => a.fx.k === 'haste' || a.fx.k === 'dmgUp' || a.fx.k === 'hpUp').sort((a, b) => ('v' in b.fx ? b.fx.v : 0) - ('v' in a.fx ? a.fx.v : 0))[0];
-    if (best && 'v' in best.fx) out.push({ from: id, fx: { ...best.fx, v: best.fx.v * d.fx.v * trackMult(s, 'buffer', region) } });
+    if (best && 'v' in best.fx) out.push({ from: id, fx: { ...best.fx, v: best.fx.v * d.fx.v * scaleOf(id, lv) } });
   }
   return out;
 }
 
 function unit(s: GameState, side: Unit['side'], id: string, role: Unit['role'], name: string, hp: number, dmg: number, interval: number, weak: string | null, boss: boolean): Unit {
   hp = Math.round(hp);
-  return { uid: s.nextUid++, side, id, role, name, maxHp: hp, hp, dmg, interval, cooldown: interval * (0.3 + 0.7 * rand(s)), dr: 0, twin: false, weak, tell: null, boss, flash: 0, lastDmg: 0, lastWeak: false, acted: 0 };
+  return { uid: s.nextUid++, side, id, role, name, maxHp: hp, hp, dmg, interval, cooldown: interval * (0.3 + 0.7 * rand(s)), dr: 0, twin: false, weak, tell: null, boss, flash: 0, lastDmg: 0, lastWeak: false, acted: 0, aim: 0 };
 }
 
-// Who shows up for a fight: 1 to 5 regulars, or the boss with two.
+// Who shows up. The count grows across the whole region: lot k fields 1 + k regulars, one more from its halfway point (max 6).
+// The boss brings 2 + k escorts (max 5), so every lot's boss is its peak and the next lot opens a step up.
+export const regularsIn = (zone: number, i: number, fights: number) => Math.min(6, 1 + zone + Math.floor((2 * i) / fights));
 export function enemyLineup(region: RegionId, fight: number): { def: EnemyDef; boss: boolean }[] {
   const f = FIGHTS[region][fight];
   const lot = REGIONS[region].lots[f.zone];
-  if (f.boss) return [{ def: lot.boss, boss: true }, { def: lot.regulars[0], boss: false }, { def: lot.regulars[1], boss: false }];
-  const n = 1 + Math.floor((f.i * 4) / lot.fights);
+  if (f.boss) return [{ def: lot.boss, boss: true }, ...Array.from({ length: Math.min(5, 2 + f.zone) }, (_, k) => ({ def: lot.regulars[k % 3], boss: false }))];
+  const n = regularsIn(f.zone, f.i, lot.fights);
   return Array.from({ length: n }, (_, k) => ({ def: lot.regulars[(f.i + k) % 3], boss: false }));
 }
+
+// Lanchester-style threat (total HP x total damage per second), so a fight's strength means the same thing whatever
+// the lineup: more, weaker enemies as a lot goes on, never a jump from who happens to show up.
+const threat = (l: { def: EnemyDef }[]) => {
+  let hp = 0, dps = 0;
+  for (const { def } of l) { const tl = def.tell ? TELL[def.tell] : { hp: 1, dmg: 1 }; hp += def.hp * tl.hp; dps += (def.dmg * tl.dmg) / def.interval; }
+  return hp * dps;
+};
+const scales: number[][] = [[], []];
+export const fightScale = (r: RegionId, g: number) => (scales[r][g] ??= Math.sqrt(threat(enemyLineup(0, 0)) / threat(enemyLineup(r, g))) * (FIGHTS[r][g].boss ? BOSS_STRENGTH : 1));
 
 export function startBattle(s: GameState, r: RegionId): Battle | null {
   const c = s.crews[r];
   const fight = Math.min(c.at, FIGHTS[r].length - 1);
-  const team = roster(s, r);
+  const lv = new Map(fighters(s, r));
+  const team: [string, number][] = lineupOf(s, r).map((id) => [id, lv.get(id) ?? 1]);
   if (!team.length) return null;
-  const ids = team.map(([id]) => id);
-  const aur = auras(s, ids, r);
+  team.sort((a, b) => ROLES.indexOf(BATTLERS[a[0]].role) - ROLES.indexOf(BATTLERS[b[0]].role));
+  const aur = auras(s, [...team, ...curb(s, r)], r);
   const field: Field = { mark: 0, slow: 0, weaken: 0, stun: 0, confuse: 0, regen: 0, revive: 0, payUp: 0 };
   for (const { fx } of aur) if (fx.k in field && 'v' in fx) (field as unknown as Record<string, number>)[fx.k] += fx.v;
   for (const k of Object.keys(CAPS) as (keyof Field)[]) if (k in field) field[k] = Math.min(field[k], CAPS[k as Fx['k']]!);
@@ -82,9 +100,9 @@ export function startBattle(s: GameState, r: RegionId): Battle | null {
   });
   const f = FIGHTS[r][fight];
   const enemies = enemyLineup(r, fight).map(({ def, boss }) => {
-    const m = f.strength;
+    const m = f.strength * fightScale(r, fight);
     const tl = def.tell ? TELL[def.tell] : { hp: 1, dmg: 1 };
-    const e = unit(s, 'enemy', def.name, 'enemy', def.name, def.hp * m * tl.hp, def.dmg * m * tl.dmg * (1 - field.weaken), def.interval * (1 + field.slow), def.weak, boss);
+    const e = unit(s, 'enemy', def.name, 'enemy', def.name, def.hp * m * tl.hp, def.dmg * m * ENEMY_DMG * tl.dmg * (1 - field.weaken), def.interval * (1 + field.slow), def.weak, boss);
     e.tell = def.tell;
     return e;
   });
@@ -110,10 +128,26 @@ function hit(s: GameState, rally: boolean, b: Battle, from: Unit, target: Unit, 
   }
 }
 
+// The crew hits the front enemy. Enemies hit the front tank 60% of the time and anyone the rest;
+// hard hitters and bosses go for whoever is lowest on HP.
+function pickTarget(u: Unit, foes: Unit[]): Unit | undefined {
+  if (u.side === 'crew') return foes.find(alive);
+  const live = foes.filter(alive);
+  if (!live.length) return undefined;
+  const n = u.aim++;
+  // Bosses always go for the weakest; hard hitters do it on a share of their hits.
+  if (u.boss || (u.tell === 'hard' && Math.floor((n + 1) * HARD_FOCUS) > Math.floor(n * HARD_FOCUS))) return live.reduce((a, z) => (z.hp / z.maxHp < a.hp / a.maxHp ? z : a));
+  // Spread hits: a fixed share goes to the front tank, the rest work down the line in turn, each enemy starting somewhere else.
+  const front = live.find((x) => x.role === 'tank') ?? live[0];
+  if (Math.floor((n + 1) * FRONT_SHARE) > Math.floor(n * FRONT_SHARE)) return front;
+  const rest = live.filter((x) => x !== front);
+  return rest.length ? rest[(u.uid + n) % rest.length] : front;
+}
+
 function act(s: GameState, rally: boolean, u: Unit, b: Battle) {
   const allies = u.side === 'crew' ? b.crew : b.enemies;
   const foes = u.side === 'crew' ? b.enemies : b.crew;
-  const target = foes.find(alive);
+  const target = pickTarget(u, foes);
   if (!target) return;
   u.acted = 0.2;
   if (u.role === 'heal') {

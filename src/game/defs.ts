@@ -3,7 +3,7 @@ import { BATTLER_LIST } from './content/battlers';
 import { BYPASS, BYPASS_SHOPS } from './content/bypass';
 import { BOSS } from './content/make';
 import { ROUTE9, ROUTE9_SHOPS } from './content/route9';
-import { FIGHT_GROWTH, KILL_RAMP, LOT_JUMP, PAY_BASE, PAY_GROWTH, BOSS_PAY } from './knobs';
+import { BOSS_PAY, FIGHT_GROWTH, LOT_JUMP, PAY_BASE, PAY_GROWTH, STRENGTH, WINS_FIRST, WINS_LAST } from './knobs';
 export * from './knobs';
 export { WALKIN_NAMES } from './content/battlers';
 
@@ -75,7 +75,7 @@ export interface LotDef {
   short: string;
   blurb: string;
   fights: number; // regular fights; the boss comes after
-  killBase: number; // wins needed at fight 1; ramps per fight
+  patrol: number; // Patrol contract price, in that region's dollars
   regulars: EnemyDef[];
   boss: EnemyDef & { joins: string };
   clearText: string;
@@ -116,15 +116,16 @@ export interface FightDef {
 }
 export const FIGHTS: FightDef[][] = REGIONS.map((r) => {
   const out: FightDef[] = [];
-  let str = 1 / FIGHT_GROWTH[r.id];
+  const n = r.lots.reduce((a, l) => a + l.fights + 1, 0);
+  let str = LOT_JUMP[r.id][0] / FIGHT_GROWTH[r.id][0];
   r.lots.forEach((lot, zone) => {
-    if (zone) str *= LOT_JUMP[r.id];
+    if (zone) str *= LOT_JUMP[r.id][zone];
     for (let i = 0; i <= lot.fights; i++) {
-      str *= FIGHT_GROWTH[r.id];
+      str *= FIGHT_GROWTH[r.id][zone];
       const boss = i === lot.fights;
       const g = out.length;
       const per = PAY_BASE[r.id] * PAY_GROWTH[r.id] ** g;
-      out.push({ region: r.id, zone, i, boss, need: boss ? 1 : Math.round(lot.killBase * KILL_RAMP ** i), pay: Math.max(1, Math.round(boss ? per * BOSS_PAY : per)), strength: str });
+      out.push({ region: r.id, zone, i, boss, need: boss ? 1 : Math.round(WINS_FIRST + ((WINS_LAST - WINS_FIRST) * g) / (n - 1)), pay: Math.max(1, Math.round(boss ? per * BOSS_PAY : per)), strength: STRENGTH[r.id][g] ?? str });
     }
   });
   return out;

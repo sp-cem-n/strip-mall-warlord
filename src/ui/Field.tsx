@@ -4,7 +4,7 @@ import { app } from '../app';
 import { glyph } from '../art/font';
 import { C, HEX } from '../art/palette';
 import { BATTLERS, FIGHTS, REGIONS, type RegionId, type Role } from '../game/defs';
-import { roster } from '../game/economy';
+import { curb, lineupOf } from '../game/economy';
 import type { Unit } from '../game/state';
 import { crewArt, enemyArt, fieldArt } from './art';
 import { hit } from './audio';
@@ -28,14 +28,14 @@ function text(ctx: CanvasRenderingContext2D, s: string, x: number, y: number, c:
 }
 const center = (s: string, x: number) => x - Math.floor((s.length * 4 - 1) / 2);
 
-// Feet positions. The crew stands in ranks, 4 deep, front rank (tanks) nearest the lamp, then damage, control, heal, buffers.
-// Columns are 17px apart so no two sprites overlap side to side; odd columns sit half a row lower.
-function crewSpots(roles: Role[]): [number, number][] {
-  return roles.map((_, i) => {
-    const col = Math.floor(i / 4);
-    return [150 - col * 17, 82 + (i % 4) * 18 + (col % 2 ? 9 : 0)];
+// Feet positions. Fielded fighters stand in ranks of 3, front rank (tanks) nearest the lamp. Buffers stand on the curb, bottom left.
+function crewSpots(n: number): [number, number][] {
+  return Array.from({ length: n }, (_, i) => {
+    const col = Math.floor(i / 3);
+    return [150 - col * 24, 84 + (i % 3) * 20 + (col % 2 ? 10 : 0)];
   });
 }
+const curbSpot = (i: number): [number, number] => [12 + i * 13, 146];
 const enemySpot = (i: number): [number, number] => [184 + Math.floor(i / 3) * 24 + (i % 3 === 1 ? 12 : 0), 88 + (i % 3) * 20];
 const BOSS_SPOT: [number, number] = [262, 134];
 const lastFlash = new Map<number, number>();
@@ -100,20 +100,22 @@ function draw(ctx: CanvasRenderingContext2D, t: number, r: RegionId) {
   ctx.drawImage(fieldArt(REGIONS[r].lots[f.zone].id), 0, 0);
   const b = c.battle;
   if (b) {
-    const spots = crewSpots(b.crew.map((u) => u.role as Role));
+    const spots = crewSpots(b.crew.length);
     const order = b.crew.map((u, i) => [u, spots[i]] as const).sort((a, z) => a[1][1] - z[1][1]);
     for (const [u, p] of order) drawUnit(ctx, u, p, t);
     const regs = b.enemies.filter((e) => !e.boss);
     regs.map((u, i) => [u, enemySpot(i)] as const).sort((a, z) => a[1][1] - z[1][1]).forEach(([u, p]) => drawUnit(ctx, u, p, t));
     for (const u of b.enemies.filter((e) => e.boss)) drawUnit(ctx, u, BOSS_SPOT, t);
-    const down = b.crew.filter((u) => u.hp <= 0).length;
-    if (down) text(ctx, `${down} DOWN`, 4, 140, C.red);
   } else {
-    const team = roster(s, r);
-    const spots = crewSpots(team.map(([id]) => BATTLERS[id].role));
-    team.map((m, i) => [m[0], spots[i]] as const).sort((a, z) => a[1][1] - z[1][1]).forEach(([id, [x, y]]) => ctx.drawImage(crewArt(id), x - 8, y - 24));
+    const team = lineupOf(s, r);
+    const spots = crewSpots(team.length);
+    team.map((id, i) => [id, spots[i]] as const).sort((a, z) => a[1][1] - z[1][1]).forEach(([id, [x, y]]) => ctx.drawImage(crewArt(id), x - 8, y - 24));
     text(ctx, 'REGROUPING', center('REGROUPING', 236), 96, C.bone);
   }
+  curb(s, r).forEach(([id], i) => {
+    const [x, y] = curbSpot(i);
+    ctx.drawImage(crewArt(id), x - 6, y - 18, 12, 18);
+  });
   let by = 132;
   if (c.rally > 0) text(ctx, `RALLY +25% ${Math.ceil(c.rally)}S`, 196, (by += 8), C.sodiumLight);
   if (c.overtime > 0 || b?.overtime) text(ctx, `OVERTIME ${b?.overtime ? 'ON' : ''}`, 196, by - 8, C.mint);

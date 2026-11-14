@@ -4,7 +4,7 @@ import { app } from '../app';
 import { ASPHALT_BONUS, FIGHTS, GOODWILL_PER_EQUITY, REGIONS } from '../game/defs';
 import { asphaltGain, leased, pave, view } from '../game/economy';
 import { fightLabel } from '../game/sim';
-import { saveGame } from '../game/save';
+import { old, saveGame } from '../game/save';
 import { bootURL } from './art';
 import { fmt, fmtTime } from './format';
 import { Speaker } from './Speaker';
@@ -69,7 +69,7 @@ export function Boot({ onNew, onResume }: { onNew: () => void; onResume: () => v
       <div class="boot-menu panel-brick">
         {app.oldSave && (
           <div class="notice">
-            <b>Notice to tenants:</b> The lease was renegotiated. Your old plaza (v0.4) is still open at <a href="../v0.4/">/v0.4/</a>, but nothing carries over. Uncle Sal's pawn shop is open at 9.
+            <b>Notice to tenants:</b> The lease was renegotiated. Your old plaza ({old.from}) is still open at <a href={`./${old.from}/`}>/{old.from}/</a>{old.from === 'v0.5' ? ', save and all' : ''}. Nothing carries over here. Uncle Sal's pawn shop is open at 9.
           </div>
         )}
         <button class="btn big" onClick={onNew}>

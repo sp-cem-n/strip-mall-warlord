@@ -1,7 +1,7 @@
 // The plaza: one fixed-layout card per storefront. Leased shops renovate; new ones come up for lease in order.
 import { app, tip, toast } from '../app';
 import { BATTLERS, CURRENCY_NAME, REGIONS, SHOPS, WALKIN_STAYS, type RegionId, type ShopDef } from '../game/defs';
-import { bal, bossLevel, currencyOf, forLease, joined, lease, leased, regionDone, renovate, renovateCost, rentOf } from '../game/economy';
+import { bal, tierOf, bossLevel, currencyOf, forLease, joined, lease, leased, lineupOf, regionDone, renovate, renovateCost, rentOf, toggleField } from '../game/economy';
 import { statsOf } from '../game/battle';
 import { collectFind, walkInValue } from '../game/sim';
 import type { GameState } from '../game/state';
@@ -26,7 +26,7 @@ function WalkIn({ sh }: { sh: ShopDef }) {
         act(collectFind(s));
         app.tip = null;
       }}
-      {...tip(`Walk-in at the ${sh.name}`, `${sh.walkin.who}: ${f.name}.`, `Click: ${EFFECT[f.kind](v)}.`, `Leaves in ${Math.ceil(f.left)}s. Ignoring them costs nothing.`)}
+      {...tip(`Walk-in at the ${sh.name}`, `${sh.walkin.who}: ${f.name}.`, `Click: ${EFFECT[f.kind](v)}.`, `Leaves in ${Math.ceil(f.left)}s.`)}
     >
       <b>{sh.walkin.who}</b>
       <span>{f.name}</span>
@@ -44,8 +44,8 @@ function Unit({ sh }: { sh: ShopDef }) {
   const d = BATTLERS[sh.battler];
   const now = performance.now();
   const raising = now < (app.raising[sh.id] ?? 0);
-  const st = statsOf(s, sh.region, sh.battler, Math.max(1, lv));
-  const nx = statsOf(s, sh.region, sh.battler, lv + 1);
+  const st = statsOf(s, sh.region, sh.battler, Math.max(1, lv) + tierOf(sh.id));
+  const nx = statsOf(s, sh.region, sh.battler, lv + 1 + tierOf(sh.id));
   const cost = lv ? renovateCost(sh.id, lv) : sh.lease;
   const cur = lv ? 'cash' : REGIONS[sh.region].leaseIn;
   const afford = bal(s, sh.region, cur) >= cost;
@@ -70,6 +70,7 @@ function Unit({ sh }: { sh: ShopDef }) {
             <span>{statLine(d.role, st.hp, st.dmg)}</span>
             <span class="dim">{lv ? `rent $${fmt(rent)}/s` : `rent $${fmt(sh.rent)}/s`}</span>
           </span>
+          {lv > 0 && <FieldToggle r={sh.region} id={d.id} />}
         </div>
         <div class="next" {...tip('Next renovation', `+${fmt(nx.hp - st.hp)} HP, +${fmt(nx.dmg - st.dmg)} ${d.role === 'heal' ? 'heal' : 'damage'}${sh.rent ? `, +$${fmt(dRent)}/s rent` : ''}.`, `Lv ${lv} → ${lv + 1}. Renovations are the big stat jump.`)}>
           {lv ? (
@@ -77,7 +78,7 @@ function Unit({ sh }: { sh: ShopDef }) {
               <span>
                 ▲ +{fmt(nx.hp - st.hp)} HP +{fmt(nx.dmg - st.dmg)} {d.role === 'heal' ? 'HEAL' : 'DMG'}
               </span>
-              <span>{sh.rent ? `▲ +$${fmt(dRent)}/s rent` : '▲ watches more lots'}</span>
+              <span>{sh.rent ? `▲ +$${fmt(dRent)}/s rent` : '▲ patrols 5% cheaper'}</span>
             </>
           ) : (
             <>
@@ -103,6 +104,18 @@ function Unit({ sh }: { sh: ShopDef }) {
   );
 }
 
+// FIELD / BENCH for fighters; buffers stand on the curb and are always on.
+function FieldToggle({ r, id }: { r: RegionId; id: string }) {
+  const s = app.s;
+  if (BATTLERS[id].role === 'buffer') return <span class="ft curb" {...tip('On the curb', 'Buffers never take a slot. Their aura is always on.')}>CURB</span>;
+  const on = lineupOf(s, r).includes(id);
+  return (
+    <button class={`ft ${on ? 'on' : ''}`} onClick={(e) => (e.stopPropagation(), act(toggleField(s, r, id)))} {...tip(on ? 'Fielded' : 'Benched', on ? 'Click to bench. You pick the lineup from here on.' : 'Click to field.')}>
+      {on ? 'FIELD' : 'BENCH'}
+    </button>
+  );
+}
+
 // Bosses who quit and joined. No rent, no renovations: they level with the crew's average.
 function BreakRoom({ r }: { r: RegionId }) {
   const s = app.s;
@@ -112,7 +125,7 @@ function BreakRoom({ r }: { r: RegionId }) {
   return (
     <div class="breakroom">
       <h3>
-        Break room <span class="dim">· they quit and joined · Lv {lv}, the crew's average</span>
+        Break room <span class="dim">· Lv {lv}, the crew's average</span>
       </h3>
       <div class="bo-row">
         {ids.map((id) => {
@@ -125,6 +138,7 @@ function BreakRoom({ r }: { r: RegionId }) {
                 <b class={`role-${d.role}`}>{d.name}</b>
                 <span class="dim">{d.does}</span>
               </span>
+              <FieldToggle r={r} id={id} />
             </div>
           );
         })}
@@ -157,7 +171,7 @@ export function Shops() {
   return (
     <section class="wall shops">
       <h2>
-        {REGIONS[r].chrome.plaza} <span class="dim">· every shop pays rent and sends one crew member</span>
+        {REGIONS[r].chrome.plaza}
       </h2>
       <div class="strip">
         {list.map((sh) => (

@@ -20,6 +20,7 @@ export interface Unit {
   lastDmg: number;
   lastWeak: boolean;
   acted: number;
+  aim: number; // enemies: hits thrown so far, for the spread rotation
 }
 
 // Auras, compiled when a fight starts.
@@ -68,6 +69,9 @@ export interface Crew {
   regroup: number;
   stance: Stance;
   overtime: number; // fights left
+  lineup: string[] | null; // fighters you picked for the lot; null = the auto pick
+  contracts: number[]; // lots with a Patrol contract (auto-advance)
+  slotBuys: number; // fighter slots bought in the Back Office
   rally: number; // seconds left
   wins: number;
   losses: number;
@@ -80,6 +84,7 @@ export interface GameState {
   totalTime: number; // all runs
   goodwill: number;
   equity: number;
+  tickets: number; // arcade tickets (Route 9's Fun Zone)
   asphalt: number;
   paves: number;
   crews: [Crew, Crew];

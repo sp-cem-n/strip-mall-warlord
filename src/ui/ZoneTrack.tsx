@@ -1,6 +1,6 @@
 // The lot signs across the top of the Lot: progress, weakness badges, auto-advance.
 import { app, tip } from '../app';
-import { BATTLERS, FIGHTS, REGIONS, SECURITY_LEVELS, WEAK_BONUS, type RegionId } from '../game/defs';
+import { BATTLERS, FIGHTS, REGIONS, WEAK_BONUS, type RegionId } from '../game/defs';
 import { autoCovers } from '../game/economy';
 
 function Weak({ id, r, zone }: { id: string; r: RegionId; zone: number }) {
@@ -8,7 +8,7 @@ function Weak({ id, r, zone }: { id: string; r: RegionId; zone: number }) {
   const d = BATTLERS[id];
   const who = [...lot.regulars, lot.boss].filter((e) => e.weak === id).map((e) => e.name);
   return (
-    <span class={`weak role-bg-${d.role}`} {...tip(`Weak to the ${d.name}`, `${who.join(', ')}.`, `+${WEAK_BONUS * 100}% damage from them. Nice to have, never required.`, d.line)}>
+    <span class={`weak role-bg-${d.role}`} {...tip(`Weak to the ${d.name}`, `${who.join(', ')}.`, `+${WEAK_BONUS * 100}% damage from them.`, d.line)}>
       {d.name[0]}
     </span>
   );
@@ -44,9 +44,11 @@ export function ZoneTrack({ r }: { r: RegionId }) {
                 </>
               )}
             </div>
-            <div class={`auto ${auto ? 'on' : ''}`} {...tip(auto ? 'Auto-advance: on' : 'Auto-advance: off', i === 0 ? 'The first lot always moves up by itself.' : `Security Office Lv ${SECURITY_LEVELS(i)} watches this lot.`)}>
-              {auto ? 'AUTO' : `SEC ${SECURITY_LEVELS(i)}`}
-            </div>
+            {state !== 'locked' && state !== 'done' && (
+              <div class={`auto ${auto ? 'on' : ''}`} {...tip(auto ? 'On patrol' : 'No patrol', auto ? 'The crew moves up here on its own.' : 'Press ▸ to move up, or sign a patrol contract in the Back Office.')}>
+                {auto ? 'AUTO' : 'BY HAND'}
+              </div>
+            )}
           </div>
         );
       })}

@@ -1,7 +1,7 @@
-import { BATTLERS, FALL_BACK_AFTER, FIGHTS, OFFLINE_CAP_SECONDS, RALLY_SECONDS, REFERRAL_WINS, REGIONS, REGROUP_SECONDS, RETRY_AFTER, SHOPS, SHOP_LIST, STEP, TIP_SECONDS, WALKIN_EVERY, WALKIN_NAMES, WALKIN_STAYS, type FightDef, type RegionId, type WalkInKind } from './defs';
+import { BATTLERS, FALL_BACK_AFTER, FIGHTS, OFFLINE_CAP_SECONDS, RALLY_SECONDS, REFERRAL_WINS, REGIONS, REGROUP_SECONDS, SHOPS, SHOP_LIST, STEP, TIP_SECONDS, WALKIN_EVERY, WALKIN_NAMES, WALKIN_STAYS, type FightDef, type RegionId, type WalkInKind } from './defs';
 import { pick } from './rng';
 import { lossReason, startBattle, stepBattle } from './battle';
-import { asphaltMult, autoCovers, available, currencyOf, earn, fightOf, leased, log, rentPerSec, topFight } from './economy';
+import { asphaltMult, autoCovers, available, currencyOf, earn, fightOf, leased, log, rentPerSec, retryAfter, topFight } from './economy';
 import type { Battle, GameState } from './state';
 import { fmt } from '../ui/format';
 
@@ -46,7 +46,7 @@ function resolve(s: GameState, r: RegionId, b: Battle, result: 'win' | 'loss') {
       c.at--;
       c.streak = 0;
       c.farmed = 0;
-      log(s, r, `Lost ${fightLabel(r, b.fight)} ${FALL_BACK_AFTER} times. Falling back to farm ${fightLabel(r, c.at)}. ${lossReason(b, c.stance)}`, 'loss');
+      log(s, r, `Lost ${fightLabel(r, b.fight)}. Falling back to farm ${fightLabel(r, c.at)}. ${lossReason(b, c.stance)}`, 'loss');
     } else {
       if (c.at === 0) c.regroup = 5;
       log(s, r, `Lost ${fightLabel(r, b.fight)}. ${lossReason(b, c.stance)}`, 'loss');
@@ -69,7 +69,7 @@ function resolve(s: GameState, r: RegionId, b: Battle, result: 'win' | 'loss') {
   log(s, r, `Won ${fightLabel(r, b.fight)}. +${fmt(pay)} ${currencyOf(r)}.`, 'win');
   const next = ladder[c.at + 1];
   if (!next || c.at + 1 > topFight(s, r) || !autoCovers(s, r, next.zone)) return;
-  if (c.at + 1 < c.frontier || c.farmed >= RETRY_AFTER) {
+  if (c.at + 1 < c.frontier || c.farmed >= retryAfter(s, r)) {
     c.at++;
     c.farmed = 0;
   }
@@ -97,7 +97,7 @@ function clearFight(s: GameState, r: RegionId) {
   }
   const next = ladder[c.frontier];
   if (autoCovers(s, r, next.zone)) c.at = c.frontier;
-  else if (next.i === 0) log(s, r, `${REGIONS[r].lots[next.zone].name} is open. The Security Office isn't watching it yet: hit Advance when the crew is ready.`);
+  else if (next.i === 0) log(s, r, `${REGIONS[r].lots[next.zone].name} is open. No patrol out there yet: press ▸ when the crew is ready.`);
 }
 
 // A walk-in every 90s or so, at the crew you're watching. Never required.

@@ -1,11 +1,37 @@
 // The Lot panel: region tabs, the lot signs, the field, and the calls.
-import { app, tip } from '../app';
-import { FIGHTS, REGIONS, ROLES, WEAK_BONUS } from '../game/defs';
-import { advance, autoCovers, lotsTaken, regionDone, topFight, view } from '../game/economy';
+import { app, tip, toast } from '../app';
+import { FIGHTS, REGIONS, type RegionId } from '../game/defs';
+import { advance, autoCovers, autoPick, bal, buySlot, curb, lineupOf, lotsTaken, regionDone, slotPrice, slotsOf, topFight, view } from '../game/economy';
+import { CURRENCY_SHORT } from '../game/defs';
+import { fmt } from './format';
 import { enemyLineup } from '../game/battle';
 import { Calls } from './Calls';
 import { Field } from './Field';
 import { ZoneTrack } from './ZoneTrack';
+
+function Slots({ r }: { r: RegionId }) {
+  const s = app.s;
+  const c = s.crews[r];
+  const n = slotsOf(s, r);
+  const used = lineupOf(s, r).length;
+  const price = slotPrice(s, r);
+  const cur = REGIONS[r].trainIn;
+  return (
+    <span class="slots dim">
+      <span {...tip('Fighter slots', `${used} of ${n} fielded. ${curb(s, r).length} on the curb, always on.`, c.lineup ? 'Picked by hand.' : 'Auto picks the lineup for each fight.')}>
+        · {used}/{n} fielding · {curb(s, r).length} on the curb
+      </span>
+      <button class={`btn small ${c.lineup ? '' : 'on'}`} onClick={() => (autoPick(s, r), app.refresh())} {...tip('Auto lineup', 'Best tank, a healer, counters for this fight, then raw power.')}>
+        AUTO
+      </button>
+      {isFinite(price) && (
+        <button class="btn small" disabled={bal(s, r, cur) < price} onClick={() => (toast(buySlot(s, r) ?? `Slot ${n + 1}`), app.refresh())} {...tip('Another slot', `One more fighter on the lot. ${fmt(price)} ${CURRENCY_SHORT[cur]}.`)}>
+          +1 slot {fmt(price)} {CURRENCY_SHORT[cur]}
+        </button>
+      )}
+    </span>
+  );
+}
 
 export function Lot() {
   const s = app.s;
@@ -23,12 +49,12 @@ export function Lot() {
     <section class="glass lot">
       <h2>
         <span>
-          The Lot <span class="dim">· fights run themselves</span>
+          The Lot <Slots r={r} />
         </span>
         {s.bypass && (
           <span class="tabs">
             {REGIONS.map((reg) => (
-              <button key={reg.id} class={`tab ${r === reg.id ? 'on' : ''}`} onClick={() => (view(s, reg.id), app.refresh())} {...tip(reg.name, `${lotsTaken(s, reg.id)}/${reg.lots.length} lots. Its own crew, its own till.`, 'Both crews fight all the time. This picks which one you manage.')}>
+              <button key={reg.id} class={`tab ${r === reg.id ? 'on' : ''}`} onClick={() => (view(s, reg.id), app.refresh())} {...tip(reg.name, `${lotsTaken(s, reg.id)}/${reg.lots.length} lots.`)}>
                 {reg.name}
               </button>
             ))}
@@ -53,9 +79,6 @@ export function Lot() {
       </div>
       <Field r={r} />
       <Calls r={r} />
-      <div class="legend dim">
-        Front to back: {ROLES.map((ro) => <b key={ro} class={`role-${ro}`}>{ro} </b>)}. Enemies hit the front first. The badge is who they're weak to (+{WEAK_BONUS * 100}%).
-      </div>
     </section>
   );
 }

@@ -1,6 +1,8 @@
-// Headless balance run: a scripted player plays N hours and we print milestones.
-// Usage: bun scripts/balance.ts [hours=20] [seed=1991] [--every=10] [--active] [--idle] [--pave=H] [--convert=0.5]
-import { FIGHTS, REGIONS, SHOP_LIST, STEP } from '../src/game/defs';
+// Headless balance run: a scripted player plays N hours; prints milestones, per-lot fight stats and 30-minute snapshots.
+// Usage: bun scripts/balance.ts [hours=20] [seed=1991] [--every=600] [--active] [--idle] [--room] [--pave=H] [--convert=0.5] [--quiet]
+//   check-in: --every=600 (default)   active: --active --every=10   active + arcade: --active --room --every=10   idle: --idle
+// Save output under out/ (git-ignored) if you want to keep it.
+import { FIGHTS, REGIONS, SHOP_LIST } from '../src/game/defs';
 import { botAct, describeCrew, type BotOpts } from '../src/game/bot';
 import { lotsTaken, newGame, rentPerSec } from '../src/game/economy';
 import { fightLabel, simulateAway, step } from '../src/game/sim';
@@ -12,52 +14,85 @@ const nums = args.filter((a) => /^[\d.]+$/.test(a)).map(Number);
 const flag = (k: string) => args.find((a) => a.startsWith(`--${k}=`))?.split('=')[1];
 const hours = nums[0] ?? 20;
 const seed = nums[1] ?? 1991;
-const every = Number(flag('every') ?? 10);
-const o: BotOpts = { active: args.includes('--active'), manual: !args.includes('--idle'), pave: flag('pave') === undefined ? undefined : Number(flag('pave')), convert: Number(flag('convert') ?? 0.5) };
+const every = Number(flag('every') ?? (args.includes('--active') ? 10 : 600));
+const quiet = args.includes('--quiet');
+const o: BotOpts = { active: args.includes('--active'), room: args.includes('--room'), manual: !args.includes('--idle'), pave: flag('pave') === undefined ? undefined : Number(flag('pave')), convert: Number(flag('convert') ?? 0.5) };
 
 let s: GameState = newGame(seed);
 const seen = new Set<string>();
 const lines: string[] = [];
 const mark = (key: string, text: string) => !seen.has(key) && (seen.add(key), lines.push(`${fmtTime(s.totalTime).padStart(8)}  ${text}`));
+const done: Record<string, number> = {};
+// per lot: frontier wins / losses, HP left on frontier wins, all wins / losses
+type LotStat = { fw: number; fl: number; hp: number; w: number; l: number; boss: number };
+const stat: LotStat[][] = REGIONS.map((r) => r.lots.map(() => ({ fw: 0, fl: 0, hp: 0, w: 0, l: 0, boss: 0 })));
 const snaps: string[] = [];
 let nextAct = 0;
 let nextSnap = 1800;
-let last = { gw: 0, eq: 0, bank: 0 };
 const t0 = Date.now();
 while (s.totalTime < hours * 3600) {
   if (s.totalTime >= nextAct) {
-    s = botAct(s, o);
-    nextAct = s.totalTime + every;
+    s = botAct(s, o, every);
+    nextAct = s.totalTime + (o.active || s.totalTime >= 1800 ? every : Math.min(every, 60)); // check-in players watch the first half hour
   }
+  const before = s.crews.map((c) => ({ b: c.battle, front: c.battle && c.battle.fight === c.frontier, w: c.wins, l: c.losses, paves: s.paves }));
   step(s, o.active);
-  const run = s.paves;
+  for (const r of [0, 1] as const) {
+    const c = s.crews[r], p = before[r];
+    if (!p.b || c.battle === p.b || p.paves !== s.paves || (r === 0 && s.paves)) continue;
+    const st = stat[r][FIGHTS[r][p.b.fight].zone];
+    const won = c.wins > p.w;
+    if (won) st.w++;
+    else st.l++;
+    if (p.front) {
+      if (won) (st.fw++, (st.hp += p.b.crew.reduce((a, u) => a + u.hp, 0) / p.b.crew.reduce((a, u) => a + u.maxHp, 0)));
+      else st.fl++;
+      if (FIGHTS[r][p.b.fight].boss) st.boss++;
+    }
+  }
   if (s.crews[0].wins) mark('win', 'first win');
   for (const r of [0, 1] as const) {
     const c = s.crews[r];
-    for (const sh of SHOP_LIST) if (sh.region === r && c.shops[sh.id]) mark(`l${run}-${sh.id}`, `${REGIONS[r].name}: leased ${sh.name}${r === 0 && run ? ` (run ${run + 1})` : ''}`);
-    REGIONS[r].lots.forEach((l, z) => z < lotsTaken(s, r) && mark(`c${r === 0 ? run : 'b'}-${r}-${z}`, `${REGIONS[r].name}: CAPTURED ${l.name}${r === 0 && run ? ` (run ${run + 1})` : ''}`));
+    const run = r === 0 ? s.paves : 0;
+    for (const sh of SHOP_LIST) if (sh.region === r && c.shops[sh.id] && !run) mark(`l-${sh.id}`, `${REGIONS[r].name}: leased ${sh.name}`);
+    if (!run) for (const z of c.contracts) mark(`k-${r}-${z}`, `${REGIONS[r].name}: patrol contract ${REGIONS[r].lots[z].name}  rent ${fmt(rentPerSec(s, r))}/s`);
+    REGIONS[r].lots.forEach((l, z) => {
+      if (z >= lotsTaken(s, r)) return;
+      const key = `c${run}-${r}-${z}`;
+      if (!seen.has(key) && !run) done[`${r}-${z}`] = s.totalTime;
+      mark(key, `${REGIONS[r].name}: CAPTURED ${l.name}${run ? ` (run ${run + 1})` : ''}  rent ${fmt(rentPerSec(s, r))}/s`);
+    });
   }
-  if (s.bypass) mark('bypass', `ROUTE 9 ENDING. The Bypass found. Goodwill banked ${fmt(s.goodwill)}`);
+  if (s.bypass) mark('bypass', `ROUTE 9 ENDING. Goodwill on hand ${fmt(s.goodwill)}`);
   for (let p = 1; p <= s.paves; p++) mark(`p${p}`, `PAVE #${p} -> asphalt ${s.asphalt}`);
   if (s.totalTime >= nextSnap) {
     nextSnap += 1800;
-    // Income over the last half hour: Goodwill from Route 9 wins, Equity from Bypass wins, Equity from the bank.
-    const gwRate = (s.stats.goodwill - last.gw) / 1800, eqRate = (s.stats.equity - last.eq) / 1800, bankRate = (s.stats.banked - last.bank) / 1800;
-    last = { gw: s.stats.goodwill, eq: s.stats.equity, bank: s.stats.banked };
     const at = (r: 0 | 1) => (s.crews[r].frontier >= FIGHTS[r].length ? 'done' : fightLabel(r, s.crews[r].at));
-    snaps.push(`${fmtTime(s.totalTime).padStart(8)}  R9 $${fmt(s.crews[0].cash).padStart(6)} ${fmt(rentPerSec(s, 0)).padStart(5)}/s GW ${fmt(s.goodwill).padStart(6)} +${fmt(gwRate)}/s W${s.crews[0].wins}/L${s.crews[0].losses} ${at(0)} [${describeCrew(s, 0)}]`);
-    if (s.bypass) snaps.push(`${''.padStart(8)}  BP $${fmt(s.crews[1].cash).padStart(6)} ${fmt(rentPerSec(s, 1)).padStart(5)}/s EQ ${fmt(s.equity).padStart(6)} +${fmt(eqRate)}/s wins +${fmt(bankRate)}/s bank W${s.crews[1].wins}/L${s.crews[1].losses} ${at(1)} [${describeCrew(s, 1)}]`);
+    snaps.push(`${fmtTime(s.totalTime).padStart(8)}  R9 $${fmt(s.crews[0].cash).padStart(6)} ${fmt(rentPerSec(s, 0)).padStart(5)}/s GW ${fmt(s.goodwill).padStart(6)} TK ${fmt(s.tickets)} W${s.crews[0].wins}/L${s.crews[0].losses} ${at(0)} [${describeCrew(s, 0)}]`);
+    if (s.bypass) snaps.push(`${''.padStart(8)}  BP $${fmt(s.crews[1].cash).padStart(6)} ${fmt(rentPerSec(s, 1)).padStart(5)}/s EQ ${fmt(s.equity).padStart(6)} W${s.crews[1].wins}/L${s.crews[1].losses} ${at(1)} [${describeCrew(s, 1)}]`);
   }
 }
 
-console.log(`Strip Mall Warlord balance: ${hours}h, seed ${seed}, ${o.active ? 'active' : 'checks in'}${o.manual ? '' : ', pure idle (never presses Advance)'}${o.pave !== undefined ? `, paves after ${o.pave}h of farming` : ''}, converts ${o.convert! * 100}% of Goodwill, acts every ${every}s, step ${STEP}s (${((Date.now() - t0) / 1000).toFixed(1)}s wall)\n`);
-console.log('Milestones');
+const mode = o.active ? (o.room ? 'active + room' : 'active') : o.manual ? 'check-in' : 'idle (never presses Advance)';
+console.log(`Strip Mall Warlord balance: ${hours}h, seed ${seed}, ${mode}, acts every ${every}s${o.pave !== undefined ? `, paves after ${o.pave}h` : ''}, converts ${o.convert! * 100}% (${((Date.now() - t0) / 1000).toFixed(1)}s wall)\n`);
+console.log('Lot            captured   frontier W/L  loss%  HP left  all W/L   loss%  boss tries');
+for (const r of [0, 1] as const)
+  REGIONS[r].lots.forEach((l, z) => {
+    const st = stat[r][z];
+    if (!st.w && !st.l) return;
+    const t = done[`${r}-${z}`];
+    console.log(`${l.short.padEnd(14)} ${(t ? fmtTime(t) : '-').padStart(8)}   ${`${st.fw}/${st.fl}`.padStart(11)}  ${((100 * st.fl) / Math.max(1, st.fw + st.fl)).toFixed(0).padStart(4)}%  ${((100 * st.hp) / Math.max(1, st.fw)).toFixed(0).padStart(6)}%  ${`${st.w}/${st.l}`.padStart(8)}  ${((100 * st.l) / Math.max(1, st.w + st.l)).toFixed(0).padStart(4)}%  ${String(st.boss).padStart(5)}`);
+  });
+const tt = (k: string) => (done[k] ? fmtTime(done[k]) : '-');
+console.log(`\nSUMMARY mode="${mode}" lot=${tt("0-0")} bigbox=${tt("0-1")} outlet=${tt("0-2")} route9=${tt('0-5')} galleria=${tt('1-3')} losses=${s.crews[0].losses}/${s.crews[0].wins + s.crews[0].losses}`);
+if (quiet) process.exit(0);
+console.log('\nMilestones');
 lines.forEach((l) => console.log(l));
 console.log('\nEvery 30 minutes');
 snaps.forEach((l) => console.log(l));
 
-const idle = botAct(newGame(seed), o);
+const idle = botAct(newGame(seed), o, 10);
 for (let i = 0; i < 300; i++) step(idle);
-botAct(idle, o);
+botAct(idle, o, 10);
 const away = simulateAway(idle, 8 * 3600);
 console.log(`\nOffline (1 min of play, then 8h away): +$${fmt(away.earned)}, +${fmt(away.goodwill)} Goodwill, ${away.wins}W/${away.losses}L, fights cleared +${away.cleared}, captured: ${away.captured.join(', ') || 'none'}`);
