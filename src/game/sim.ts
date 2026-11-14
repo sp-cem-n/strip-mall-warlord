@@ -1,7 +1,7 @@
 import { BATTLERS, FALL_BACK_AFTER, FIGHTS, OFFLINE_CAP_SECONDS, RALLY_SECONDS, REFERRAL_WINS, REGIONS, REGROUP_SECONDS, RETRY_AFTER, SHOPS, SHOP_LIST, STEP, TIP_SECONDS, WALKIN_EVERY, WALKIN_NAMES, WALKIN_STAYS, type FightDef, type RegionId, type WalkInKind } from './defs';
 import { pick } from './rng';
 import { lossReason, startBattle, stepBattle } from './battle';
-import { asphaltMult, autoCovers, available, currencyOf, fightOf, leased, log, rentPerSec, topFight } from './economy';
+import { asphaltMult, autoCovers, available, currencyOf, earn, fightOf, leased, log, rentPerSec, topFight } from './economy';
 import type { Battle, GameState } from './state';
 import { fmt } from '../ui/format';
 
@@ -57,8 +57,8 @@ function resolve(s: GameState, r: RegionId, b: Battle, result: 'win' | 'loss') {
   c.streak = 0;
   const f = ladder[b.fight];
   const pay = payFor(s, r, f, b.field.payUp);
-  if (r === 0) (s.goodwill += pay), (s.stats.goodwill += pay);
-  else (s.equity += pay), (s.stats.equity += pay);
+  earn(s, r, REGIONS[r].pay, pay);
+  s.stats[REGIONS[r].pay as 'goodwill' | 'equity'] += pay;
   if (b.fight === c.frontier) {
     if (++c.kills < f.need) return log(s, r, `Won ${fightLabel(r, b.fight)}. ${c.kills}/${f.need} to move up.`, 'win');
     clearFight(s, r);
@@ -135,8 +135,7 @@ export function collectFind(s: GameState): string | null {
     c.cash += v;
     log(s, r, `${f.name} at the ${where}. +$${fmt(v)}.`, 'win');
   } else {
-    if (r === 0) s.goodwill += v;
-    else s.equity += v;
+    earn(s, r, REGIONS[r].pay, v);
     log(s, r, `${f.name}: ${where} regular. +${fmt(v)} ${currencyOf(r)}.`, 'win');
   }
   return null;

@@ -6,8 +6,10 @@ import { BATTLERS, REGIONS, SHOP_LIST } from '../src/game/defs';
 import { Grid } from '../src/art/grid';
 import { C, PALETTE } from '../src/art/palette';
 import { crewSprite, enemySprite } from '../src/art/people';
-import * as S from '../src/art/scenes';
-import { battlefield, buttonFrame, facade, ICONS, panelFrame } from '../src/art/scenes';
+import { battlefield, bootScene } from '../src/art/field';
+import * as S from '../src/art/frames';
+import { buttonFrame, ICONS, panelFrame } from '../src/art/frames';
+import { facade, scaffold } from '../src/art/storefronts';
 
 const out = process.argv[2] ?? 'docs/spritesheet.png';
 const W = 660;
@@ -53,7 +55,7 @@ const mats = ['home', 'bigbox', 'outlet', 'office', 'lifestyle'] as const;
   const sh = SHOP_LIST.find((x) => x.id === id);
   const x = 6 + (i % 9) * 72;
   const yy = y + Math.floor(i / 9) * 62;
-  if (id === 'scaffold') sheet.blit(facade('dojo', 'home', 1), x, yy).blit(S.scaffold(), x, yy);
+  if (id === 'scaffold') sheet.blit(facade('dojo', 'home', 1), x, yy).blit(scaffold(), x, yy);
   else sheet.blit(facade(id, sh ? (sh.region === 1 ? 'bypass' : mats[sh.zone]) : 'home', i + 1), x, yy);
 });
 y += 62 * 4 + 6;
@@ -68,7 +70,7 @@ Object.values(ICONS).forEach((f, i) => sheet.blit(scaled(f(), 4), 220 + i * 40, 
 y += 44;
 label('TITLE SCENE + THE DAWN WIN CARD 320X180 (1X)', 6, y);
 y += 8;
-sheet.blit(S.bootScene(['pawn', 'dojo', 'laundromat', 'vape']), 6, y).blit(S.bootScene(['pawn', 'dojo', 'laundromat', 'vape'], true), 332, y);
+sheet.blit(bootScene(['pawn', 'dojo', 'laundromat', 'vape']), 6, y).blit(bootScene(['pawn', 'dojo', 'laundromat', 'vape'], true), 332, y);
 y += 186;
 let fx = 6;
 for (const f of [S.glassFrame, S.brickFrame, S.pylonFrame, S.printerFrame, S.binderFrame, S.tagFrame, () => S.signFrame(C.sodium), S.cinderTile, S.roadTile, S.tearTile]) {

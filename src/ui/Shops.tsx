@@ -1,7 +1,7 @@
 // The plaza: one fixed-layout card per storefront. Leased shops renovate; new ones come up for lease in order.
 import { app, tip, toast } from '../app';
-import { BATTLERS, REGIONS, SHOPS, WALKIN_STAYS, type RegionId, type ShopDef } from '../game/defs';
-import { bossLevel, forLease, joined, lease, leased, regionDone, renovate, renovateCost, rentOf } from '../game/economy';
+import { BATTLERS, CURRENCY_NAME, REGIONS, SHOPS, WALKIN_STAYS, type RegionId, type ShopDef } from '../game/defs';
+import { bal, bossLevel, currencyOf, forLease, joined, lease, leased, regionDone, renovate, renovateCost, rentOf } from '../game/economy';
 import { statsOf } from '../game/battle';
 import { collectFind, walkInValue } from '../game/sim';
 import type { GameState } from '../game/state';
@@ -11,7 +11,7 @@ import { fmt } from './format';
 
 const act = (err: string | null) => (err && toast(err), app.refresh());
 const RAISE_MS = 1400;
-const EFFECT = { cash: (v: number) => `+$${fmt(v)} cash`, referral: (v: number) => `+${fmt(v)} ${REGIONS[app.s.view].currency}`, rally: () => 'Crew hits 25% harder for 30s' };
+const EFFECT = { cash: (v: number) => `+$${fmt(v)} cash`, referral: (v: number) => `+${fmt(v)} ${currencyOf(app.s.view)}`, rally: () => 'Crew hits 25% harder for 30s' };
 
 function WalkIn({ sh }: { sh: ShopDef }) {
   const s = app.s;
@@ -47,8 +47,8 @@ function Unit({ sh }: { sh: ShopDef }) {
   const st = statsOf(s, sh.region, sh.battler, Math.max(1, lv));
   const nx = statsOf(s, sh.region, sh.battler, lv + 1);
   const cost = lv ? renovateCost(sh.id, lv) : sh.lease;
-  const eq = sh.region === 1;
-  const afford = lv ? c.cash >= cost : eq ? s.equity >= cost : c.cash >= cost;
+  const cur = lv ? 'cash' : REGIONS[sh.region].leaseIn;
+  const afford = bal(s, sh.region, cur) >= cost;
   const rent = rentOf(s, sh.id, lv);
   const dRent = rentOf(s, sh.id, lv + 1) - rent;
   return (
@@ -82,7 +82,7 @@ function Unit({ sh }: { sh: ShopDef }) {
           ) : (
             <>
               <span>{d.does}</span>
-              <span class="dim">{eq ? 'Bypass leases cost Equity' : ''}</span>
+              <span class="dim">{cur === 'cash' ? '' : `Leased in ${CURRENCY_NAME[cur]}`}</span>
             </>
           )}
         </div>
@@ -96,7 +96,7 @@ function Unit({ sh }: { sh: ShopDef }) {
             act(err);
           }}
         >
-          {lv ? `Renovate $${fmt(cost)}` : eq ? `Lease ${fmt(cost)} Equity` : `Lease it $${fmt(cost)}`}
+          {lv ? `Renovate $${fmt(cost)}` : cur === 'cash' ? `Lease it $${fmt(cost)}` : `Lease ${fmt(cost)} ${CURRENCY_NAME[cur]}`}
         </button>
       </div>
     </div>
@@ -104,15 +104,15 @@ function Unit({ sh }: { sh: ShopDef }) {
 }
 
 // Bosses who quit and joined. No rent, no renovations: they level with the crew's average.
-function BackOffice({ r }: { r: RegionId }) {
+function BreakRoom({ r }: { r: RegionId }) {
   const s = app.s;
   const ids = joined(s, r);
   if (!ids.length) return null;
   const lv = bossLevel(s, r);
   return (
-    <div class="backoffice">
+    <div class="breakroom">
       <h3>
-        Back office <span class="dim">· they quit and joined · Lv {lv}, the crew's average</span>
+        Break room <span class="dim">· they quit and joined · Lv {lv}, the crew's average</span>
       </h3>
       <div class="bo-row">
         {ids.map((id) => {
@@ -157,14 +157,14 @@ export function Shops() {
   return (
     <section class="wall shops">
       <h2>
-        {r === 0 ? 'Pinewood Plaza' : 'Exit 14, Rt. 9 Bypass'} <span class="dim">· every shop pays rent and sends one crew member</span>
+        {REGIONS[r].chrome.plaza} <span class="dim">· every shop pays rent and sends one crew member</span>
       </h2>
       <div class="strip">
         {list.map((sh) => (
           <Unit key={sh.id} sh={sh} />
         ))}
       </div>
-      <BackOffice r={r} />
+      <BreakRoom r={r} />
       <div class="uncle" {...tip("Uncle's note", 'Taped to the register. Updated, somehow.')}>
         <b>Uncle's note:</b> {uncleSays(s, r)}
       </div>

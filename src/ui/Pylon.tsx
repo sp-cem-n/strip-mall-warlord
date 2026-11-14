@@ -21,7 +21,7 @@ export function Pylon() {
           {...tip('Pinewood Plaza', 'Est. 1991. Back to the title screen.', 'The fights keep going while you look at it.')}
         >
           <span class="pylon-title">STRIP MALL WARLORD</span>
-          <span class="pylon-sub">{r === 0 ? 'Pinewood Plaza · Rt. 9 · Fall 1997' : 'Exit 14 · Rt. 9 Bypass · 1998'}</span>
+          <span class="pylon-sub">{REGIONS[r].chrome.sub}</span>
         </button>
         <div class="tenant t-cash" {...tip(`${REGIONS[r].name} till`, `Rent: $${fmt(rent)}/s. Each crew has its own till.`, 'Buys leases, renovations and overtime.', 'Every tenant pays on time. Every tenant is you.')}>
           <img src={icon('cash')} width={18} height={18} alt="" />

@@ -1,4 +1,4 @@
-import { ASPHALT_BONUS, BATTLERS, FIGHTS, GOODWILL_PER_EQUITY, OVERTIME_SECONDS, REGIONS, RENO_GROWTH, RENT_GROWTH, RETRY_AFTER, ROLES, SECURITY_LEVELS, SHOPS, SHOP_LIST, START_CASH, TRAIN_BASE, TRAIN_GROWTH, type RegionId, type Role, type ShopDef, type Stance } from './defs';
+import { ASPHALT_BONUS, CURRENCY_NAME, type Currency, BATTLERS, FIGHTS, fightIndex, GOODWILL_PER_EQUITY, OVERTIME_SECONDS, REGIONS, RENO_GROWTH, RENT_GROWTH, RETRY_AFTER, ROLES, SECURITY_LEVELS, SHOPS, SHOP_LIST, START_CASH, TRAIN_BASE, TRAIN_GROWTH, type RegionId, type Role, type ShopDef, type Stance } from './defs';
 import type { Crew, GameState, LogLine, Track } from './state';
 
 export const SAVE_VERSION = 4;
@@ -28,9 +28,19 @@ export function newGame(seed = Date.now() % 2147483647): GameState {
   };
 }
 
-export const crewOf = (s: GameState, r: RegionId = s.view) => s.crews[r];
-export const currencyOf = (r: RegionId) => REGIONS[r].currency;
-export const purse = (s: GameState, r: RegionId) => (r === 0 ? s.goodwill : s.equity);
+// The purse: every currency is read, spent and earned through these three.
+export const bal = (s: GameState, r: RegionId, cur: Currency) => (cur === 'cash' ? s.crews[r].cash : s[cur]);
+export function earn(s: GameState, r: RegionId, cur: Currency, n: number) {
+  if (cur === 'cash') s.crews[r].cash += n;
+  else s[cur] += n;
+}
+export function spend(s: GameState, r: RegionId, cur: Currency, n: number): string | null {
+  if (bal(s, r, cur) < n) return `Not enough ${CURRENCY_NAME[cur]}`;
+  earn(s, r, cur, -n);
+  return null;
+}
+export const currencyOf = (r: RegionId) => CURRENCY_NAME[REGIONS[r].pay];
+export const purse = (s: GameState, r: RegionId) => bal(s, r, REGIONS[r].pay);
 
 // Paving Route 9: the Route 9 crew starts over with more asphalt under it. The Bypass is untouched.
 export const asphaltGain = (s: GameState) => (regionDone(s, 0) ? FIGHTS[0].length + 10 * REGIONS[0].lots.length : 0);
@@ -53,7 +63,7 @@ export const asphaltMult = (s: GameState, r: RegionId) => (r === 0 ? 1 + ASPHALT
 
 export const regionDone = (s: GameState, r: RegionId) => s.crews[r].frontier >= FIGHTS[r].length;
 export function cleared(s: GameState, r: RegionId, zone: number, i: number) {
-  const idx = FIGHTS[r].findIndex((f) => f.zone === zone && f.i === i);
+  const idx = fightIndex(r, zone, i);
   return idx >= 0 && s.crews[r].frontier > idx;
 }
 export const lotsTaken = (s: GameState, r: RegionId) => REGIONS[r].lots.filter((l, z) => cleared(s, r, z, l.fights)).length;
@@ -109,10 +119,8 @@ export function lease(s: GameState, id: string): string | null {
   const c = sh && s.crews[sh.region];
   if (!sh || c.shops[id]) return 'Already yours';
   if (!available(s, sh)) return 'Not available yet';
-  // Route 9 leases cost dollars; the Bypass leases cost Equity (that's where Goodwill ends up).
-  if (sh.region === 0 ? c.cash < sh.lease : s.equity < sh.lease) return sh.region === 0 ? 'Not enough cash' : 'Not enough Equity';
-  if (sh.region === 0) c.cash -= sh.lease;
-  else s.equity -= sh.lease;
+  const err = spend(s, sh.region, REGIONS[sh.region].leaseIn, sh.lease);
+  if (err) return err;
   c.shops[id] = 1;
   bought(c);
   log(s, sh.region, `${sh.name} leased. ${BATTLERS[sh.battler].name} joins the crew.`, 'capture');
@@ -124,21 +132,17 @@ export function renovate(s: GameState, id: string): string | null {
   const c = s.crews[sh.region];
   const lv = c.shops[id];
   if (!lv) return 'Lease it first';
-  const cost = renovateCost(id, lv);
-  if (c.cash < cost) return 'Not enough cash';
-  c.cash -= cost;
+  const err = spend(s, sh.region, 'cash', renovateCost(id, lv));
+  if (err) return err;
   c.shops[id] = lv + 1;
   bought(c);
   return null;
 }
 
-// Route 9 trains with Goodwill, the Bypass with Equity.
 export function train(s: GameState, r: RegionId, role: Role): string | null {
   const c = s.crews[r];
-  const cost = trainCost(r, c.train[role]);
-  if (purse(s, r) < cost) return `Not enough ${currencyOf(r)}`;
-  if (r === 0) s.goodwill -= cost;
-  else s.equity -= cost;
+  const err = spend(s, r, REGIONS[r].trainIn, trainCost(r, c.train[role]));
+  if (err) return err;
   c.train[role]++;
   bought(c);
   return null;
@@ -182,8 +186,8 @@ export function overtime(s: GameState, r: RegionId): string | null {
   const c = s.crews[r];
   if (c.overtime > 0) return 'Already on overtime';
   const cost = overtimeCost(s, r);
-  if (c.cash < cost) return 'Not enough cash';
-  c.cash -= cost;
+  const err = spend(s, r, 'cash', cost);
+  if (err) return err;
   c.overtime = 3;
   log(s, r, `Overtime approved. Next 3 fights: +25% HP and damage. -$${Math.round(cost)}.`);
   return null;

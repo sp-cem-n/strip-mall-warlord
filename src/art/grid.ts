@@ -69,11 +69,6 @@ export class Grid {
     for (let j = 0; j < src.h; j++) for (let i = 0; i < src.w; i++) if (src.get(i, j)) this.px(x + i, y + j, src.get(i, j));
     return this;
   }
-  crop(x: number, y: number, w: number, h: number) {
-    const g = new Grid(w, h);
-    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) g.data[j * w + i] = this.get(x + i, y + j);
-    return g;
-  }
   // every filled pixel -> one color (hit flash silhouettes)
   silhouette(c: number) {
     const g = new Grid(this.w, this.h);
@@ -88,3 +83,10 @@ export class Grid {
 }
 
 export const textWidth = (s: string, scale = 1) => s.length * 4 * scale - scale;
+
+// cheap deterministic noise
+export const hash = (a: number, b: number) => {
+  let h = (a * 374761393 + b * 668265263) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+};

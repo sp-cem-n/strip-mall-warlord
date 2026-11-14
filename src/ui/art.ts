@@ -3,8 +3,10 @@ import { SHOPS } from '../game/defs';
 import type { Grid } from '../art/grid';
 import { C } from '../art/palette';
 import { crewSprite, enemySprite } from '../art/people';
-import * as S from '../art/scenes';
-import { battlefield, buttonFrame, facade, ICONS, panelFrame, type Material } from '../art/scenes';
+import { battlefield, bootScene } from '../art/field';
+import * as F from '../art/frames';
+import { buttonFrame, ICONS, panelFrame } from '../art/frames';
+import { facade, scaffold, type Material } from '../art/storefronts';
 
 const cache = new Map<string, HTMLCanvasElement>();
 export function canvasOf(key: string, make: () => Grid): HTMLCanvasElement {
@@ -32,8 +34,8 @@ export const crewURL = (id: string) => urlOf(`crewurl:${id}`, () => crewSprite(i
 const MATERIALS: Material[] = ['home', 'bigbox', 'outlet', 'office', 'lifestyle'];
 export const materialOf = (id: string): Material => (SHOPS[id].region === 1 ? 'bypass' : MATERIALS[SHOPS[id].zone] ?? 'home');
 export const facadeURL = (id: string, leased: boolean) => urlOf(`facade:${id}:${leased}`, () => facade(leased ? id : null, materialOf(id), id.length * 7 + id.charCodeAt(0), SHOPS[id].region === 1 ? 'COMING' : 'SHOES'));
-export const scaffoldURL = () => urlOf('scaffold', S.scaffold);
-export const bootURL = (kinds: (string | null)[], dawn = false) => urlOf(`boot:${kinds.join(',')}:${dawn}`, () => S.bootScene(kinds, dawn));
+export const scaffoldURL = () => urlOf('scaffold', scaffold);
+export const bootURL = (kinds: (string | null)[], dawn = false) => urlOf(`boot:${kinds.join(',')}:${dawn}`, () => bootScene(kinds, dawn));
 // frames and tiles as CSS variables (border-image / background)
 export function installFrames() {
   const root = document.documentElement.style;
@@ -41,19 +43,19 @@ export function installFrames() {
   set('frame', panelFrame);
   set('btn', () => buttonFrame());
   set('btn-hot', () => buttonFrame(C.sodium));
-  set('glass', S.glassFrame);
-  set('brick', S.brickFrame);
-  set('pylon', S.pylonFrame);
-  set('tenant', S.tenantFrame);
-  set('tag', S.tagFrame);
-  set('printer', S.printerFrame);
-  set('binder', S.binderFrame);
-  set('lotsign', () => S.signFrame());
-  set('lotsign-now', () => S.signFrame(C.sodium));
-  set('lotsign-done', () => S.signFrame(C.green));
-  set('cinder', S.cinderTile);
-  set('sky', S.skyTile);
-  set('road', S.roadTile);
-  set('led', S.ledTile);
-  set('tear', S.tearTile);
+  set('glass', F.glassFrame);
+  set('brick', F.brickFrame);
+  set('pylon', F.pylonFrame);
+  set('tenant', F.tenantFrame);
+  set('tag', F.tagFrame);
+  set('printer', F.printerFrame);
+  set('binder', F.binderFrame);
+  set('lotsign', () => F.signFrame());
+  set('lotsign-now', () => F.signFrame(C.sodium));
+  set('lotsign-done', () => F.signFrame(C.green));
+  set('cinder', F.cinderTile);
+  set('sky', F.skyTile);
+  set('road', F.roadTile);
+  set('led', F.ledTile);
+  set('tear', F.tearTile);
 }

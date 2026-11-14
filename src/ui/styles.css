@@ -1,5 +1,5 @@
 /* Colors are the sprite palette (src/art/palette.ts). Every frame and texture is a generated pixel sprite
-   (src/art/scenes.ts) installed as a CSS variable, drawn at 2x with no smoothing. */
+   (src/art/*.ts) installed as a CSS variable, drawn at 2x with no smoothing. */
 :root {
   --ink: #1a1420; --night: #24222b; --asphalt: #3a3941; --concrete: #5f5c66; --stone: #8f8a86; --bone: #cfc6b0; --paper: #f2ecdc;
   --sodium: #e39a3b; --sodium-light: #f6d27a; --red: #c4553f; --brick: #7d3528; --blue: #4d73a6; --navy: #2c3858;
@@ -119,9 +119,9 @@ button { font: inherit; }
 .weak { display: inline-grid; place-items: center; width: 15px; height: 15px; margin-left: 2px; color: var(--paper); font-size: 13px; border: 1px solid var(--ink); cursor: help; }
 .role-bg-tank { background: var(--red); } .role-bg-damage { background: var(--sodium); } .role-bg-control { background: var(--green); } .role-bg-heal { background: var(--blue); } .role-bg-buffer { background: var(--violet); }
 /* back office: the bosses who joined */
-.backoffice { margin-top: 12px; padding: 4px 6px 6px; background: var(--night); border: 2px solid var(--ink); }
-.backoffice h3 { margin: 0 0 4px; font-family: 'Pixelify Sans', sans-serif; font-weight: 500; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sodium); }
-.backoffice h3 .dim { font-family: 'VT323', monospace; font-size: 15px; text-transform: none; letter-spacing: 0; }
+.breakroom { margin-top: 12px; padding: 4px 6px 6px; background: var(--night); border: 2px solid var(--ink); }
+.breakroom h3 { margin: 0 0 4px; font-family: 'Pixelify Sans', sans-serif; font-weight: 500; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sodium); }
+.breakroom h3 .dim { font-family: 'VT323', monospace; font-size: 15px; text-transform: none; letter-spacing: 0; }
 .bo-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 8px; }
 .bo { display: flex; gap: 4px; align-items: center; font-size: 14px; line-height: 1; cursor: help; }
 .bo span { display: flex; flex-direction: column; min-width: 0; }

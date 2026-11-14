@@ -1,6 +1,6 @@
 // Training: five tracks, one per role. Route 9 trains with Goodwill; the Bypass with Equity. Plus the bank.
 import { app, tip, toast } from '../app';
-import { BATTLERS, GOODWILL_PER_EQUITY, REGIONS, ROLES, TRAIN_STEP, type Role } from '../game/defs';
+import { BATTLERS, CURRENCY_SHORT, GOODWILL_PER_EQUITY, REGIONS, ROLES, TRAIN_STEP, type Role } from '../game/defs';
 import { convert, currencyOf, purse, roster, train, trainCost } from '../game/economy';
 import { fmt } from './format';
 
@@ -38,7 +38,7 @@ export function Training() {
               Lv {lv} · +{Math.round(lv * TRAIN_STEP * 100)}%
             </span>
             <button class="btn small" disabled={have < cost} onClick={() => (toast(train(s, r, role) ?? `${name} Lv ${lv + 1}`), app.refresh())}>
-              {fmt(cost)} {r === 0 ? 'GW' : 'EQ'}
+              {fmt(cost)} {CURRENCY_SHORT[REGIONS[r].trainIn]}
             </button>
           </div>
         );
