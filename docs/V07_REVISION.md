@@ -235,7 +235,173 @@ Against Pass 1: S21 is +0 lines and removes S3/S4/S5. S23 and S24 replace S9/S10
 
 ## Pass 3 (Code)
 
-*(placeholder)*
+Evidence: four scratch copies in `/tmp` built from `a02499a`, none committed. **A** = Toad's S21 exactly: fast-climb clause deleted in `sim.ts:74` and `bot.ts:100`, `retryAfter` = constant `RETRY_AFTER` 10 (Security term dropped). **B** = A, but below the frontier the crew climbs after 3 wins. **C** = A plus flat `need` 3 (Q1's option). **D** = A with `RETRY_AFTER` 6. **F** = A with the Fun Zone moved. Runs: `bun scripts/balance.ts 40|50 <seed> [--active --every=10] [--room] [--idle] --pave=1`, seeds 1991 and 7, and `simulateAway(8h)` from 2h and 6h saves. Numbering continues: problems **43+**, solutions **S32+**, deletions **D23+**.
+
+### 1. Problems (including problems in Pass 2's solutions)
+
+**Verification of Pass 2's numbers:** reproduced exactly on seed 1991 (A): check-in Route 9 **17h04**, active **11h50**, active Galleria **30h34**, active+room Galleria **24h04** (Route 9 11h16), Galleria boss tries 2 / 15. Overall loss per lot 3–9% at check-in. Pass 2's numbers are right. What they leave out:
+
+43. **S21 as specced overshoots check-in and nearly erases the active advantage.**
+    - **Check-in Galleria** is **43h21** (target ~35h); seed 7 doesn't finish in 40h.
+    - **Seed 7:** check-in Route 9 is 15h30 but active is **13h51**, only 11% faster (target ~17%).
+    - **Variant C (flat need 3):** active is *slower* than check-in on seed 1991 (13h29 vs 13h23), and seed variance blows out (13h23 vs 16h57).
+    
+    The 10-win wait after every fall-back is a fixed delay that hits whoever is ahead of the curve, and the active player is always ahead. So flat 3 (Q1) isn't the way to get the time back.
+44. **Offline barely progresses in every variant.** 8h away clears **1–4 fights**:
+
+    | | Loss % | Fights cleared |
+    |---|---|---|
+    | v0.6 | 44% | 1–4 |
+    | A | 7% | 1–4 |
+    | D | 11% | 1–4 |
+
+    S21 fixes the *losses* (Problem 4) but not the feeling: the crew can't spend while you're away, so it parks at its wall. Waking up to "+2 fights" after 8 hours is the real complaint. Hiding it isn't the fix.
+45. **S31 (Fun Zone at ~$28K) doesn't move the unlock.** Measured with the Fun Zone at Big-Box f5 for $28K:
+    - Check-in leases it at **23:01 / 24:01** and active at **20:08 / 18:28** (v0.6: 23 / 19 min).
+    - Rent at that point is ~500–1,000/s, so $28K is about one minute of rent, not 35. The gate is the fight slot, not the price.
+    - It also delays the Big-Box capture on seed 1991 from 28 to **39 min**.
+46. **Machine unlocks don't check for the Fun Zone.** `room.ts` gives Whac on the Big-Box capture, Skee on Outlet f6, and so on, whether or not the Fun Zone is leased. `roomOpen()` then shows the Arcade tab. In v0.6 this is hidden only because the Fun Zone is always leased first. Any move of the Fun Zone (S31 or ours) exposes it.
+47. **S23 (arcade pays tickets only, bar pays buffs only) conflicts with Josh's own reward map** (t21u: "coin pusher can net more $, skee ball for tickets can get upgrades from gift shop. claw machine prizes are buffs"). It also conflicts with his ask for a mini-game that "could essentially cut down the game time by a large margin for active players". Pass 2 is right that Pusher and Darts are unbounded (verified: +87% / +180% of rent). The bug is the *missing bound*, not the currency. **Flag for Josh, don't override.**
+48. **S24 (room in the right column) conflicts with Josh's ask** (t21u: "a separate tab that could take up more screen real estate to flesh them out better. would certainly want them to be bigger than the tiles"). Practical problems:
+    - The right column is 380 px.
+    - At ≤1720 px wide the Back Office drops *under the Lot*, so the room would be below the fold on most laptops.
+    - Pinball is 480 px tall, so one cabinet at a time fills it.
+    
+    **Flag for Josh.**
+49. **S25 (one Security Office lease per region) conflicts with Josh's ask** (t20u: "auto progression should be something you need to purchase for each new lot individually as you progress"). He reaffirmed it in t21s6 ("Parking Lot contract $50 from the start"). Pass 2 notes it ("Josh keeps 'buy auto-advance' and loses the per-lot list"), but as a replacement, not a conflict. **Flag for Josh, don't silently override.**
+50. **S26 (asphalt boosts rent only) removes the reason Josh gave for paving** (t19u: pave Route 9 "to build up more goodwill to feed into region 2's equity"). Under S26, a repave gives no extra Goodwill per win. The compounding Pass 2 found comes from the *stats* term (through renovations), not the Goodwill term.
+51. **D16 cuts Cyclone, which Josh picked by name** (t21s1 "all 3"; t21u "let's do all of the arcade machines… maybe even open to more arcade ideas"). Shuffleboard was ours, not his ("darts and pool and video poker etc."), so cutting it is in bounds. But its job (the 9th Bypass slot) needs a new home.
+52. **S28's rendered-DOM leak test can't see tooltips.** `tip()` (`app.ts:48`) returns `onMouseEnter` handlers, so the text exists only while hovered. `innerText` and `title` scans miss every tooltip, and most guarded copy is tooltips (`Pylon.tsx:32/38`, `BackOffice.tsx:45`). It would also add a Chromium install to CI.
+53. **The frontier curve is still lumpy after the loss fix.** D, check-in seed 1991, frontier loss: Big-Box **0%**, Commons 36%, **Exit 14 48%**, **Campus 66%** (seed 7 the same shape). S21 fixed the *overall* loss rate, not the walls.
+54. **The active bot still grinds late bosses.** Under D: Phase II 5–16 tries and Galleria **27–28** for active and active+room, against 1–5 at check-in. The bot's Overtime trigger reads `c.streak > 0` (`bot.ts:103`), which S22 deletes. The pass-2 numbers silently depend on a field that's going away.
+
+### 2. Better solutions
+
+S32. **S21 + `RETRY_AFTER` 6, nothing else (fixes 43, and most of 2/3/4).** Variant D, measured:
+
+| | Check-in 1991 / 7 | Idle 1991 | Active 1991 / 7 | Active+room 1991 / 7 | Target |
+|---|---|---|---|---|---|
+| Route 9 | **15h50 / 15h40** | **14h52** | **12h34 / 11h47** | **9h19 / 9h09** | 15±1 / ~12.5 / 9–10.5 |
+| Galleria | 36h52 / 37h23 | 37h05 | **31h41 / 29h13** | **21h28 / 21h51** | ~35 / ~30 / 22–25 |
+| Overall loss | 6–16% per lot (~10%) | | | | 3–10% |
+| Offline 8h | 11% losses (v0.6 44%) | | | | |
+
+- Every Route 9 row is inside its band on both seeds, and active is 20–25% faster than check-in again.
+- The two long rows (Galleria check-in +2h, active+room just under 22h) are curve problems for S35, not a reason for another system.
+- It's a one-number change on top of Toad's one-clause change. **Use D, not A, and not flat-3 (Q1 → keep the 3 → 10 ramp Josh chose).**
+
+S33. **The pile is the cap (fixes 47 and 36 inside Josh's reward map; replaces S23 and S9).** Every machine that pays a currency pays out of a visible **float** that refills on the clock: the pusher's coin shelf (it already exists, but refills 1 per 3 s), a chalkboard "house pot" for darts, a ticket hopper.
+- The shelf refills 1 coin per 60 s, cap 10. Skill decides how much of the float you capture; the clock decides the most anyone can take per hour.
+- Set the float so an hour of play is worth about +25% of that hour's rent in $ (pusher, darts), or about 1.5× the hour's win pay in Goodwill/Equity (whac, pinball, pool).
+- Josh's map stays: pusher → $, skee → tickets, claw → buffs, poker → buffs. The active speedup is a design number instead of clicks per second.
+- Cost: ~10 lines (a `float` per machine in `RoomState`, refilled in `tickRoom`). It deletes S9's hourly meter and the 3× Attract idea.
+- If Josh prefers S23, both fit the same data shape: S23 is "every float is tickets".
+
+S34. **Per-lot patrols, folded into the lot track (49; the per-lot version of S25).**
+- Keep one contract per lot (Josh's ask). Price each at that lot's first lease (Parking Lot $50 per answer 4; Big-Box $5K; Outlet $30K…), so it competes with a shop.
+- Sell it with one button on the `ZoneTrack` lot chip ("Hire a patrol $5K"). That deletes the Patrol tab, `patrolBlock`, `PATROL_DISCOUNT*`, the Security Office's price and retry terms, and its "next renovation" line.
+- The Security Office stays a $0-rent tank whose renovations make *all* patrols' fighters tougher (its +5% HP aura already exists). No new mechanic.
+- Present S25 and S34 side by side to Josh (Q2).
+
+S35. **Fix the walls with three numbers, guarded (53; agrees with D17).** After S32:
+- Big-Box `LOT_JUMP[0][1]` 1.259 → ~1.45.
+- Exit 14 `LOT_JUMP[1][0]` 2.5 → ~2.2.
+- Campus `LOT_JUMP[1][1]` 8.59 → ~7.3.
+- Commons stays long but loses 4 fights (D18).
+
+The S19 guard checks frontier loss 10–40%, overall ≤ 12%, and boss tries ≤ 6 at check-in on both seeds. It runs in CI with `--quiet` (~40 s × 2).
+
+S36. **Fun Zone at Outlet fight 1, $30K (fixes 8, 45; replaces S31 and S6).** Measured (F): check-in leases it at **1h00** on both seeds (the bot's first 10-minute look after arriving at ~40 min), active at **39:34 / 40:35**. The targets were ~50 / ~40 min. Big-Box is no longer delayed. Gate every machine on `funZone(s) && …` (fixes 46; one `&&` in `tickRoom`).
+
+S37. **Asphalt boosts Goodwill per win only (fixes 50 and 7; replaces S26).** It's the paving loop Josh asked for (Goodwill → Equity) and it doesn't compound through renovations: the stats and rent terms are cut. Re-run the pave bot. Add `^0.7` only if it still paves more than twice.
+
+S38. **"While you were out" ends in one button (fixes 44; replaces S5 and settles most of Q6).** The away card leads with what was earned ("$412M and 24K Goodwill came in. The crew held Office 8/14."), then shows **[Spend it]**. That runs the idle bot's existing buy step (`crewAct` leases → renovations → training) once, and the card lists what it bought.
+- Idle players get the 8h of progress back with one click, with no offline spending simulation and no new rules.
+- Active players can skip it and spend by hand.
+- About 15 lines, reusing `bot.ts`.
+
+S39. **Tooltip registry for the leak test (fixes 52; replaces S28's DOM scan).** In test builds, `tip()` pushes `title` and `lines` into a global `Set` *as it's called during render*. `check.ts` renders each screen with `preact-render-to-string` at four game states (fresh, Big-Box, Commons, pre-dawn win) and runs `LEAK` and `CUT` over the set plus the HTML text.
+- It sees every tooltip without hovering and needs no browser in CI.
+- One dev dependency, ~30 lines, and it replaces the per-file regex.
+
+S40. **Keep Cyclone, drop its Equity branch (51; narrows D16).** The jackpot pays tickets before and after dawn. That deletes the only cross-region branch in a Route 9 machine, `"+ EQUITY"` and the `s.bypass` check in `pay`, with ~0 lines added. **Cut Shuffleboard** (ours, duplicative). The 9th Bypass slot becomes a 4th Equity slot in the Back Office (`SLOT_PRICES[1]` gets one more entry).
+
+S41. **Overtime trigger reads `tries` (fixes 54).** After S22, the active bot's Overtime check becomes `f.boss && tries > 0`. Re-measure late boss tries after S35. If active is still above 6, the bot should also field the counter lineup before a boss attempt (`lineupOf(..., auto)` already exists). Again, no new mechanic.
+
+S42. **Arcade at full screen, one click away, plaza header kept (fixes 15, 22 without S24; replaces S10's strip and S13).** If Josh keeps the separate screen (Q10):
+- Clicking the Fun Zone shop card opens it (deletes the Arcade tab's button).
+- The room renders the existing `<Pylon>` header (cash, Goodwill, the receipt printer, the lot counter), so a loss shows while you play with no new strip.
+- The cabinet grid sizes to the viewport: 3-up at scale 3 under 1600 px, 6-up at scale 3 above, 4-up for the bar. CSS only, no wall or back-bar art.
+- One rAF for the room (S18).
+
+### 3. Deletions
+
+| Cut | Replaced by | Removes |
+|---|---|---|
+| D23. Flat-3 `need` option (Q1 as an option) | S32 (`RETRY_AFTER` 6 gets the time back) | A tuning axis Josh already decided |
+| D24. S23's ticket-only rewrite *if Josh keeps his map*; S9's meter and 3× Attract (already cut by Pass 2) | S33 floats | ~60 lines of payout rework, without changing what machines pay |
+| D25. Patrol tab, `patrolBlock`, `PATROL_DISCOUNT*`, Security Office price and retry terms and its next-renovation line | S34 (or S25, Josh's choice) | ~90 lines either way |
+| D26. S5 offline renovation sim, S38's alternative "auto-spend while away" | S38's [Spend it] button reusing `crewAct` | An offline-only rules path |
+| D27. S28's Playwright DOM dump in CI | S39 registry plus render-to-string | A Chromium step in CI, and a test that misses tooltips |
+| D28. Cyclone's Equity jackpot branch; Shuffleboard entirely (`BAR_HOUSE`, `postShuffle`, `SHUFFLE_TOP`, `shuffle`/`shuffleBest` state, slot special case, shuffle mini-game ~110 lines) | S40 | ~170 lines, 2 state fields, 1 cross-region branch |
+| D29. Asphalt's stats and rent terms (Goodwill term kept) | S37 | Two of three compounding multipliers |
+| D30. S31's price change | S36 slot move | A number that doesn't do anything |
+
+### Current proposal (running list, Passes 1–3, merged and deduped)
+
+**Accepted (build these):**
+- **Combat and pacing:**
+  - S21 + **S32** (delete the fast climb, `RETRY_AFTER` 6, drop the Security retry term).
+  - S22 (`tries` replaces `streak` and `FALL_BACK_AFTER`; boss intro on the first attempt).
+  - S41 (bot reads `tries`).
+  - **S35** (three `LOT_JUMP` fixes) + D18 (Commons −4 fights).
+  - S19 guard (frontier 10–40%, overall ≤ 12%, boss tries ≤ 6, Route 9 14–16h, two seeds, CI).
+- **Fun Zone:** **S36** (Outlet f1, $30K, machines gated on the lease).
+- **Offline:** **S38** ([Spend it] on the away card).
+- **Paving:** **S37** (asphalt → Goodwill per win only).
+- **Room:**
+  - S33 floats, *or* S23 (Q9).
+  - S40 (Cyclone pays tickets always; cut Shuffleboard; a 4th Equity slot).
+  - S27 (four-color deck; log `handTier()`'s real name).
+  - Pass 1's input fixes from S11 (separate coin button, READY beat, pinball flipper labels), without the 3-engine rewrite.
+  - S14 SFX table.
+  - S18 one rAF.
+- **Receipt and copy:**
+  - S15's collapse (one live win line, history keeps captures, leases, unlocks, toys).
+  - S16 copy rewrites (plus the `src/game` log lines from problem 38).
+  - **S39** leak and copy test.
+- **Code:**
+  - S17 (one region-shaped room config).
+  - S19's tooling moves (knobs as plain constants, `debug.ts` dev-only).
+  - D20 (`bought()`).
+- **Release:** S20 (release note, deploy cache), S29 (versions page without subjects; README spoiler cut), S30 (package version, old screenshots, V06 §7 note).
+
+**Rejected or superseded:**
+- S1 (generated curve) → S35.
+- S2 / flat 3 → S32.
+- S3, S4, S5 → S21/S32 and S38.
+- S6 → S36.
+- S7, S26 → S37.
+- S8 → S34/S25.
+- S9 → S33.
+- S10, S13 → S42 (or S24).
+- S11's engine rewrite, D10 → input fixes only.
+- S12 → S27.
+- S28 → S39.
+- S31 → S36.
+- D16's Cyclone cut → S40.
+
+**Open questions for Josh (deduped):**
+- **Q1 (settled by data unless he objects):** keep his 3 → 10 wins ramp. The time comes back through faster retries (S32), not fewer wins.
+- **Q2 (conflict with his t20u ask):** auto-advance **per lot** (S34: one button per lot, priced like that lot's first lease) or **one Security Office lease per region** (S25, simpler, but not what he asked for)?
+- **Q4:** fighter slots from tickets at the prize counter (as built), or Goodwill only?
+- **Q6 (narrowed):** is a one-click [Spend it] on the away card enough for idle players (S38)?
+- **Q7 (likely moot):** a boss pity ramp only if the S19 guard still trips after S35.
+- **Q8 (narrowed):** OK to cut Shuffleboard (ours) and keep Cyclone (yours) with a tickets-only jackpot?
+- **Q9 (conflict with his t21u map):** keep "pusher nets $, skee tickets, claw buffs" with a refilling float as the limit (S33), or switch to tickets-only arcade / buffs-only bar (S23)?
+- **Q10 (conflict with his t21u ask):** arcade as its own full screen, one click from the Fun Zone shop with the header kept (S42), or inside the right column (S24)?
+- **Q11:** paving boosts Goodwill per win only (S37, matches his Goodwill → Equity loop). OK?
+
 
 ## Pass 4 (Toad)
 
