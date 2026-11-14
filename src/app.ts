@@ -19,6 +19,7 @@ export interface Ask {
 export const app = {
   s: null as unknown as GameState,
   screen: 'boot' as Screen,
+  howFrom: 'boot' as Screen,
   hasSave: false,
   oldSave: false, // a pre-v0.5 save was found and set aside
   speed: 1,

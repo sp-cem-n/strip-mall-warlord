@@ -6,6 +6,9 @@ import { loadGame, old, saveGame } from '../src/game/save';
 import { collectFind, simulateAway, step } from '../src/game/sim';
 import { CREW_LOOKS, ENEMY_LOOKS } from '../src/art/people';
 import type { GameState } from '../src/game/state';
+import { HOW, STORY } from '../src/game/content/copy';
+import { botAct } from '../src/game/bot';
+import { readdirSync, readFileSync } from 'node:fs';
 
 const store = new Map<string, string>();
 Object.assign(globalThis, {
@@ -168,6 +171,29 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   check('a v0.5 save reads as old and is copied where /v0.5/ finds it', loadGame() === 'old' && old.from === 'v0.5' && store.get('smw-v0.5:smw.save') === v5);
   store.set('smw.save', '{nope');
   check('a broken save does not crash', loadGame() === 'old');
+}
+
+// pre-dawn copy: nothing before the Route 9 ending may hint at the Bypass, Equity or a second crew
+{
+  const LEAK = /bypass|equity|second crew|both crews|each crew|other crew|this crew only|only this crew|own till|exit 14|route 9 north/i;
+  const texts: string[] = [...HOW.flat(), ...STORY.map((x) => x.text)];
+  for (const sh of r9) texts.push(sh.name, sh.tagline, sh.walkin.who, ...Object.values(sh.walkin).flat().map(String));
+  for (const id of [...r9.map((x) => x.battler), ...bosses(0)]) texts.push(BATTLERS[id].name, BATTLERS[id].does, BATTLERS[id].line);
+  for (const l of REGIONS[0].lots) texts.push(l.name, l.blurb, l.clearText, ...[...l.regulars, l.boss].flatMap((e) => [e.name, e.title]));
+  texts.push(REGIONS[0].name, ...Object.values(REGIONS[0].chrome));
+  let t = newGame(12);
+  let next = 0;
+  while (!t.bypass && t.totalTime < 30 * 3600) {
+    if (t.totalTime >= next) ((t = botAct(t, { active: true }, 10)), (next = t.totalTime + 10));
+    step(t, true);
+  }
+  const pre = t.log.filter((l) => l.r === 0 && !l.text.includes(REGIONS[0].ending));
+  texts.push(...pre.map((l) => l.text));
+  const bad = texts.filter((x) => LEAK.test(x));
+  check(`pre-dawn copy: ${texts.length} strings and receipt lines, no Bypass / Equity / second-crew hints${bad.length ? ` (${bad.slice(0, 3).join(' | ')})` : ''}`, bad.length === 0);
+  const CUT = /fights run themselves|nice to have|never required|ignoring them|this crew only|only this crew|both crews|own till|every shop pays rent and sends/i;
+  const ui = readdirSync('src/ui').filter((f) => f.endsWith('.tsx')).flatMap((f) => readFileSync(`src/ui/${f}`, 'utf8').split('\n').filter((x) => CUT.test(x)).map((x) => `${f}: ${x.trim().slice(0, 60)}`));
+  check(`no design-explaining copy in the UI${ui.length ? ` (${ui.join(' | ')})` : ''}`, ui.length === 0);
 }
 
 console.log(failed ? `\n${failed} FAILED` : '\nall good');

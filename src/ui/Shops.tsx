@@ -61,7 +61,10 @@ function Unit({ sh }: { sh: ShopDef }) {
       <div class="unit-info">
         <div class="unit-head">
           <span>{sh.name}</span>
-          <span>{lv ? `Lv ${lv}` : 'NEW'}</span>
+          <span class="uh-r">
+            {lv > 0 && <FieldToggle r={sh.region} id={d.id} />}
+            {lv ? `Lv ${lv}` : 'NEW'}
+          </span>
         </div>
         <div class="crewline" {...tip(`${d.name}${lv ? ` · Lv ${lv}` : ''}`, d.does, `${d.role} · every ${d.interval}s`, d.line)}>
           <img src={crewURL(d.id)} width={16} height={24} alt="" />
@@ -70,7 +73,6 @@ function Unit({ sh }: { sh: ShopDef }) {
             <span>{statLine(d.role, st.hp, st.dmg)}</span>
             <span class="dim">{lv ? `rent $${fmt(rent)}/s` : `rent $${fmt(sh.rent)}/s`}</span>
           </span>
-          {lv > 0 && <FieldToggle r={sh.region} id={d.id} />}
         </div>
         <div class="next" {...tip('Next renovation', `+${fmt(nx.hp - st.hp)} HP, +${fmt(nx.dmg - st.dmg)} ${d.role === 'heal' ? 'heal' : 'damage'}${sh.rent ? `, +$${fmt(dRent)}/s rent` : ''}.`, `Lv ${lv} → ${lv + 1}. Renovations are the big stat jump.`)}>
           {lv ? (
@@ -158,7 +160,8 @@ function uncleSays(s: GameState, r: RegionId): string {
   if (!c.shops.dojo && forLease(s, 0).some((x) => x.id === 'dojo')) return 'Lease the Dojo. Somebody has to stand in front.';
   if (forLease(s, 0).length) return 'Something is for lease. Every shop is one more person in the lot.';
   if (c.streak >= 2) return 'Losing? Renovate, train, call a different play, or let them farm the fight behind them.';
-  if (c.shops.security && c.frontier > 0 && REGIONS[0].lots.length > 1 && !regionDone(s, 0)) return 'The Security Office watches more lots the more you renovate it.';
+  if (c.shops.security && !c.contracts.includes(1) && c.frontier > 9) return 'Big-Box needs a patrol. The Back Office has the paperwork.';
+  if (!c.contracts.includes(0) && c.cash >= 50) return 'Fifty bucks and the Parking Lot patrols itself. Back Office.';
   return regionDone(s, 0) ? "They didn't pave it. You might. Asphalt keeps." : "Don't let them pave it.";
 }
 

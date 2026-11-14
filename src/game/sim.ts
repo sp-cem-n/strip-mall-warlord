@@ -100,7 +100,7 @@ function clearFight(s: GameState, r: RegionId) {
   else if (next.i === 0) log(s, r, `${REGIONS[r].lots[next.zone].name} is open. No patrol out there yet: press ▸ when the crew is ready.`);
 }
 
-// A walk-in every 90s or so, at the crew you're watching. Never required.
+// A walk-in every 90s or so, at the crew you're watching.
 function walkIns(s: GameState) {
   if (s.find) {
     if ((s.find.left -= STEP) <= 0) s.find = null;

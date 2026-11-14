@@ -24,7 +24,7 @@ function startOver() {
 }
 
 const onNew = () =>
-  app.hasSave && app.s.totalTime > 30 ? ask('Start over? Both crews, every lease and all the Goodwill go in the dumpster behind Unit D.', 'Start over', 'Never mind', startOver) : startOver();
+  app.hasSave && app.s.totalTime > 30 ? ask('Start over? Every lease and all the Goodwill go in the dumpster behind Unit D.', 'Start over', 'Never mind', startOver) : startOver();
 
 const onResume = () => {
   app.away = null;
@@ -48,10 +48,8 @@ export function App() {
         <Pylon />
         <main class="grid">
           <Shops />
-          <div class="col">
-            <Lot />
-            <BackOffice />
-          </div>
+          <Lot />
+          <BackOffice />
         </main>
       </div>
     );

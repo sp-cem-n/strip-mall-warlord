@@ -1,5 +1,5 @@
 import { enemyLineup, statsOf } from './battle';
-import { ASPHALT_BONUS, CURRENCY_NAME, type Currency, BATTLERS, FIGHTS, fightIndex, GOODWILL_PER_EQUITY, MAX_SLOTS, OVERTIME_SECONDS, PATROL_DISCOUNT, PATROL_DISCOUNT_CAP, REGIONS, RENO_GROWTH, RENT_GROWTH, RETRY_AFTER, ROLES, SHOPS, SLOT_PRICES, START_SLOTS, SHOP_LIST, START_CASH, TRAIN_BASE, TRAIN_GROWTH, type RegionId, type Role, type ShopDef, type Stance } from './defs';
+import { ASPHALT_BONUS, CURRENCY_NAME, type Currency, BATTLERS, FIGHTS, fightIndex, GOODWILL_PER_EQUITY, MAX_SLOTS, OVERTIME_SECONDS, PATROL_DISCOUNT, PATROL_DISCOUNT_CAP, REGIONS, RENO_GROWTH, RENT_GROWTH, RETRY_AFTER, ROLES, SHOPS, SLOT_PRICES, START_SLOTS, SHOP_LIST, START_CASH, TRAIN_BASE, TRAIN_GROWTH, type RegionId, type Role, type ShopDef, type Stance, LOG_KEEP } from './defs';
 import type { Crew, GameState, LogLine, Track } from './state';
 
 export const SAVE_VERSION = 5;
@@ -113,7 +113,8 @@ export function log(s: GameState, r: RegionId, text: string, tone: LogLine['tone
     if (l.r === r) break;
   }
   s.log.push({ t: s.time, r, text, tone });
-  if (s.log.length > 80) s.log.splice(0, s.log.length - 80);
+  // keep the last LOG_KEEP lines per crew
+  if (s.log.filter((l) => l.r === r).length > LOG_KEEP) s.log.splice(s.log.findIndex((l) => l.r === r), 1);
 }
 
 // Any purchase lets auto-advance try the frontier again right away.

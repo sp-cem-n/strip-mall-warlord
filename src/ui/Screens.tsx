@@ -5,6 +5,7 @@ import { ASPHALT_BONUS, FIGHTS, GOODWILL_PER_EQUITY, REGIONS } from '../game/def
 import { asphaltGain, leased, pave, view } from '../game/economy';
 import { fightLabel } from '../game/sim';
 import { old, saveGame } from '../game/save';
+import { HOW, STORY } from '../game/content/copy';
 import { bootURL } from './art';
 import { fmt, fmtTime } from './format';
 import { Speaker } from './Speaker';
@@ -81,7 +82,7 @@ export function Boot({ onNew, onResume }: { onNew: () => void; onResume: () => v
           </button>
           <AwayStats />
         </div>
-        <button class="btn big" onClick={() => ((app.screen = 'howto'), app.refresh())}>
+        <button class="btn big" onClick={() => ((app.howFrom = 'boot'), (app.screen = 'howto'), app.refresh())}>
           How to Play
         </button>
       </div>
@@ -90,18 +91,7 @@ export function Boot({ onNew, onResume }: { onNew: () => void; onResume: () => v
   );
 }
 
-const HOW = [
-  ['The deal', 'Every shop pays rent and sends one person to fight in the parking lot. You start with Uncle Sal\'s pawn shop.'],
-  ['Fights', 'They run themselves, including while the tab is closed (up to 8 hours). Win a fight enough times and the crew moves up. Every win pays Goodwill.'],
-  ['Dollars', 'Rent buys leases and renovations. A renovation is the big stat jump: +10% HP and damage, +15% rent. The card says exactly what the next one does.'],
-  ['Goodwill', 'Spend it on training: five tracks, one per role. Small, permanent, and for the whole crew.'],
-  ['New shops', 'They come up for lease as you clear fights, in order. No choosing, no rebranding. Lease it and somebody new joins.'],
-  ['Stuck?', 'Three losses in a row and the crew falls back one fight to farm. It tries again after ten wins or anything you buy. The receipt says why it lost.'],
-  ['The play', 'Even, Rush or Dig In. Some enemies are tanky, some hit hard. Calling the right play saves time. Calling none is fine too.'],
-  ['Overtime', 'Pay two minutes of rent: the next three fights get +25% HP and damage. Good for a boss you almost beat.'],
-  ['Security', 'The Parking Lot moves up by itself. The Security Office watches the rest of the plaza: more levels, more lots on auto. Otherwise, hit Advance.'],
-  ['Walk-ins', 'Only while you watch, somebody walks into a shop: cash, a referral, or a rally. Ignore them and nothing bad happens.'],
-];
+
 
 export function HowTo() {
   return (
@@ -116,7 +106,7 @@ export function HowTo() {
             </div>
           ))}
         </dl>
-        <button class="btn big" onClick={() => ((app.screen = 'boot'), app.refresh())}>
+        <button class="btn big" onClick={() => ((app.screen = app.howFrom), app.refresh())}>
           Back
         </button>
       </div>
@@ -124,14 +114,7 @@ export function HowTo() {
   );
 }
 
-const STORY: { text: string; note?: boolean }[] = [
-  { text: 'Fall 1997. Route 9.' },
-  { text: 'Your uncle Sal left you the lease on Unit A, his pawn shop, and a note:' },
-  { text: "Don't let them pave it.", note: true },
-  { text: "Pinewood Plaza peaked in 1991. The developer thinks it's done." },
-  { text: "It isn't." },
-  { text: 'P.S. The rest of the row is for lease. Fill it with people who can stand in a parking lot.', note: true },
-];
+
 
 export function Story({ all, onDone }: { all: boolean; onDone: () => void }) {
   const [n, setN] = useState(all ? STORY.length : 1);

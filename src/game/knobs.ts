@@ -52,3 +52,4 @@ export const TIP_SECONDS = 30; // cash walk-in: this much rent
 export const REFERRAL_WINS = 10; // referral walk-in: this many wins' pay
 export const OFFLINE_CAP_SECONDS = 8 * 3600;
 export const STEP = 0.2;
+export const LOG_KEEP = 60; // receipt lines kept per crew

@@ -18,18 +18,18 @@ export function Pylon() {
         <button
           class="cabinet"
           onClick={() => ((app.screen = 'boot'), (app.tip = null), app.refresh())}
-          {...tip('Pinewood Plaza', 'Est. 1991. Back to the title screen.', 'The fights keep going while you look at it.')}
+          {...tip('Pinewood Plaza', 'Est. 1991. Back to the title screen.')}
         >
           <span class="pylon-title">STRIP MALL WARLORD</span>
           <span class="pylon-sub">{REGIONS[r].chrome.sub}</span>
         </button>
-        <div class="tenant t-cash" {...tip(`${REGIONS[r].name} till`, `Rent: $${fmt(rent)}/s. Each crew has its own till.`, 'Buys leases, renovations and overtime.', 'Every tenant pays on time. Every tenant is you.')}>
+        <div class="tenant t-cash" {...tip(`${REGIONS[r].name} till`, `Rent: $${fmt(rent)}/s.`, 'Leases, renovations, patrols, Overtime.', 'Every tenant pays on time. Every tenant is you.')}>
           <img src={icon('cash')} width={18} height={18} alt="" />
           <span class="k">Cash</span>
           <span class="v">${fmt(c.cash)}</span>
           <span class="r">+${fmt(rent)}/s</span>
         </div>
-        <div class="tenant t-goodwill" {...tip('Goodwill', 'Route 9 wins pay it. Spend it on Route 9 training.', s.bypass ? `The bank turns ${GOODWILL_PER_EQUITY} Goodwill into 1 Equity.` : 'People are starting to say nice things about the plaza.')}>
+        <div class="tenant t-goodwill" {...tip('Goodwill', 'Wins pay it. Training costs it.', s.bypass ? `The bank turns ${GOODWILL_PER_EQUITY} Goodwill into 1 Equity.` : 'People are starting to say nice things about the plaza.')}>
           <img src={icon('goodwill')} width={18} height={18} alt="" />
           <span class="k">Goodwill</span>
           <span class="v">{fmt(s.goodwill)}</span>
@@ -67,6 +67,9 @@ export function Pylon() {
           </span>
         </div>
         <Speaker />
+        <button class="help" onClick={() => ((app.howFrom = 'game'), (app.screen = 'howto'), (app.tip = null), app.refresh())} {...tip('How to play')}>
+          ?
+        </button>
         <div class="legs">
           <i />
           <i />
