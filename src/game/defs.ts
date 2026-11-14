@@ -72,7 +72,7 @@ export const ZONES: ZoneDef[] = [
     name: 'The Parking Lot',
     blurb: 'Faded lines, one working lamp post, a shopping cart nobody owns.',
     rows: 5,
-    strength: 1.35,
+    strength: 2,
     regulars: [
       { name: 'Rent-a-Cop', title: 'Contract Security, Part-Time', hp: 40, dmg: 4, interval: 1.6, weak: 'hustler' },
       { name: 'Lot Attendant', title: 'Parking Enforcement Associate I', hp: 30, dmg: 5, interval: 1.4, weak: 'hustler' },
@@ -141,6 +141,13 @@ export const STAT_GROWTH = 1.1; // fighter hp/dmg = base * growth^(level-1)
 export const ROW_GROWTH = 0.22; // enemy stats +22% per row inside a lot
 export const HEAT_PER_PAYDAY_LEVEL = 0.02; // +2% enemy strength per Payday level owned
 export const REGROUP_SECONDS = 3;
+export const SMOKE_BREAK_AFTER = 3; // straight losses on one row
+export const SMOKE_BREAK_SECONDS = 60; // first break; doubles each further loss (cap 15 min) until you change something
+export const WALKIN_EVERY = 90; // seconds between walk-ins, only while the game is open
+export const WALKIN_STAYS = 25;
+export const WALKIN_BOOST = 0.5; // +50% crew damage
+export const WALKIN_SECONDS = 60;
+export const WALKIN_ITEMS = ['Aluminum Bat', 'Maglite (4-cell)', 'Carhartt Jacket', 'Case of Red Bull', 'Nextel Chirp Phone', 'Letterman Jacket', 'Tire Iron', 'Discman w/ Anti-Skip', 'Rollerblades', 'Pager (Clip-On)'];
 export const FIGHT_TIMEOUT = 30; // stalemate counts as a loss
 
 export const ASPHALT_BONUS = 0.02; // +2% income and crew stats per asphalt

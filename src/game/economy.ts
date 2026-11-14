@@ -9,16 +9,19 @@ import {
   SHOP_ORDER,
   START_CASH,
   START_SHOPS,
+  SMOKE_BREAK_AFTER,
+  REGROUP_SECONDS,
+  WALKIN_SECONDS,
   ZONES,
   type ShopKind,
 } from './defs';
 import type { GameState, LogLine, Slot } from './state';
 
 export const SAVE_VERSION = 2;
-const HOME_LABELS = ['Unit A (inherited)', 'Unit B', 'Unit C', 'Unit D'];
+const HOME_LABELS = ['Unit A', 'Unit B', 'Unit C', 'Unit D'];
 
 export function newGame(seed = Date.now() % 2147483647, asphalt = 0, bulldozes = 0, totalTime = 0): GameState {
-  const slots: Slot[] = HOME_LABELS.slice(0, HOME_UNITS).map((label, id) => ({ id, label, level: 1, shop: null }));
+  const slots: Slot[] = HOME_LABELS.slice(0, HOME_UNITS).map((label, id) => ({ id, label, level: 1, shop: id === 0 ? 'vape' : null }));
   return {
     version: SAVE_VERSION,
     seed,
@@ -32,11 +35,15 @@ export function newGame(seed = Date.now() % 2147483647, asphalt = 0, bulldozes =
     row: 0,
     battle: null,
     regroup: 2,
-    log: [{ t: 0, text: 'Your uncle left you Pinewood Plaza, est. 1991. Four empty units and a paid-up lease.', tone: 'info' }],
+    log: [{ t: 0, text: 'Your uncle left you Pinewood Plaza, est. 1991: his vape shop, three empty units, and a paid-up lease.', tone: 'info' }],
     stats: { wins: 0, losses: 0, earned: 0 },
     savedAt: Date.now(),
     nextUid: 1,
     lastCapture: 0,
+    lossStreak: 0,
+    find: null,
+    findClock: 30,
+    boost: 0,
   };
 }
 
@@ -86,6 +93,7 @@ export function openShop(s: GameState, slotId: number, kind: ShopKind): string |
   s.cash -= cost;
   const was = sl.shop;
   sl.shop = kind;
+  lineupChanged(s);
   log(s, was ? `${sl.label}: ${SHOPS[was].name} is now a ${SHOPS[kind].name}. Same carpet.` : `${SHOPS[kind].name} opened in ${sl.label}.`);
   return null;
 }
@@ -97,5 +105,20 @@ export function renovate(s: GameState, slotId: number): string | null {
   if (s.cash < cost) return 'Not enough cash';
   s.cash -= cost;
   sl.level++;
+  lineupChanged(s);
+  return null;
+}
+
+// Any change to the crew ends a smoke break.
+function lineupChanged(s: GameState) {
+  if (s.lossStreak >= SMOKE_BREAK_AFTER && !s.battle) s.regroup = Math.min(s.regroup, REGROUP_SECONDS);
+  s.lossStreak = 0;
+}
+
+export function collectFind(s: GameState): string | null {
+  if (!s.find) return 'Nobody walked in';
+  s.boost = WALKIN_SECONDS;
+  log(s, `Somebody pawned a ${s.find.name} at ${s.slots[s.find.slot].label}. Crew hits 50% harder for a minute.`, 'win');
+  s.find = null;
   return null;
 }

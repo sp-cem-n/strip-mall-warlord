@@ -22,6 +22,8 @@ export interface Unit {
   boss: boolean;
   flash: number; // seconds left of "just hit"
   lastDmg: number; // last damage taken, shown while flashing
+  lastMult: number; // 2.5 weak hit, 0.5 resisted
+  lastTag: string; // 'C&D' when a lawyer lands one
   acted: number;
 }
 
@@ -58,4 +60,8 @@ export interface GameState {
   savedAt: number;
   nextUid: number;
   lastCapture: number;
+  lossStreak: number; // 3 in a row on one row = smoke break
+  find: { slot: number; name: string; left: number } | null; // walk-in, only while you're watching
+  findClock: number;
+  boost: number; // seconds of +50% crew damage left
 }

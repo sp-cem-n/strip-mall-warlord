@@ -7,7 +7,6 @@ export const app = {
   speed: 1,
   paused: false,
   away: null as AwaySummary | null,
-  bot: false,
   toast: '' as string,
   toastUntil: 0,
   refresh: () => {},

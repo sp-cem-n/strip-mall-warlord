@@ -1,11 +1,11 @@
-import { FIGHTERS, FIGHT_TIMEOUT, FRONT_ORDER, RESIST_MULT, ROW_GROWTH, SHOPS, STAT_GROWTH, WEAK_MULT, ZONES, type EnemyDef } from './defs';
-import { asphaltMult, heat } from './economy';
+import { FIGHTERS, FIGHT_TIMEOUT, FRONT_ORDER, RESIST_MULT, ROW_GROWTH, SHOPS, STAT_GROWTH, WALKIN_BOOST, WEAK_MULT, ZONES, type EnemyDef } from './defs';
+import { asphaltMult, heat, log } from './economy';
 import { pick, rand } from './rng';
 import type { Battle, GameState, Slot, Unit } from './state';
 
 function unit(s: GameState, side: Unit['side'], kind: Unit['kind'], name: string, title: string, hp: number, dmg: number, interval: number, weak: Unit['weak'], boss: boolean): Unit {
   hp = Math.round(hp);
-  return { uid: s.nextUid++, side, kind, name, title, maxHp: hp, hp, dmg, interval, cooldown: interval * (0.3 + 0.7 * rand(s)), weak, boss, flash: 0, lastDmg: 0, acted: 0 };
+  return { uid: s.nextUid++, side, kind, name, title, maxHp: hp, hp, dmg, interval, cooldown: interval * (0.3 + 0.7 * rand(s)), weak, boss, flash: 0, lastDmg: 0, lastMult: 1, lastTag: '', acted: 0 };
 }
 
 function crewUnit(s: GameState, sl: Slot): Unit {
@@ -32,6 +32,7 @@ export function startBattle(s: GameState): Battle | null {
   const { boss, count } = enemiesFor(s.zone, s.row);
   const mk = (e: EnemyDef, isBoss: boolean) => unit(s, 'enemy', 'enemy', e.name, e.title, e.hp * m, e.dmg * m, e.interval, e.weak, isBoss);
   const enemies = boss ? [mk(zd.boss, true), mk(pick(s, zd.regulars), false)] : Array.from({ length: count }, () => mk(pick(s, zd.regulars), false));
+  if (boss && s.lossStreak === 0) log(s, `The ${zd.boss.name} walks out. ${zd.boss.title}`);
   return (s.battle = { zone: s.zone, row: s.row, t: 0, crew, enemies });
 }
 
@@ -49,7 +50,10 @@ function act(s: GameState, u: Unit, b: Battle) {
     return;
   }
   const mult = target.weak ? (target.weak === u.kind ? WEAK_MULT : RESIST_MULT) : 1;
-  const dmg = u.dmg * mult * (0.85 + 0.3 * rand(s));
+  const boost = u.side === 'crew' && s.boost > 0 ? 1 + WALKIN_BOOST : 1;
+  const dmg = u.dmg * mult * boost * (0.85 + 0.3 * rand(s));
+  target.lastMult = mult;
+  target.lastTag = u.kind === 'lawyer' && mult > 1 ? 'C&D' : '';
   target.hp = Math.max(0, target.hp - dmg);
   target.flash = 0.35;
   target.lastDmg = dmg;

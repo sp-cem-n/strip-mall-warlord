@@ -3,7 +3,7 @@
 //   static — fills slots in a fixed rotation and never rebrands
 //   dojo   — Dojos everywhere
 import { FIGHTERS, SHOPS, SHOP_ORDER, ZONES, type FighterKind, type ShopKind } from './defs';
-import { openShop, regionTaken, renovate, renovateCost, unlockedShops } from './economy';
+import { collectFind, openShop, regionTaken, renovate, renovateCost, unlockedShops } from './economy';
 import { asphaltGain, bulldoze, canBulldoze } from './sim';
 import type { GameState } from './state';
 
@@ -29,6 +29,7 @@ function plan(s: GameState, strategy: Strategy): ShopKind[] {
 }
 
 export function botAct(s: GameState, strategy: Strategy = 'mixed', prestige = false): GameState {
+  if (s.find) collectFind(s); // only ever set while watching
   const want = plan(s, strategy);
   // keep storefronts that already match something we want
   const need = [...want];

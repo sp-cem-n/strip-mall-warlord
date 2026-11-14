@@ -1,11 +1,15 @@
-import { OFFLINE_CAP_SECONDS, PRESTIGE_MIN_ZONE, REGROUP_SECONDS, SHOPS, STEP, ZONES } from './defs';
+import { OFFLINE_CAP_SECONDS, PRESTIGE_MIN_ZONE, REGROUP_SECONDS, SHOPS, SMOKE_BREAK_AFTER, SMOKE_BREAK_SECONDS, STEP, WALKIN_EVERY, WALKIN_ITEMS, WALKIN_STAYS, ZONES } from './defs';
+import { pick } from './rng';
 import { lossReason, startBattle, stepBattle } from './battle';
 import { incomePerSec, log, newGame, regionTaken } from './economy';
 import type { GameState } from './state';
 
 // One fixed step. Callers own their own time accumulators.
-export function step(s: GameState) {
+// `watching` is true only for the live game: walk-ins never happen offline or in the idle bot.
+export function step(s: GameState, watching = false) {
   s.time += STEP;
+  s.boost = Math.max(0, s.boost - STEP);
+  if (watching) walkIns(s);
   s.totalTime += STEP;
   const inc = incomePerSec(s) * STEP;
   s.cash += inc;
@@ -26,10 +30,15 @@ function resolve(s: GameState, result: 'win' | 'loss') {
   const zd = ZONES[b.zone];
   if (result === 'loss') {
     s.stats.losses++;
+    if (++s.lossStreak >= SMOKE_BREAK_AFTER) {
+      s.regroup = Math.min(15 * 60, SMOKE_BREAK_SECONDS * 2 ** (s.lossStreak - SMOKE_BREAK_AFTER)); // 1, 2, 4… min, cap 15
+      if (s.lossStreak === SMOKE_BREAK_AFTER) log(s, `Crew's on a smoke break after ${SMOKE_BREAK_AFTER} straight losses. They'll try again in a minute, then less and less, until you change something.`, 'loss');
+    }
     log(s, `Lost row ${b.row + 1}/${zd.rows} at ${zd.name}. ${lossReason(b)}`, 'loss');
     return;
   }
   s.stats.wins++;
+  s.lossStreak = 0;
   s.row++;
   if (s.row < zd.rows) return log(s, `Took row ${s.row}/${zd.rows} at ${zd.name}.`, 'win');
   const id = s.slots.length;
@@ -40,6 +49,18 @@ function resolve(s: GameState, result: 'win' | 'loss') {
   s.row = 0;
   s.lastCapture = s.time;
   if (regionTaken(s)) log(s, 'The region is yours. The only thing left to do is pave it.', 'capture');
+}
+
+function walkIns(s: GameState) {
+  if (s.find && (s.find.left -= STEP) <= 0) {
+    log(s, `The guy with the ${s.find.name} got tired of waiting and left.`);
+    s.find = null;
+  }
+  const open = s.slots.filter((x) => x.shop);
+  if (!s.find && open.length && (s.findClock -= STEP) <= 0) {
+    s.findClock = WALKIN_EVERY;
+    s.find = { slot: pick(s, open).id, name: pick(s, WALKIN_ITEMS), left: WALKIN_STAYS };
+  }
 }
 
 export const canBulldoze = (s: GameState) => s.zone >= PRESTIGE_MIN_ZONE;
@@ -60,6 +81,7 @@ export interface AwaySummary {
   losses: number;
   rows: number;
   captured: string[];
+  onBreak: boolean;
 }
 
 export function simulateAway(s: GameState, seconds: number): AwaySummary {
@@ -73,5 +95,6 @@ export function simulateAway(s: GameState, seconds: number): AwaySummary {
     losses: s.stats.losses - before.losses,
     rows: asphaltGain(s) - before.rows,
     captured: ZONES.slice(before.zone, s.zone).map((z) => z.name),
+    onBreak: s.lossStreak >= SMOKE_BREAK_AFTER,
   };
 }

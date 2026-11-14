@@ -1,5 +1,5 @@
 // Headless balance run: a scripted player plays N minutes and we print milestones.
-// Usage: bun scripts/balance.ts [minutes=60] [seed=1991] [--every=10] [--strategy=mixed|static|dojo] [--prestige]
+// Usage: bun scripts/balance.ts [minutes=60] [seed=1991] [--every=10] [--strategy=mixed|static|dojo] [--prestige] [--active]
 import { STEP, ZONES } from '../src/game/defs';
 import { botAct, describeCrew, type Strategy } from '../src/game/bot';
 import { heat, incomePerSec, newGame } from '../src/game/economy';
@@ -15,6 +15,7 @@ const seed = nums[1] ?? 1991;
 const every = Number(flag('every') ?? 10);
 const strategy = (flag('strategy') ?? 'mixed') as Strategy;
 const prestige = args.includes('--prestige');
+const active = args.includes('--active'); // a player who keeps the tab open and grabs walk-ins
 
 let s: GameState = newGame(seed);
 const seen = new Set<string>();
@@ -30,7 +31,7 @@ while (s.totalTime < minutes * 60) {
     if (s.bulldozes > before) mark(`b${s.bulldozes}`, `BULLDOZE #${s.bulldozes} → asphalt ${s.asphalt}`);
     nextAct = s.totalTime + every;
   }
-  step(s);
+  step(s, active);
   if (s.stats.wins) mark('win', 'first win');
   if (s.stats.losses) mark('loss', 'first loss');
   for (let z = 0; z < s.zone; z++) mark(`c${s.bulldozes}-${z}`, `CAPTURED ${ZONES[z].name}${s.bulldozes ? ` (run ${s.bulldozes + 1})` : ''}`);
@@ -41,12 +42,14 @@ while (s.totalTime < minutes * 60) {
   }
 }
 
-console.log(`Strip Mall Warlord balance — ${minutes} min, seed ${seed}, strategy ${strategy}${prestige ? ', prestige on' : ''}, acts every ${every}s, step ${STEP}s\n`);
+console.log(`Strip Mall Warlord balance — ${minutes} min, seed ${seed}, strategy ${strategy}${prestige ? ', prestige on' : ''}${active ? ', active (walk-ins)' : ''}, acts every ${every}s, step ${STEP}s\n`);
 console.log('Milestones');
 lines.forEach((l) => console.log(l));
 console.log('\nEvery 5 minutes');
 snaps.forEach((l) => console.log(l));
 
 const idle = botAct(newGame(seed), strategy);
+for (let i = 0; i < 300; i++) step(idle); // one minute of play, then close the tab
+botAct(idle, strategy);
 const away = simulateAway(idle, 8 * 3600);
-console.log(`\nOffline (one shop, 8h cap): +$${fmt(away.earned)}, ${away.wins}W/${away.losses}L, rows +${away.rows}, captured: ${away.captured.join(', ') || 'none'}`);
+console.log(`\nOffline (1 min of play, then 8h away): +$${fmt(away.earned)}, ${away.wins}W/${away.losses}L, rows +${away.rows}, captured: ${away.captured.join(', ') || 'none'}`);

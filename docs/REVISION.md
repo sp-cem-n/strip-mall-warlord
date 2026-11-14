@@ -59,3 +59,22 @@ Net after Pass 2: about 8, with rebrand added and win pay, rent, fallback and he
 - **Deleted (14):** training timers, bench caps, bench bonus, squad size/draft, gear, fixer debuff, stun/DoT/dodge, leasing, duplicate-cost scaling, win pay, loss rent, fall-back, raids + heat decay, second asphalt bonus (plus the Crew panel, Prestige panel, `tick()` module state, LEVEL_INCOME doubling).
 - **Added (3):** `weak` per enemy, rebrand (reuses the open UI), loss-reason log line. Damage numbers and weak chips are display only.
 - **Net:** 19 → 8 systems.
+
+---
+
+## Pass 4 (v0.3): flavor, visuals and the leftover problems, in one pass
+
+Josh's ask: add flavor back and real visuals, define the core loop (`docs/CORE_LOOP.md`), then run steps 1–3 once. Art rules are in `docs/ART_DIRECTION.md`.
+
+| # | Problem | Clever solution | Deletes | Adds |
+|---|---|---|---|---|
+| 28 | It's all text on screen, and nothing says "strip mall". | The plaza *is* a strip of pixel facades (one per storefront, in the captured lot's own material). The lot is a pixel battlefield with sprites, lunges, knockback, hit flashes and floating damage. | HTML unit tokens, rows of rebrand buttons (now one select), "does" text on cards (now a tooltip), the 40-line log (now 7) | `src/art/` sprite code, canvas field |
+| 29 | Flavor was cut along with systems. | Bring flavor back **only as readouts of existing mechanics**: the Lawyer's weak hits show **C&D**; bosses get a walk-out line with their job title; income is called **rent**; heat shows as cruiser lights at the lot entrance; one sign tube is always burnt out. | — | text and visual tags only (no new stats) |
+| 30 | Pawn-shop finds were fun, but gear was a hidden stacking system. | **Walk-ins**: the finds come back as the *active-play* hook. They appear only while you're watching, last 25s, give one temporary +50% damage for 60s, and never stack. | gear slots, gear rolls (stay deleted) | walk-in (1 field + 1 button) |
+| 31 | Offline: hundreds of hopeless losses at a wall (v2: 0W/1,354L in 8h). | **Smoke break:** after 3 straight losses the crew waits 1, 2, 4… min (cap 15) between tries. Any renovate or rebrand sends them straight back out. | the meaningless retries | 1 counter |
+| 32 | The harsh first minute (a lone Bouncer can't win, and the screen sits empty). | Your uncle's unit is already a **Vape Shop**: the first win comes at 0:05, and the first decision (open a Dojo for a front line) is obvious. | the "dead" first minute | — |
+| 33 | The Lifestyle Center grind is unclear. | Keep the wall (it's what bulldozing is for) but **signpost it**: the smoke break sets the Pave it stop glowing, and the away summary says why the crew stopped. | the separate "stuck for X" hint | — |
+| 34 | Counters are "solved" once you read the badges. | Accept it on purpose. Counters are for *readability*, not a puzzle. The real decision is the slot budget (tank + medic + counters vs Payday rent and its Heat). | — | — |
+| 35 | Cruft: the `?bot=1` live-bot mode and raid-era sprite entries. | Delete them. | `app.bot`, live bot loop, unused sprite | — |
+
+Net: no new stats or currencies. Systems are 8 → 9 (walk-ins). The smoke break replaces retry spam rather than adding a choice. The rest is presentation.

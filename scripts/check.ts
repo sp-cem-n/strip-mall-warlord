@@ -1,7 +1,7 @@
 // Small invariant checks. Run: bun scripts/check.ts
 import { OFFLINE_CAP_SECONDS, RESIST_MULT, WEAK_MULT, ZONES } from '../src/game/defs';
 import { lossReason, startBattle } from '../src/game/battle';
-import { heat, newGame, openShop, renovate, renovateCost } from '../src/game/economy';
+import { collectFind, heat, newGame, openShop, renovate, renovateCost } from '../src/game/economy';
 import { loadGame, saveGame } from '../src/game/save';
 import { asphaltGain, bulldoze, simulateAway, step } from '../src/game/sim';
 
@@ -17,12 +17,12 @@ const check = (name: string, ok: boolean) => {
 };
 
 const s = newGame(1);
-check('four vacant units at start', s.slots.length === 4 && s.slots.every((x) => !x.shop));
-check('payday locked at start', openShop(s, 0, 'payday') === 'Not unlocked yet');
-check('dojo opens', openShop(s, 0, 'dojo') === null && s.slots[0].shop === 'dojo');
+check("start with uncle's vape shop + 3 vacant units", s.slots.length === 4 && s.slots[0].shop === 'vape' && s.slots.slice(1).every((x) => !x.shop));
+check('payday locked at start', openShop(s, 1, 'payday') === 'Not unlocked yet');
+check('dojo opens', openShop(s, 1, 'dojo') === null && s.slots[1].shop === 'dojo');
 s.cash = 1e6;
 check('renovate raises the building level', renovate(s, 0) === null && s.slots[0].level === 2);
-check('rebrand keeps the level', openShop(s, 0, 'vape') === null && s.slots[0].shop === 'vape' && s.slots[0].level === 2);
+check('rebrand keeps the level', openShop(s, 0, 'laundromat') === null && s.slots[0].shop === 'laundromat' && s.slots[0].level === 2);
 check('renovation cost ignores shop type', renovateCost(2) === renovateCost(s.slots[0].level));
 
 s.zone = 2;
@@ -32,13 +32,28 @@ check('heat is derived from payday levels', Math.abs(heat(s) - 0.1) < 1e-9);
 
 // counters: a lone bouncer vs the lot loses and says why
 const lone = newGame(5);
-openShop(lone, 0, 'dojo');
+lone.slots[0].shop = 'dojo';
 const b = startBattle(lone)!;
 check('the lot is weak to hustlers', b.enemies.every((e) => e.weak === 'hustler') && WEAK_MULT > 1 && RESIST_MULT < 1);
 let guard = 0;
 while (lone.battle && guard++ < 2000) step(lone);
 check('lone bouncer loses at the lot', lone.stats.losses === 1 && lone.row === 0);
 check('loss names the missing counter', lossReason(b).includes('Hustler'));
+
+// smoke break: three straight losses -> long regroup; any lineup change ends it
+while (lone.lossStreak < 3 && guard++ < 50000) step(lone);
+check('three straight losses = smoke break', lone.lossStreak === 3 && lone.regroup > 30);
+lone.cash = 1e6;
+renovate(lone, 0);
+check('renovating ends the smoke break', lone.lossStreak === 0 && lone.regroup <= 3);
+
+// walk-ins only happen while watching
+const idle = newGame(6);
+for (let i = 0; i < 5000; i++) step(idle);
+check('no walk-ins offline', idle.find === null);
+for (let i = 0; i < 5000 && !idle.find; i++) step(idle, true);
+check('walk-ins appear while watching', idle.find !== null);
+check('collecting a walk-in boosts the crew', collectFind(idle) === null && idle.boost > 0 && idle.find === null);
 
 saveGame(s);
 check('save round-trips', loadGame()?.slots[0].level === 2);

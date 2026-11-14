@@ -4,10 +4,10 @@ import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright';
 
 const base = process.env.URL ?? 'http://localhost:4173/';
-const out = process.env.OUT ?? 'screenshots/v2';
+const out = process.env.OUT ?? 'screenshots/v3';
 const shots = [
   ['01-fresh-start.png', '?fresh=1&seed=1991&pause=1'],
-  ['02-five-minutes.png', '?fresh=1&seed=1991&advance=300&pause=1'],
+  ['02-five-minutes.png', '?fresh=1&seed=1991&advance=300&walkin=1&pause=1'],
   ['03-mid-battle.png', '?fresh=1&seed=1991&advance=300&midbattle=1&pause=1'],
   ['04-twenty-minutes.png', '?fresh=1&seed=1991&advance=1200&midbattle=1&pause=1'],
   ['05-while-you-were-away.png', '?fresh=1&seed=1991&advance=120&away=3600&pause=1'],
