@@ -374,3 +374,11 @@ Fun Zone at Parking Lot fight 7 for $20,000. Off-Ramp at Exit 14 fight 4. Attrac
 - **Bypass farming pays real Equity** (raise PAY_BASE so it's worth it under the patrol rule); GW-to-Equity conversion stays as a top-up.
 - **Plaza Management folds into the Bypass landmarks.**
 - **Fighter slots: Goodwill buys plus one room source** (pick the prize shelf or shuffleboard at build; drop the other).
+
+## Bottleneck design, 15 Nov (supersedes overtime and the boss auto-overtime patch)
+
+- **Cut overtime entirely**, including the M1 automatic boss overtime after two failed patrolled tries. Walls should be felt and solved, not bullied through.
+- **Design spine:** the player hits a wall, works out why, breaks it, then hits the next. Resets and repaves break walls faster through buffs and the player's own knowledge.
+- **Wall map (new design task before building):** list every boss and lot with its crew makeup, what it beats, what beats it, and which unlocked unit or role solves it. Walls should push the player to shift focus: upgrade one shop or role to pass a wall, then bench it and build another for the next wall. Strengths and weaknesses become the core of the puzzle, so check that the system has enough depth and make it readable on hovers and the roster.
+- **The tools to break a wall** are farming Goodwill for training, cash for renovations, and changing the lineup. Patrols cost a bit more Goodwill, as a goal once the farm-versus-advance loop is understood. Auto lineup is a goal worth unlocking because crew makeup is a real bottleneck.
+- **Balance:** re-run the check-in and skilled active sims without auto-overtime. Each wall should stop progress for a while but be breakable with the intended tools. Keep Route 9 near 15h±1, or retune and report.
