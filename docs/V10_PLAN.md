@@ -361,3 +361,16 @@ Fun Zone at Parking Lot fight 7 for $20,000. Off-Ramp at Exit 14 fight 4. Attrac
 - **No reduce-flicker toggle.**
 - **Balance:** add a skilled active-player simulation alongside the check-in bot.
 - **Mobile:** 2.5D rooms are desktop first; portrait comes after 1.0.
+
+## Cohesion calls, 15 Nov (supersede anything above)
+
+- **Patrols cost Goodwill, not cash.** Without a patrol, a lot you can't beat keeps fighting and losing, earns no Goodwill, and never drops you back. With a patrol, a loss drops you to the highest fight you can win, which keeps paying Goodwill. Idle players farm their way to patrols; pushers trade that for progress. Training competing with patrols is intended. Price patrols in minutes of farming time and test them in both sims.
+- **No Goodwill auto-spend before dawn.** A post-dawn "crew coach" consultant that auto-trains Route 9 is optional; discuss before building.
+- **Minigames pay their room's currency** (Fun Zone tickets or Goodwill, Off-Ramp slips or Equity); cash only as an occasional jackpot.
+- **Overtime: undecided.** Leave as is until Josh decides.
+- **Cut crew contracts.** Stacking landmarks take the stat-sink job.
+- **One short-boost type per room:** claw toys for Route 9, Grapevine slips for the Bypass. Video poker pays slips instead of its own buff. Cut the shot glass and the other separate timed buffs into these two.
+- **Walk-ins pay a little Goodwill or a chance at a ticket**, not cash.
+- **Bypass farming pays real Equity** (raise PAY_BASE so it's worth it under the patrol rule); GW-to-Equity conversion stays as a top-up.
+- **Plaza Management folds into the Bypass landmarks.**
+- **Fighter slots: Goodwill buys plus one room source** (pick the prize shelf or shuffleboard at build; drop the other).
