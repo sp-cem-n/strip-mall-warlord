@@ -6,8 +6,8 @@ import { asphaltMult, bal, cleared, earn, log, rentPerSec, spend } from './econo
 import { rand } from './rng';
 import type { GameState } from './state';
 
-export type MachineId = 'pusher' | 'whac' | 'skee' | 'claw' | 'pinball' | 'cyclone' | 'darts' | 'pool' | 'poker' | 'shuffle';
-export type BuffKind = 'bat' | 'duck' | 'troll' | 'ball' | 'watch' | 'well' | 'call' | 'top' | 'royal';
+export type MachineId = 'pusher' | 'whac' | 'skee' | 'claw' | 'pinball' | 'cyclone' | 'darts' | 'pool' | 'poker' | 'foos' | 'shuffle' | 'trivia';
+export type BuffKind = 'bat' | 'duck' | 'troll' | 'ball' | 'watch' | 'well' | 'call' | 'top' | 'royal' | 'quiz' | 'genius';
 export type Cost = { cur: Currency | 'tickets'; n: number };
 export interface Reward { cash?: number; goodwill?: number; tickets?: number; equity?: number; buff?: BuffKind; big?: boolean; text: string }
 export interface RoomState {
@@ -31,7 +31,9 @@ export const newRoom = (): RoomState => ({ unlocked: [], attract: {}, clock: {},
 const rent = (s: GameState, r: RegionId) => Math.max(1, rentPerSec(s, r));
 export const winPay = (s: GameState, r: RegionId) => FIGHTS[r][Math.min(s.crews[r].frontier, FIGHTS[r].length - 1)].pay * asphaltMult(s, r) * boardBonus(s, r);
 // Night Shift (Route 9 Goodwill) and the shuffleboard (Bypass Equity): +6% per win for each house score beaten
-export const boardBonus = (s: GameState, r: RegionId = 0) => 1 + 0.06 * (r === 0 ? s.room.board : s.room.shuffle);
+// trivia on the Bypass: a timed bump to Equity per win
+export const QUIZ: [BuffKind, number][] = [['quiz', 0.1], ['genius', 0.25]];
+export const boardBonus = (s: GameState, r: RegionId = 0) => 1 + 0.06 * (r === 0 ? s.room.board : s.room.shuffle) + (r === 1 ? Math.max(0, ...QUIZ.filter(([b]) => buffOn(s, b)).map(([, v]) => v)) : 0);
 const rentCost = (sec: number, r: RegionId = 0) => (s: GameState): Cost => ({ cur: 'cash', n: Math.max(1, Math.round(rent(s, r) * sec)) });
 
 export const BUFFS: Record<BuffKind, { name: string; does: string }> = {
@@ -44,6 +46,8 @@ export const BUFFS: Record<BuffKind, { name: string; does: string }> = {
   call: { name: 'Three of a Kind', does: '+20% crew damage' },
   top: { name: 'Full House', does: '+30% crew damage and HP' },
   royal: { name: 'Royal Flush', does: '+50% crew damage and HP' },
+  quiz: { name: 'Three Right', does: '+10% Equity per win' },
+  genius: { name: 'Five for Five', does: '+25% Equity per win' },
 };
 export const BUFF_SECONDS = 600;
 // the bar's buffs, by poker hand: [kind, seconds, damage, HP]
@@ -138,8 +142,21 @@ export const MACHINES: MachineDef[] = [
     },
   },
   {
+    id: 'foos', region: 1, name: 'Foosball', blurb: 'First to five. Move to line up a man, click to shoot.', needs: 'Capture the Corporate Campus', unlock: or((s) => cleared(s, 1, 1, REGIONS[1].lots[1].fights)), cost: rentCost(20, 1), secs: 60, cool: 0,
+    pay: (s, q) => ({ equity: winPay(s, 1) * 8 * q, big: q >= 1, text: q >= 1 ? 'Five-nothing. They want a rematch.' : `${Math.round(q * 5)} goals.` }),
+  },
+  {
     id: 'shuffle', region: 1, name: 'Shuffleboard', blurb: 'Six pucks. Hold for power. The far end is worth more.', needs: 'Capture Town Center, Phase II', unlock: or((s) => cleared(s, 1, 2, REGIONS[1].lots[2].fights)), cost: rentCost(15, 1), secs: 30, cool: 0,
     pay: (s, q) => ({ equity: winPay(s, 1) * 2 * q, text: `${Math.round(q * SHUFFLE_TOP)} points.` }),
+  },
+  {
+    id: 'trivia', region: 1, name: 'Bar Trivia', blurb: 'Five questions. Faster is more points.', needs: 'Clear fight 6 at the Bypass Galleria', unlock: or((s) => cleared(s, 1, 3, 5)), cost: rentCost(10, 1), secs: 50, cool: 600,
+    pay: (_s, q) => {
+      const right = Math.round(q * 5);
+      if (right >= 5) return { buff: 'genius', big: true, text: `Five for five: ${BUFFS.genius.does} for 10 min.` };
+      if (right >= 3) return { buff: 'quiz', text: `${right} right: ${BUFFS.quiz.does} for 10 min.` };
+      return { text: `${right} right. The regulars are not impressed.` };
+    },
   },
 ];
 export const MACHINE: Record<MachineId, MachineDef> = Object.fromEntries(MACHINES.map((m) => [m.id, m])) as Record<MachineId, MachineDef>;

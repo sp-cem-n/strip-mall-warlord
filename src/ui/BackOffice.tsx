@@ -74,7 +74,7 @@ function Arcade({ r }: { r: RegionId }) {
         </div>
       ))}
       <div class="dim tnote">
-        {r === 0 ? `${fmt(s.tickets)} tickets · ${open.length}/6 machines` : `${open.length}/4 tables`}
+        {r === 0 ? `${fmt(s.tickets)} tickets · ${open.length}/6 machines` : `${open.length}/6 tables`}
       </div>
     </>
   );

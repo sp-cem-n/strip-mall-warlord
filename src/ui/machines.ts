@@ -2,6 +2,7 @@
 // when it's over; the payout itself is game/room.ts's job, so Attract Mode and the bot pay the same way.
 import { glyph } from '../art/font';
 import { C, HEX } from '../art/palette';
+import { foos, foosIdle, trivia, triviaIdle } from './bargames';
 import { BAR_HOUSE, HOUSE_SCORES, PINBALL_TOP, POKER_HANDS, SHUFFLE_TOP, type MachineId } from '../game/room';
 
 export interface Pen {
@@ -40,7 +41,7 @@ export interface Game {
   up(x: number, y: number): void;
   move?(x: number, y: number): void;
 }
-const circle = (p: Pen, cx: number, cy: number, r: number, c: number) => {
+export const circle = (p: Pen, cx: number, cy: number, r: number, c: number) => {
   for (let y = -r; y <= r; y++) {
     const w = Math.floor(Math.sqrt(r * r - y * y));
     p.rect(cx - w, cy + y, w * 2 + 1, 1, c);
@@ -793,6 +794,8 @@ export function newGame(id: MachineId, o: { shelf: number; speed: number; jackpo
     case 'pool': return pool();
     case 'poker': return poker();
     case 'shuffle': return shuffle();
+    case 'foos': return foos();
+    case 'trivia': return trivia();
   }
 }
 
@@ -813,6 +816,8 @@ export function idle(p: Pen, id: MachineId, t: number, extra: string) {
     p.center(extra || 'QUARTERS', 60, extra ? C.mint : blink ? C.paper : C.bone);
     return;
   }
+  if (id === 'foos') return foosIdle(p, t, extra);
+  if (id === 'trivia') return triviaIdle(p, t, extra);
   if (id === 'shuffle') {
     p.rect(0, 0, p.w, p.h, C.umber).rect(6, 0, 66, p.h, C.bone);
     p.center('HIGH SCORES', 20, C.red);

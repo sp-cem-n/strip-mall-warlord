@@ -4,7 +4,7 @@ import { app, tip, toast } from '../app';
 import { CAB_H, CAB_W, cabinet, carpet, paneling, screenOf, type CabinetLook } from '../art/cabinets';
 import { C } from '../art/palette';
 import { CURRENCY_SHORT } from '../game/defs';
-import { ATTRACT_EVERY, BAR_BUFFS, BAR_HOUSE, BUFFS, HOUSE_SCORES, postShuffle, MACHINES, PERKS, attractPrice, buffOn, buyAttract, buyPerk, canAfford, endPlay, perk, perkPrice, postScore, serviced, startPlay, type BuffKind, type Cost, type MachineDef, type MachineId, type PerkId } from '../game/room';
+import { ATTRACT_EVERY, BAR_BUFFS, QUIZ, BAR_HOUSE, BUFFS, HOUSE_SCORES, postShuffle, MACHINES, PERKS, attractPrice, buffOn, buyAttract, buyPerk, canAfford, endPlay, perk, perkPrice, postScore, serviced, startPlay, type BuffKind, type Cost, type MachineDef, type MachineId, type PerkId } from '../game/room';
 import { canvasOf, urlOf } from './art';
 import { fmt, fmtTime } from './format';
 import { idle, newGame, pen, type Game } from './machines';
@@ -21,9 +21,11 @@ export const LOOKS: Record<MachineId, CabinetLook> = {
   darts: { body: C.umber, trim: C.red, marquee: C.neon, ink: C.paper, title: 'DARTS', side: 'dots', bar: 'darts' },
   pool: { body: C.umber, trim: C.blue, marquee: C.mint, ink: C.paper, title: 'POOL', side: 'dots', tall: true, bar: 'pool' },
   poker: { body: C.night, trim: C.sodium, marquee: C.sodium, ink: C.ink, title: 'JACKS OR BETTER', side: 'stars' },
+  foos: { body: C.umber, trim: C.mint, marquee: C.mint, ink: C.paper, title: 'FOOSBALL', side: 'dots', tall: true, bar: 'foos' },
   shuffle: { body: C.umber, trim: C.sodium, marquee: C.sodiumLight, ink: C.paper, title: 'SHUFFLEBOARD', side: 'dots', tall: true, bar: 'shuffle' },
+  trivia: { body: C.night, trim: C.violet, marquee: C.neon, ink: C.ink, title: 'BAR TRIVIA', side: 'stripes' },
 };
-const BAR_IDS = new Set(BAR_BUFFS.map(([b]) => b));
+const BAR_IDS = new Set([...BAR_BUFFS, ...QUIZ].map(([b]) => b));
 export const costText = (c: Cost) => (c.cur === 'tickets' ? `${fmt(c.n)} tickets` : c.cur === 'cash' ? `$${fmt(c.n)}` : `${fmt(c.n)} ${CURRENCY_SHORT[c.cur]}`);
 
 function Cabinet({ m }: { m: MachineDef }) {
@@ -145,7 +147,7 @@ function Cabinet({ m }: { m: MachineDef }) {
 
 function BarCounter() {
   const s = app.s;
-  const on = BAR_BUFFS.filter(([b]) => buffOn(s, b));
+  const on = [...BAR_BUFFS, ...QUIZ].filter(([b]) => buffOn(s, b));
   return (
     <section class="counter pub">
       <h2>Behind the bar</h2>
@@ -158,7 +160,7 @@ function BarCounter() {
           <span class="dim">{fmtTime(s.room.buffs[b] ?? 0)}</span>
         </div>
       ))}
-      {!on.length && <div class="dim">Nothing from the poker machine yet.</div>}
+      {!on.length && <div class="dim">Nothing from the poker machine or the trivia yet.</div>}
       <h3>Shuffleboard board</h3>
       {BAR_HOUSE.map(([n, v], i) => (
         <div key={n} class={`perk ${i < s.room.shuffle ? 'beat' : ''}`}>
@@ -254,7 +256,7 @@ export function GameRoom() {
         </button>
       </header>
       <div class="room-floor">
-        <div class={`cabs ${bar ? 'four' : ''}`}>
+        <div class="cabs">
           {MACHINES.filter((m) => m.region === s.view).map((m) => (
             <Cabinet key={m.id} m={m} />
           ))}

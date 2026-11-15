@@ -3,16 +3,17 @@ import { FIGHTS, RETRY_AFTER, ROLES, SHOPS, REGIONS, type RegionId } from './def
 import { advance, bal, buyPatrol, buySlot, convert, curb, forLease, leased, lease, lineupOf, overtime, overtimeCost, patrolBlock, patrolPrice, pave, purse, regionDone, renovate, renovateCost, rentPerSec, slotPrice, topFight, train, trainCost, view } from './economy';
 import { collectFind } from './sim';
 import type { GameState } from './state';
-import { BAR_BUFFS, MACHINE, PERKS, PINBALL_TOP, SHUFFLE_TOP, buffOn, buyPerk, endPlay, perkPrice, pokerQ, postScore, postShuffle, startPlay, type MachineId, type PerkId } from './room';
+import { BAR_BUFFS, QUIZ, serviced, MACHINE, PERKS, PINBALL_TOP, SHUFFLE_TOP, buffOn, buyPerk, endPlay, perkPrice, pokerQ, postScore, postShuffle, startPlay, type MachineId, type PerkId } from './room';
 import { rand } from './rng';
 
 // The room player: half of online time, at about 70% skill. Keeps a claw toy going, spends tickets at the counter.
 const MIX: [MachineId, number][] = [['pusher', 0.35], ['skee', 0.25], ['whac', 0.15], ['pinball', 0.1], ['cyclone', 0.15]];
-const BAR_MIX: [MachineId, number][] = [['darts', 0.35], ['pool', 0.45], ['shuffle', 0.2]];
+const BAR_MIX: [MachineId, number][] = [['darts', 0.3], ['pool', 0.35], ['foos', 0.2], ['shuffle', 0.15]];
 function barAct(s: GameState, o: BotOpts) {
   for (let g = 0; g < 20 && o.barBudget! > 0; g++) {
     let id: MachineId;
     if (s.room.unlocked.includes('poker') && !BAR_BUFFS.some(([b]) => buffOn(s, b))) id = 'poker';
+    else if (s.room.unlocked.includes('trivia') && !QUIZ.some(([b]) => buffOn(s, b)) && !serviced(s, 'trivia')) id = 'trivia';
     else {
       const open = BAR_MIX.filter(([m]) => s.room.unlocked.includes(m)).map(([m, w]) => [m, m === 'shuffle' && s.room.shuffle >= 5 ? 0.03 : w] as [MachineId, number]);
       let x = rand(s) * open.reduce((a, [, w]) => a + w, 0);
@@ -21,7 +22,7 @@ function barAct(s: GameState, o: BotOpts) {
     o.barBudget! -= MACHINE[id].secs;
     if (startPlay(s, id)) continue;
     const skill = 0.7 * (0.75 + 0.5 * rand(s));
-    const q = id === 'poker' ? pokerQ(s, true) : id === 'pool' ? (rand(s) < 0.05 ? 1 : Math.min(5, Math.round(skill * 6)) / 6) : id === 'darts' ? (rand(s) < 0.03 ? 1 : Math.min(0.95, skill * 0.8)) : Math.min(1, skill);
+    const q = id === 'poker' ? pokerQ(s, true) : id === 'trivia' ? Math.round((0.45 + 0.55 * rand(s)) * 5) / 5 : id === 'pool' ? (rand(s) < 0.05 ? 1 : Math.min(5, Math.round(skill * 6)) / 6) : id === 'darts' ? (rand(s) < 0.03 ? 1 : Math.min(0.95, skill * 0.8)) : Math.min(1, skill);
     if (id === 'shuffle') postShuffle(s, Math.round(q * SHUFFLE_TOP));
     endPlay(s, id, q, true);
   }

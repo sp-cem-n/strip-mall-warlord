@@ -8,7 +8,8 @@ import { CREW_LOOKS, ENEMY_LOOKS } from '../src/art/people';
 import type { GameState } from '../src/game/state';
 import { HOW, STORY } from '../src/game/content/copy';
 import { botAct } from '../src/game/bot';
-import { BAR_BUFFS, BUFFS, MACHINES, PERKS, buffOn, buyAttract, buyPerk, endPlay, postShuffle, startPlay } from '../src/game/room';
+import { QUESTIONS } from '../src/ui/bargames';
+import { BAR_BUFFS, BUFFS, MACHINES, PERKS, QUIZ, boardBonus, buffOn, buyAttract, buyPerk, endPlay, postShuffle, startPlay } from '../src/game/room';
 import { handTier } from '../src/ui/machines';
 import { readdirSync, readFileSync } from 'node:fs';
 
@@ -240,6 +241,13 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   check('hands: royal, full house, jacks, low pair', handTier([12, 11, 10, 9, 8]).join() === '4,ROYAL FLUSH' && handTier([0, 13, 26, 1, 14])[0] === 3 && handTier([9, 22, 2, 30, 45])[0] === 1 && handTier([0, 13, 5, 30, 45])[0] === 0);
   const s0 = slotsOf(t, 1);
   check('shuffleboard: each house score is +6% Equity per win, the third adds a slot', postShuffle(t, 14) === 2 && slotsOf(t, 1) === s0 && postShuffle(t, 17) === 1 && slotsOf(t, 1) === s0 + 1);
+  check('six at the bar, like the arcade', MACHINES.filter((m) => m.region === 1).length === 6 && MACHINES.filter((m) => m.region === 0).length === 6);
+  t.room.unlocked.push('foos', 'trivia');
+  const e0 = t.equity;
+  check('foosball pays Equity by the goal', startPlay(t, 'foos') === null && (endPlay(t, 'foos', 0.3), t.equity > e0));
+  const base = 1 + 0.06 * t.room.shuffle;
+  check('trivia: three right is +10% Equity per win, five is +25%', !endPlay(t, 'trivia', 0.4).buff && endPlay(t, 'trivia', 0.6).buff === 'quiz' && Math.abs(boardBonus(t, 1) - base - 0.1) < 1e-9 && endPlay(t, 'trivia', 1).buff === 'genius' && Math.abs(boardBonus(t, 1) - base - 0.25) < 1e-9 && boardBonus(t, 0) === 1 + 0.06 * t.room.board);
+  check('trivia questions fit the screen', QUESTIONS.every((q) => q.slice(1).every((a) => a.length <= 19) && q.slice(1).length === 4 && new Set(q.slice(1)).size === 4));
 }
 
 // pre-dawn copy: nothing before the Route 9 ending may hint at the Bypass, Equity or a second crew
@@ -251,7 +259,7 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   for (const l of REGIONS[0].lots) texts.push(l.name, l.blurb, l.clearText, ...[...l.regulars, l.boss].flatMap((e) => [e.name, e.title]));
   texts.push(REGIONS[0].name, ...Object.values(REGIONS[0].chrome));
   for (const m of MACHINES.filter((x) => x.region === 0)) texts.push(m.name, m.blurb, m.needs);
-  for (const [k, b] of Object.entries(BUFFS)) if (!BAR_BUFFS.some(([x]) => x === k)) texts.push(b.name, b.does);
+  for (const [k, b] of Object.entries(BUFFS)) if (![...BAR_BUFFS, ...QUIZ].some(([x]) => x === k)) texts.push(b.name, b.does);
   for (const p of Object.values(PERKS)) texts.push(p.name, p.does);
   let t = newGame(12);
   let next = 0;

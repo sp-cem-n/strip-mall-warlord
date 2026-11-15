@@ -244,7 +244,6 @@ button { font: inherit; }
 .perk.beat { color: var(--concrete); text-decoration: line-through; }
 .plush { height: 24px; background: repeating-linear-gradient(90deg, var(--violet) 0 12px, var(--mint) 12px 24px, var(--neon) 24px 36px, var(--sodium-light) 36px 48px); border-bottom: 4px solid var(--ink); margin-bottom: 6px; }
 .arcade-go { width: 100%; margin-bottom: 6px; }
-.cabs.four { grid-template-columns: repeat(4, 288px); }
 .room.pub .room-bar { border-color: var(--brick); }
 .room.pub .room-sign { color: var(--sodium-light); text-shadow: 2px 2px 0 var(--ink), 0 0 12px var(--red); }
 .room.pub .cab canvas { filter: drop-shadow(0 0 10px rgba(246, 210, 122, 0.25)); }

@@ -3,7 +3,7 @@
 import { Grid, hash, textWidth } from './grid';
 import { C } from './palette';
 
-export interface CabinetLook { body: number; trim: number; marquee: number; ink: number; title: string; side: 'stars' | 'stripes' | 'bolts' | 'dots' | 'moon' | 'rings'; tall?: boolean; bar?: 'darts' | 'pool' | 'shuffle' }
+export interface CabinetLook { body: number; trim: number; marquee: number; ink: number; title: string; side: 'stars' | 'stripes' | 'bolts' | 'dots' | 'moon' | 'rings'; tall?: boolean; bar?: 'darts' | 'pool' | 'shuffle' | 'foos' }
 export const CAB_W = 96;
 export const CAB_H = 160;
 // screen rectangle inside the cabinet (pinball's playfield is taller)
@@ -120,6 +120,11 @@ function barPiece(l: CabinetLook, lit: boolean, sign?: string): Grid {
       g.rect(8, by, 80, 3, dark);
       for (let i = 0; i < 5; i++) g.rect(14 + i * 15, by + 3, 2, 14, lit ? C.bone : C.concrete).px(14 + i * 15, by + 3, lit ? C.blue : C.asphalt);
       g.rect(80, by + 10, 4, 4, lit ? C.blue : C.asphalt);
+    } else if (l.bar === 'foos') {
+      // a coin box on the end and two spare balls in the cup
+      g.rect(36, by, 24, 14, dark).rect(38, by + 2, 20, 10, lit ? C.concrete : C.asphalt).rect(46, by + 4, 4, 1, C.ink);
+      g.rect(14, by + 4, 10, 8, dark);
+      for (const x of [16, 20]) g.rect(x, by + 5, 3, 3, lit ? C.paper : C.stone);
     } else {
       // a can of shuffleboard wax and the spare pucks
       g.rect(12, by + 2, 8, 10, lit ? C.sodium : C.asphalt).rect(12, by + 2, 8, 2, lit ? C.paper : C.concrete);
