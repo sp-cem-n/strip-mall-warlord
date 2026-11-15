@@ -45,12 +45,12 @@ function resolve(s: GameState, r: RegionId, b: Battle, result: 'win' | 'loss') {
     c.losses++;
     if (b.fight === c.frontier) c.tries++;
     smokeBreak(s, r);
-    // Lost fresh: this one is a wall, drop back a fight. Lost worn down: same fight after the smoke.
-    if (b.fresh && c.at > 0) {
+    // Lost the frontier fresh: it's a wall, drop back a fight. Otherwise: same fight after the smoke.
+    if (b.fresh && b.fight === c.frontier && c.at > 0) {
       c.at--;
       c.farmed = 0;
       log(s, r, `Lost ${fightLabel(r, b.fight)}. Back to ${fightLabel(r, c.at)} after a smoke. ${lossReason(b)}`, 'loss');
-    } else log(s, r, `Lost ${fightLabel(r, b.fight)}, worn down. Smoke break, then again.`, 'loss', true);
+    } else log(s, r, `Lost ${fightLabel(r, b.fight)}. Smoke break, then again.`, 'loss', true);
     return;
   }
   c.wins++;
@@ -58,6 +58,7 @@ function resolve(s: GameState, r: RegionId, b: Battle, result: 'win' | 'loss') {
   for (const u of b.crew) c.wounds[u.id] = 1 - u.hp / u.maxHp;
   c.regroup = 0.4;
   c.smoke = 0;
+  if (b.crew.some((u) => u.hp <= 0)) smokeBreak(s, r); // somebody's down: smoke break before the next one
   const f = ladder[b.fight];
   const pay = payFor(s, r, f, b.field.payUp);
   earn(s, r, REGIONS[r].pay, pay);

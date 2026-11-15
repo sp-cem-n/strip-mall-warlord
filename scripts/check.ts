@@ -77,8 +77,8 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
 {
   // damage carries over: a win leaves wounds, the next fight starts on them
   const t = newGame(4);
-  t.crews[0].frontier = 6;
-  t.crews[0].at = 6;
+  t.crews[0].frontier = 0;
+  t.crews[0].at = 0;
   let worn = false;
   for (let i = 0; i < 4000 && !worn; i++) {
     step(t);
@@ -87,7 +87,8 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   }
   check('damage carries over: after a win the next group walks in on a hurt crew', worn);
   const c = t.crews[0];
-  advance(t, 0, c.at > 0 ? -1 : 1);
+  c.frontier = Math.max(c.frontier, c.at + 2);
+  advance(t, 0, 1);
   check('moving to a new fight is a smoke break: full HP', Object.keys(c.wounds).length === 0 && c.smoke === SMOKE_BREAK_SECONDS && c.regroup === SMOKE_BREAK_SECONDS);
 }
 

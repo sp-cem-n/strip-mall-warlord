@@ -33,7 +33,11 @@ function roomAct(s: GameState, o: BotOpts, dt: number) {
   o.barBudget = (o.barBudget ?? 0) + (bar ? dt * 0.35 : 0);
   if (bar) barAct(s, o);
   o.roomBudget = (o.roomBudget ?? 0) + dt * (bar ? 0.15 : 0.5);
-  for (const id of Object.keys(PERKS) as PerkId[]) while (s.tickets >= perkPrice(s, id) && !buyPerk(s, id));
+  // prize counter in order (fighter slots first), saving up for the next one rather than grabbing what's cheap
+  for (const id of Object.keys(PERKS) as PerkId[]) {
+    while (s.tickets >= perkPrice(s, id) && !buyPerk(s, id));
+    if (isFinite(perkPrice(s, id))) break;
+  }
   for (let g = 0; g < 20 && o.roomBudget > 0; g++) {
     let id: MachineId | undefined;
     if (s.tickets >= 50 && !buffOn(s, 'bat') && !buffOn(s, 'duck') && s.room.unlocked.includes('claw')) id = 'claw';
@@ -95,6 +99,8 @@ function crewAct(s: GameState, r: RegionId, o: BotOpts) {
   for (let g = 0; g < 50; g++) {
     const role = [...ROLES].sort((a, b) => c.train[a] - c.train[b])[0];
     if (eqPending && trainCost(r, c.train[role]) > purse(s, r) - eqPending) break;
+    // save up for the next fighter slot once it costs less than a handful of training levels
+    if (slotPrice(s, r) <= 6 * trainCost(r, c.train[role]) && trainCost(r, c.train[role]) > purse(s, r) - slotPrice(s, r)) break;
     if (purse(s, r) < trainCost(r, c.train[role]) || train(s, r, role)) break;
   }
   if (o.manual !== false && c.at < topFight(s, r) && c.farmed >= RETRY_AFTER) advance(s, r, 1);

@@ -167,7 +167,7 @@ export const roomOpen = (s: GameState, r: RegionId) => MACHINES.some((m) => m.re
 // ---- the prize counter (tickets, permanent) ----
 export type PerkId = 'slot' | 'otCheap' | 'otLong' | 'walkins';
 export const PERKS: Record<PerkId, { name: string; does: string; prices: number[] }> = {
-  slot: { name: 'Fighter slot', does: 'One more fighter on the lot', prices: [1500, 6000] },
+  slot: { name: 'Fighter slot', does: 'One more fighter on the lot', prices: [1200, 5000] },
   otCheap: { name: 'Overtime coupon', does: 'Overtime costs 25% less', prices: [800, 800] },
   otLong: { name: 'Overtime punch card', does: 'Overtime lasts 4 fights', prices: [2000] },
   walkins: { name: 'Doorbell', does: 'Walk-ins every 75s instead of 90', prices: [1200] },

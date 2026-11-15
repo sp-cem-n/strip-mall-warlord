@@ -1,15 +1,45 @@
 // Headless balance run: a scripted player plays N hours; prints milestones, per-lot fight stats and 30-minute snapshots.
-// Usage: bun scripts/balance.ts [hours=20] [seed=1991] [--every=600] [--active] [--idle] [--room] [--pave=H] [--convert=0.5] [--quiet]
+// Usage: bun scripts/balance.ts [hours=20] [seed=1991] [--every=600] [--active] [--idle] [--room] [--pave=H] [--convert=0.5] [--quiet] [--knob NAME=value ...]
 //   check-in: --every=600 (default)   active: --active --every=10   active + arcade: --active --room --every=10   idle: --idle
+//   --knob swaps a knobs.ts constant for this run only, e.g. --knob FIGHT_TIMEOUT=45 --knob "LOT_JUMP=[[2,1.45,1.103,1.286,0.619,1.089],[2,5,1.01,0.45]]"
+//   --guard: check-in and active on 2 seeds; exits 1 if pacing or losses leave the targets. Run it before tagging.
 // Save output under out/ (git-ignored) if you want to keep it.
-import { FIGHTS, REGIONS, SHOP_LIST } from '../src/game/defs';
-import { botAct, describeCrew, type BotOpts } from '../src/game/bot';
-import { lotsTaken, newGame, rentPerSec } from '../src/game/economy';
-import { fightLabel, simulateAway, step } from '../src/game/sim';
+import type { BotOpts } from '../src/game/bot';
 import type { GameState } from '../src/game/state';
-import { fmt, fmtTime } from '../src/ui/format';
+declare const Bun: any; // bun runtime (no @types/bun in this repo)
 
 const args = process.argv.slice(2);
+const knobArgs: string[] = [];
+args.forEach((a, i) => {
+  if (a === '--knob' && args[i + 1]) knobArgs.push(args[i + 1]);
+  else if (a.startsWith('--knob=')) knobArgs.push(a.slice(7));
+});
+if (knobArgs.length) {
+  const swaps = knobArgs.map((kv) => [kv.slice(0, kv.indexOf('=')), kv.slice(kv.indexOf('=') + 1)] as const);
+  Bun.plugin({
+    name: 'knobs',
+    setup(b: any) {
+      b.onLoad({ filter: /src[\\/]game[\\/]knobs\.ts$/ }, async ({ path }: { path: string }) => {
+        let src = await Bun.file(path).text();
+        for (const [k, v] of swaps) {
+          const re = new RegExp(`(export const ${k} = )[^;]*;`);
+          if (!re.test(src)) throw new Error(`--knob: no constant ${k} in knobs.ts`);
+          src = src.replace(re, `$1${v.includes(',') && !v.startsWith('[') ? `[${v}]` : v};`);
+        }
+        return { contents: src, loader: 'ts' };
+      });
+    },
+  });
+}
+
+if (args.includes('--guard')) await guard();
+
+const { FIGHTS, REGIONS, SHOP_LIST } = await import('../src/game/defs');
+const { botAct, describeCrew } = await import('../src/game/bot');
+const { lotsTaken, newGame, rentPerSec } = await import('../src/game/economy');
+const { fightLabel, simulateAway, step } = await import('../src/game/sim');
+const { fmt, fmtTime } = await import('../src/ui/format');
+
 const nums = args.filter((a) => /^[\d.]+$/.test(a)).map(Number);
 const flag = (k: string) => args.find((a) => a.startsWith(`--${k}=`))?.split('=')[1];
 const hours = nums[0] ?? 20;
@@ -36,7 +66,7 @@ while (s.totalTime < hours * 3600) {
     nextAct = s.totalTime + (o.active || s.totalTime >= 1800 ? every : Math.min(every, 60)); // check-in players watch the first half hour
   }
   const before = s.crews.map((c) => ({ b: c.battle, front: c.battle && c.battle.fight === c.frontier, w: c.wins, l: c.losses, paves: s.paves }));
-  step(s, o.active && !process.env.SMW_NOWATCH);
+  step(s, !!o.active);
   for (const r of [0, 1] as const) {
     const c = s.crews[r], p = before[r];
     if (!p.b || c.battle === p.b || p.paves !== s.paves || (r === 0 && s.paves)) continue;
@@ -96,3 +126,33 @@ for (let i = 0; i < 300; i++) step(idle);
 botAct(idle, o, 10);
 const away = simulateAway(idle, 8 * 3600);
 console.log(`\nOffline (1 min of play, then 8h away): +$${fmt(away.earned)}, +${fmt(away.goodwill)} Goodwill, ${away.wins}W/${away.losses}L, fights cleared +${away.cleared}, captured: ${away.captured.join(', ') || 'none'}`);
+
+// ---- the guard: the pacing targets from docs/V07_REVISION.md, checked on 2 seeds ----
+async function guard(): Promise<never> {
+  const knobs = knobArgs.flatMap((k) => ['--knob', k]);
+  const runs = [1991, 7].flatMap((seed) => [
+    { seed, mode: 'check-in', flags: [], route9: [14, 16] },
+    { seed, mode: 'active', flags: ['--active', '--every=10'], route9: [11, 15.5] }, // ~12.5h on most seeds; about 1 in 5 lands near 15h
+  ]);
+  const hrs = (t: string) => (t.includes('h') ? Number(t.split('h')[0]) + Number(t.split('h')[1].replace('m', '')) / 60 : Number(t.split(':')[0]) / 60);
+  const out = await Promise.all(runs.map((r) => new Response(Bun.spawn([process.execPath, process.argv[1], '20', String(r.seed), ...r.flags, '--quiet', ...knobs]).stdout).text()));
+  let bad = 0;
+  const fail = (why: string) => (bad++, console.log(`  FAIL ${why}`));
+  runs.forEach((r, i) => {
+    const txt = out[i];
+    const route9 = /route9=([^ ]+(?: \d+m)?) /.exec(txt)?.[1] ?? '-';
+    const [l, n] = (/losses=(\d+)\/(\d+)/.exec(txt) ?? [0, 0, 1]).slice(1).map(Number);
+    console.log(`seed ${r.seed} ${r.mode}: Route 9 at ${route9}, losses ${Math.round((100 * l) / n)}%`);
+    if (route9 === '-' || hrs(route9) < r.route9[0] || hrs(route9) > r.route9[1]) fail(`Route 9 ending outside ${r.route9[0]}-${r.route9[1]}h`);
+    if (l / n < 0.1 || l / n > 0.3) fail('overall losses outside 10-30%');
+    for (const row of txt.split('\n').filter((x) => /^\S.*\d+\/\d+\s+\d+%/.test(x))) {
+      const lot = row.slice(0, 14).trim();
+      const front = /(\d+)\/(\d+)\s+(\d+)%/.exec(row)!;
+      const boss = Number(row.trim().split(/\s+/).pop());
+      if (Number(front[3]) > 50) fail(`${lot}: frontier loss ${front[3]}% (over 50%)`);
+      if (boss > 12) fail(`${lot}: ${boss} boss tries (over 12)`);
+    }
+  });
+  console.log(bad ? `\nguard: ${bad} failure(s)` : '\nguard: all within targets');
+  process.exit(bad ? 1 : 0);
+}

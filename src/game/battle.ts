@@ -1,4 +1,4 @@
-import { AURA_STEP, BATTLERS, WALK_IN_SECONDS, BOSS_STRENGTH, HARD_FOCUS, ENEMY_DMG, FIGHTS, FIGHT_TIMEOUT, FRONT_SHARE, MAIN_GROWTH, OVERTIME_BOOST, RALLY_BOOST, REGIONS, ROLES, SIDE_HP_GROWTH, TANK_HP_GROWTH, TELL, TRAIN_STEP, WEAK_BONUS, type BattlerDef, type EnemyDef, type Fx, type RegionId, type Role } from './defs';
+import { AURA_STEP, BATTLERS, WALK_IN_SECONDS, BOSS_STRENGTH, HARD_FOCUS, FIGHTS, FIGHT_TIMEOUT, FRONT_SHARE, MAIN_GROWTH, OVERTIME_BOOST, RALLY_BOOST, REGIONS, ROLES, SIDE_HP_GROWTH, TANK_HP_GROWTH, TELL, TRAIN_STEP, WEAK_BONUS, type BattlerDef, type EnemyDef, type Fx, type RegionId, type Role } from './defs';
 import { asphaltMult, curb, fighters, lineupOf, log } from './economy';
 import { rand } from './rng';
 import { barDmg, barHp, buffOn } from './room';
@@ -105,7 +105,7 @@ export function startBattle(s: GameState, r: RegionId): Battle | null {
   const enemies = enemyLineup(r, fight).map(({ def, boss }) => {
     const m = f.strength * fightScale(r, fight);
     const tl = def.tell ? TELL[def.tell] : { hp: 1, dmg: 1 };
-    const e = unit(s, 'enemy', def.name, 'enemy', def.name, def.hp * m * tl.hp, def.dmg * m * ENEMY_DMG * tl.dmg * (1 - field.weaken), def.interval * (1 + field.slow), def.weak, boss);
+    const e = unit(s, 'enemy', def.name, 'enemy', def.name, def.hp * m * tl.hp, def.dmg * m * tl.dmg * (1 - field.weaken), def.interval * (1 + field.slow), def.weak, boss);
     e.tell = def.tell;
     return e;
   });
