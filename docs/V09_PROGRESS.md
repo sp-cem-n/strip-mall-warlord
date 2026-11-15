@@ -1,6 +1,6 @@
 # v0.9 progress
 
-Last updated: 15 Nov 2026, about 4:20 AM America/New_York.
+Last updated: 15 Nov 2026, about 4:35 AM America/New_York.
 
 Worktree: `/workspace/smw-v09` on branch `v09`. Commit author is always Josh Durbin `<149157950+sp-cem-n@users.noreply.github.com>`. Do not work in `/workspace/strip-mall-warlord` (still on `v09-polish`). Mockups live only on this machine at `/workspace/smw-mockups/v09/` and `/workspace/smw-mockups/v09b/`, plus `/workspace/smw-mockups/minigames/`.
 
@@ -81,11 +81,19 @@ Ticket economy is on local / `origin/v09` (not merged to main):
 - After dawn, a back-room shelf in `dawn.ts` (Bypass slot and doorbell, longer claw buffs, souvenir shot glass).
 - `roomAct` buys the cheapest affordable prize, including after a visit's plays. Official `--guard` still does **not** pass `--room` (a modest official Skee habit bought power perks and pulled Route 9 well under target). Acceptance is a `--room` check-in: a first prize within 2h of Skee. `bun scripts/check.ts` and `--guard` both pass; Route 9 times match the earlier M1 guard.
 
-Next: Toad's 2.5D Fun Zone cabinets from `/workspace/smw-mockups/v09b/` (pusher, claw, Whac, Night Shift) and YOU WON slips. Off-Ramp 2.5D stays M3. Do not merge to main until Josh picks logos.
+Fun Zone 2.5D cabinets and YOU WON slips are also on `origin/v09`:
+
+- Coin Pusher: 3-coin drops, persistent `room.pusher` field (save-migrates, no SAVE_VERSION bump), bonus hole, hopper timer, coin tower, visible Rent Check; the hidden 8% roll is gone. The pile ticks while you are away.
+- Whac-a-Shoplifter: a flat 3×3 brick slab; beanie+sack bandits vs basket shoppers.
+- Claw: five toys on their own spots with floor gaps; hover to read the prize; centered grabs hold, off-center slips on the lift, a gap is a miss. `pay()` trusts the visible result when a toy is picked.
+- Night Shift: time-clock ramp (20s 2× and a short multiball), standup targets, flippers on A/D, arrows, and click/tap.
+- YOU WON slip: a dimmed sodium card on the cabinet when the play pays (cash over cost, 20+ tickets, a toy, or a big win). Click or any key dismisses; it auto-clears at 2.8s.
+
+Off-Ramp 2.5D and arcade high-stakes tables stay M3. Do not merge to main until Josh picks logos. Review shots: `screenshots/v9/review/funzone-*-1280x800.png`.
 
 ## Not done (M2 cabinets, then M3 → M4)
 
-M3 and M4 have not been implemented. Ticket economy above is the first half of M2. `package.json` is still 0.8.0. There is no `v0.9` tag and no `/v0.9/` archive.
+M3 and M4 have not been implemented. M2 ticket economy + Fun Zone cabinets are in; high-stakes arcade tables can land with M3. `package.json` is still 0.8.0. There is no `v0.9` tag and no `/v0.9/` archive.
 
 ### M2 — Fun Zone 2.5D, ticket economy, arcade high-stakes
 

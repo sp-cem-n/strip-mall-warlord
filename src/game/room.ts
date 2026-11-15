@@ -12,6 +12,8 @@ export type MachineId = 'pusher' | 'whac' | 'skee' | 'claw' | 'pinball' | 'cyclo
 export type BuffKind = 'bat' | 'duck' | 'troll' | 'ball' | 'watch' | 'well' | 'call' | 'top' | 'royal' | 'quiz' | 'genius' | 'shot';
 export type Cost = { cur: Currency | 'tickets'; n: number };
 export interface Reward { cash?: number; goodwill?: number; tickets?: number; equity?: number; buff?: BuffKind; big?: boolean; text: string }
+export interface PusherCoin { x: number; y: number; layer: 'shelf' | 'field'; kind: 'coin' | 'rent' | 'ticket' }
+export interface PusherField { coins: PusherCoin[]; hopper: number; tower: number; inn: number; out: number }
 export interface RoomState {
   unlocked: MachineId[]; // survives paving
   attract: Partial<Record<MachineId, number>>; // Attract Mode level, 0-3
@@ -22,6 +24,8 @@ export interface RoomState {
   best: number; // your best pinball score
   jackpot: number; // Cyclone, progressive
   shelf: [number, number]; // what's left to win: the coin pusher's pile, and the darts pot. 0-10, one back a minute
+  pusher?: PusherField; // persistent coin positions; save-migrates via newRoom spread
+  clawPick?: BuffKind;
   buffs: Partial<Record<BuffKind, number>>; // seconds left
   plays: number;
   shuffle: number; // shuffleboard house scores beaten (0-5)
@@ -84,14 +88,15 @@ const or = (f: (s: GameState) => boolean) => (s: GameState) => offRamp(s) && f(s
 const bypassRent = (s: GameState) => rent(s, 1);
 export const MACHINES: MachineDef[] = [
   {
-    id: 'pusher', region: 0, name: 'Coin Pusher', blurb: 'One coin a game. Drop it when the chute is over the arrow; whatever the shelf shoves off the edge pays cash.', needs: 'Lease the Fun Zone', unlock: funZone, cost: rentCost(5), secs: 4, cool: 120,
+    id: 'pusher', region: 0, name: 'Coin Pusher', blurb: 'Three coins a game. The pile stays. Drop them when the chute is over the shelf; coins off the edge pay cash.', needs: 'Lease the Fun Zone', unlock: funZone, cost: rentCost(5), secs: 5, cool: 120,
     pay: (s, q) => {
       const cost = rent(s, 0) * 5;
-      const pile = s.room.shelf[0] / 10;
+      const pile = Math.min(1, (s.room.pusher?.coins.length ?? s.room.shelf[0] * 3) / 40);
       const tickets = q > 0.45 && rand(s) < 0.22 ? 8 + Math.floor(rand(s) * 13) : 0;
       const token = tickets ? ' A ticket token went over too.' : '';
-      if (q > 0.9 && pile > 0.5 && rand(s) < 0.08) return { cash: rent(s, 0) * 120, tickets, big: true, text: 'A Rent Check coin went over the edge.' + token };
-      return { cash: cost * (0.4 + 2.6 * q) * (0.4 + 0.6 * pile), tickets, text: (q > 0.7 ? 'Clean drop.' : 'Bounced.') + token };
+      const rentCheck = q > 0.92 && (s.room.pusher?.coins.some((c) => c.kind === 'rent') === false || pile > 0.5);
+      const cash = rentCheck ? rent(s, 0) * 120 : cost * (0.4 + 2.6 * q) * (0.4 + 0.6 * Math.max(0.3, pile));
+      return { cash, tickets, big: q > 0.85 || rentCheck, text: (rentCheck ? 'The Rent Check went over the edge.' : q > 0.7 ? 'A clean shove.' : q > 0.35 ? 'A few off the edge.' : 'Mostly stuck.') + token };
     },
   },
   {
@@ -107,11 +112,14 @@ export const MACHINES: MachineDef[] = [
     },
   },
   {
-    id: 'claw', region: 0, name: 'Claw Machine', blurb: 'Press to go. Press to drop.', needs: 'Capture the Outlet Mall', unlock: fz((s) => cleared(s, 0, 2, REGIONS[0].lots[2].fights)), cost: () => ({ cur: 'tickets', n: 50 }), secs: 10, cool: 60,
+    id: 'claw', region: 0, name: 'Claw Machine', blurb: 'Move over a prize, then grab. Hover to read it. Off-center grabs slip on the way up.', needs: 'Capture the Outlet Mall', unlock: fz((s) => cleared(s, 0, 2, REGIONS[0].lots[2].fights)), cost: () => ({ cur: 'tickets', n: 50 }), secs: 10, cool: 60,
     pay: (s, q) => {
-      if (rand(s) > q + 0.12 * perk(s, 'grip')) return { text: 'It slipped. It always slips.' };
+      const pick = s.room.clawPick;
+      s.room.clawPick = undefined;
+      if (q < 0.25) return { text: pick ? 'It slipped. It always slips.' : 'Closed on a gap.' };
+      if (!pick && rand(s) > q + 0.12 * perk(s, 'grip')) return { text: 'It slipped. It always slips.' };
       const roll = rand(s);
-      const buff: BuffKind = roll < 0.06 ? 'watch' : roll < 0.37 ? 'bat' : roll < 0.68 ? 'duck' : roll < 0.86 ? 'troll' : 'ball';
+      const buff: BuffKind = pick ?? (roll < 0.06 ? 'watch' : roll < 0.37 ? 'bat' : roll < 0.68 ? 'duck' : roll < 0.86 ? 'troll' : 'ball');
       return { buff, big: true, text: `Got the ${BUFFS[buff].name}: ${BUFFS[buff].does}.` };
     },
   },
@@ -325,6 +333,7 @@ export function tickRoom(s: GameState, dt: number) {
   }
   for (const k of Object.keys(R.buffs) as BuffKind[]) R.buffs[k] = Math.max(0, (R.buffs[k] ?? 0) - dt);
   R.shelf = R.shelf.map((x) => Math.min(10, x + dt / 60)) as [number, number];
+  if (R.unlocked.includes('pusher')) tickPusher(s, dt);
   if (R.attracting) {
     // GameRoom holds the clock while the cabinet is on screen, so you can watch the play.
     if (!R.attracting.held) {
@@ -356,4 +365,27 @@ export function pokerQ(s: GameState, good: boolean) {
   const x = rand(s);
   const [royal, top, call, well] = good ? [0.0005, 0.035, 0.2, 0.62] : [0.0001, 0.012, 0.09, 0.4];
   return x < royal ? 1 : x < top ? 0.75 : x < call ? 0.5 : x < well ? 0.25 : 0;
+}
+
+export function seedPusher(): PusherField {
+  const coins: PusherCoin[] = [];
+  for (let i = 0; i < 22; i++) coins.push({ x: 8 + ((i * 19 + i * i * 3) % 62), y: 40 + ((i * 13 + 5 * (i % 5)) % 20), layer: 'field', kind: 'coin' });
+  for (let i = 0; i < 8; i++) coins.push({ x: 10 + ((i * 17 + 3) % 50), y: 26 + (i % 4), layer: 'shelf', kind: 'coin' });
+  coins.push({ x: 28, y: 44, layer: 'field', kind: 'rent' });
+  return { coins, hopper: 42, tower: 8, inn: 0, out: 0 };
+}
+export const ensurePusher = (s: GameState) => (s.room.pusher ??= seedPusher());
+function tickPusher(s: GameState, dt: number) {
+  const f = ensurePusher(s);
+  f.hopper -= dt;
+  if (f.hopper <= 0) {
+    f.hopper = 35 + rand(s) * 25;
+    const n = Math.min(8, 40 - f.coins.length);
+    for (let i = 0; i < n; i++) f.coins.push({ x: 10 + rand(s) * 20, y: 40 + rand(s) * 8, layer: 'field', kind: rand(s) < 0.08 ? 'ticket' : 'coin' });
+  }
+  if (f.tower > 0 && rand(s) < dt / 60) {
+    f.tower = Math.max(0, f.tower - 1);
+    f.coins.push({ x: 22 + rand(s) * 8, y: 50, layer: 'field', kind: f.tower === 0 ? 'rent' : 'coin' });
+  }
+  if (f.coins.length > 56) f.coins.splice(0, f.coins.length - 56);
 }

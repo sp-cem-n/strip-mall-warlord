@@ -6,10 +6,11 @@ import { CAB_H, CAB_W, cabinet, carpet, paneling, screenOf, type CabinetLook } f
 import { C } from '../art/palette';
 import { CURRENCY_SHORT } from '../game/defs';
 import { log } from '../game/economy';
-import { ATTRACT_EVERY, BAR_BUFFS, QUIZ, BAR_HOUSE, BUFFS, HOUSE_SCORES, postShuffle, MACHINES, PERKS, attractPrice, buffOn, buyAttract, buyPerk, canAfford, endPlay, perk, perkInfo, perkPrice, postScore, serviced, shelfOf, startPlay, type BuffKind, type Cost, type MachineDef, type MachineId, type PerkId, type PrePerkId } from '../game/room';
+import { ATTRACT_EVERY, BAR_BUFFS, QUIZ, BAR_HOUSE, BUFFS, HOUSE_SCORES, postShuffle, MACHINES, PERKS, attractPrice, buffOn, buyAttract, buyPerk, canAfford, endPlay, ensurePusher, perk, perkInfo, perkPrice, postScore, serviced, shelfOf, startPlay, type BuffKind, type Cost, type MachineDef, type MachineId, type PerkId, type PrePerkId } from '../game/room';
 import { canvasOf, urlOf } from './art';
 import { fmt, fmtTime } from './format';
 import { idle, newGame, pen, type Game } from './machines';
+import { drawSlip } from './arcade';
 import { register } from './audio';
 import { Pylon } from './Pylon';
 
@@ -39,7 +40,7 @@ function Cabinet({ m }: { m: MachineDef }) {
   const game = useRef<Game | null>(null);
   const ready = useRef(0); // the READY beat: a moment after the coin drops before the game takes input
   const ended = useRef(0); // a beat after a game ends, so the last tap doesn't buy the next one
-  const result = useRef<{ text: string; until: number } | null>(null);
+  const result = useRef<{ text: string; until: number; slip?: { amount: string; sub: string; tickets?: boolean } } | null>(null);
   const autoQ = useRef<number | null>(null); // set while Attract Mode or test autoplay is on this cabinet
   const autoPoked = useRef(false);
   const autoAt = useRef(0);
@@ -70,6 +71,8 @@ function Cabinet({ m }: { m: MachineDef }) {
             ready.current = now + 500;
             game.current = newGame(m.id, {
               shelf: app.s.room.shelf[0],
+              field: m.id === 'pusher' ? ensurePusher(app.s) : undefined,
+              grip: perk(app.s, 'grip'),
               speed: Math.min(20, 9 + app.s.room.plays * 0.05),
               jackpot: `${app.s.room.jackpot}`,
               onGrab: () => false,
@@ -99,8 +102,12 @@ function Cabinet({ m }: { m: MachineDef }) {
             if (g.over) finish(g);
           } else {
             const sv = serviced(app.s, m.id);
-            const r = result.current && now < result.current.until ? result.current.text : '';
-            idle(p, m.id, now / 1000, sv > 0 ? `SERVICED ${fmtTime(sv)}` : r);
+            const rs = result.current;
+            if (rs?.slip && now < rs.until) drawSlip(p, { ...rs.slip, t: 1 - (rs.until - now) / 2800 });
+            else {
+              const r = rs && now < rs.until ? rs.text : '';
+              idle(p, m.id, now / 1000, sv > 0 ? `SERVICED ${fmtTime(sv)}` : r);
+            }
           }
         }
       }
@@ -111,6 +118,27 @@ function Cabinet({ m }: { m: MachineDef }) {
       cancelAnimationFrame(raf);
       const att = app.s.room.attracting;
       if (att?.id === m.id) att.held = false;
+    };
+  }, [m.id]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLInputElement) return;
+      const rs = result.current;
+      if (rs?.slip && performance.now() < rs.until) {
+        e.preventDefault();
+        rs.until = performance.now();
+        return;
+      }
+      if (game.current?.key && (e.key === 'a' || e.key === 'A' || e.key === 'd' || e.key === 'D' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+        e.preventDefault();
+        game.current.key(e.key, e.type === 'keydown');
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('keyup', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('keyup', onKey);
     };
   }, [m.id]);
   function finish(g: Game) {
@@ -135,6 +163,15 @@ function Cabinet({ m }: { m: MachineDef }) {
       const got = m.id === 'poker' ? '' : [rw.cash && `+$${fmt(rw.cash)}`, rw.goodwill && `+${fmt(rw.goodwill)} GW`, rw.tickets && `+${fmt(rw.tickets)} TICKETS`, rw.equity && `+${fmt(rw.equity)} EQ`].filter(Boolean).join(' ');
       text = got || text;
       if (rw.cash || rw.tickets) register();
+      const costN = m.cost(app.s).n;
+      const wonCash = (rw.cash ?? 0) > costN && m.cost(app.s).cur === 'cash';
+      const showSlip = !watched && (rw.big || wonCash || (rw.tickets ?? 0) >= 20 || !!rw.buff);
+      if (showSlip) {
+        const amount = rw.tickets ? `${fmt(rw.tickets)}` : rw.cash ? `$${fmt(rw.cash)}` : rw.buff ? BUFFS[rw.buff].name.toUpperCase() : rw.goodwill ? `${fmt(rw.goodwill)} GW` : rw.equity ? `${fmt(rw.equity)} EQ` : text;
+        result.current = { text, until: performance.now() + 2800, slip: { amount, sub: (g.label ?? rw.text ?? '').toUpperCase().slice(0, 22), tickets: !!rw.tickets } };
+        app.refresh();
+        return;
+      }
     } else if (watched !== null && app.s.room.attracting?.id === m.id) {
       app.s.room.attracting = null;
       endPlay(app.s, m.id, g.q, true);
@@ -150,9 +187,12 @@ function Cabinet({ m }: { m: MachineDef }) {
     ready.current = performance.now() + 700;
     game.current = newGame(m.id, {
       shelf: app.s.room.shelf[0],
+      field: m.id === 'pusher' ? ensurePusher(app.s) : undefined,
+      grip: perk(app.s, 'grip'),
       speed: Math.min(20, 9 + app.s.room.plays * 0.05),
       jackpot: `${app.s.room.jackpot}`,
-      onGrab: (q) => {
+      onGrab: (q, prize) => {
+        app.s.room.clawPick = prize;
         const rw = endPlay(app.s, 'claw', q);
         if (rw.buff) toast(`${BUFFS[rw.buff].name}: ${BUFFS[rw.buff].does}`);
         return !!rw.buff;
@@ -178,6 +218,10 @@ function Cabinet({ m }: { m: MachineDef }) {
         onPointerDown={(e) => {
           // tap the cabinet: the coin goes in, then the same screen plays
           if (!open) return;
+          if (result.current?.slip && performance.now() < result.current.until) {
+            result.current.until = performance.now();
+            return;
+          }
           if (autoQ.current !== null) return; // watching Attract Mode / test autoplay
           if (!game.current) return insert();
           if (performance.now() < ready.current) return;

@@ -3,7 +3,8 @@
 import { glyph } from '../art/font';
 import { C, HEX } from '../art/palette';
 import { foos, foosIdle, trivia, triviaIdle } from './bargames';
-import { BAR_HOUSE, HOUSE_SCORES, PINBALL_TOP, SHUFFLE_TOP, type MachineId } from '../game/room';
+import { BAR_HOUSE, HOUSE_SCORES, PINBALL_TOP, SHUFFLE_TOP, type BuffKind, type MachineId, type PusherField } from '../game/room';
+import { clawV2, pinballV2, pusherV2, whacV2 } from './arcade';
 
 export interface Pen {
   rect(x: number, y: number, w: number, h: number, c: number): Pen;
@@ -40,6 +41,7 @@ export interface Game {
   down(x: number, y: number): void;
   up(x: number, y: number): void;
   move?(x: number, y: number): void;
+  key?(key: string, down: boolean): void;
 }
 export const circle = (p: Pen, cx: number, cy: number, r: number, c: number) => {
   for (let y = -r; y <= r; y++) {
@@ -119,7 +121,7 @@ function pusher(shelf: number): Game {
 }
 
 // ---- Whac-a-Shoplifter: 3x3 aisles, 30s ----
-function whac(): Game {
+export function whac(): Game {
   let t = 0, bonks = 0, next = 0.6, flash = 0;
   const holes: { kind: 'thief' | 'shopper' | null; left: number; hit: number }[] = Array.from({ length: 9 }, () => ({ kind: null, left: 0, hit: 0 }));
   const spot = (i: number) => [6 + (i % 3) * 24, 10 + Math.floor(i / 3) * 21] as const;
@@ -256,7 +258,7 @@ function skee(): Game {
 
 // ---- Claw: press to send it across, press to drop; dead center grips ----
 const PRIZES = [C.violet, C.sodiumLight, C.neon, C.mint, C.blue];
-function claw(onGrab: (q: number) => boolean): Game {
+export function claw(onGrab: (q: number) => boolean): Game {
   let x = 6, phase: 'wait' | 'move' | 'down' | 'up' | 'done' = 'wait', y = 6, got = false, hold = 0;
   const items = PRIZES.map((c, i) => ({ c, x: 10 + i * 14 + (i % 2) * 3, y: 52 + (i % 2) * 4 }));
   const g: Game = {
@@ -311,7 +313,7 @@ function claw(onGrab: (q: number) => boolean): Game {
 }
 
 // ---- Night Shift: pinball. Left half of the table is the left flipper, right half the right. 3 balls. ----
-function pinball(): Game {
+export function pinball(): Game {
   const W = 78, H = 101;
   let ball = { x: 72, y: 90, vx: 0, vy: -95 }, balls = 3, score = 0, launched = true, wait = 0;
   const L = { on: false, a: 0 }, R = { on: false, a: 0 };
@@ -796,13 +798,13 @@ const puck = (p: Pen, x: number, y: number, red: boolean) => {
   p.rect(Math.round(x) - 1, Math.round(y) - 2, 2, 1, C.paper);
 };
 
-export function newGame(id: MachineId, o: { shelf: number; speed: number; jackpot: string; onGrab: (q: number) => boolean }): Game {
+export function newGame(id: MachineId, o: { shelf: number; speed: number; jackpot: string; onGrab: (q: number, prize?: BuffKind) => boolean; field?: PusherField; grip?: number }): Game {
   switch (id) {
-    case 'pusher': return pusher(o.shelf);
-    case 'whac': return whac();
+    case 'pusher': return o.field ? pusherV2(o.field) : pusher(o.shelf);
+    case 'whac': return whacV2();
     case 'skee': return skee();
-    case 'claw': return claw(o.onGrab);
-    case 'pinball': return pinball();
+    case 'claw': return clawV2(o.onGrab, o.grip ?? 0);
+    case 'pinball': return pinballV2();
     case 'cyclone': return cyclone(o.speed, o.jackpot);
     case 'darts': return darts();
     case 'pool': return pool();
