@@ -6,7 +6,14 @@ Companion doc: `docs/V09_POLISH.md` (branch `v09-polish`) covers unlocking the F
 
 **Josh's direction (pt45u).** (a) a worse Goodwill→Equity rate and (c) steeper Bypass renovation costs. The Bypass is hidden like a prestige mode or new game plus, and it should take about **2× as long as Route 9**, through more battles and less growth between battles. Beating Route 9 is an accomplishment and repaving is the replay loop. The game is actually complete only after the Bypass. Completing it unlocks a full reset and a unique skill tree with permanent buffs for later runs.
 
-> **Flag: "a c and d".** "d" was "leave it", which contradicts a and c. This doc reads the message as **a + c** and treats "d" as "leave everything else (Route 9, paving, the room) as it is". If d meant something else, say so; it changes nothing below except that line.
+**Decided (15 Nov 2026, Josh's answers to the Bypass card):**
+1. **a + c**: a worse, flat Goodwill→Equity rate (10 → 20) and steeper Bypass renovations. "d" is ignored.
+2. **Bypass renovation growth 1.50.**
+3. **Ease check-in by raising the offline cap.** It's raised on the Bypass only: 8h → 12h after dawn (§5b).
+4. **The arcade resets on the sale.** "Keep the room" becomes a Rolodex node, and the tree is repriced (§6, §7).
+5. **The Bypass hides again until dawn** on later runs.
+6. **Names are good in concept**, open to workshopping. Alternatives are in §7b.
+7. **Wall limits OK**: ≤60% frontier loss per Bypass lot, ≤30 boss tries.
 
 ---
 
@@ -86,7 +93,7 @@ Takeaways:
 | ar 1991 | 9.6h | 26.1h | 16.5h | 1.71 |
 | ar 7 | 10.3h | 26.9h | 16.6h | 1.62 |
 
-Check-in comes out long (~37h against 30h) and arcade short (~16.5h against 20h). Steep renovations hurt the player who can't spend often. 1.52 evens nothing out: it lengthens all three. The Night Manager node (§7) narrows the gap on later runs. Decision 3 asks whether to accept this.
+Check-in comes out long (~37h against 30h) and arcade short (~16.5h against 20h). Steep renovations hurt the player who can't spend often. 1.52 evens nothing out: it lengthens all three. **Decided: 1.50.** Check-in is eased by the Bypass offline cap (§5b).
 
 **Renovation cost curve.** `cost(L) = reno × growth^(L−1)`. Rent grows ×1.2 per level in both regions, so the payback time per level grows ×1.125 on Route 9 and ×1.25 on the Bypass.
 
@@ -126,6 +133,41 @@ Both, in one change: 1.5× fights with rooted growth (§4), so each fight is a s
 - Frontier loss ≤60% per Bypass lot (Route 9 is ≤50%; the Bypass is meant to be harder).
 - Boss tries ≤30.
 
+## 5b. Offline cap: Bypass-only, 8h → 12h
+
+**Problem.** The cap can't move the 2.5× headline number. That number comes from the bot's standard check-in player, who acts every 10 minutes forever and never goes offline. So raising the cap leaves the Route 9 guard (15h ±1) untouched by construction. The cap matters for real people, who are away for longer than 8h: a workday or a night.
+
+**How it was measured.** A scratch calendar mode for `balance.ts` (not committed):
+- The player checks in for 30 minutes at fixed times of day and acts every 10 minutes during each session.
+- Between sessions the game runs offline exactly like `simulateAway`, up to the cap. Anything past the cap is lost.
+- Times are calendar hours from the first session (07:00).
+- Recommended Bypass knobs, seeds 1991 / 7, check-in only.
+
+| Schedule (gaps) | Cap pre-dawn / post-dawn | Route 9 | Bypass length | Ratio |
+|---|---|---|---|---|
+| 4 a day: 7, 12, 18, 22 (gaps 4.5–8.5h) | 8 / 8 (today) | 26.3h / 26.4h | 57.4h / 47.9h | 2.18 / 1.82 |
+| | **8 / 12** | 26.3h / 26.4h | 53.0h / 53.4h | 2.01 / 2.03 |
+| | 12 / 12 | 26.5h / 26.1h | 56.5h / 70.4h | 2.13 / 2.69 |
+| Workday: 7, 18, 22 (gaps 10.5h, 3.5h, 8.5h) | 8 / 8 | 39.2h / 39.3h | 69.1h / 77.6h | 1.76 / 1.97 |
+| | **8 / 12** | 39.2h / 39.3h | 69.4h / 68.2h | 1.77 / 1.73 |
+| | 12 / 12 | 36.8h / 37.5h | 60.5h / 60.0h | 1.65 / 1.60 |
+| Twice a day: 7, 19 (gaps 11.5h) | 8 / 8 | 49.2h / 50.1h | 96.1h / 94.3h | 1.95 / 1.88 |
+| | **8 / 12** | 49.2h / 50.1h | **74.5h / 73.6h** | 1.52 / 1.47 |
+| | 12 / 12 | 48.1h / 48.2h | 84.1h / 83.9h | 1.75 / 1.74 |
+| (8 / 16 gave the same result as 8 / 12 on every schedule, since no gap is over 12h.) | | | | |
+
+Reading it:
+- **Route 9 is untouched by a Bypass-only cap.** The pre-dawn cap stays 8h, the Route 9 times in every row match, and the standard guard player (15.1–15.2h) never goes offline anyway.
+- A **global** 12h cap moves calendar Route 9 by 1–2.4h on the long-gap schedules. That is why this doc scopes the cap to the Bypass.
+- **Twice-a-day players gain the most:** the Bypass goes from ~95h to ~74h of calendar time (−22%).
+- The workday seed 7 gains 9h, while seed 1991 is flat. The 4-a-day schedule only loses 0.5h a day at 8h, so its rows are within seed noise (±5–10h).
+- 16h buys nothing over 12h for these schedules.
+- In calendar time, real check-in schedules already land at **1.5–2.2×**. The 2.5× figure is the continuous-check-in worst case.
+
+**Decided change.** Add `OFFLINE_CAP_BYPASS = 12 * 3600`. `simulateAway` uses it when `s.bypass` is set; before dawn it's still `OFFLINE_CAP_SECONDS` (8h). The away card's "capped at" line reads whichever applies. It's post-dawn, so the copy lives in `dawn.ts` and the leak rule holds.
+
+**Still true:** the continuous check-in bot stays at ~2.5×. The thing that actually closes that gap is spending cadence, not offline time. Consultants with auto-renovation (§8b) are the candidate; the guard measures it in M4.
+
 ## 6. The full reset: "Sell to the REIT"
 
 Mid-90s fiction: strip-center REITs went public in 1993–97 and bought plazas by the dozen. After the Galleria falls, a new button appears in the Bypass Back Office: **SELL TO THE REIT**. A REIT out of Hartford buys both plazas, mostly for paper. Uncle Sal keeps his Rolodex.
@@ -141,43 +183,63 @@ Mid-90s fiction: strip-center REITs went public in 1993–97 and bought plazas b
 | Equity | kept | **reset** |
 | Asphalt, paves | kept / +gain | **reset to 0** |
 | `s.bypass` (revealed) | kept | **reset**: dawn happens again |
-| The room (unlocks, Attract, perks, shelf, boards, jackpot) | kept | **kept** (same rule as paving) |
-| Tickets | kept | kept |
+| The room (machine unlocks, Attract, perks, shelf, buffs, jackpot, pusher field, Grapevine slips) | kept | **reset**, unless the *Keep the Room* node is bought |
+| Tickets | kept | **reset**, unless *Keep the Room* |
+| High-score boards and bests (names, not power) | kept | kept |
+| Late cash sinks on both roads (consultants, landmarks, crew contracts, marketing; §8b) | Route 9's reset on pave | **reset** |
 | Rolodex cards and nodes | — | **kept** |
 | `stats` lifetime, sales count | — | kept, +1 sale |
 
-- Josh asked "maybe minigame unlocks?" The room already survives paving, so the cheapest answer is that it survives the sale too. No "coupon book" node is needed.
-- One caveat: a full room makes the second Route 9 faster in arcade mode. V09_POLISH moving unlocks earlier makes this smaller anyway. Decision 4.
-- The dawn reveal plays again, with a shorter card ("You know the way to Exit 14."). The Bypass is still revealed at dawn and hidden before it, so the leak rule doesn't change.
+- **Decided: the arcade resets on the sale.** The room survives *paving* (unchanged), but not the sale. Keeping it is the *Keep the Room* node (§7).
+- This matters more now. V09_POLISH opens the Fun Zone at about 10–15 minutes, rebuilds a deeper prize counter with real ticket income, persists the coin-pusher field, and adds the bar's Grapevine slips. A room that carried all of that into run 2 would shorten Route 9 and the arcade Bypass noticeably.
+- V09_POLISH §25 still says "the room survives the sale". That line is out of date and should be corrected on `v09-polish` (not edited from this branch).
+- **Decided: the Bypass hides again until dawn.** The dawn reveal plays again, with a shorter card ("You know the way to Exit 14."). The leak rule doesn't change.
 
-## 7. The skill tree: Uncle Sal's Rolodex
+## 7. The skill tree: Uncle Sal's Rolodex (rebalanced)
 
 **Currency: Rolodex cards**, paid only at the sale.
-- `cards = 10 + min(paves this run, 5)`, so the first sale pays 10–15.
-- That rewards the existing replay loop (repaving) inside a run without making the player grind it.
-- Plaza Management is not a source; its level resets on every pave, so it would just reward stalling.
+- `cards = 10 + min(paves this run, 5)`, so 10–15 per sale (unchanged).
+- Plaza Management is not a source; its level resets on every pave.
 
-**Nodes: 12 in three branches, 34 cards total.** About three sales fill the tree. Costs rise down each branch; any order inside a branch. Pre-1998 and dry.
+**What changed in the rebalance:**
+- **Added:** *Keep the Room*, priced as the tree's biggest node (8). After V09_POLISH, the room is a real engine: an early Fun Zone, a fed prize counter, persisted pusher coins and Grapevine slips.
+- **Deleted:** *Contractor's Discount* (Bypass renovation 1.50 → 1.47). It bought back the decided curve.
+- **Changed:** *Night Manager* now gives Route 9 the 12h cap that the Bypass gets by default (§5b), since the Bypass no longer needs it.
+- **Moved:** WPNE to the Exit 14 branch, and Night Manager to Route 9.
+- **Total:** 12 nodes, **39 cards** (was 34). About three sales fill the tree (10–15 per sale).
+- **No prerequisites.** *Keep the Room* can be bought on the first sale for 8 of its 10–15 cards. That's a real choice: the room, or four or five smaller buffs.
 
 | Branch | Node | Cost | Effect | Line |
 |---|---|---|---|---|
 | Route 9 | Friend on the Zoning Board | 2 | First lease of every Route 9 unit −50% | "He owes Sal for the variance." |
 | Route 9 | Bulk Paint Account | 3 | Route 9 renovations −10% | "Forty gallons of Navajo White." |
 | Route 9 | Old Paving Crew | 3 | Start each run with 20 asphalt | "Same guys. Same truck." |
+| Route 9 | Night Manager | 3 | Pre-dawn offline cap 8h → 12h | "Sleeps on the cot by the safe." |
 | Route 9 | Union Card | 4 | 6 starting fighter slots (`START_SLOTS` 5 → 6) | "Local 371 sends one more." |
 | Exit 14 | County Assessor | 2 | First 1,000 Equity each run at the old 10:1 | "Reassessment is next year." |
-| Exit 14 | Contractor's Discount | 3 | Bypass renovation growth 1.50 → 1.47 | "Cash, no invoice." |
+| Exit 14 | WPNE 1490 AM Spot | 3 | +10% Goodwill per win | "Between the traffic and the polka hour." |
 | Exit 14 | Retired Cop | 3 | Overtime gives +2 fights | "Thirty years in. Still has the stick." |
 | Exit 14 | Uncle Sal's Keys | 5 | Plaza Management comes leased at Lv 1 after each dawn | "He never changed the locks." |
-| Back Room | Night Manager | 2 | Offline cap 8h → 12h (`OFFLINE_CAP_SECONDS`) | "Sleeps on the cot by the safe." |
-| Back Room | Pager | 3 | Walk-ins every 60s (90s now, 75s with the perk) | "Beeps twice for a walk-in." |
-| Back Room | WPNE 1490 AM Spot | 3 | +10% Goodwill per win | "Between the traffic and the polka hour." |
 | Back Room | Cousin at the Sign Shop | 1 | Fixes the dead O. A starburst ray goes out instead. | "He did his best." |
+| Back Room | Pager | 2 | Walk-ins every 60s (90s now, 75s with the perk) | "Beeps twice for a walk-in." |
+| Back Room | **Keep the Room** | **8** | The Fun Zone, the Off-Ramp and everything in them survive the sale: machine unlocks, Attract, prize-counter perks and shelf, claw buffs, tickets, the pusher field, Grapevine slips | "The REIT didn't want the arcade. Nobody asked about the arcade." |
 
-- The Night Manager is the check-in player's node (it targets the §4 gap).
-- The cousin is a 1-card joke, so the first sale always buys something.
+Per branch: Route 9 15, Exit 14 13, Back Room 11.
 
-**Pacing with the tree.** The bot doesn't model nodes yet. Rough expectation: a full tree takes Route 9 from 15h to ~10–11h and the Bypass from ~37h to ~28h in check-in. Each later run is shorter, but never trivial: the 2× shape stays. The build adds a `--rolodex=all` bot flag and checks run 2 with a full tree: Route 9 ≥ 8h, Bypass ratio ≥ 1.4.
+- **Overlap to watch:** WPNE (+10% Goodwill per win) sits next to V09_POLISH's permanent marketing. If marketing ships as a stacking Goodwill or rent buy, WPNE should become "your first marketing level is free each run" instead of a second Goodwill multiplier.
+- **Pacing with the tree.** The bot doesn't model nodes yet. A full tree (with *Keep the Room*) should take Route 9 from 15h to ~10–11h and the Bypass from ~37h to ~28h in check-in. The build adds `--rolodex=all` and checks run 2: Route 9 ≥ 8h, Bypass ratio ≥ 1.4. It also adds `--rolodex=room` alone, because *Keep the Room* is the node most likely to flatten run 2.
+
+## 7b. Name alternatives (working titles stay until Josh picks)
+
+All grounded, dry and pre-1998. The leak grep (§10) gets whichever words are picked.
+
+| Working title | Alternatives |
+|---|---|
+| **Sell to the REIT** (the reset) | Take the Buyout · The Closing · Sign Over the Deeds · Sell to the Pension Fund · Sale-Leaseback |
+| **Uncle Sal's Rolodex** (the tree) | Sal's Little Black Book · The Back Booth · Who Sal Knows · Sal's Christmas Card List · The Favor Board |
+| **Rolodex cards** (the currency) | Favors · Markers · IOUs · Business Cards · Handshakes |
+
+They pair up naturally: The Closing / Sal's Little Black Book / Markers reads harder-edged. Sell to the Pension Fund / Sal's Christmas Card List / Favors reads warmer.
 
 ## 8. Interactions
 
@@ -194,12 +256,39 @@ Mid-90s fiction: strip-center REITs went public in 1993–97 and bought plazas b
   - Equity resets at the sale.
   - The County Assessor softens the start of each run without a diminishing curve.
 
+## 8b. Late cash sinks inside the Bypass
+
+V09_POLISH.md specifies the late-game cash sinks Josh picked:
+- **consultants**, which run older lots, with an auto-renovation upgrade;
+- **plaza landmarks**, big one-time buys with a small permanent buff;
+- **crew contracts**, which sign or retain fighters at growing cost;
+- **permanent marketing**, a stacking buy whose price keeps rising;
+- **high-stakes tables**, pricier minigame plays.
+
+Rival buyouts are cut. This doc only decides whether each applies inside the Bypass, which has its own bank (`s.crews[1].cash`). Today that bank has nothing to buy but renovations.
+
+| Sink | On the Bypass? | Why / how |
+|---|---|---|
+| Consultants (run older lots) | **Yes**, paid in Bypass cash | Exit 14 and the Campus get farmed for hours while the crew pushes Phase II and the Galleria. Same rule as Route 9: price scales with the lot's rent. |
+| Consultant auto-renovation | **Yes, with care** | It doesn't cut the 1.50 curve, only the spend cadence. That is exactly the check-in gap (2.5× continuous vs 1.9× active), so it's the real fix for check-in. It could also pull check-in toward active, so price it as a sink and let the Bypass guard (1.6–2.8×) decide. |
+| Plaza landmarks | **Yes, a Bypass set** | Highway-scale, not plaza-scale: an interstate pylon at Exit 14, the Campus water tower, a Galleria billboard. Strings go in `bypass.ts`. Same small permanent buffs, priced off Bypass rent. |
+| Crew contracts | **Yes** | Bypass training is paid in Equity, so contracts give Bypass cash a crew outlet without touching the Equity rate. |
+| Permanent marketing | **Yes, per road** | Each road keeps its own levels and price curve, so a rich Route 9 can't buy Bypass marketing. Watch the overlap with the WPNE node (§7). |
+| High-stakes tables | **Off-Ramp yes; Fun Zone stays Route 9** | The Off-Ramp already pays and charges Bypass cash, so its high-stakes plays drain the Bypass bank naturally. |
+
+Rules for all of them:
+- **Separate banks hold.** A Bypass sink is paid only from Bypass cash, and nothing transfers between roads.
+- **Everything resets at the sale**, like the rest of each road. None of it is kept by a node.
+- **The bot doesn't model them yet.** Sinks that buy buffs compete with renovations for Bypass cash, so the net effect on length is unknown. M4 re-measures, and `BP_RENO_GROWTH` stays at 1.50 unless the guard says otherwise.
+- **Leaks:** Route 9 versions use Route 9 words only. Bypass versions live in `bypass.ts` and are shown only after dawn.
+
 ## 9. Interaction with V09_POLISH
 
 - V09_POLISH unlocks the Fun Zone and Off-Ramp sooner. The arcade numbers above (16.5h Bypass) use v0.8's unlock times, so arcade will likely get *shorter*.
 - **Order:** land polish first, then re-run §4 and tune `BP_RENO_GROWTH` (1.50–1.52) with the new guard.
 - Minigame buffs that stay relevant after the Bypass (polish's job) shorten the Bypass in arcade mode. The same guard catches it.
-- The room survives the sale (§6), so anything polish adds to the room carries into later runs. Polish should know that.
+- The room **resets** at the sale (§6) unless *Keep the Room* is bought. Polish's room additions (prize counter, pusher field, Grapevine slips) therefore reset with it. V09_POLISH §25's "room survives the sale" line should be updated to match.
+- V09_POLISH's Fun Zone at ~10–15 minutes and the ticket retune make *Keep the Room* worth more. Its price (8) is set with that in mind and gets re-checked in M4.
 
 ## 10. Leak rules
 
@@ -219,24 +308,33 @@ Mid-90s fiction: strip-center REITs went public in 1993–97 and bought plazas b
 3. `content/bypass.ts`: Bypass lot fights 10/12/14/16 → 15/18/21/24, shop unlock fights ×1.5.
 4. `knobs.ts`: Bypass `FIGHT_GROWTH` per-fight 1.0825 → 1.054 (rooted, same climb per lot).
 5. `knobs.ts`: Bypass `LOT_JUMP` Campus ×4 down, Phase II up, tuned by the new guard.
-6. `check.ts`: Bypass guard (ratio 1.6–2.8×, frontier ≤60%, boss tries ≤30, seeds 1991/7, 70h).
-7. `economy.ts`: `sellToReit()` = pave both regions + Equity/asphalt/paves/bypass to 0, + cards; room and tickets kept.
-8. `state.ts`: `rolodex: { cards, nodes[] }`, `sales`; save migration defaults to empty.
-9. `content/rolodex.ts`: sale copy, shorter repeat dawn card, 12 node names, lines and effects.
-10. Back Office UI: SELL TO THE REIT button (Bypass done only) and the Rolodex panel (after the first sale only).
-11. Node effects wired at their knobs: lease, renovation, asphalt, slots, convert, Bypass renovation, overtime, Plaza Management, offline cap, walk-ins, Goodwill per win, sign.
-12. Sign: the dead-O fix plus the swapped dead ray for the cousin node.
-13. `check.ts`: `LATE_WORDS` grep, plus `rolodex.ts` in the `DAWN_WORDS` exemption.
-14. `balance.ts`: `--rolodex=all` flag and a run-2 check (Route 9 ≥ 8h, Bypass ratio ≥ 1.4).
-15. Re-run §4 after V09_POLISH lands; final `BP_RENO_GROWTH` between 1.50 and 1.52.
+6. `knobs.ts` + `sim.ts`: `OFFLINE_CAP_BYPASS = 12h`, used by `simulateAway` after dawn; pre-dawn stays 8h.
+7. `check.ts`: Bypass guard (ratio 1.6–2.8×, frontier ≤60%, boss tries ≤30, seeds 1991/7, 70h).
+8. `balance.ts`: a calendar mode (`--sched`, `--cap`) so the offline cap and real schedules are measurable.
+9. `economy.ts`: `sellToReit()` resets both roads, Equity, asphalt, paves, `s.bypass`, the room and tickets, and pays cards. *Keep the Room* skips the room and tickets reset.
+10. `state.ts`: `rolodex: { cards, nodes[] }`, `sales`; save migration defaults to empty.
+11. `content/rolodex.ts`: sale copy, shorter repeat dawn card, 12 node names, lines and effects.
+12. Back Office UI: SELL TO THE REIT button (Bypass done only) and the Rolodex panel (after the first sale only).
+13. Node effects wired at their knobs: lease, renovation, asphalt, Route 9 offline cap, slots, convert, Goodwill per win, overtime, Plaza Management, walk-ins, sign, keep-the-room.
+14. Sign: the dead-O fix plus the swapped dead ray for the cousin node.
+15. Bypass versions of consultants (with auto-renovation), landmarks, crew contracts and marketing, paid in Bypass cash; Off-Ramp high-stakes tables.
+16. `check.ts`: `LATE_WORDS` grep for the chosen names, plus `rolodex.ts` in the `DAWN_WORDS` exemption.
+17. `balance.ts`: `--rolodex=all` and `--rolodex=room` flags and a run-2 check (Route 9 ≥ 8h, Bypass ratio ≥ 1.4).
+18. Re-run §4 and §5b after V09_POLISH M2/M3 land (M4).
 
-## 12. Open decisions for Josh
+## 12. Decisions
 
-1. **"a c and d"**: is d really "leave it"? This doc assumes a + c, and everything else unchanged.
-2. **Renovation growth 1.50 vs 1.52.** 1.50 lands at 2.5× / ~1.9× / 1.65× (ci/ac/ar); 1.52 at 2.85× / 2.2× / 2.2×.
-3. **Accept check-in at ~2.5× (37h Bypass) while arcade is ~1.65×?** Or ease check-in, e.g. offline cap 8h → 10h for everyone.
-4. **The room survives the sale** (same as paving)? Or reset the room and put "keep the room" on a node?
-5. **Re-hide the Bypass until dawn on later runs** (proposed), or leave it open from the start?
-6. **Card formula** `10 + min(paves, 5)`: OK? A full tree takes about 3 sales.
-7. **Names**: "Sell to the REIT", "Uncle Sal's Rolodex", Rolodex cards, the 12 nodes.
-8. **Bypass wall limit**: frontier ≤60% (Route 9 is ≤50%) and boss tries ≤30 (Route 9 is ≤12)?
+**Decided (15 Nov 2026):**
+1. a + c; "d" ignored.
+2. Bypass renovation growth 1.50.
+3. Check-in eased by the offline cap, Bypass-only: 8h → 12h after dawn.
+4. The arcade resets on the sale; *Keep the Room* is an 8-card Rolodex node.
+5. The Bypass hides again until dawn on later runs.
+6. Names are good in concept: Sell to the REIT, Uncle Sal's Rolodex, Rolodex cards (working titles).
+7. Bypass wall limits: frontier ≤60% per lot, boss tries ≤30.
+
+**Still open:**
+1. Final names: keep the working titles or pick from §7b.
+2. Card formula `10 + min(paves, 5)` and the rebalanced costs (39 total, *Keep the Room* 8).
+3. WPNE vs permanent marketing: keep +10% Goodwill, or change it to "first marketing level free"?
+4. Consultant auto-renovation on the Bypass: ship it, accepting that it pulls check-in toward the active pace, subject to the guard?
