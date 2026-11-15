@@ -161,11 +161,11 @@ export const MACHINES: MachineDef[] = [
     },
   },
   {
-    id: 'foos', region: 1, name: 'Foosball', blurb: 'First to five. Move to line up a man, click to shoot.', needs: 'Capture the Corporate Campus', unlock: or((s) => cleared(s, 1, 1, REGIONS[1].lots[1].fights)), cost: rentCost(20, 1), secs: 60, cool: 0,
+    id: 'foos', region: 1, name: 'Foosball', blurb: 'First to five. Move (or A/D) to line up a man; click or Space to shoot.', needs: 'Capture the Corporate Campus', unlock: or((s) => cleared(s, 1, 1, REGIONS[1].lots[1].fights)), cost: rentCost(20, 1), secs: 60, cool: 0,
     pay: (s, q) => ({ equity: winPay(s, 1) * 8 * q, big: q >= 1, text: q >= 1 ? 'Five-nothing. They want a rematch.' : `${Math.round(q * 5)} goals.` }),
   },
   {
-    id: 'shuffle', region: 1, name: 'Shuffleboard', blurb: 'Six pucks. Hold for power. The far end is worth more.', needs: 'Capture Town Center, Phase II', unlock: or((s) => cleared(s, 1, 2, REGIONS[1].lots[2].fights)), cost: rentCost(15, 1), secs: 30, cool: 0,
+    id: 'shuffle', region: 1, name: 'Shuffleboard', blurb: 'Six pucks against the house. Aim, hold for power, knock his off. The far end is worth more.', needs: 'Capture Town Center, Phase II', unlock: or((s) => cleared(s, 1, 2, REGIONS[1].lots[2].fights)), cost: rentCost(15, 1), secs: 30, cool: 0,
     pay: (s, q) => ({ equity: winPay(s, 1) * 2 * q, text: `${Math.round(q * SHUFFLE_TOP)} points.` }),
   },
   {

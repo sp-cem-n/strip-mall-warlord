@@ -1,6 +1,6 @@
 // The Off-Ramp's last two: Foosball (a tall table, first to five) and Bar Trivia (a countertop touchscreen, five questions).
 import { C } from '../art/palette';
-import { circle, type Game, type Pen } from './machines';
+import { type Game, type Pen } from './machines';
 
 // ---- Foosball: rows from the top are their goalie, your forwards, their forwards, your goalie. Move to slide your rods, click to shoot. ----
 const ROWS = [
@@ -11,24 +11,43 @@ const ROWS = [
 ];
 const MOUTH = [27, 51];
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+// 2.5D: the far end (their goal) is narrower; the near rods are bigger. Logic stays in flat table units (78 x 100).
+const T = (x: number, y: number) => {
+  const k = 0.72 + 0.28 * (y / 100);
+  return { x: 39 + (x - 39) * k, y: 3 + y * 0.95, k };
+};
 function table(p: Pen) {
-  p.rect(0, 0, p.w, p.h, C.forest);
-  p.rect(0, Math.floor(p.h / 2), p.w, 1, C.green);
-  circle(p, 39, Math.floor(p.h / 2), 8, C.green);
-  circle(p, 39, Math.floor(p.h / 2), 7, C.forest);
-  p.rect(MOUTH[0], 0, MOUTH[1] - MOUTH[0], 2, C.ink).rect(MOUTH[0], p.h - 2, MOUTH[1] - MOUTH[0], 2, C.ink);
+  p.rect(0, 0, p.w, p.h, C.umber);
+  for (let y = 0; y <= 100; y++) {
+    const l = T(0, y), r = T(78, y);
+    const row = Math.round(l.y);
+    p.rect(Math.round(l.x) - 3, row, Math.round(r.x - l.x) + 6, 1, C.ink); // the cabinet wall
+    p.rect(Math.round(l.x), row, Math.round(r.x - l.x), 1, y % 10 < 5 ? C.forest : C.green); // mowed stripes
+  }
+  const mid = T(0, 50), midR = T(78, 50);
+  p.rect(Math.round(mid.x), Math.round(mid.y), Math.round(midR.x - mid.x), 1, C.paper);
+  for (let a = 0; a < 24; a++) {
+    const c = T(39 + Math.cos((a / 24) * Math.PI * 2) * 8, 50 + Math.sin((a / 24) * Math.PI * 2) * 8);
+    p.rect(Math.round(c.x), Math.round(c.y), 1, 1, C.paper);
+  }
+  const g0 = T(MOUTH[0], 0), g1 = T(MOUTH[1], 0), n0 = T(MOUTH[0], 100), n1 = T(MOUTH[1], 100);
+  p.rect(Math.round(g0.x), Math.round(g0.y) - 2, Math.round(g1.x - g0.x), 3, C.ink).rect(Math.round(n0.x), Math.round(n0.y) - 1, Math.round(n1.x - n0.x), 3, C.ink);
 }
 function rods(p: Pen, blue: number, red: number) {
   for (const r of ROWS) {
-    p.rect(0, r.y, p.w, 1, C.stone);
+    const l = T(-4, r.y), rr = T(82, r.y);
+    p.rect(Math.round(l.x), Math.round(l.y), Math.round(rr.x - l.x), 1, C.stone); // the rod, through the walls
+    p.rect(Math.round(rr.x), Math.round(rr.y) - 1, 2, 3, C.ink); // handle
     for (const x of r.xs) {
-      const mx = Math.round(x + (r.red ? red : blue));
-      p.rect(mx - 1, r.y - 2, 3, 5, r.red ? C.red : C.blue).rect(mx, r.y - 1, 1, 1, C.paper);
+      const m = T(x + (r.red ? red : blue), r.y);
+      const w = Math.max(2, Math.round(3 * m.k)), h = Math.max(4, Math.round(6 * m.k));
+      p.rect(Math.round(m.x) - Math.floor(w / 2), Math.round(m.y) - h + 2, w, h, r.red ? C.red : C.blue).rect(Math.round(m.x), Math.round(m.y) - h + 2, 1, 1, C.skin); // head
+      p.rect(Math.round(m.x) - Math.floor(w / 2), Math.round(m.y) + 2, w, 1, C.ink); // the foot
     }
   }
 }
 export function foos(): Game {
-  let me = 0, them = 0, blue = 0, red = 0, kick = 0, pause = 1, end = -1, msg = 'FIRST TO 5';
+  let me = 0, them = 0, blue = 0, red = 0, kick = 0, pause = 1, end = -1, msg = 'FIRST TO 5', keyL = false, keyR = false;
   const ball = { x: 39, y: 50, vx: 0, vy: 0 };
   const hitCool = [0, 0, 0, 0];
   const serve = (down: boolean) => {
@@ -52,6 +71,7 @@ export function foos(): Game {
     update(dt) {
       if (end >= 0) return void ((end += dt) > 1.5 && (g.over = true));
       kick = Math.max(0, kick - dt);
+      if (keyL || keyR) blue = clamp(blue + (keyR ? 40 : -40) * dt, -12, 12);
       // their rods chase the ball, not quite fast enough
       const near = ROWS[ball.vy < 0 ? 0 : 2].xs.reduce((a, x) => (Math.abs(x + red - ball.x) < Math.abs(a + red - ball.x) ? x : a));
       red += clamp(ball.x - (near + red), -32 * dt, 32 * dt);
@@ -86,7 +106,11 @@ export function foos(): Game {
     draw(p) {
       table(p);
       rods(p, blue, red);
-      if (end < 0) p.rect(Math.round(ball.x) - 1, Math.round(ball.y) - 1, 2, 2, C.paper);
+      if (end < 0) {
+        const b = T(ball.x, ball.y);
+        p.rect(Math.round(b.x) - 1, Math.round(b.y), 2, 1, C.ink); // its shadow
+        p.rect(Math.round(b.x) - 1, Math.round(b.y) - 2, 2, 2, C.paper);
+      }
       p.text(`${me}`, 2, 46, C.blue);
       p.text(`${them}`, 2, 52, C.red);
       if (end >= 0) p.center(g.label ?? '', 44, C.sodiumLight);
@@ -100,6 +124,13 @@ export function foos(): Game {
       kick = 0.22;
     },
     up() {},
+    // A/D or the arrows slide your rods; Space, W or Up shoots
+    key(k, down) {
+      const low = k.toLowerCase();
+      if (low === 'a' || k === 'ArrowLeft') keyL = down;
+      if (low === 'd' || k === 'ArrowRight') keyR = down;
+      if (down && (k === ' ' || low === 'w' || k === 'ArrowUp')) kick = 0.22;
+    },
   };
   return g;
 }

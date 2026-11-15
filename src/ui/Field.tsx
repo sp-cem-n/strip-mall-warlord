@@ -6,7 +6,7 @@ import { C, HEX } from '../art/palette';
 import { BATTLERS, FIGHTS, REGIONS, WALK_IN_SECONDS, type RegionId, type Role } from '../game/defs';
 import { enemyLineup } from '../game/battle';
 import { curb, lineupOf } from '../game/economy';
-import type { Unit } from '../game/state';
+import type { Battle, Unit } from '../game/state';
 import { crewArt, enemyArt, fieldArt } from './art';
 import { hit } from './audio';
 import { fmt } from './format';
@@ -126,20 +126,47 @@ function smokeBreak(ctx: CanvasRenderingContext2D, t: number, r: RegionId) {
   ctx.fillRect(bx, by, Math.round(bw * done), 4);
 }
 
+// Visual only, never touches the fight: when a group that was waiting in line takes over, it steps up from its
+// place in line (STEP_UP seconds) instead of popping onto the spots, and the one-tick gap between fights keeps
+// drawing the last fight, so nothing blinks. The fallen from the last group finish fading under the new one.
+const STEP_UP = 0.6;
+const QUEUE_OFF: [number, number] = [36, -20];
+type Trail = { last: Battle | null; lastAt: number; queued: boolean; seen: Battle | null; stepFrom: number; fallen: [Unit, [number, number]][] };
+const trails: Trail[] = [0, 1].map(() => ({ last: null, lastAt: -9, queued: false, seen: null, stepFrom: -9, fallen: [] }));
+
 function draw(ctx: CanvasRenderingContext2D, t: number, r: RegionId) {
   const s = app.s;
   const c = s.crews[r];
   const f = FIGHTS[r][Math.min(c.at, FIGHTS[r].length - 1)];
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(fieldArt(REGIONS[r].lots[f.zone].id), 0, 0);
-  const b = c.battle;
+  const tr = trails[r];
+  let b = c.battle;
+  const gap = !b && c.smoke <= 0 && tr.last && t - tr.lastAt < 0.5; // regroup tick between two fights
+  if (gap) b = tr.last;
+  if (b && b !== tr.seen && c.battle === b) {
+    // a new fight: if its group was standing in line, it steps up from there
+    tr.stepFrom = tr.queued && b.enter < WALK_IN_SECONDS ? t : -9;
+    const old = tr.seen?.enemies ?? [];
+    const spotOf = (u: Unit): [number, number] => (u.boss ? BOSS_SPOT : enemySpot(old.filter((e) => !e.boss).indexOf(u)));
+    tr.fallen = old.filter((u) => u.hp <= 0 && t - (downAt.get(u.uid) ?? t) < 0.9).map((u) => [u, spotOf(u)]);
+    tr.seen = b;
+  }
+  if (c.battle) ((tr.last = c.battle), (tr.lastAt = t), (tr.queued = c.queueEnter >= 0));
+  else if (!gap) ((tr.last = null), (tr.queued = false));
   if (b) {
+    if (!gap) for (const [u, p] of tr.fallen) drawUnit(ctx, u, p, t);
     const spots = crewSpots(b.crew.length);
     const order = b.crew.map((u, i) => [u, spots[i]] as const).sort((a, z) => a[1][1] - z[1][1]);
     for (const [u, p] of order) drawUnit(ctx, u, p, t);
     // the next group walks in from the back of the lot (upper right) to where the last one fell
     const k = Math.max(0, b.enter) / WALK_IN_SECONDS;
-    const walk = ([x, y]: [number, number]): [number, number] => [Math.round(x + k * 70), Math.round(y - k * 46 + (k > 0 ? Math.abs(Math.sin(t * 10)) * 1.5 : 0))];
+    const up = gap ? 0 : Math.max(0, 1 - (t - tr.stepFrom) / STEP_UP); // 1 = still in line, 0 = on the spot
+    const ue = up * up * (3 - 2 * up);
+    const walk = ([x, y]: [number, number]): [number, number] => [
+      Math.round(x + k * 70 + QUEUE_OFF[0] * ue),
+      Math.round(y - k * 46 + QUEUE_OFF[1] * ue + (k > 0 || up > 0 ? Math.abs(Math.sin(t * 10)) * 1.5 : 0)),
+    ];
     const regs = b.enemies.filter((e) => !e.boss);
     regs.map((u, i) => [u, walk(enemySpot(i))] as const).sort((a, z) => a[1][1] - z[1][1]).forEach(([u, p]) => drawUnit(ctx, u, p, t));
     for (const u of b.enemies.filter((e) => e.boss)) drawUnit(ctx, u, walk(BOSS_SPOT), t);

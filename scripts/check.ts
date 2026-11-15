@@ -11,6 +11,7 @@ import { botAct } from '../src/game/bot';
 import { QUESTIONS } from '../src/ui/bargames';
 import { BAR_BUFFS, BUFFS, MACHINES, PERKS, QUIZ, boardBonus, buffOn, buyAttract, buyPerk, endPlay, grant, perk, perkPrice, postShuffle, shelfOf, startPlay } from '../src/game/room';
 import { handTier } from '../src/ui/machines';
+import { moving, powFor, scoreOf, slide, throwPuck, zoneOf } from '../src/ui/shuffle';
 import { readdirSync, readFileSync } from 'node:fs';
 
 const store = new Map<string, string>();
@@ -42,6 +43,15 @@ check('enemy strength never goes down inside a lot', FIGHTS.every((L) => L.every
 check('enemy groups grow: 1 at the start, 6 by Pinewood Commons', enemyLineup(0, 0).length === 1 && enemyLineup(0, FIGHTS[0].length - 2).length === 6);
 check('shop tiers: the Pawn Shop is tier 0, later shops sit higher', tierOf('pawn') === 0 && tierOf(r9.at(-1)!.id) > tierOf(r9[3].id));
 
+// shuffleboard: pucks slide to where the power says, and knock each other
+{
+  const park = [throwPuck(20, powFor(14), false)];
+  for (let i = 0; i < 400 && moving(park); i++) slide(park, 1 / 120);
+  check(`shuffleboard: a measured throw parks in the 3 (y ${park[0].y.toFixed(1)})`, park[0].live && zoneOf(park[0].y) === 3);
+  const hit = [...park, throwPuck(20, powFor(-2), true)];
+  for (let i = 0; i < 600 && moving(hit); i++) slide(hit, 1 / 120);
+  check('shuffleboard: a hard red throw knocks the blue puck out of the 3', !(hit[0].live && zoneOf(hit[0].y) === 3) && scoreOf(hit, false) !== 3);
+}
 // roster: a full field says where more slots come from, and stops offering once there are none
 {
   const t = newGame(5);

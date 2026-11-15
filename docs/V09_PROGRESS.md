@@ -22,6 +22,8 @@ Plans: `docs/V09_POLISH.md` (b8de1e9) and `docs/V09_BYPASS.md` (45f76d3), alread
   - Roster full field: `fieldFull` / `slotSources` in `game/economy.ts`, red FIELD FULL strip in the popup (`.roster-full`, auto-clears 6s, click dismisses). Lists only sources still available (Route 9: Back Office Goodwill buys, Fun Zone prize counter; Bypass strings in `DAWN.slotWhere`). Maxed (≥ MAX_SLOTS or nothing left) = just "Bench someone first." Two new checks.
   - Guard fix: the M2 Coin Pusher pile (`tickPusher`) was drawing from the game's seeded `rand(s)`, which shifted every fight roll and broke `--guard` (Phase II 14 tries, Outlet 13, losses 10%). The pile now has its own RNG (`pileRand`, `room.pusher.rng`). Guard is back to the M1 numbers below.
 - Save popup: the top-right ✕ (redundant with the sign click) is now a floppy (`.boot-door.save`, inline SVG in `Pylon.tsx`) that opens `SavePopup` (`Screens.tsx`, `app.savePop`, Esc closes) with the same `SaveBox`: selectable code textarea (select-on-focus), Copy, Load. Boot screen keeps its box. Back Office has no lease code. Shot: `screenshots/v9/<size>/32-save-popup.png`. `scripts/screenshots.mjs` takes `ONLY=regex`.
+- Battle hand-off (visual only, `ui/Field.tsx` `trails`): the one regroup tick between two fights keeps drawing the last fight (no blink), a group that was waiting in line steps up from its line spot over `STEP_UP` 0.6s instead of popping in, and the last group's fallen finish fading. Sim / battle timing untouched (guard unchanged).
+- P2 chunk 1: Shuffleboard is `ui/shuffle.ts` (`shuffleV2`): 2.5D lane, real puck physics (`slide`, collisions, gutters, off the end), you throw 6 blue, the house (next unbeaten `BAR_HOUSE` name) throws 3 red and goes after your best puck; aim by mouse / A/D / arrows, hold or Space for power on a visible meter; only your pucks score (q = score / SHUFFLE_TOP as before). Old flat `shuffle()` deleted from `machines.ts`. Foosball (`bargames.ts`): 2.5D perspective table, A/D/arrows slide your rods, Space / W / Up shoots, tap still works. `GameRoom` forwards Space / W / Up too (repeat ignored). Checks: a measured throw parks in the 3; a hard red throw knocks it out. Shots `33-bar-foos-play`, `34-bar-shuffle-play`. Darts / pool / poker / trivia 2.5D not redone yet.
 - Known, not fixed: at 390×844 the top bar is wider than the screen (receipt / LED board scroll off to the right), same as before.
 - `bun scripts/check.ts`: all good, including leak checks.
 - `bun scripts/balance.ts --guard` (Route 9 15h±1; CI 14–16h, active 11–15.5h, losses 10–30%, frontier ≤50%, boss tries ≤12):
@@ -37,7 +39,7 @@ Plans: `docs/V09_POLISH.md` (b8de1e9) and `docs/V09_BYPASS.md` (45f76d3), alread
 
 ## Next (P2, in order; push live after each checked chunk)
 
-1. Shuffleboard puck collision + foosball keys + Off-Ramp 2.5D games. 2. Pull-Tabs, Blackjack, Fairway 9. 3. Grapevine rumor slips (strings in `dawn.ts`). 4. Hotkeys in How to Play. 5. High-stakes tables. 6. Trivia batches toward 1,200+. Then P3 = M4 Bypass, bump 0.9.0, tag v0.9.
+1. (done: shuffleboard + foosball; darts/pool/poker/trivia 2.5D still open, low priority). 2. Pull-Tabs, Blackjack, Fairway 9. 3. Grapevine rumor slips (strings in `dawn.ts`). 4. Hotkeys in How to Play. 5. High-stakes tables. 6. Trivia batches toward 1,200+. Then P3 = M4 Bypass, bump 0.9.0, tag v0.9.
 
 ---
 

@@ -41,6 +41,8 @@ const shots = [
   ['29-roster-full', `${g}&advance=5400&active=1&screen=game`, [['click', 'canvas.field'], ['wait', 300], ['click', '.fc.bench'], ['wait', 200]]],
   ['30-sign-letters-out', `${g}&advance=5400&screen=game&lights=still&signout=18`, [], '.roadside'],
   ['31-funzone-zone-off', `${room}&lights=still&fzoff=zone`, [], '.roadside'],
+  ['33-bar-foos-play', bar, [['click', '.cab:nth-child(4) canvas'], ['wait', 2500]], '.cab:nth-child(4)'],
+  ['34-bar-shuffle-play', bar, [['click', '.cab:nth-child(5) canvas'], ['wait', 1200], ['hold', '.cab:nth-child(5) canvas', 700], ['wait', 2500]], '.cab:nth-child(5)'],
   ['32-save-popup', `${g}&advance=900&screen=game`, [['click', '.boot-door.save'], ['wait', 200]]],
 ];
 const only = process.env.ONLY ? new RegExp(process.env.ONLY) : null;

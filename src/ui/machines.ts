@@ -3,8 +3,9 @@
 import { glyph } from '../art/font';
 import { C, HEX } from '../art/palette';
 import { foos, foosIdle, trivia, triviaIdle } from './bargames';
-import { BAR_HOUSE, HOUSE_SCORES, PINBALL_TOP, SHUFFLE_TOP, type BuffKind, type MachineId, type PusherField } from '../game/room';
+import { BAR_HOUSE, HOUSE_SCORES, PINBALL_TOP, type BuffKind, type MachineId, type PusherField } from '../game/room';
 import { clawV2, pinballV2, pusherV2, whacV2 } from './arcade';
+import { shuffleV2 } from './shuffle';
 
 export interface Pen {
   rect(x: number, y: number, w: number, h: number, c: number): Pen;
@@ -728,77 +729,7 @@ function poker(): Game {
 }
 
 // ---- Shuffleboard: the needle sways, hold for power. The far end is worth more; past it is nothing. ----
-const ZONES: [number, number, number][] = [[0, 6, 4], [6, 20, 3], [20, 34, 2], [34, 48, 1]];
-function shuffle(): Game {
-  let t = 0, hold = -1, left = 6, score = 0, end = -1, msg = '';
-  const pucks: { x: number; y: number; red: boolean; pts: number }[] = [];
-  let slide: { x: number; y0: number; y1: number; k: number; red: boolean } | null = null;
-  const zoneOf = (y: number) => (y < 0 ? -1 : ZONES.find(([a, b]) => y >= a && y < b)?.[2] ?? 0);
-  const aimX = () => 39 + Math.sin(t * 2.1) * 22;
-  const g: Game = {
-    over: false, q: 0, score: 0,
-    update(dt) {
-      t += dt;
-      if (hold >= 0) hold += dt;
-      if (slide) {
-        slide.k = Math.min(1, slide.k + dt * 0.9);
-        if (slide.k >= 1) {
-          const pts = zoneOf(slide.y1);
-          if (pts >= 0) pucks.push({ x: slide.x, y: slide.y1, red: slide.red, pts });
-          score += Math.max(0, pts);
-          msg = pts < 0 ? 'OFF THE END' : pts === 4 ? 'HANGER' : pts ? `+${pts}` : 'SHORT';
-          slide = null;
-          if (--left === 0) ((end = 0), (g.score = score), (g.q = Math.min(1, score / SHUFFLE_TOP)), (g.label = `${score} PTS`));
-        }
-      }
-      if (end >= 0 && (end += dt) > 1.5) g.over = true;
-    },
-    draw(p) {
-      p.rect(0, 0, p.w, p.h, C.umber);
-      p.rect(6, 0, 66, p.h, C.bone);
-      for (let y = 1; y < p.h; y += 4) for (let x = 8 + (y % 8 ? 2 : 0); x < 72; x += 5) p.rect(x, y, 1, 1, C.paper); // the sand
-      for (let y = 0; y < p.h; y += 9) p.rect(6, y, 66, 1, C.stone);
-      for (const [a, b, v] of ZONES) {
-        p.rect(6, b, 66, 1, C.red);
-        p.text(String(v), 37, a + Math.floor((b - a) / 2) - 2, v === 4 ? C.red : C.concrete);
-      }
-      p.rect(6, 0, 66, 1, C.ink);
-      p.rect(6, 86, 66, 1, C.blue); // foul line
-      for (const pk of pucks) puck(p, pk.x, pk.y, pk.red);
-      if (slide) {
-        const e = 1 - (1 - slide.k) * (1 - slide.k);
-        puck(p, slide.x, slide.y0 + (slide.y1 - slide.y0) * e, slide.red);
-      } else if (end < 0) {
-        const x = aimX();
-        puck(p, x, 92, left % 2 === 0);
-        p.rect(Math.round(x), 80, 1, 6, C.ink);
-        if (hold >= 0) p.rect(73, 98 - tri(hold, 1.8) * 40, 4, tri(hold, 1.8) * 40, C.red);
-      }
-      p.text(`${score}`, 74 - 4 * String(score).length, 2, C.paper);
-      p.text(`${left}`, 74, p.h - 7, C.paper);
-      if (msg) p.text(msg, 8, 60, C.brick);
-      if (end >= 0) p.center(g.label ?? '', 70, C.red);
-      else if (left === 6 && hold < 0 && !slide) p.center('HOLD', 70, C.blue);
-    },
-    down() {
-      if (!slide && end < 0) hold = 0;
-    },
-    up() {
-      if (hold < 0 || slide) return;
-      const pow = tri(hold, 1.8);
-      hold = -1;
-      slide = { x: aimX(), y0: 92, y1: 92 - pow * 104, k: 0, red: left % 2 === 0 };
-      msg = '';
-    },
-  };
-  return g;
-}
-const puck = (p: Pen, x: number, y: number, red: boolean) => {
-  circle(p, Math.round(x), Math.round(y), 3, red ? C.red : C.blue);
-  p.rect(Math.round(x) - 1, Math.round(y) - 2, 2, 1, C.paper);
-};
-
-export function newGame(id: MachineId, o: { shelf: number; speed: number; jackpot: string; onGrab: (q: number, prize?: BuffKind) => boolean; field?: PusherField; grip?: number }): Game {
+export function newGame(id: MachineId, o: { shelf: number; speed: number; jackpot: string; house?: string; onGrab: (q: number, prize?: BuffKind) => boolean; field?: PusherField; grip?: number }): Game {
   switch (id) {
     case 'pusher': return o.field ? pusherV2(o.field) : pusher(o.shelf);
     case 'whac': return whacV2();
@@ -809,7 +740,7 @@ export function newGame(id: MachineId, o: { shelf: number; speed: number; jackpo
     case 'darts': return darts();
     case 'pool': return pool();
     case 'poker': return poker();
-    case 'shuffle': return shuffle();
+    case 'shuffle': return shuffleV2(o.house);
     case 'foos': return foos();
     case 'trivia': return trivia();
   }

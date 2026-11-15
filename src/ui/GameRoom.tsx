@@ -75,6 +75,7 @@ function Cabinet({ m }: { m: MachineDef }) {
               grip: perk(app.s, 'grip'),
               speed: Math.min(20, 9 + app.s.room.plays * 0.05),
               jackpot: `${app.s.room.jackpot}`,
+              house: BAR_HOUSE[Math.min(BAR_HOUSE.length - 1, app.s.room.shuffle)][0],
               onGrab: () => false,
             });
           }
@@ -129,7 +130,8 @@ function Cabinet({ m }: { m: MachineDef }) {
         rs.until = performance.now();
         return;
       }
-      if (game.current?.key && (e.key === 'a' || e.key === 'A' || e.key === 'd' || e.key === 'D' || e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+      if (game.current?.key && (e.key === 'a' || e.key === 'A' || e.key === 'd' || e.key === 'D' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W')) {
+        if (e.repeat) return e.preventDefault();
         e.preventDefault();
         game.current.key(e.key, e.type === 'keydown');
       }
@@ -191,6 +193,7 @@ function Cabinet({ m }: { m: MachineDef }) {
       grip: perk(app.s, 'grip'),
       speed: Math.min(20, 9 + app.s.room.plays * 0.05),
       jackpot: `${app.s.room.jackpot}`,
+      house: BAR_HOUSE[Math.min(BAR_HOUSE.length - 1, app.s.room.shuffle)][0],
       onGrab: (q, prize) => {
         app.s.room.clawPick = prize;
         const rw = endPlay(app.s, 'claw', q);
