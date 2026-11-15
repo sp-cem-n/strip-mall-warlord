@@ -1,6 +1,6 @@
 # v0.9 progress
 
-Last updated: 15 Nov 2026, about 2:35 AM America/New_York.
+Last updated: 15 Nov 2026, about 3:55 AM America/New_York.
 
 Worktree: `/workspace/smw-v09` on branch `v09`. Commit author is always Josh Durbin `<149157950+sp-cem-n@users.noreply.github.com>`. Do not work in `/workspace/strip-mall-warlord` (still on `v09-polish`). Mockups live only on this machine at `/workspace/smw-mockups/v09/` and `/workspace/smw-mockups/v09b/`, plus `/workspace/smw-mockups/minigames/`.
 
@@ -15,7 +15,7 @@ Plans: `docs/V09_POLISH.md` (b8de1e9) and `docs/V09_BYPASS.md` (45f76d3), alread
 ## Live now (M1)
 
 - Live: https://sp-cem-n.github.io/strip-mall-warlord/
-- Branch / commit: `main` and `origin/v09` are both at **4035230** (`v0.9 M1: plaza polish, earlier Fun Zone, sinks, roster, save codes`).
+- Branch / commit: live `main` is still **4035230**. Local `v09` is ahead (v09d top bars, M1 receipt/plaza/boot fixes, Toad-matching roster). A prior `git push origin v09` was blocked pending top-bar approval; do not merge to main or publish until Josh signs off (bars are in the approved direction, Fun Zone / Off-Ramp logos still waiting on Toad).
 - Package version is still **0.8.0**. Do not bump or tag until M4.
 - `bun scripts/check.ts`: all good, including leak checks (1093 pre-dawn strings, post-dawn words only in `dawn.ts` / `bypass.ts`).
 - `bun scripts/balance.ts --guard` (Route 9 15h±1; CI 14–16h, active 11–15.5h, losses 10–30%, frontier ≤50%, boss tries ≤12):
@@ -36,7 +36,7 @@ Plans: `docs/V09_POLISH.md` (b8de1e9) and `docs/V09_BYPASS.md` (45f76d3), alread
 - Rates: cash/tickets over 5s, Goodwill/Equity over 60s. Display `/m` below 1/s, `/s` at ≥1.5/s, hold in the 1.0–1.5 band (`rateLabel` in `src/game/rates.ts`).
 - Room top bars drop street posts. Fun Zone and Off-Ramp use logos from `src/art/logos.ts` (Off-Ramp title is passed from `DAWN` so `logos.ts` stays leak-safe). Plaza top bar has a night sky (`--stars`).
 - Next group walks up during the current fight (`Crew.queueEnter`). Only a smoke break clears the line. A clean win starts with whatever walk is left (often 0).
-- Roster is a modal popup (`src/ui/Roster.tsx`), not a full screen. Click the lot or press R. Esc closes. Cards show DPS and Field/Bench. Hover tips on crew, enemies, and curb.
+- Roster is a modal popup (`src/ui/Roster.tsx`), not a full screen. Click the lot or press R. Esc closes. Rebuilt on `v09` to match Toad's mockup (Josh's reference): steel-bevel "THE LOT" header with fight / lot / tells, ON THE FIELD count and a red X; 3×3 fighter cards with portrait, role, large DPS, HP bar, DMG / EVERY, FIELD|BENCH (benched cards dim and stamp BENCH); right column ON THE CURB with lilac effect chips; totals strip; AUTO + hint + "ESC to close". Footer and totals stay pinned when the grid scrolls. Stacks and scrolls as one column at 390×844. Leak-safe. Checked at 1280×800 and 390×844 (`screenshots/v9/review/roster-mid-1280x800.png`, `roster-full-1280x800.png`, `roster-mid-390x844.png`, `roster-mid-390x844-bottom.png`).
 - Attract Mode is 5 / 3 / 2 minutes (`ATTRACT_EVERY` `[0, 300, 180, 120]`) and queues a visible play (`room.attracting`) at 0.4 skill, then `endPlay`. Cabinets get `.cab.attracting`.
 - Title screen uses the starburst (`titleSign` blit in `bootScene`, logo on the tenant-board menu).
 - Lease codes: prefix `SMW1.`, base64url of the JSON, confirm before overwrite (`exportCode` / `importCode` in `src/game/save.ts`). UI is `SaveBox` on the boot menu and in the Back Office. v0.8 saves still migrate; `SAVE_VERSION` is 5.
@@ -67,7 +67,7 @@ Multi-size set at `screenshots/v9/{1280x800,1366x768,1440x900,1920x1080,390x844}
 - `screenshots/v9/1280x800/24-back-office.png`
 - `screenshots/v9/1920x1080/01-title.png`
 
-The 1280 title cuts the lease-code box off the fold (page scrolls; it is visible at 1920). Back Office sinks are in the sticky right column (scroll that pane).
+The boot screen is a flex column so the lease-code box stays on-screen at 1280×800 (scene shrinks with `object-fit: contain`). Back Office sinks are in the sticky right column (scroll that pane).
 
 ---
 

@@ -107,7 +107,7 @@ export function Boot({ onNew, onResume }: { onNew: () => void; onResume: () => v
   return (
     <div class="screen boot">
       <Speaker corner />
-      <img class="boot-scene" src={bootURL(kinds)} width={960} height={540} alt="Pinewood Plaza at night" />
+      <div class="boot-scene-wrap"><img class="boot-scene" src={bootURL(kinds)} width={960} height={540} alt="Pinewood Plaza at night" /></div>
       <div class="boot-menu panel-brick tenant-board">
         {app.oldSave && (
           <div class="notice">
