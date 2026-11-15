@@ -1,6 +1,7 @@
 // The Game Room: the Fun Zone arcade on Route 9 (and, after dawn, the bar on the Bypass). DOM-free.
 // Every machine is data: what unlocks it, what a play costs, and payout(q) for a play of quality q (0..1).
 // The UI's mini-games, Attract Mode and the balance bot all go through startPlay / endPlay, so they pay the same.
+import { credit } from './rates';
 import { DAWN } from './content/dawn';
 import { FIGHTS, REGIONS, type Currency, type RegionId } from './defs';
 import { asphaltMult, bal, cleared, earn, log, rentPerSec, spend } from './economy';
@@ -229,10 +230,10 @@ export function endPlay(s: GameState, id: MachineId, q: number, quiet = false): 
   const r = m.region;
   q = Math.max(0, Math.min(1, q));
   const rw = m.pay(s, q);
-  if (rw.cash) earn(s, r, 'cash', rw.cash);
-  if (rw.goodwill) earn(s, r, 'goodwill', rw.goodwill);
-  if (rw.equity) earn(s, r, 'equity', rw.equity);
-  if (rw.tickets) s.tickets += rw.tickets;
+  if (rw.cash) earn(s, r, 'cash', rw.cash, !quiet);
+  if (rw.goodwill) earn(s, r, 'goodwill', rw.goodwill, !quiet);
+  if (rw.equity) earn(s, r, 'equity', rw.equity, !quiet);
+  if (rw.tickets) (s.tickets += rw.tickets), credit(s, 'tickets', rw.tickets, !quiet);
   if (rw.buff) grant(s, rw.buff);
   if (id === 'pusher' || id === 'darts') s.room.shelf[id === 'pusher' ? 0 : 1] = Math.max(0, s.room.shelf[id === 'pusher' ? 0 : 1] - 1);
   if (id === 'cyclone') s.room.jackpot = q >= 1 ? 500 : s.room.jackpot + 5;

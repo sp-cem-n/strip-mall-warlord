@@ -11,6 +11,7 @@ import { canvasOf, urlOf } from './art';
 import { fmt, fmtTime } from './format';
 import { idle, newGame, pen, type Game } from './machines';
 import { register } from './audio';
+import { Pylon } from './Pylon';
 
 const SCALE = 3;
 export const LOOKS: Record<MachineId, CabinetLook> = {
@@ -29,12 +30,15 @@ export const LOOKS: Record<MachineId, CabinetLook> = {
 };
 const BAR_IDS = new Set([...BAR_BUFFS, ...QUIZ].map(([b]) => b));
 // The hand that earned each poker buff (saved in room.hands): a flush pays like trips, so show the real hand.
+// the sticker on the coin door
+const tagText = (c: Cost) => (c.cur === 'cash' ? `$${fmt(c.n)}` : `${fmt(c.n)} ${c.cur === 'tickets' ? 'TK' : CURRENCY_SHORT[c.cur]}`);
 export const costText = (c: Cost) => (c.cur === 'tickets' ? `${fmt(c.n)} tickets` : c.cur === 'cash' ? `$${fmt(c.n)}` : `${fmt(c.n)} ${CURRENCY_SHORT[c.cur]}`);
 
 function Cabinet({ m }: { m: MachineDef }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const game = useRef<Game | null>(null);
   const ready = useRef(0); // the READY beat: a moment after the coin drops before the game takes input
+  const ended = useRef(0); // a beat after a game ends, so the last tap doesn't buy the next one
   const result = useRef<{ text: string; until: number } | null>(null);
   const [, setN] = useState(0);
   const s = app.s;
@@ -74,6 +78,7 @@ function Cabinet({ m }: { m: MachineDef }) {
   }, [m.id]);
   function finish(g: Game) {
     game.current = null;
+    ended.current = performance.now() + 700;
     let text = g.label ?? '';
     if (m.id !== 'claw') {
       if (m.id === 'pinball' && g.score !== undefined && postScore(app.s, g.score)) text += ' NEW HIGH';
@@ -92,7 +97,7 @@ function Cabinet({ m }: { m: MachineDef }) {
     app.refresh();
   }
   function insert() {
-    if (game.current) return;
+    if (game.current || performance.now() < ended.current) return;
     const err = startPlay(app.s, m.id);
     if (err) return toast(err);
     register();
@@ -119,13 +124,16 @@ function Cabinet({ m }: { m: MachineDef }) {
   const lv = s.room.attract[m.id] ?? 0;
   return (
     <div class={`cab ${open ? '' : 'dark'} ${look.tall ? 'tall' : ''}`}>
+      {open && <span class={`price-tag ${canAfford(s, m.region, cost) ? '' : 'short'}`}>{tagText(cost)}</span>}
       <canvas
         ref={ref}
         width={CAB_W * SCALE}
         height={CAB_H * SCALE}
         onPointerDown={(e) => {
-          // the coin goes in with the Play button; the screen is only for playing
-          if (!open || !game.current || performance.now() < ready.current) return;
+          // tap the cabinet: the coin goes in, then the same screen plays
+          if (!open) return;
+          if (!game.current) return insert();
+          if (performance.now() < ready.current) return;
           const [x, y] = local(e);
           game.current.down(x, y);
         }}
@@ -137,9 +145,6 @@ function Cabinet({ m }: { m: MachineDef }) {
         <b {...tip(m.name, m.blurb, open ? `${costText(cost)} a game.` : m.needs)}>{m.name}</b>
         {open && (
           <>
-            <button class="btn small hot" disabled={!!game.current || !canAfford(s, m.region, cost) || serviced(s, m.id) > 0} onClick={insert}>
-              Play {costText(cost)}
-            </button>
             <button
               class="btn small"
               disabled={!ap || !canAfford(s, m.region, ap)}
@@ -238,33 +243,10 @@ export function GameRoom() {
     const id = setInterval(() => setN((n) => n + 1), 500);
     return () => clearInterval(id);
   }, []);
-  const back = () => ((app.screen = 'game'), (app.tip = null), app.refresh());
   const bar = s.view === 1;
   return (
     <div class={`screen room ${bar ? 'pub' : ''}`} style={{ backgroundImage: `url(${bar ? urlOf('paneling', paneling) : urlOf('carpet', carpet)})` }}>
-      <header class="room-bar">
-        <span class="room-sign">{bar ? DAWN.bar : 'FUN ZONE ARCADE'}</span>
-        <span class="tenant t-cash">
-          <span class="k">Cash</span> <span class="v">${fmt(s.crews[s.view].cash)}</span>
-        </span>
-        {bar ? (
-          <span class="tenant t-equity">
-            <span class="k">{DAWN.equity}</span> <span class="v">{fmt(s.equity)}</span>
-          </span>
-        ) : (
-          <>
-            <span class="tenant t-goodwill">
-              <span class="k">Goodwill</span> <span class="v">{fmt(s.goodwill)}</span>
-            </span>
-            <span class="tenant t-tickets">
-              <span class="k">Tickets</span> <span class="v">{fmt(s.tickets)}</span>
-            </span>
-          </>
-        )}
-        <button class="btn big" onClick={back}>
-          {bar ? DAWN.barBack : 'Back to the plaza'}
-        </button>
-      </header>
+      <Pylon room />
       <div class="room-floor">
         <div class="cabs">
           {MACHINES.filter((m) => m.region === s.view).map((m) => (

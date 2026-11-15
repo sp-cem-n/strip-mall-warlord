@@ -6,7 +6,8 @@ import { crewSprite, enemySprite } from '../art/people';
 import { battlefield, bootScene } from '../art/field';
 import * as F from '../art/frames';
 import { buttonFrame, ICONS, panelFrame } from '../art/frames';
-import { facade, scaffold, type Material } from '../art/storefronts';
+import { deadTube, facade, scaffold, type Material } from '../art/storefronts';
+import { titleSign } from '../art/sign';
 
 const cache = new Map<string, HTMLCanvasElement>();
 export function canvasOf(key: string, make: () => Grid): HTMLCanvasElement {
@@ -33,8 +34,12 @@ export const crewURL = (id: string) => urlOf(`crewurl:${id}`, () => crewSprite(i
 // storefront material comes from where the shop turns up
 const MATERIALS: Material[] = ['home', 'bigbox', 'outlet', 'office', 'lifestyle'];
 export const materialOf = (id: string): Material => (SHOPS[id].region === 1 ? 'bypass' : MATERIALS[SHOPS[id].zone] ?? 'home');
-export const facadeURL = (id: string, leased: boolean) => urlOf(`facade:${id}:${leased}`, () => facade(leased ? id : null, materialOf(id), id.length * 7 + id.charCodeAt(0), SHOPS[id].region === 1 ? 'COMING' : 'SHOES'));
+const seedOf = (id: string) => id.length * 7 + id.charCodeAt(0);
+export const hasDeadTube = (id: string) => deadTube(seedOf(id));
+export const facadeURL = (id: string, leased: boolean, lit = false) =>
+  urlOf(`facade:${id}:${leased}:${lit}`, () => facade(leased ? id : null, materialOf(id), seedOf(id), SHOPS[id].region === 1 ? 'COMING' : 'SHOES', lit));
 export const scaffoldURL = () => urlOf('scaffold', scaffold);
+export const titleSignURL = (ray = false, o = false) => urlOf(`titlesign:${ray}:${o}`, () => titleSign(ray, o));
 export const bootURL = (kinds: (string | null)[], dawn = false) => urlOf(`boot:${kinds.join(',')}:${dawn}`, () => bootScene(kinds, dawn));
 // frames and tiles as CSS variables (border-image / background)
 export function installFrames() {
@@ -44,7 +49,7 @@ export function installFrames() {
   set('btn', () => buttonFrame());
   set('btn-hot', () => buttonFrame(C.sodium));
   set('glass', F.glassFrame);
-  set('brick', F.brickFrame);
+  set('brickwall', F.brickFrame); // not --brick: that one is the color
   set('pylon', F.pylonFrame);
   set('tenant', F.tenantFrame);
   set('tag', F.tagFrame);

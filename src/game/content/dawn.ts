@@ -23,6 +23,8 @@ export const DAWN = {
   barGo: 'Stop in at the Off-Ramp',
   barBack: 'Back to the Bypass',
   barSign: 'OFF-RAMP',
+  // the green highway sign over the scoreboard: where it takes you from each road
+  hwy: ['BYPASS ▸', '◂ RT 9'],
   galleriaSign: 'BYPASS GALLERIA',
   needsOffRamp: 'Lease the Off-Ramp',
   needsExit14: 'Capture the Exit 14 Power Center',

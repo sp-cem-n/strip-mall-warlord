@@ -1,6 +1,11 @@
 // The Route 9 Bypass: a new crew. New kinds of shops first, a few old ones trickle back in as franchises.
 import type { RegionDef, ShopDef } from '../defs';
-import { BOSS, E, S } from './make';
+import { B, BOSS, E, S } from './make';
+import { MGMT_RENO } from '../knobs';
+
+// The 21st Pinewood unit: the office the receipt was always printed for. After dawn only, leased in Equity.
+export const MGMT: ShopDef = { ...S('mgmt', 'Plaza Management', 'sal', 0, 0, -1, 40, 0, 'Pinewood Plaza Mgmt. Office hours by appointment. Nobody has an appointment.', 'referral', 'Somebody with a complaint', MGMT_RENO), dawn: true };
+export const SAL = B('sal', 'Uncle Sal', 'damage', 320, 48, 1.8, 'Fights at your best shop\'s level. Every renovation: +3% rent on both roads.', 'Came back from Boca. Says the lot looks smaller.');
 
 export const BYPASS_SHOPS: ShopDef[] = [
   S('storage', 'Self Storage', 'auction', 1, 0, -1, 0, 2, 'Climate controlled. Emotionally, not.', 'cash', 'Unit 114, behind on rent', 5),
@@ -27,7 +32,7 @@ export const BYPASS: RegionDef = {
   pay: 'equity',
   leaseIn: 'equity',
   trainIn: 'equity',
-  chrome: { plaza: 'Exit 14, Rt. 9 Bypass', mgmt: 'EXIT 14 MGMT', sub: 'Exit 14 · Rt. 9 Bypass · 1998' },
+  chrome: { plaza: 'Exit 14, Rt. 9 Bypass', mgmt: 'EXIT 14 MGMT' },
   start: 'storage',
   ending: 'The Bypass is yours. Route 9 North is still being surveyed.',
   lots: [

@@ -1,8 +1,10 @@
 // The plaza: one fixed-layout card per storefront. Leased shops renovate; new ones come up for lease in order.
+import { lit } from './lights';
+import { useEffect, useRef } from 'preact/hooks';
 import { DAWN } from '../game/content/dawn';
 import { app, tip, toast } from '../app';
 import { BATTLERS, CURRENCY_NAME, REGIONS, SHOPS, WALKIN_STAYS, type RegionId, type ShopDef } from '../game/defs';
-import { bal, tierOf, bossLevel, currencyOf, forLease, joined, lease, leased, lineupOf, regionDone, renovate, renovateCost, rentOf, toggleField } from '../game/economy';
+import { bal, leaseCur, tierOf, bossLevel, currencyOf, forLease, joined, lease, leased, lineupOf, regionDone, renovate, renovateCost, rentOf, toggleField } from '../game/economy';
 import { statsOf } from '../game/battle';
 import { collectFind, walkInValue } from '../game/sim';
 import type { GameState } from '../game/state';
@@ -48,14 +50,14 @@ function Unit({ sh }: { sh: ShopDef }) {
   const st = statsOf(s, sh.region, sh.battler, Math.max(1, lv) + tierOf(sh.id));
   const nx = statsOf(s, sh.region, sh.battler, lv + 1 + tierOf(sh.id));
   const cost = lv ? renovateCost(sh.id, lv) : sh.lease;
-  const cur = lv ? 'cash' : REGIONS[sh.region].leaseIn;
+  const cur = lv ? 'cash' : leaseCur(sh);
   const afford = bal(s, sh.region, cur) >= cost;
   const rent = rentOf(s, sh.id, lv);
   const dRent = rentOf(s, sh.id, lv + 1) - rent;
   return (
     <div class={`unit ${lv ? '' : 'vacant'}`}>
       <div class="facade" {...tip(sh.name, sh.tagline, lv ? `Rent $${fmt(rent)}/s. Sends one ${d.name}.` : `For lease. Sends one ${d.name}: ${d.does}`)}>
-        <img class={!raising && now < (app.raising[sh.id] ?? 0) + 700 ? 'flicker' : ''} src={facadeURL(sh.id, lv > 0 && !raising)} width={192} height={168} alt={sh.name} />
+        <img class={!raising && now < (app.raising[sh.id] ?? 0) + 700 ? 'flicker' : ''} src={facadeURL(sh.id, lv > 0 && !raising, lit.has(sh.id))} width={192} height={168} alt={sh.name} />
         {raising && <img class="scaffold" src={scaffoldURL()} width={192} height={168} alt="" />}
         {s.find?.shop === sh.id && <WalkIn sh={sh} />}
       </div>
@@ -165,8 +167,29 @@ function uncleSays(s: GameState, r: RegionId): string {
   return regionDone(s, 0) ? "They didn't pave it. You might. Asphalt keeps." : "Don't let them pave it.";
 }
 
+// 21 units: 7 or 3 to a row, so every row comes out full. Tiles are the 64px storefronts at 3x (4x when 3 to a row
+// leaves room); only when 7 don't fit at 3x do they shrink to whatever whole pixel width fits.
+const GUTTER = 12;
+export function plazaFit(w: number): { cols: number; tile: number } {
+  const fit = (n: number) => Math.floor((w - (n + 1) * GUTTER) / n);
+  const step = (t: number) => (t >= 256 ? 256 : t >= 192 ? 192 : t);
+  return fit(7) >= 150 ? { cols: 7, tile: step(Math.min(fit(7), 192)) } : { cols: 3, tile: step(fit(3)) };
+}
+
 export function Shops() {
   const s = app.s;
+  const strip = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = strip.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      const { cols, tile } = plazaFit(el.clientWidth);
+      el.style.setProperty('--cols', String(cols));
+      el.style.setProperty('--z', String(tile / 192));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   const r = s.view;
   const list = [...leased(s, r), ...forLease(s, r)];
   const order = Object.keys(SHOPS);
@@ -176,7 +199,7 @@ export function Shops() {
       <h2>
         {REGIONS[r].chrome.plaza}
       </h2>
-      <div class="strip">
+      <div class="strip" ref={strip}>
         {list.map((sh) => (
           <Unit key={sh.id} sh={sh} />
         ))}

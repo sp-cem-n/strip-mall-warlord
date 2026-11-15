@@ -48,6 +48,7 @@ const SHOP_ART: Record<string, ShopArt> = {
   bridal: A('BRIDAL', C.paper, C.neon, C.bone, 'dress'),
   cineplex: A('CINEMA', C.ink, C.sodiumLight, C.red, 'film'),
   pretzel: A('PRETZEL', C.sodium, C.umber, C.sodiumLight, 'pretzel'),
+  mgmt: A('MGMT', C.navy, C.paper, C.sodium, 'desk', 'OFFICE'),
 };
 for (const [id, base] of [['dojo2', 'dojo'], ['security2', 'security'], ['laundry2', 'laundromat'], ['payday2', 'payday'], ['party2', 'party'], ['grooming2', 'grooming']]) SHOP_ART[id] = SHOP_ART[base];
 
@@ -166,7 +167,9 @@ function interior(g: Grid, art: ShopArt) {
   }
 }
 
-export function facade(kind: string | null, material: Material, seed: number, ghost = 'SHOES'): Grid {
+// one tube in most signs is out (lit = the rare moment it sputters back on)
+export const deadTube = (seed: number) => hash(seed, 7) < 0.6;
+export function facade(kind: string | null, material: Material, seed: number, ghost = 'SHOES', lit = false): Grid {
   const g = new Grid(64, 56);
   const m = MATERIAL[material];
   g.rect(0, 0, 64, 50, m.wall);
@@ -178,8 +181,8 @@ export function facade(kind: string | null, material: Material, seed: number, gh
   g.boxed(3, 6, 58, 12, sgn ? sgn.bg : C.concrete);
   if (sgn) {
     const x = 32 - Math.floor(textWidth(sgn.text, 2) / 2);
-    const dead = Math.floor(hash(seed, 99) * sgn.text.length); // one tube is always out
-    [...sgn.text].forEach((ch, i) => g.text(ch, x + i * 8, 7, i === dead && hash(seed, 7) < 0.6 ? sgn.bg === C.sodium ? C.tan : C.concrete : sgn.fg, 2));
+    const dead = lit ? -1 : Math.floor(hash(seed, 99) * sgn.text.length);
+    [...sgn.text].forEach((ch, i) => g.text(ch, x + i * 8, 7, i === dead && deadTube(seed) ? sgn.bg === C.sodium ? C.tan : C.concrete : sgn.fg, 2));
   } else {
     g.text(ghost, 32 - Math.floor(textWidth(ghost, 2) / 2), 7, C.stone, 2); // ghost of the last tenant
   }

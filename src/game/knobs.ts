@@ -44,3 +44,6 @@ export const REFERRAL_WINS = 3; // referral walk-in: this many wins' pay
 export const OFFLINE_CAP_SECONDS = 8 * 3600;
 export const STEP = 0.2;
 export const LOG_KEEP = 60; // receipt lines kept per crew
+export const RATE_WINDOW = 5; // seconds of game time behind every +/s on the top bar
+export const MGMT_RENT = 0.03; // Plaza Management: +3% rent, both roads, per level
+export const MGMT_RENO = 3e9; // its first renovation; then RENO_GROWTH like every unit

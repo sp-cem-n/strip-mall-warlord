@@ -171,5 +171,5 @@ export function Field({ r }: { r: RegionId }) {
     id = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(id);
   }, []);
-  return <canvas ref={ref} width={W} height={H} class="field" style={{ width: `${W * SCALE}px`, height: `${H * SCALE}px` }} />;
+  return <canvas ref={ref} width={W} height={H} class="field" style={{ width: "100%", maxWidth: `${W * SCALE}px`, aspectRatio: `${W} / ${H}` }} />;
 }

@@ -31,7 +31,7 @@ export const ROUTE9: RegionDef = {
   pay: 'goodwill',
   leaseIn: 'cash',
   trainIn: 'goodwill',
-  chrome: { plaza: 'Pinewood Plaza', mgmt: 'PINEWOOD PLAZA MGMT', sub: 'Pinewood Plaza · Rt. 9 · Fall 1997' },
+  chrome: { plaza: 'Pinewood Plaza', mgmt: 'PINEWOOD PLAZA MGMT' },
   start: 'pawn',
   ending: 'The rendering is now a parking lot. Yours.',
   lots: [

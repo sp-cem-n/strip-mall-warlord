@@ -69,11 +69,15 @@ export interface BotOpts {
 function crewAct(s: GameState, r: RegionId, o: BotOpts) {
   const c = s.crews[r];
   const R = REGIONS[r];
+  const open = () => forLease(s, r).filter((x) => !x.dawn).sort((a, b) => a.lease - b.lease);
   for (let g = 0; g < 5; g++) {
-    const next = forLease(s, r).sort((a, b) => a.lease - b.lease)[0];
+    const next = open()[0];
     if (!next || lease(s, next.id)) break;
   }
-  const pending = forLease(s, r).sort((a, b) => a.lease - b.lease)[0]?.lease ?? 0;
+  // Plaza Management: leased in Equity once there's twice its price on hand
+  const mgmt = forLease(s, r).find((x) => x.dawn);
+  if (mgmt && s.equity >= 2 * mgmt.lease) lease(s, mgmt.id);
+  const pending = open()[0]?.lease ?? 0;
   // Patrol contracts for every lot reached; save up for one when it's under half an hour of rent.
   const zone = FIGHTS[r][Math.min(c.frontier, FIGHTS[r].length - 1)].zone;
   let reserve = 0;

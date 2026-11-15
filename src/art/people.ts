@@ -76,6 +76,7 @@ export const CREW_LOOKS: Record<string, Look> = {
   golfpro: { hair: C.sodium, shirt: C.paper, pants: C.green, shoes: C.paper, extra: (g) => { cap(C.paper)(g); g.vline(13, 8, 10, C.stone).rect(12, 18, 3, 1, C.stone); } },
   planner: { hair: C.night, shirt: C.paper, pants: C.night, extra: (g) => { clipboard(g); g.px(6, 11, C.neon); } },
   usher: { hair: C.umber, shirt: C.red, pants: C.night, extra: (g) => g.px(6, 11, C.sodiumLight).px(9, 11, C.sodiumLight).rect(12, 13, 2, 4, C.night).px(12, 12, C.paper) },
+  sal: { skin: C.tan, hair: C.paper, shirt: C.bone, sleeves: C.bone, pants: C.umber, wide: true, belly: true, extra: (g) => g.hline(5, 2, 6, C.tan).px(5, 2, C.paper).px(10, 2, C.paper).rect(12, 15, 3, 3, C.sodiumLight).px(13, 16, C.ink) }, // cardigan, the ring of keys
   pretzel: { hair: C.tan, shirt: C.sodium, pants: C.navy, extra: (g) => { cap(C.red)(g); g.rect(12, 13, 4, 3, C.sodium).px(13, 14, C.umber); } },
 };
 

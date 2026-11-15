@@ -30,16 +30,36 @@ button { font: inherit; }
 .btn.big { font-family: 'Pixelify Sans', sans-serif; font-weight: 500; font-size: 20px; letter-spacing: 0.06em; padding: 6px 18px; min-width: 220px; text-align: center; border-width: 6px; border-image-width: 6px; }
 
 /* ---- the roadside: pylon sign + LED board over grass and Rt. 9 ---- */
-.roadside { display: flex; align-items: flex-end; gap: 18px; padding: 10px 20px 14px; background: var(--road) left bottom / 64px 32px repeat-x; }
+.roadside { position: sticky; top: 0; z-index: 15; display: flex; align-items: flex-end; gap: 18px; padding: 10px 20px 14px; background: var(--night) var(--road) left bottom / 64px 32px repeat-x; }
 .pylon { width: 390px; display: flex; flex-direction: column; }
-.cabinet { display: flex; flex-direction: column; align-items: center; padding: 2px 8px; background: none; border: 10px solid; border-image: var(--pylon) 5 fill / 10px; cursor: pointer; color: var(--bone); }
-.cabinet:hover .pylon-title { color: var(--paper); }
-.pylon-title { font-family: 'Pixelify Sans', sans-serif; font-weight: 500; font-size: 22px; letter-spacing: 0.1em; color: var(--sodium-light); text-shadow: 2px 2px 0 var(--brick); }
-.pylon-sub { font-size: 16px; color: var(--stone); }
-.tenant { display: flex; align-items: center; gap: 8px; height: 34px; margin: -4px 14px 0; padding: 0 10px; border: 4px solid; border-image: var(--tenant) 2 / 4px; background-clip: padding-box; }
+.cabinet { display: flex; flex-direction: column; align-items: stretch; gap: 2px; padding: 2px 6px; background: none; border: 10px solid; border-image: var(--pylon) 5 fill / 10px; cursor: pointer; color: var(--bone); font: inherit; }
+/* the sign: chasing bulbs, STRIP MALL in sodium, WARLORD in red neon with a burned-out O */
+.bulbrow { height: 4px; background: repeating-linear-gradient(90deg, var(--sodium-light) 0 4px, transparent 4px 8px, var(--sodium) 8px 12px, transparent 12px 16px); animation: chase 0.6s steps(2) infinite; }
+.bulbrow:last-child { animation-direction: reverse; }
+.sign-main { display: flex; align-items: baseline; justify-content: center; gap: 10px; font-family: 'Pixelify Sans', sans-serif; font-weight: 500; line-height: 1; padding: 2px 0 0; }
+.sign-main i { font-style: normal; font-size: 17px; letter-spacing: 0.12em; color: var(--sodium-light); text-shadow: 2px 2px 0 var(--brick); }
+.sign-main .neon { font-weight: 500; font-size: 30px; letter-spacing: 0.1em; color: #ff6a5a; text-shadow: 0 0 6px var(--red), 2px 2px 0 var(--brick); }
+.sign-sub { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; color: var(--stone); white-space: nowrap; overflow: hidden; }
+.sign-sub .lit { color: var(--mint); }
+.title-sign { display: block; padding: 0; margin: 0 0 2px; border: 0; background: none; cursor: pointer; }
+.title-sign img { display: block; width: 390px; max-width: 100%; height: auto; }
+.title-sign:hover img { filter: brightness(1.15); }
+.marquee-sign { cursor: default; }
+.marquee-sign.fz .sign-main .neon { color: #ff7fb0; text-shadow: 0 0 6px var(--neon), 2px 2px 0 var(--plum); }
+.marquee-sign.fz .sign-main i { color: var(--mint); text-shadow: 2px 2px 0 var(--teal); }
+.marquee-sign.fz .bulbrow { background: repeating-linear-gradient(90deg, var(--neon) 0 4px, transparent 4px 8px, var(--sodium-light) 8px 12px, transparent 12px 16px); }
+.marquee-sign.pub .sign-main .neon { font-size: 24px; color: var(--mint); text-shadow: 0 0 6px var(--teal), 2px 2px 0 var(--ink); }
+.marquee-sign.pub .bulbrow { background: repeating-linear-gradient(90deg, var(--mint) 0 4px, transparent 4px 8px, var(--sodium) 8px 12px, transparent 12px 16px); }
+.marquee-sign .sign-sub .lit { color: var(--sodium-light); }
+.tenant { position: relative; display: flex; align-items: center; gap: 8px; height: 34px; margin: -4px 14px 0; padding: 0 10px; border: 4px solid; border-image: var(--tenant) 2 / 4px; background-clip: padding-box; }
 .tenant .k { font-family: 'Pixelify Sans', sans-serif; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; width: 84px; }
 .tenant .v { font-size: 26px; }
-.tenant .r { margin-left: auto; font-size: 17px; }
+.tenant .r { margin-left: auto; font-size: 17px; white-space: nowrap; }
+/* a payout lands: it floats up over the tenant */
+.tenant .pop { position: absolute; right: 10px; top: -6px; z-index: 2; font-size: 20px; color: var(--sodium-light); text-shadow: 2px 2px 0 var(--ink); pointer-events: none; animation: pop 2.5s steps(10) forwards; }
+@keyframes pop { 0% { transform: translateY(6px); opacity: 1; } 70% { opacity: 1; } 100% { transform: translateY(-12px); opacity: 0; } }
+.t-tickets { background-color: var(--sodium-light); color: var(--brick); }
+.t-tickets .v { color: var(--ink); }
 .t-cash { background-color: var(--paper); color: var(--forest); }
 .t-cash .v { color: var(--ink); }
 .t-asphalt { background-color: var(--navy); color: var(--sodium-light); }
@@ -49,27 +69,35 @@ button { font: inherit; }
 .t-equity .v { color: var(--ink); }
 .pole { display: flex; justify-content: center; gap: 120px; height: 22px; }
 .pole i, .legs i { display: block; width: 14px; background: var(--concrete); border: 2px solid var(--ink); border-top: 0; box-shadow: inset 4px 0 0 var(--stone); }
-.led-sign { margin-left: auto; display: grid; grid-template-columns: auto auto; gap: 0 8px; align-items: center; justify-items: center; }
-.led { display: flex; gap: 22px; padding: 4px 14px; font-size: 32px; color: var(--red); text-shadow: 2px 0 0 var(--brick); background: var(--led) repeat; background-size: 6px 6px; background-clip: padding-box; border: 10px solid; border-image: var(--pylon) 5 / 10px; }
-.legs { grid-area: 2 / 1; display: flex; gap: 160px; height: 34px; }
+.led-sign { display: grid; grid-template-columns: auto auto; gap: 4px 8px; align-items: center; justify-items: center; }
+/* the board never changes size: three fixed cells, short forms (1.2K) */
+.led { display: grid; grid-template-columns: 10ch 6ch 4ch; gap: 10px; padding: 2px 10px; font-size: 26px; line-height: 1; white-space: nowrap; color: var(--red); text-shadow: 2px 0 0 var(--brick); background: var(--led) repeat; background-size: 6px 6px; background-clip: padding-box; border: 10px solid; border-image: var(--pylon) 5 / 10px; }
+.led .cell { display: flex; flex-direction: column; align-items: center; }
+.led small { font-family: 'Pixelify Sans', sans-serif; font-size: 10px; letter-spacing: 0.1em; color: var(--brick); text-shadow: none; }
+.led-buttons { display: flex; flex-direction: column; gap: 4px; }
+.hwy, .hwy-gap { justify-self: stretch; height: 30px; }
+.hwy { font-family: 'Pixelify Sans', sans-serif; font-weight: 500; font-size: 16px; letter-spacing: 0.08em; color: var(--paper); background: #2f6b3f; border: 3px solid var(--paper); box-shadow: 0 0 0 2px #2f6b3f, 3px 3px 0 2px var(--ink); cursor: pointer; }
+.hwy:hover { background: var(--forest); }
+.legs { grid-area: 3 / 1; display: flex; gap: 160px; height: 34px; }
 .debug { color: var(--red); align-self: center; }
 .speaker { padding: 2px; background: none; border: 4px solid; border-image: var(--btn) 2 fill / 4px; cursor: pointer; line-height: 0; }
 .speaker:hover { border-image-source: var(--btn-hot); }
 .speaker.corner { position: fixed; top: 14px; right: 14px; z-index: 10; }
 
 /* ---- layout ---- */
-.grid { display: grid; grid-template-columns: minmax(600px, 1fr) 690px; grid-template-rows: auto 1fr; gap: 12px; padding: 12px; align-items: start; }
-.grid > .shops { grid-row: span 2; }
-.grid > .backoffice { grid-column: 2; }
-.help { grid-area: 2 / 2; font: inherit; font-size: 20px; width: 40px; height: 34px; align-self: start; padding: 0; background: none; color: var(--paper); border: 4px solid; border-image: var(--btn) 2 fill / 4px; cursor: pointer; }
+.grid { display: grid; grid-template-columns: minmax(min(100%, 620px), 1fr) minmax(min(100%, 480px), 690px); gap: 12px; padding: 12px; align-items: start; }
+/* the Lot and Back Office float under the top bar while you scroll the plaza; taller than the window, they scroll inside */
+.side { position: sticky; top: calc(var(--bar, 0px) + 12px); max-height: calc(100vh - var(--bar, 0px) - 24px); overflow-y: auto; display: flex; flex-direction: column; gap: 12px; min-width: 0; scrollbar-width: thin; }
+.help { font: inherit; font-size: 20px; width: 40px; height: 34px; padding: 0; background: none; color: var(--paper); border: 4px solid; border-image: var(--btn) 2 fill / 4px; cursor: pointer; }
 .help:hover { border-image-source: var(--btn-hot); }
 .col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 
 /* the plaza: painted cinderblock behind the strip */
 .wall { padding: 6px 8px 10px; background: var(--cinder) repeat; background-size: 64px 32px; background-clip: padding-box; border: 10px solid; border-image: var(--pylon) 5 / 10px; }
 /* tiles are the storefront art at 3x (64px -> 192px); space-evenly gives equal gutters and equal outer margins */
-.strip { display: grid; grid-template-columns: repeat(auto-fill, 192px); justify-content: space-evenly; row-gap: 12px; }
-.unit { display: flex; flex-direction: column; gap: 3px; }
+.strip { display: grid; grid-template-columns: repeat(var(--cols, 3), calc(192px * var(--z, 1))); justify-content: space-evenly; row-gap: 12px; }
+/* a tile is drawn at 192px and scaled as a whole (Shops.tsx picks whole-pixel widths) */
+.unit { display: flex; flex-direction: column; gap: 3px; zoom: var(--z, 1); width: 192px; }
 .facade { position: relative; width: 192px; height: 168px; }
 .facade img { display: block; }
 .facade .scaffold { position: absolute; inset: 0; pointer-events: none; }
@@ -111,10 +139,6 @@ button { font: inherit; }
 .zone.current .bar i { background: var(--sodium); }
 .auto { font-size: 13px; color: var(--concrete); }
 .auto.on { color: var(--mint); }
-.lot h2 { display: flex; justify-content: space-between; align-items: center; }
-.tabs { display: flex; gap: 4px; }
-.tab { font-family: 'Pixelify Sans', sans-serif; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; color: var(--stone); background: var(--night); border: 2px solid var(--ink); cursor: pointer; }
-.tab.on { color: var(--ink); background: var(--sodium); }
 .calls { display: flex; gap: 6px; align-items: center; margin-top: 5px; }
 .calls .btn:last-child { margin-left: auto; }
 .btn.hot { color: var(--ink); border-image-source: var(--btn-hot); }
@@ -126,16 +150,21 @@ button { font: inherit; }
 .breakroom { margin-top: 12px; padding: 4px 6px 6px; background: var(--night); border: 2px solid var(--ink); }
 .breakroom h3 { margin: 0 0 4px; font-family: 'Pixelify Sans', sans-serif; font-weight: 500; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sodium); }
 .breakroom h3 .dim { font-family: 'VT323', monospace; font-size: 15px; text-transform: none; letter-spacing: 0; }
-.bo-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 8px; }
-.bo { display: flex; gap: 4px; align-items: center; font-size: 14px; line-height: 1; cursor: help; }
+.bo-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr)); gap: 4px 8px; }
+.bo { display: flex; gap: 4px; align-items: center; min-width: 0; font-size: 14px; line-height: 1; cursor: help; }
+.bo > span { flex: 1; }
+.bo img, .bo .ft { flex: none; }
 .bo span { display: flex; flex-direction: column; min-width: 0; }
 .bo span > * { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* training */
 .training { font-size: 17px; }
-.track { display: grid; grid-template-columns: 130px 1fr auto; gap: 8px; align-items: center; padding: 2px 0; }
+/* two tight columns; narrow windows (and phones, later) fall back to one */
+.tracks { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 2px 14px; }
+.track { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; padding: 2px 0; white-space: nowrap; }
+.track > span { overflow: hidden; text-overflow: ellipsis; }
 .track .btn { min-width: 96px; text-align: center; }
-.bank { display: flex; gap: 6px; align-items: center; margin-top: 6px; padding-top: 6px; border-top: 2px dashed var(--concrete); }
-.bank span { flex: 1; }
+.bank { display: flex; gap: 6px; align-items: center; padding: 2px 0; white-space: nowrap; }
+.bank span { flex: 1; overflow: hidden; text-overflow: ellipsis; }
 .tnote { font-size: 15px; margin-top: 4px; }
 /* the win card */
 .wincard { width: 700px; }
@@ -168,19 +197,19 @@ button { font: inherit; }
 .printer.open .x { white-space: normal; }
 .printer.open { height: 0; min-height: var(--printer-h, 168px); overflow: visible; }
 .paper::-webkit-scrollbar { width: 10px; } .paper::-webkit-scrollbar-thumb { background: var(--concrete); } .paper::-webkit-scrollbar-track { background: var(--bone, #d8d0b8); }
-.paper { min-height: 97px; }
+.printer:not(.open) .paper { height: 104px; overflow: hidden; } /* fixed: the bar never bounces */
 .paper .t { color: var(--stone); }
 .paper b { font-weight: normal; }
 .r-info { color: var(--asphalt); }
 .r-win { color: var(--ink); }
 .r-loss, .r-capture { color: var(--brick); }
 .r-capture { letter-spacing: 0.03em; }
-.r-foot { text-align: center; letter-spacing: 0.12em; color: var(--concrete); padding-bottom: 2px; }
+.r-foot { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; letter-spacing: 0.12em; color: var(--concrete); padding-bottom: 2px; }
 
 
 /* ---- full screens ---- */
 .screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 20px; }
-.panel-brick { padding: 4px 12px 8px; border: 18px solid; border-image: var(--brick) 9 fill / 18px; }
+.panel-brick { padding: 4px 12px 8px; border: 18px solid; border-image: var(--brickwall) 9 fill / 18px; }
 .boot-scene { display: block; border: 4px solid var(--ink); }
 .boot-menu { width: 968px; display: flex; gap: 18px; justify-content: center; align-items: flex-start; }
 .resume { display: flex; flex-direction: column; gap: 6px; width: 310px; }
@@ -222,34 +251,32 @@ button { font: inherit; }
 .slots { font-size: 15px; display: inline-flex; gap: 6px; align-items: center; margin-left: 6px; }
 .btn.on { border-color: var(--mint); color: var(--mint); }
 .backoffice h2 { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
-.backoffice .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
 /* ---- the Fun Zone ---- */
-.screen.room { justify-content: flex-start; background-size: 128px 128px; image-rendering: pixelated; padding: 12px; }
-.room-bar { display: flex; gap: 12px; align-items: center; width: 100%; max-width: 1880px; padding: 8px 12px; background: var(--ink); border: 4px solid var(--plum); }
-.room-sign { font-family: 'Pixelify Sans', sans-serif; font-size: 28px; color: var(--neon); text-shadow: 2px 2px 0 var(--ink), 0 0 12px var(--neon); letter-spacing: 0.1em; flex: 1; }
-.room-bar .tenant { display: flex; gap: 6px; align-items: baseline; padding: 4px 10px; font-size: 20px; }
-.t-tickets { background: var(--sodium-light); color: var(--ink); }
+.screen.room { justify-content: flex-start; align-items: stretch; background-size: 128px 128px; image-rendering: pixelated; padding: 0 0 12px; }
+.screen.room .room-floor { align-self: center; padding: 0 12px; }
 .room-floor { display: flex; gap: 16px; align-items: flex-start; width: 100%; max-width: 1880px; }
 .cabs { display: grid; grid-template-columns: repeat(3, 288px); gap: 18px 28px; flex: 1; justify-content: center; }
-.cab { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.cab { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.price-tag { position: absolute; top: 420px; left: 50%; transform: translateX(-50%) rotate(-3deg); z-index: 1; padding: 1px 6px; font-size: 15px; line-height: 1.1; white-space: nowrap; color: var(--red); background: var(--paper); border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); pointer-events: none; }
+.cab.tall .price-tag { top: 432px; }
+.price-tag.short { color: var(--stone); background: var(--bone); }
 .cab canvas { display: block; width: 288px; height: 480px; cursor: pointer; image-rendering: pixelated; filter: drop-shadow(0 0 10px rgba(224, 88, 140, 0.35)); touch-action: none; user-select: none; }
 .cab.dark canvas { cursor: default; filter: none; }
 .cab-plate { display: flex; flex-direction: column; gap: 4px; align-items: stretch; width: 288px; padding: 6px; background: var(--ink); border: 2px solid var(--asphalt); font-size: 16px; }
 .cab-plate b { font-weight: normal; color: var(--sodium-light); text-align: center; }
-.counter { width: 340px; padding: 10px 12px; background: var(--night); border: 6px solid var(--sodium); font-size: 16px; position: sticky; top: 12px; }
+.counter { width: 340px; padding: 10px 12px; background: var(--night); border: 6px solid var(--sodium); font-size: 16px; position: sticky; top: calc(var(--bar, 0px) + 12px); }
 .counter h2, .counter h3 { margin: 4px 0; color: var(--sodium-light); font-weight: normal; }
 .perk { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 3px 0; border-bottom: 2px solid var(--asphalt); }
 .perk > span:first-child { display: flex; flex-direction: column; }
 .perk b { font-weight: normal; }
 .perk.beat { color: var(--concrete); text-decoration: line-through; }
 .plush { height: 24px; background: repeating-linear-gradient(90deg, var(--violet) 0 12px, var(--mint) 12px 24px, var(--neon) 24px 36px, var(--sodium-light) 36px 48px); border-bottom: 4px solid var(--ink); margin-bottom: 6px; }
-.room.pub .room-bar { border-color: var(--brick); }
-.room.pub .room-sign { color: var(--sodium-light); text-shadow: 2px 2px 0 var(--ink), 0 0 12px var(--red); }
 .room.pub .cab canvas { filter: drop-shadow(0 0 10px rgba(246, 210, 122, 0.25)); }
 .counter.pub { border-color: var(--brick); }
 
 /* the arcade door: a small neon marquee between the receipt and the LED board, bulbs chasing in 2-step pixels */
-.arcade-door { align-self: center; margin-left: auto; display: flex; flex-direction: column; align-items: stretch; gap: 3px; width: 132px; padding: 4px; background: var(--ink); color: var(--neon); border: 4px solid var(--plum); box-shadow: 0 0 0 2px var(--ink), 4px 4px 0 rgba(0,0,0,0.4); cursor: pointer; }
+.doors { margin-left: auto; align-self: center; display: flex; flex-direction: column; gap: 6px; }
+.arcade-door { display: flex; flex-direction: column; align-items: stretch; gap: 3px; width: 132px; padding: 4px; background: var(--ink); color: var(--neon); border: 4px solid var(--plum); box-shadow: 0 0 0 2px var(--ink), 4px 4px 0 rgba(0,0,0,0.4); cursor: pointer; }
 .arcade-door .bulbs { height: 4px; background: repeating-linear-gradient(90deg, var(--sodium-light) 0 4px, transparent 4px 8px, var(--sodium) 8px 12px, transparent 12px 16px); animation: chase 0.6s steps(2) infinite; }
 .arcade-door .bulbs:last-child { animation-direction: reverse; }
 @keyframes chase { to { background-position: 8px 0; } }
@@ -258,8 +285,13 @@ button { font: inherit; }
 .arcade-door .slot i { width: 4px; height: 12px; background: var(--night); border: 2px solid var(--concrete); }
 .arcade-door:hover { border-color: var(--neon); }
 .arcade-door:hover .marquee { color: var(--paper); }
-.arcade-door.bar { color: var(--mint); border-color: var(--teal); }
-.arcade-door.bar .marquee { color: var(--mint); text-shadow: 2px 2px 0 var(--teal); }
+.arcade-door.pub { color: var(--mint); border-color: var(--teal); }
+.arcade-door.pub .marquee { color: var(--mint); text-shadow: 2px 2px 0 var(--teal); }
+.arcade-door.home { color: var(--sodium-light); border-color: var(--sodium); }
+.arcade-door.home .marquee { color: var(--sodium-light); text-shadow: 2px 2px 0 var(--brick); }
+.doors:has(> :nth-child(2)) .arcade-door { gap: 1px; padding: 2px 4px; }
+.doors:has(> :nth-child(2)) .arcade-door .marquee { font-size: 16px; }
+.doors:has(> :nth-child(2)) .arcade-door .slot { font-size: 14px; }
 
 /* test mode (?test=1) */
 .test-panel { position: fixed; left: 12px; bottom: 12px; z-index: 50; width: 420px; display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; font-size: 16px; background: var(--ink); border: 4px solid var(--violet); box-shadow: 4px 4px 0 rgba(0,0,0,0.5); }

@@ -1,8 +1,9 @@
 import { DAWN } from './content/dawn';
 import { enemyLineup, statsOf } from './battle';
-import { ASPHALT_BONUS, CURRENCY_NAME, type Currency, BATTLERS, FIGHTS, fightIndex, GOODWILL_PER_EQUITY, MAX_SLOTS, OVERTIME_FIGHTS, OVERTIME_SECONDS, REGIONS, RENO_GROWTH, RENT_GROWTH, ROLES, SMOKE_BREAK_SECONDS, SHOPS, SLOT_PRICES, START_SLOTS, SHOP_LIST, START_CASH, TRAIN_BASE, TRAIN_GROWTH, type RegionId, type Role, type ShopDef, LOG_KEEP } from './defs';
+import { ASPHALT_BONUS, CURRENCY_NAME, type Currency, BATTLERS, FIGHTS, fightIndex, GOODWILL_PER_EQUITY, MAX_SLOTS, OVERTIME_FIGHTS, OVERTIME_SECONDS, REGIONS, RENO_GROWTH, RENT_GROWTH, ROLES, SMOKE_BREAK_SECONDS, SHOPS, SLOT_PRICES, START_SLOTS, SHOP_LIST, START_CASH, TRAIN_BASE, TRAIN_GROWTH, type RegionId, type Role, type ShopDef, LOG_KEEP, MGMT_RENT } from './defs';
 import type { Crew, GameState, LogLine, Track } from './state';
 import { newRoom, perk } from './room';
+import { credit } from './rates';
 
 export const SAVE_VERSION = 5;
 const zeroTrack = (): Track => ({ tank: 0, damage: 0, heal: 0, control: 0, buffer: 0 });
@@ -35,9 +36,10 @@ export function newGame(seed = Date.now() % 2147483647): GameState {
 
 // The purse: every currency is read, spent and earned through these three.
 export const bal = (s: GameState, r: RegionId, cur: Currency) => (cur === 'cash' ? s.crews[r].cash : s[cur]);
-export function earn(s: GameState, r: RegionId, cur: Currency, n: number) {
+export function earn(s: GameState, r: RegionId, cur: Currency, n: number, lump = false) {
   if (cur === 'cash') s.crews[r].cash += n;
   else s[cur] += n;
+  credit(s, cur === 'cash' ? (r ? 'cash1' : 'cash0') : cur, n, lump);
 }
 export function spend(s: GameState, r: RegionId, cur: Currency, n: number): string | null {
   if (bal(s, r, cur) < n) return `Not enough ${CURRENCY_NAME[cur]}`;
@@ -77,14 +79,27 @@ export const topFight = (s: GameState, r: RegionId) => (regionDone(s, r) ? FIGHT
 export const fightOf = (s: GameState, r: RegionId) => FIGHTS[r][Math.min(s.crews[r].at, FIGHTS[r].length - 1)];
 
 // Shops arrive in a fixed order as fights are cleared.
-export const available = (s: GameState, sh: ShopDef) => sh.fight < 0 || cleared(s, sh.region, sh.zone, sh.fight);
+export function available(s: GameState, sh: ShopDef) {
+  if (sh.dawn) return s.bypass;
+  return sh.fight === -1 || cleared(s, sh.region, sh.zone, sh.fight);
+}
+export const leaseCur = (sh: ShopDef): Currency => REGIONS[sh.dawn ? 1 : sh.region].leaseIn;
 export const leased = (s: GameState, r: RegionId) => SHOP_LIST.filter((x) => x.region === r && s.crews[r].shops[x.id]);
 export const forLease = (s: GameState, r: RegionId) => SHOP_LIST.filter((x) => x.region === r && !s.crews[r].shops[x.id] && available(s, x));
 
 // A shop's hire fights at its renovation level plus the shop's tier: pricier storefronts send better people,
 // so a dollar of renovation buys about the same strength anywhere on the strip.
 export const tierOf = (id: string) => Math.max(0, Math.round(Math.log(SHOPS[id].reno / 5) / Math.log(RENO_GROWTH)));
-export const powerLevel = (s: GameState, id: string) => (s.crews[SHOPS[id].region].shops[id] ?? 0) + tierOf(id);
+export function powerLevel(s: GameState, id: string): number {
+  const sh = SHOPS[id];
+  const lv = s.crews[sh.region].shops[id] ?? 0;
+  if (!sh.dawn) return lv + tierOf(id);
+  // Plaza Management: Sal fights at the best storefront's level, plus his own renovations
+  const top = Math.max(1, ...SHOP_LIST.filter((x) => x.region === sh.region && !x.dawn && s.crews[sh.region].shops[x.id]).map((x) => powerLevel(s, x.id)));
+  return top + lv - 1;
+}
+// Plaza Management's renovations: +MGMT_RENT rent per level on both roads
+export const mgmtMult = (s: GameState) => 1 + MGMT_RENT * (s.crews[0].shops.mgmt ?? 0);
 // Bosses who quit and joined that region's crew; they fight at the crew's average power level.
 export const joined = (s: GameState, r: RegionId) => REGIONS[r].lots.filter((l, z) => cleared(s, r, z, l.fights)).map((l) => l.boss.joins);
 export function bossLevel(s: GameState, r: RegionId): number {
@@ -99,7 +114,7 @@ export function roster(s: GameState, r: RegionId): [string, number][] {
   return out.sort((a, b) => ROLES.indexOf(BATTLERS[a[0]].role) - ROLES.indexOf(BATTLERS[b[0]].role));
 }
 
-export const rentOf = (s: GameState, id: string, level = s.crews[SHOPS[id].region].shops[id] ?? 0) => (level ? SHOPS[id].rent * RENT_GROWTH ** (level - 1) * asphaltMult(s, SHOPS[id].region) : 0);
+export const rentOf = (s: GameState, id: string, level = s.crews[SHOPS[id].region].shops[id] ?? 0) => (level ? SHOPS[id].rent * RENT_GROWTH ** (level - 1) * asphaltMult(s, SHOPS[id].region) * mgmtMult(s) : 0);
 export const rentPerSec = (s: GameState, r: RegionId) => leased(s, r).reduce((a, x) => a + rentOf(s, x.id), 0);
 export const renovateCost = (id: string, level: number) => Math.round(SHOPS[id].reno * RENO_GROWTH ** (level - 1));
 export const trainCost = (r: RegionId, level: number) => Math.round(TRAIN_BASE[r] * TRAIN_GROWTH ** level);
@@ -131,7 +146,7 @@ export function lease(s: GameState, id: string): string | null {
   const c = sh && s.crews[sh.region];
   if (!sh || c.shops[id]) return 'Already yours';
   if (!available(s, sh)) return 'Not available yet';
-  const err = spend(s, sh.region, REGIONS[sh.region].leaseIn, sh.lease);
+  const err = spend(s, sh.region, leaseCur(sh), sh.lease);
   if (err) return err;
   c.shops[id] = 1;
   log(s, sh.region, `${sh.name} leased. ${BATTLERS[sh.battler].name} joins the crew.`, 'capture');

@@ -2,9 +2,9 @@
 // Click it and the paper unrolls: the last 60 lines for this crew, scrolling.
 import { app, tip } from '../app';
 import { REGIONS } from '../game/defs';
-import { fmtTime } from './format';
+import { fmtClock } from './format';
 
-const FOOTERS = ['NO REFUNDS. NO EXCEPTIONS.', 'PARKING VALIDATED: NEVER', 'THANK YOU FOR SHOPPING PINEWOOD PLAZA', 'ASK ABOUT OUR VACANCIES', 'NOT A RECEIPT FOR TAX PURPOSES', 'HAVE A NICE NIGHT. NO LOITERING.'];
+const FOOTERS = ['NO REFUNDS. NO EXCEPTIONS.', 'PARKING VALIDATED: NEVER', 'THANK YOU FOR SHOPPING', 'ASK ABOUT OUR VACANCIES', 'NOT A TAX RECEIPT', 'NO LOITERING.']; // short: the footer is one line, always
 export const receipt = { open: false };
 
 export function Receipt() {
@@ -28,7 +28,7 @@ export function Receipt() {
         <ul>
           {lines.map((l, i) => (
             <li key={`${l.t}-${i}`} class={`r-${l.tone}`}>
-              <span class="t">{fmtTime(l.t)}</span>
+              <span class="t">{fmtClock(l.t)}</span>
               <span class="x">
                 {l.tone === 'capture' ? `*** ${l.text} ***` : l.text}
                 {l.n && <b> x{l.n}</b>}

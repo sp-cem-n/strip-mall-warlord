@@ -5,7 +5,8 @@ import { app, toast } from '../app';
 import { botAct } from '../game/bot';
 import { FIGHTS, REGIONS, SHOP_LIST, STEP } from '../game/defs';
 import { forLease, rentPerSec } from '../game/economy';
-import { MACHINES } from '../game/room';
+import { MACHINES, PINBALL_TOP, SHUFFLE_TOP, endPlay, pokerQ, postScore, postShuffle, serviced, type MachineId } from '../game/room';
+import { enterRoom, leaveRoom } from './Pylon';
 import { fightLabel, payFor, step } from '../game/sim';
 import { fmt } from './format';
 
@@ -63,6 +64,31 @@ function unlockAll() {
   done();
 }
 
+// Autoplay: every unlocked machine plays itself, one game per its usual length, on the house (no coin, no tickets).
+// The cabinets stay dark; the payouts land in the purse and the +/s on the top bar like a real play.
+const auto = { on: false, timer: 0, clock: {} as Partial<Record<MachineId, number>> };
+const TICK = 0.25;
+function autoTick() {
+  const s = app.s;
+  if (app.paused) return;
+  for (const m of MACHINES) {
+    if (!s.room.unlocked.includes(m.id) || serviced(s, m.id) > 0) continue;
+    const t = (auto.clock[m.id] = (auto.clock[m.id] ?? 0) + TICK * app.speed);
+    if (t < m.secs) continue;
+    auto.clock[m.id] = 0;
+    const q = m.id === 'poker' ? pokerQ(s, true) : m.id === 'cyclone' ? (Math.random() < 0.1 ? 1 : Math.random() < 0.4 ? 0.5 : 0) : 0.45 + 0.5 * Math.random();
+    if (m.id === 'pinball') postScore(s, Math.round(q * PINBALL_TOP));
+    if (m.id === 'shuffle') postShuffle(s, Math.round(q * SHUFFLE_TOP));
+    endPlay(s, m.id, q);
+  }
+}
+function setAuto(on: boolean) {
+  auto.on = on;
+  clearInterval(auto.timer);
+  if (on) auto.timer = setInterval(autoTick, TICK * 1000) as unknown as number;
+  app.refresh();
+}
+
 export function TestPanel() {
   const [open, setOpen] = useState(true);
   const [lot, setLot] = useState(0);
@@ -100,7 +126,13 @@ export function TestPanel() {
       </div>
       <div class="tp-row">
         <button class="btn small" onClick={unlockAll}>Unlock every machine</button>
-        <button class="btn small" onClick={() => ((app.screen = app.screen === 'room' ? 'game' : 'room'), app.refresh())}>{app.screen === 'room' ? 'Back to the plaza' : 'Go to the arcade'}</button>
+        <button class="btn small" onClick={() => (app.screen === 'room' ? leaveRoom() : enterRoom(0))}>{app.screen === 'room' ? 'Back to the plaza' : 'Go to the arcade'}</button>
+      </div>
+      <div class="tp-row">
+        <button class={`btn small ${auto.on ? 'hot' : ''}`} onClick={() => setAuto(!auto.on)}>
+          Autoplay machines: {auto.on ? 'ON' : 'off'}
+        </button>
+        <span class="dim">every open machine, free</span>
       </div>
       <div class="tp-row">
         <span class="dim">Speed</span>

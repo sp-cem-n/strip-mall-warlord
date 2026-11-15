@@ -1,3 +1,4 @@
+import { startLights } from './ui/lights';
 import { render } from 'preact';
 import { app, type Screen } from './app';
 import { STEP } from './game/defs';
@@ -42,6 +43,7 @@ app.screen = (q.get('screen') as Screen) ?? 'boot';
 for (const ev of ['pointerdown', 'keydown']) addEventListener(ev, unlockAudio);
 
 render(<App />, document.getElementById('app')!);
+startLights(q.get('lights') === 'fast');
 
 let last = performance.now();
 let acc = 0;

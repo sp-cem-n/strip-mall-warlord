@@ -4,7 +4,7 @@ import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright';
 
 const base = process.env.URL ?? 'http://localhost:4173/';
-const out = process.env.OUT ?? 'screenshots/v7';
+const out = process.env.OUT ?? 'screenshots/v8';
 const g = '?fresh=1&seed=1991&pause=1';
 const room = `${g}&advance=3600&room=full&screen=room`;
 const bar = `${g}&roster=full&region=1&room=full&screen=room`;

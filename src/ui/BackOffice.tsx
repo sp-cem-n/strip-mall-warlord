@@ -19,7 +19,7 @@ function Training({ r }: { r: RegionId }) {
   const have = purse(s, r);
   const team = roster(s, r);
   return (
-    <>
+    <div class="tracks">
       {ROLES.map((role) => {
         const [name, what] = TRACKS[role];
         const lv = c.train[role];
@@ -52,7 +52,7 @@ function Training({ r }: { r: RegionId }) {
           </button>
         </div>
       )}
-    </>
+    </div>
   );
 }
 

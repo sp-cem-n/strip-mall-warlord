@@ -26,6 +26,7 @@ export const ICONS: Record<string, () => Grid> = {
   equity: () => new Grid(9, 9).rect(1, 6, 2, 2, C.mint).rect(4, 4, 2, 4, C.mint).rect(7, 1, 2, 7, C.mint).hline(0, 8, 9, C.stone).outline(), // up and to the right
   asphalt: () => new Grid(9, 9).rect(3, 1, 3, 2, C.sodium).rect(2, 3, 5, 2, C.paper).rect(1, 5, 7, 2, C.sodium).hline(0, 7, 9, C.night),
   lots: () => new Grid(9, 9).vline(1, 0, 9, C.stone).rect(2, 0, 6, 4, C.red).hline(2, 2, 6, C.paper),
+  ticket: () => new Grid(9, 9).rect(0, 2, 9, 5, C.sodiumLight).rect(2, 3, 5, 3, C.sodium).px(0, 4, C.night).px(8, 4, C.night).vline(4, 3, 3, C.sodiumLight).outline(), // a prize ticket, torn off the strip
   find: () => new Grid(9, 9).vline(4, 0, 9, C.sodiumLight).hline(0, 4, 9, C.sodiumLight).rect(3, 3, 3, 3, C.paper).px(2, 2, C.sodium).px(6, 6, C.sodium).px(6, 2, C.sodium).px(2, 6, C.sodium),
 };
 

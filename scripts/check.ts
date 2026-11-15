@@ -1,7 +1,7 @@
 // Small invariant checks. Run: bun scripts/check.ts
 import { BATTLERS, FIGHTS, GOODWILL_PER_EQUITY, MAX_SLOTS, OFFLINE_CAP_SECONDS, REGIONS, SHOPS, SMOKE_BREAK_SECONDS, SHOP_LIST, START_SLOTS, STEP, WEAK_BONUS } from '../src/game/defs';
 import { auras, enemyLineup, startBattle, statsOf, stepBattle } from '../src/game/battle';
-import { advance, asphaltGain, autoCovers, buyPatrol, buySlot, convert, curb, forLease, lease, lineupOf, newGame, overtime, patrolBlock, patrolPrice, pave, renovate, renovateCost, roster, slotsOf, tierOf, toggleField, train, trainCost, view } from '../src/game/economy';
+import { advance, asphaltGain, autoCovers, buyPatrol, buySlot, convert, curb, forLease, lease, lineupOf, newGame, overtime, patrolBlock, powerLevel, rentPerSec, patrolPrice, pave, renovate, renovateCost, roster, slotsOf, tierOf, toggleField, train, trainCost, view } from '../src/game/economy';
 import { loadGame, old, saveGame } from '../src/game/save';
 import { collectFind, simulateAway, step } from '../src/game/sim';
 import { CREW_LOOKS, ENEMY_LOOKS } from '../src/art/people';
@@ -29,7 +29,7 @@ const finish = (s: GameState, r: 0 | 1) => ((s.crews[r].frontier = FIGHTS[r].len
 const r9 = SHOP_LIST.filter((x) => x.region === 0);
 const bp = SHOP_LIST.filter((x) => x.region === 1);
 const bosses = (r: 0 | 1) => REGIONS[r].lots.map((l) => l.boss.joins);
-check(`Route 9: ${r9.length} shops + ${bosses(0).length} bosses = 26 battlers`, r9.length + bosses(0).length === 26 && new Set([...r9.map((x) => x.battler), ...bosses(0)]).size === 26);
+check(`Route 9: ${r9.length} shops + ${bosses(0).length} bosses = 27 battlers`, r9.length + bosses(0).length === 27 && new Set([...r9.map((x) => x.battler), ...bosses(0)]).size === 27);
 check(`Bypass: ${bp.length} shops (${bp.filter((x) => !r9.some((y) => y.battler === x.battler)).length} new kinds) + ${bosses(1).length} bosses`, bp.length >= 12 && new Set(bp.map((x) => x.battler)).size === bp.length);
 check('every battler and shop id resolves', SHOP_LIST.every((x) => BATTLERS[x.battler]) && REGIONS.every((r) => r.lots.every((l) => BATTLERS[l.boss.joins])));
 check('every enemy weakness is a battler that region can field', REGIONS.every((r) => r.lots.every((l) => [...l.regulars, l.boss].every((e) => [...SHOP_LIST.filter((x) => x.region === r.id).map((x) => x.battler), ...bosses(r.id)].includes(e.weak)))));
@@ -98,7 +98,7 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   t.crews[0].shops = Object.fromEntries(r9.map((x) => [x.id, 5]));
   finish(t, 0);
   const team = roster(t, 0);
-  check('26 on the crew with every boss joined', team.length === 26);
+  check('27 on the crew with every boss joined', team.length === 27);
   const b = startBattle(t, 0)!;
   check(`${START_SLOTS} fighter slots to start; buffers stand on the curb, not in a slot`, slotsOf(t, 0) === START_SLOTS && b.crew.length === START_SLOTS && b.crew.every((u) => u.role !== 'buffer') && curb(t, 0).length > 0);
   check('aura from the curb: Personal Trainer gives tanks +20% HP', b.crew.find((u) => u.role === 'tank')!.maxHp > statsOf(t, 0, b.crew.find((u) => u.role === 'tank')!.id, 5 + tierOf(r9.find((x) => x.battler === b.crew.find((u) => u.role === 'tank')!.id)?.id ?? 'pawn')).hp * 1.15);
@@ -143,6 +143,21 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   t.crews[1].frontier = 3;
   const eq = t.equity;
   check('Bypass leases cost Equity, not dollars', lease(t, 'carwash') === null && t.equity === eq - SHOPS.carwash.lease);
+  {
+    // Plaza Management: hidden before dawn, leased in Equity after, every level +5% rent on both roads
+    const pre = newGame(9);
+    check('Plaza Management is not for lease before dawn', !forLease(pre, 0).some((x) => x.id === 'mgmt') && lease(pre, 'mgmt') !== null);
+    const m = structuredClone(t);
+    delete m.crews[0].shops.mgmt;
+    m.crews[1].shops = { storage: 1 };
+    m.equity = 100;
+    const cash = m.crews[0].cash;
+    const r0 = rentPerSec(m, 0), r1 = rentPerSec(m, 1);
+    check('Plaza Management: for lease after dawn, in Equity', forLease(m, 0).some((x) => x.id === 'mgmt') && lease(m, 'mgmt') === null && m.equity === 100 - SHOPS.mgmt.lease && m.crews[0].cash === cash);
+    m.crews[0].shops.mgmt = 3;
+    check('Plaza Management Lv 3: +9% rent on both roads', Math.abs(rentPerSec(m, 0) / r0 - 1.09) < 1e-9 && Math.abs(rentPerSec(m, 1) / r1 - 1.09) < 1e-9);
+    check("Uncle Sal fights at the best shop's level, plus his own", powerLevel(m, 'mgmt') === Math.max(...r9.filter((x) => x.id !== 'mgmt').map((x) => powerLevel(m, x.id))) + 2);
+  }
   const bpCrew = JSON.stringify(t.crews[1].shops);
   const gain = asphaltGain(t);
   pave(t);

@@ -51,8 +51,10 @@ export function App() {
         <Pylon />
         <main class="grid">
           <Shops />
-          <Lot />
-          <BackOffice />
+          <div class="side">
+            <Lot />
+            <BackOffice />
+          </div>
         </main>
       </div>
     );

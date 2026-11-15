@@ -18,7 +18,7 @@ export function step(s: GameState, watching = false) {
     const c = s.crews[r];
     c.rally = Math.max(0, c.rally - STEP);
     const inc = rentPerSec(s, r) * STEP;
-    c.cash += inc;
+    earn(s, r, 'cash', inc);
     s.stats.earned += inc;
     if (c.battle) {
       const result = stepBattle(s, c.battle, STEP, c.rally > 0);
@@ -138,10 +138,10 @@ export function collectFind(s: GameState): string | null {
     c.rally = RALLY_SECONDS;
     log(s, r, `Somebody brought ${f.name} to the ${where}. Crew hits 25% harder for 30 seconds.`, 'win');
   } else if (f.kind === 'cash') {
-    c.cash += v;
+    earn(s, r, 'cash', v, true);
     log(s, r, `${f.name} at the ${where}. +$${fmt(v)}.`, 'win');
   } else {
-    earn(s, r, REGIONS[r].pay, v);
+    earn(s, r, REGIONS[r].pay, v, true);
     log(s, r, `${f.name}: ${where} regular. +${fmt(v)} ${currencyOf(r)}.`, 'win');
   }
   return null;

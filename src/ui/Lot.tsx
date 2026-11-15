@@ -1,7 +1,7 @@
 // The Lot panel: region tabs, the lot signs, the field, and the calls.
 import { app, tip, toast } from '../app';
 import { FIGHTS, REGIONS, type RegionId } from '../game/defs';
-import { advance, autoCovers, autoPick, bal, buySlot, curb, lineupOf, lotsTaken, regionDone, slotPrice, slotsOf, topFight, view } from '../game/economy';
+import { advance, autoCovers, autoPick, bal, buySlot, curb, lineupOf, regionDone, slotPrice, slotsOf, topFight } from '../game/economy';
 import { CURRENCY_SHORT } from '../game/defs';
 import { fmt } from './format';
 import { enemyLineup } from '../game/battle';
@@ -51,15 +51,6 @@ export function Lot() {
         <span>
           The Lot <Slots r={r} />
         </span>
-        {s.bypass && (
-          <span class="tabs">
-            {REGIONS.map((reg) => (
-              <button key={reg.id} class={`tab ${r === reg.id ? 'on' : ''}`} onClick={() => (view(s, reg.id), app.refresh())} {...tip(reg.name, `${lotsTaken(s, reg.id)}/${reg.lots.length} lots.`)}>
-                {reg.name}
-              </button>
-            ))}
-          </span>
-        )}
       </h2>
       <ZoneTrack r={r} />
       <div class="field-head">

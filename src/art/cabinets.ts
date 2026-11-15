@@ -52,12 +52,11 @@ export function cabinet(l: CabinetLook, lit: boolean, sign?: string): Grid {
   } else {
     g.rect(2, 70, 3, 8, lit ? C.paper : C.concrete).rect(91, 70, 3, 8, lit ? C.paper : C.concrete);
   }
-  // coin door: two slots, a price sticker, a light
+  // coin door: two slots (the price sticker is a real sticker, see .price-tag)
   const cy = l.tall ? 132 : 128;
   g.boxed(34, cy, 28, 22, lit ? C.ink : C.night).rect(35, cy + 1, 26, 20, lit ? C.asphalt : C.night);
   g.rect(39, cy + 4, 6, 6, lit ? C.sodium : C.asphalt).vline(42, cy + 5, 4, C.ink);
   g.rect(51, cy + 4, 6, 6, lit ? C.sodium : C.asphalt).vline(54, cy + 5, 4, C.ink);
-  g.rect(38, cy + 13, 20, 5, lit ? C.paper : C.concrete).text('25C', 42, cy + 13, C.red);
   // feet and kick plate
   g.rect(2, 155, 92, 3, C.ink).rect(6, 158, 10, 2, C.ink).rect(80, 158, 10, 2, C.ink);
   if (sign) paperSign(g, sc, sign, 'OUT OF', 'ORDER');

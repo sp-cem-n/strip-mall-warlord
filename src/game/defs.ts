@@ -1,7 +1,7 @@
 // Types and the assembled content. The content itself lives in content/*.ts, the numbers in knobs.ts.
 import { DAWN } from './content/dawn';
 import { BATTLER_LIST } from './content/battlers';
-import { BYPASS, BYPASS_SHOPS } from './content/bypass';
+import { BYPASS, BYPASS_SHOPS, MGMT, SAL } from './content/bypass';
 import { BOSS } from './content/make';
 import { ROUTE9, ROUTE9_SHOPS } from './content/route9';
 import { BOSS_PAY, FIGHT_GROWTH, LOT_JUMP, PAY_BASE, PAY_GROWTH, WINS_FIRST, WINS_LAST } from './knobs';
@@ -43,7 +43,7 @@ export interface BattlerDef {
 }
 
 
-export const BATTLERS: Record<string, BattlerDef> = Object.fromEntries(BATTLER_LIST.map((b) => [b.id, b]));
+export const BATTLERS: Record<string, BattlerDef> = Object.fromEntries([...BATTLER_LIST, SAL].map((b) => [b.id, b]));
 
 export type WalkInKind = 'cash' | 'referral' | 'rally';
 export interface ShopDef {
@@ -58,6 +58,7 @@ export interface ShopDef {
   rent: number; // $/s at level 1
   tagline: string;
   walkin: { kind: WalkInKind; who: string };
+  dawn?: boolean; // Plaza Management: for lease only after dawn, in Equity, and its hire fights at the crew's top level
 }
 
 export type Tell = 'tanky' | 'hard' | null; // tanky: +40% HP, -20% dmg. hard: +30% dmg, -20% HP.
@@ -93,14 +94,14 @@ export interface RegionDef {
   pay: Currency; // what wins pay
   leaseIn: Currency;
   trainIn: Currency;
-  chrome: { plaza: string; mgmt: string; sub: string };
+  chrome: { plaza: string; mgmt: string };
   start: string; // shop you start with
   lots: LotDef[];
   ending: string;
 }
 
 export const REGIONS: RegionDef[] = [ROUTE9, BYPASS];
-export const SHOP_LIST: ShopDef[] = [...ROUTE9_SHOPS, ...BYPASS_SHOPS];
+export const SHOP_LIST: ShopDef[] = [...ROUTE9_SHOPS, MGMT, ...BYPASS_SHOPS];
 for (const sh of SHOP_LIST) if (sh.fight === BOSS) sh.fight = REGIONS[sh.region].lots[sh.zone].fights;
 export const SHOPS: Record<string, ShopDef> = Object.fromEntries(SHOP_LIST.map((s) => [s.id, s]));
 
