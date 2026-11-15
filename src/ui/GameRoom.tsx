@@ -34,6 +34,7 @@ export const costText = (c: Cost) => (c.cur === 'tickets' ? `${fmt(c.n)} tickets
 function Cabinet({ m }: { m: MachineDef }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const game = useRef<Game | null>(null);
+  const ready = useRef(0); // the READY beat: a moment after the coin drops before the game takes input
   const result = useRef<{ text: string; until: number } | null>(null);
   const [, setN] = useState(0);
   const s = app.s;
@@ -55,8 +56,9 @@ function Cabinet({ m }: { m: MachineDef }) {
           const p = pen(ctx, sc.x, sc.y, sc.w, sc.h);
           const g = game.current;
           if (g) {
-            g.update(dt);
+            if (now >= ready.current) g.update(dt);
             g.draw(p, now / 1000);
+            if (now < ready.current) (p.rect(0, Math.floor(sc.h / 2) - 6, sc.w, 13, C.ink), p.center('READY', Math.floor(sc.h / 2) - 2, C.sodiumLight));
             if (g.over) finish(g);
           } else {
             const sv = serviced(app.s, m.id);
@@ -94,6 +96,7 @@ function Cabinet({ m }: { m: MachineDef }) {
     const err = startPlay(app.s, m.id);
     if (err) return toast(err);
     register();
+    ready.current = performance.now() + 700;
     game.current = newGame(m.id, {
       shelf: app.s.room.shelf[0],
       speed: Math.min(20, 9 + app.s.room.plays * 0.05),
@@ -121,8 +124,8 @@ function Cabinet({ m }: { m: MachineDef }) {
         width={CAB_W * SCALE}
         height={CAB_H * SCALE}
         onPointerDown={(e) => {
-          if (!open) return;
-          if (!game.current) return insert();
+          // the coin goes in with the Play button; the screen is only for playing
+          if (!open || !game.current || performance.now() < ready.current) return;
           const [x, y] = local(e);
           game.current.down(x, y);
         }}

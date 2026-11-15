@@ -4,19 +4,21 @@ import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright';
 
 const base = process.env.URL ?? 'http://localhost:4173/';
-const out = process.env.OUT ?? 'screenshots/v6';
+const out = process.env.OUT ?? 'screenshots/v7';
 const g = '?fresh=1&seed=1991&pause=1';
 const room = `${g}&advance=3600&room=full&screen=room`;
 const bar = `${g}&roster=full&region=1&room=full&screen=room`;
-// a cabinet: click it to put a quarter in, then optional extra steps
-const cab = (i) => [['click', `.cab:nth-child(${i}) canvas`]];
+// a cabinet: the Play button puts a quarter in, then the READY beat
+const cab = (i) => [['click', `.cab:nth-child(${i}) .cab-plate .btn.hot`], ['wait', 800]];
 // [file, query, steps: ['click' | 'hover', selector] | ['wait', ms] | ['drag', selector, [x0, y0, x1, y1] in art px], clip selector?]
 const shots = [
   ['01-title.png', `${g}&advance=900&away=5400&oldsave=1&screen=boot`],
   ['02-early-game-back-office.png', `${g}&advance=900&walkin=1&midbattle=1&screen=game`],
   ['03-receipt-history-open.png', `${g}&advance=2400&screen=game`, [['click', '.printer-head']]],
   ['04-lineup-and-slots.png', `${g}&advance=5400&active=1&screen=game`, [['hover', '.slots']]],
-  ['05-auto-advance-contracts.png', `${g}&advance=5400&screen=game`, [['click', '.tabs .tab:nth-child(2)']]],
+  ['05-patrol-on-the-lot-sign.png', `${g}&advance=5400&screen=game`, [['hover', '.zone.current .auto']]],
+  ['05b-smoke-break.png', `${g}&advance=900&smoke=1&screen=game`],
+  ['05c-next-group-walks-in.png', `${g}&advance=900&walkup=1&screen=game`],
   ['06-combat-spread-hits.png', `${g}&advance=7200&midbattle=1&screen=game`],
   ['07-arcade.png', room],
   ['08-arcade-coin-pusher.png', room, [...cab(1), ['wait', 900]], '.cab:nth-child(1)'],
@@ -29,7 +31,9 @@ const shots = [
   ['15-bar-darts.png', bar, [...cab(1), ['click', '.cab:nth-child(1) canvas'], ['wait', 300], ['click', '.cab:nth-child(1) canvas']], '.cab:nth-child(1)'],
   ['16-bar-pool.png', bar, [...cab(2), ['drag', '.cab:nth-child(2) canvas', [39, 82, 41, 96]], ['wait', 450]], '.cab:nth-child(2)'],
   ['17-bar-video-poker.png', bar, [...cab(3), ['click', '.cab:nth-child(3) canvas']], '.cab:nth-child(3)'],
-  ['18-bar-shuffleboard.png', bar, [...cab(4), ['hold', '.cab:nth-child(4) canvas', 700], ['wait', 600], ['hold', '.cab:nth-child(4) canvas', 400]], '.cab:nth-child(4)'],
+  ['18-bar-shuffleboard.png', bar, [...cab(5), ['hold', '.cab:nth-child(5) canvas', 700], ['wait', 600], ['hold', '.cab:nth-child(5) canvas', 400]], '.cab:nth-child(5)'],
+  ['18b-bar-foosball.png', bar, [...cab(4), ['wait', 1500]], '.cab:nth-child(4)'],
+  ['18c-bar-trivia.png', bar, [...cab(6), ['wait', 400]], '.cab:nth-child(6)'],
   ['19-win-card.png', `${g}&roster=full&win=1&screen=game`],
 ];
 mkdirSync(out, { recursive: true });

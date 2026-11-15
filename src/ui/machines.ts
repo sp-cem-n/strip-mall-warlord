@@ -391,6 +391,7 @@ function pinball(): Game {
       p.rect(0, H - 8, W, 8, C.ink);
       p.text(String(score), 2, H - 7, C.sodiumLight);
       p.text(`BALL ${4 - Math.max(1, balls)}`, W - 26, H - 7, C.bone);
+      if (!L.on && !R.on && score === 0) (p.text('L', 14, 78, C.concrete), p.text('R', 61, 78, C.concrete)); // which half is which flipper
     },
     down(x) {
       if (x < W / 2) L.on = true;
