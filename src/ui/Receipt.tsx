@@ -10,7 +10,7 @@ export const receipt = { open: false };
 export function Receipt() {
   const s = app.s;
   const all = s.log.filter((l) => l.r === s.view).reverse();
-  const lines = receipt.open ? all : all.slice(0, 5);
+  const lines = receipt.open ? all : all.slice(0, 4); // four lines rolled up, so the printer is no taller than the pylon
   const toggle = (e: MouseEvent) => {
     const el = (e.currentTarget as HTMLElement).closest('.printer') as HTMLElement;
     if (!receipt.open) el.style.setProperty('--printer-h', `${el.offsetHeight}px`);
@@ -24,7 +24,7 @@ export function Receipt() {
         <span>{REGIONS[s.view].chrome.mgmt} · ACTIVITY</span>
         <span class="printer-light" />
       </button>
-      <div class="paper" onClick={receipt.open ? undefined : toggle}>
+      <div class="paper" onClick={toggle}>
         <ul>
           {lines.map((l, i) => (
             <li key={`${l.t}-${i}`} class={`r-${l.tone}`}>
