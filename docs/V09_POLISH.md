@@ -2,6 +2,8 @@
 
 Josh's notes from the v0.8 playtest on live main (`7d1c8f3`). Same method as always: find the actual problem, pick the cheap clever fix, and delete something where possible. This is the polish list for the plaza, the rooms, combat chrome and the test panel. The Bypass-as-NG+ design (pacing, Equity, the skill tree, the true ending) lives in a separate doc on `v09-plan` and is not decided here.
 
+**Status (15 Nov 2026):** Josh approved the 5/3/2 autoplay interval and the auto /s vs /m rate switch, and is holding the rest of the list — more changes are coming. **Build nothing** until the list is approved in one go. Fun Zone price is still open; the metric is average play time, collected in the [Cost Deep Dive](https://cursor.com/canvas/store-2a58db62-021e-466c-b74f-238b407050e2/58052c0f-aa31-4be5-aa23-62c86ab08741) page.
+
 Mockups are still images in `/workspace/smw-mockups/v09/` (they aren't in the repo):
 
 - `1-topbar-1280.png`, `1-topbar-1366.png`, `1-topbar-1920.png`: taller pylons and the receipt's old detail, pre-dawn, at Josh's laptop size and the two wider ones
@@ -43,11 +45,17 @@ Layouts get checked at 1280×800 (Josh's size), 1366×768 and 1920×1080. Mobile
 
 **Root cause.** Not a 15s timer. `RATE_WINDOW` is 5 seconds (`src/game/rates.ts`). Cash from rent trickles in every sim step, so +$/s is smooth. Goodwill almost only arrives as a lump when a fight is won (`payFor` in `sim.ts`). A mid-game win is roughly 150 GW. The 5-second window then shows 150/5 ≈ 30 GW/s until that second slides out, then 0 until the next win (often 15–30s later). Josh's "15s update" is the fight rhythm, not the window.
 
-**Fix.** Show Goodwill (and Equity, after dawn) as **GW/m and EQ/m over a 60-second window**. A 150 GW win every 20s reads as a steady 450 GW/m instead of a 0 / 30 / 0 blink. Cash and tickets stay as /s over 5 seconds, and the yellow lump pop still fires on a payout so a jackpot is obvious.
+**Fix.** Keep a smooth number, then **auto-switch the unit** between /s and /m based on how much that currency is earning, with hysteresis so the label doesn't flicker:
+
+- Measure Goodwill and Equity over a **60-second window** (fight payouts are lumpy). Cash and tickets stay over **5 seconds** (cash already trickles in smoothly).
+- Show **/m** when the smoothed rate is under **1.0 per second** (early Goodwill of 0.67/s reads as 40 GW/m, not "0 then 30").
+- Show **/s** when the smoothed rate is at or above **1.5 per second** (a mid-game 150 GW win every 20s reads as 7.5 GW/s).
+- In the **1.0–1.5/s band, hold whichever unit is currently showing**, so a rate that hovers around 1/s doesn't flip every few seconds.
+- Each currency switches independently (cash can be $/s while Goodwill is still GW/m). The yellow lump pop still fires on a payout so a jackpot is obvious.
 
 **Deleted:** the 5-second Goodwill rate, which was the wrong unit for lumpy income.
 
-**Decision:** the Goodwill unit and window. Recommendation: GW/m (and EQ/m) over 60s, as above. The alternative is to keep /s but average over 60s (a mid-game win would read as ~2.5 GW/s, which looks like almost nothing).
+**Decision:** Josh wants both /m and /s, depending on earnings. **Accepted:** auto-switch with a 1.0–1.5/s hysteresis band, as above. Not built until the whole list is approved.
 
 ---
 
@@ -70,16 +78,26 @@ The Fun Zone unit is `S(..., zone 2, fight 0, lease $30K)`: Outlet fight 1, afte
 
 So the arcade is *visible* around 27–33 minutes and *playable* at 38 min (active) or a full hour (check-in). The Off-Ramp is playable 7–17 minutes after dawn; leave it.
 
-**Fix.** Move the Fun Zone lease to **Big-Box fight 1** and drop the price to **$8,000** (between Video Rental at $5K and Payday Loans at $15K).
+**Fix.** Move the Fun Zone lease to **Big-Box fight 1** (after that fight is won). **Leave the price undecided** until Josh picks it from play time, not from a dollar guess. The Off-Ramp stays at Exit 14 fight 4.
 
-- Check-in can lease it on arrival (~18 min, $12.9K on hand).
-- Active play has only $2.55K at that moment and will save for it during early Big-Box (around the Video Rental window, ~19 min).
-- The Coin Pusher opens on the lease. Whac still wants Big-Box captured, which is now a real machine-unlock goal (~27–33 min). Skee, the Claw, Night Shift and the Cyclone stay on their current lots.
-- $30K at Big-Box fight 1 would miss the point: an active player couldn't buy it until Outlet anyway.
+The $2.55K "active player is broke at Big-Box fight 1" figure was cash on *reaching* the first Big-Box fight (Parking Lot just captured, 12:31 on seed 1991). The unit actually goes up for lease *after that fight is won*. Multi-seed bot runs (1991 / 7 / 42, official cadences) say:
+
+| Fun Zone option | Check-in: available / affordable / bought | Active: available / affordable / bought |
+|---|---|---|
+| Current: $30,000 at Outlet fight 1 | 1h 01m / 1h 01m / 1h 10m | 41m 28s / 41m 28s / 41m 37s |
+| $5,000 at Big-Box fight 1 | 20m 37s / 20m 37s / 21m 01s | 15m 50s / 15m 53s / 15m 58s |
+| $8,000 at Big-Box fight 1 | 20m 37s / 20m 37s / 21m 01s | 15m 50s / 15m 58s / 15m 58s |
+| $15,000 at Big-Box fight 1 | 20m 37s / 20m 37s / 21m 01s | 15m 50s / 16m 10s / 16m 18s |
+| $30,000 at Big-Box fight 1 | 20m 37s / 20m 59s / 21m 01s | 15m 50s / 16m 36s / 16m 38s |
+
+Cash already reaches $5K / $8K / $15K / $30K at 8m 46s / 9m 54s / 12m 53s / 16m 59s check-in, and 8m 58s / 11m 27s / 12m 38s / 13m 07s active — all at or before Big-Box fight 1 is won. So **the unlock point does the work**; the sticker price barely changes when a typical player can buy it (about a minute of spread even at $30K on active). Today's late lease is the Outlet fight 1 gate, plus the check-in bot farming before it pushes that fight, not a $30K shortage (cash is already waiting when the unit appears).
+
+- The Coin Pusher opens on the lease. Whac still wants Big-Box captured, which becomes a real machine-unlock goal (~27–33 min if the player pushes). Skee, the Claw, Night Shift and the Cyclone stay on their current lots.
+- If a sticker has to be picked, $8,000 sits between Video Rental ($5K) and Payday Loans ($15K) and is already in the wallet when the unit appears. $5K ties Video; $15K ties Payday but arrives much earlier than Payday (Payday unlocks when Big-Box is captured). This is a feel choice, not a timing one.
 
 **Deleted:** the "Capture Big-Box, but only after you've already captured Big-Box" overlap on Whac.
 
-**Decision:** the new lease point and price. Recommendation: Big-Box fight 1 for $8,000. The cheaper alt is $5,000, same as Video Rental, if the door should open for active players a few minutes sooner.
+**Decision:** unlock at Big-Box fight 1 is still the proposal; **price is open.** Josh asked for average play time rather than $5K vs $8K in a vacuum. Full catalog, growth curves, and flagged pacing live in the [Cost Deep Dive](https://cursor.com/canvas/store-2a58db62-021e-466c-b74f-238b407050e2/58052c0f-aa31-4be5-aa23-62c86ab08741) page.
 
 ---
 
@@ -173,7 +191,7 @@ Hovering a row uses the same tip as item 9.
 
 **Deleted:** the silent payout-only attract play, and the 30/20/12-minute clock.
 
-**Decision:** the new intervals. Recommendation: 5 / 3 / 2 minutes. The more aggressive alt is 3 / 2 / 1, which I'd only take if a pacing run still looks quiet.
+**Decision:** **Approved** at 5 / 3 / 2 minutes. The more aggressive 3 / 2 / 1 alt is off the table unless a later pacing run still looks quiet.
 
 ---
 
@@ -226,15 +244,15 @@ The rest of the Bypass economy (Equity rate, renovations, the skill tree) stays 
 ## Change list (one line each)
 
 1. Restore the receipt's torn edge and printer housing, and stretch every pylon post up to its cabinet so the scoreboard no longer floats.
-2. Show Goodwill and Equity as GW/m and EQ/m over a 60-second window; cash and tickets stay /s over 5 seconds, with the lump pop moved off the rate.
-3. The Fun Zone is for lease at Big-Box fight 1 for $8,000; the Off-Ramp stays at Exit 14 fight 4.
+2. Auto-switch Goodwill and Equity (and the others) between /s and /m with a 1.0–1.5/s hysteresis band; 60s window for GW/EQ, 5s for cash and tickets.
+3. Move the Fun Zone lease to Big-Box fight 1; price still undecided (play-time table in item 3). The Off-Ramp stays at Exit 14 fight 4.
 4. Buffers already don't take field slots; the new roster makes the curb rule obvious.
 5. The yellow cash pop rises from the dollar amount, not on top of +$/s.
 6. The Fun Zone and Off-Ramp get their own top-bar chrome (carpet and coin-door; wood bartop); the street and pylons stay outside.
 7. The next group walks up during the current fight and waits in line; only a smoke break pauses, and the 0.4s clean-win delay goes away.
 8. Clicking the battlefield opens a roster popup: fighters with renovated stats and DPS, Field / Bench, and buffers with their auras.
 9. Hovering a battler, a buffer or an enemy shows a price-tag tip with its stats.
-10. Attract Mode (and test autoplay) visibly plays the cabinet, badly; the clock becomes 5 / 3 / 2 minutes at Lv 1 / 2 / 3.
+10. Attract Mode (and test autoplay) visibly plays the cabinet, badly; the clock is **approved** at 5 / 3 / 2 minutes at Lv 1 / 2 / 3.
 11. Test panel: visible autoplay on bar games too; drop the arcade/plaza toggle; +1h rent pays the viewed road; add +Equity, +Asphalt and Trigger flicker; the starburst wording and extra rays can sputter, not just the dead O and one ray.
 12. After dawn the prize counter grows a Bypass shelf, and Claw toys apply to the crew that's fighting.
 13. The title screen uses the starburst logo and a tighter tenant-board menu.
@@ -243,8 +261,8 @@ The rest of the Bypass economy (Equity rate, renovations, the skill tree) stays 
 
 ## Decisions for Josh
 
-1. **Goodwill rate unit (item 2).** Recommendation: **GW/m (and EQ/m) over 60 seconds.** Alt: keep /s, still average over 60s.
-2. **Fun Zone lease (item 3).** Recommendation: **Big-Box fight 1 for $8,000.** Alt: $5,000, the same as Video Rental. Off-Ramp stays put.
-3. **Attract Mode interval (item 10).** Recommendation: **5 / 3 / 2 minutes** at Lv 1 / 2 / 3 (was 30 / 20 / 12). Alt: 3 / 2 / 1, only if a pacing run still feels quiet.
+1. **Goodwill rate unit (item 2).** **Decided:** auto-switch /s vs /m depending on earnings, with a 1.0–1.5/s hysteresis band and a 60s window for GW/EQ. See item 2.
+2. **Fun Zone lease (item 3).** **Unlock still proposed at Big-Box fight 1; price undecided.** The metric is average play time (see the table in item 3 and the [Cost Deep Dive](https://cursor.com/canvas/store-2a58db62-021e-466c-b74f-238b407050e2/58052c0f-aa31-4be5-aa23-62c86ab08741)). $5K / $8K / $15K / $30K all become affordable within about a minute of that unlock (~21 min check-in / ~16 min active). Off-Ramp stays put.
+3. **Attract Mode interval (item 10).** **Approved:** 5 / 3 / 2 minutes at Lv 1 / 2 / 3.
 
-The other items are ready to build as written. Nothing ships until this list is approved.
+**The rest of the list is on hold.** Josh has more changes coming. Build nothing, and ship nothing, until the list is approved in one go.
