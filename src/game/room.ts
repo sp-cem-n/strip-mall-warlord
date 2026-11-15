@@ -81,7 +81,7 @@ const or = (f: (s: GameState) => boolean) => (s: GameState) => offRamp(s) && f(s
 const bypassRent = (s: GameState) => rent(s, 1);
 export const MACHINES: MachineDef[] = [
   {
-    id: 'pusher', region: 0, name: 'Coin Pusher', blurb: 'Drop it in front of the pile.', needs: 'Lease the Fun Zone', unlock: funZone, cost: rentCost(5), secs: 4, cool: 120,
+    id: 'pusher', region: 0, name: 'Coin Pusher', blurb: 'One coin a game. Drop it when the chute is over the arrow; whatever the shelf shoves off the edge pays cash.', needs: 'Lease the Fun Zone', unlock: funZone, cost: rentCost(5), secs: 4, cool: 120,
     pay: (s, q) => {
       const cost = rent(s, 0) * 5;
       const pile = s.room.shelf[0] / 10;

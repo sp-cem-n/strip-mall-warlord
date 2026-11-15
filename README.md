@@ -14,6 +14,8 @@ bun scripts/balance.ts --guard   # pacing targets on 2 seeds; run before tagging
 bun scripts/spritesheet.ts   # docs/spritesheet.png: every sprite + the palette
 ```
 
+Test mode: `?test=1` plays on its own save with a small panel to jump to any Route 9 fight, top up cash, Goodwill and tickets, unlock every machine and run time at 10× or 60×.
+
 Debug URL params: `?fresh=1`, `?speed=20`, `?seed=1991`, `?advance=300` (bot plays 300s first, `&active=1` to play actively), `?midbattle=1`, `?roster=full` (Route 9 done, 25 battlers), `?win=1` (the dawn card), `?region=1`, `?away=3600`, `?oldsave=1`, `?pause=1`, `?screen=boot|howto|story|game|room`, `?room=full` (every arcade machine; with `roster=full&region=1` the bar), `?story=all`, `?walkin=1`, `?smoke=1` (crew on a smoke break), `?walkup=1` (the next group walking in). The scenario params (`advance`, `roster`, `room`, `midbattle`, `walkin`, `smoke`, `walkup`) live in `src/debug.ts`, loaded only when one is in the URL.
 
 Audio is synthesized with WebAudio in `src/ui/audio.ts` (no sound files). It starts after the first click or key press; mute is saved in localStorage.

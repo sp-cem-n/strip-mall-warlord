@@ -3,6 +3,7 @@ import { DAWN } from '../game/content/dawn';
 import { app, tip } from '../app';
 import { ASPHALT_BONUS, REGIONS } from '../game/defs';
 import { lotsTaken, rentPerSec } from '../game/economy';
+import { MACHINES, roomOpen } from '../game/room';
 import { icon } from './art';
 import { fmt, fmtTime } from './format';
 import { Receipt } from './Receipt';
@@ -56,6 +57,7 @@ export function Pylon() {
         </div>
       </div>
       <Receipt />
+      <ArcadeDoor />
       {app.speed !== 1 && <div class="debug">debug ×{app.speed}</div>}
       <div class="led-sign">
         <div class="led" {...tip(REGIONS[r].name, `${c.wins} fights won, ${c.losses} lost.`, `${fmtTime(s.totalTime)} on the clock, all runs.`, 'The board was $40 a month. It shows.')}>
@@ -77,5 +79,29 @@ export function Pylon() {
         </div>
       </div>
     </header>
+  );
+}
+
+// The arcade's door: a little marquee between the receipt and the LED board, only once a machine is open.
+function ArcadeDoor() {
+  const s = app.s;
+  const r = s.view;
+  if (!roomOpen(s, r)) return null;
+  const open = MACHINES.filter((m) => m.region === r && s.room.unlocked.includes(m.id)).length;
+  const name = r === 0 ? 'FUN ZONE' : DAWN.barSign;
+  return (
+    <button
+      class={`arcade-door ${r ? 'bar' : ''}`}
+      onClick={() => ((app.screen = 'room'), (app.tip = null), app.refresh())}
+      {...tip(r === 0 ? 'Fun Zone Arcade' : DAWN.barGo, r === 0 ? `${open}/6 machines open. ${fmt(s.tickets)} tickets.` : `${open}/6 tables open.`, 'Click to walk over.')}
+    >
+      <span class="bulbs" />
+      <span class="marquee">{name}</span>
+      <span class="slot">
+        <i />
+        {r === 0 ? `${fmt(s.tickets)} TK` : 'OPEN'}
+      </span>
+      <span class="bulbs" />
+    </button>
   );
 }

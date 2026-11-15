@@ -55,8 +55,8 @@ function Unit({ sh }: { sh: ShopDef }) {
   return (
     <div class={`unit ${lv ? '' : 'vacant'}`}>
       <div class="facade" {...tip(sh.name, sh.tagline, lv ? `Rent $${fmt(rent)}/s. Sends one ${d.name}.` : `For lease. Sends one ${d.name}: ${d.does}`)}>
-        <img class={!raising && now < (app.raising[sh.id] ?? 0) + 700 ? 'flicker' : ''} src={facadeURL(sh.id, lv > 0 && !raising)} width={128} height={112} alt={sh.name} />
-        {raising && <img class="scaffold" src={scaffoldURL()} width={128} height={112} alt="" />}
+        <img class={!raising && now < (app.raising[sh.id] ?? 0) + 700 ? 'flicker' : ''} src={facadeURL(sh.id, lv > 0 && !raising)} width={192} height={168} alt={sh.name} />
+        {raising && <img class="scaffold" src={scaffoldURL()} width={192} height={168} alt="" />}
         {s.find?.shop === sh.id && <WalkIn sh={sh} />}
       </div>
       <div class="unit-info">

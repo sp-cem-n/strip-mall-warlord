@@ -34,6 +34,8 @@ const shots = [
   ['18-bar-shuffleboard.png', bar, [...cab(5), ['hold', '.cab:nth-child(5) canvas', 700], ['wait', 600], ['hold', '.cab:nth-child(5) canvas', 400]], '.cab:nth-child(5)'],
   ['18b-bar-foosball.png', bar, [...cab(4), ['wait', 1500]], '.cab:nth-child(4)'],
   ['18c-bar-trivia.png', bar, [...cab(6), ['wait', 400]], '.cab:nth-child(6)'],
+  ['20-test-mode-panel.png', `?test=1&${g.slice(1)}&advance=5400&screen=game`],
+  ['21-top-bar-arcade-door.png', `${g}&advance=5400&screen=game`, [], '.roadside'],
   ['19-win-card.png', `${g}&roster=full&win=1&screen=game`],
 ];
 mkdirSync(out, { recursive: true });

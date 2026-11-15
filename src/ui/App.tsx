@@ -63,6 +63,7 @@ export function App() {
       <WinCard />
       <AskDialog />
       <TipCard />
+      {app.testPanel && app.screen !== 'boot' && <app.testPanel />}
     </>
   );
 }

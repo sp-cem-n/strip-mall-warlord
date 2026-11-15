@@ -1,10 +1,9 @@
-// The Back Office: training (Goodwill / Equity), and later the arcade. One tab at a time.
+// The Back Office: training (Goodwill / Equity). The arcade's door is up on the roadside, next to the receipt.
 import { DAWN } from '../game/content/dawn';
 import { app, tip, toast } from '../app';
 import { BATTLERS, CURRENCY_SHORT, GOODWILL_PER_EQUITY, REGIONS, ROLES, TRAIN_STEP, type RegionId, type Role } from '../game/defs';
 import { convert, currencyOf, purse, roster, train, trainCost } from '../game/economy';
 import { fmt } from './format';
-import { MACHINES, roomOpen } from '../game/room';
 
 const TRACKS: Record<Role, [string, string]> = {
   tank: ['Conditioning', 'tank HP'],
@@ -13,8 +12,6 @@ const TRACKS: Record<Role, [string, string]> = {
   control: ['Paperwork', 'control effects and hits'],
   buffer: ['Team Building', 'buffer auras'],
 };
-export type OfficeTab = 'training' | 'arcade';
-export const office = { tab: 'training' as OfficeTab };
 
 function Training({ r }: { r: RegionId }) {
   const s = app.s;
@@ -59,50 +56,14 @@ function Training({ r }: { r: RegionId }) {
   );
 }
 
-function Arcade({ r }: { r: RegionId }) {
-  const s = app.s;
-  const open = MACHINES.filter((m) => m.region === r && s.room.unlocked.includes(m.id));
-  return (
-    <>
-      <button class="btn big hot arcade-go" onClick={() => ((app.screen = 'room'), (app.tip = null), app.refresh())}>
-        {r === 0 ? 'Walk over to the Fun Zone' : DAWN.barGo}
-      </button>
-      {MACHINES.filter((m) => m.region === r).map((m) => (
-        <div key={m.id} class="track">
-          <b class={s.room.unlocked.includes(m.id) ? '' : 'dim'}>{m.name}</b>
-          <span class="dim">{s.room.unlocked.includes(m.id) ? (s.room.attract[m.id] ? `Attract Lv ${s.room.attract[m.id]}` : m.blurb) : m.needs}</span>
-          <span />
-        </div>
-      ))}
-      <div class="dim tnote">
-        {r === 0 ? `${fmt(s.tickets)} tickets · ${open.length}/6 machines` : `${open.length}/6 tables`}
-      </div>
-    </>
-  );
-}
-
 export function BackOffice() {
-  const s = app.s;
-  const r = s.view;
-  const tabs: [OfficeTab, string][] = [
-    ['training', `Training · ${currencyOf(r)}`],
-  ];
-  if (roomOpen(s, r)) tabs.push(['arcade', r === 0 ? `Arcade · ${fmt(s.tickets)} tk` : 'Bar']);
-  if (!tabs.some(([k]) => k === office.tab)) office.tab = 'training';
+  const r = app.s.view;
   return (
     <section class="glass training backoffice">
       <h2>
-        Back Office
-        <span class="tabs">
-          {tabs.map(([k, label]) => (
-            <button key={k} class={`tab ${office.tab === k ? 'on' : ''}`} onClick={() => ((office.tab = k), app.refresh())}>
-              {label}
-            </button>
-          ))}
-        </span>
+        Back Office <span class="dim">· Training · {currencyOf(r)}</span>
       </h2>
-      {office.tab === 'training' && <Training r={r} />}
-      {office.tab === 'arcade' && roomOpen(s, r) && <Arcade r={r} />}
+      <Training r={r} />
     </section>
   );
 }

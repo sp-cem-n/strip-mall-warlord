@@ -2,7 +2,9 @@ import { SAVE_VERSION } from './economy';
 import type { GameState } from './state';
 import { newRoom } from './room';
 
-const KEY = 'smw.save';
+let KEY = 'smw.save';
+// ?test=1 plays on its own save, so testing never touches the real plaza
+export const useTestSave = () => void (KEY = 'smw.test');
 
 export function saveGame(s: GameState) {
   s.savedAt = Date.now();

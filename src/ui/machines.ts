@@ -75,8 +75,11 @@ function pusher(shelf: number): Game {
       p.rect(0, 0, p.w, p.h, C.night);
       // glass dome glints and the back wall
       p.rect(0, 0, p.w, 18, C.plum);
-      for (let i = 0; i < 8; i++) p.rect(4 + i * 10, 4, 6, 6, i % 2 ? C.sodium : C.violet);
-      p.rect(chute - 4, 12, 9, 4, C.stone);
+      if (drop && !spill) for (let i = 0; i < 8; i++) p.rect(4 + i * 10, 4, 6, 6, (i + Math.floor(t * 8)) % 2 ? C.sodium : C.violet);
+      // the sweet spot: an arrow over the middle of the shelf; the chute lights up when it's over it
+      const onIt = Math.abs(chute - 39) < 8;
+      p.rect(37, 19, 5, 1, C.mint).rect(38, 20, 3, 1, C.mint).rect(39, 21, 1, 1, C.mint);
+      p.rect(chute - 4, 12, 9, 4, onIt && !drop ? C.mint : C.stone);
       p.rect(chute - 1, 16, 3, 2, C.ink);
       // the pusher shelf and the pile
       p.rect(4, 30 + push, 70, 8, C.concrete);
@@ -92,10 +95,16 @@ function pusher(shelf: number): Game {
       p.rect(0, 65, p.w, p.h - 65, C.umber);
       if (drop) {
         p.rect(drop.x - 2, Math.min(drop.y, 44), 5, 2, C.sodiumLight);
-        if (spill) for (let i = 0; i < Math.round(1 + drop.q * 5); i++) p.rect(10 + i * 11, 62 + Math.min(10, spill * 20) + (i % 2) * 2, 5, 2, C.sodium);
+        const n = Math.round(1 + drop.q * 5);
+        if (spill) {
+          for (let i = 0; i < n; i++) p.rect(10 + i * 11, 62 + Math.min(10, spill * 20) + (i % 2) * 2, 5, 2, C.sodium);
+          p.center(`${n} OFF THE EDGE`, 1, n >= 4 ? C.sodiumLight : C.bone);
+          p.center(drop.q > 0.7 ? 'RIGHT ON IT' : drop.q > 0.4 ? 'CLOSE' : 'WIDE', 7, n >= 4 ? C.mint : C.stone);
+        }
       }
       p.text(`PILE ${pile}`, 2, 68, C.bone);
-      if (!drop) p.text('CLICK TO DROP', 2, 20, C.mint);
+      p.text('EDGE PAYS $', p.w - 46, 68, C.sodiumLight);
+      if (!drop) (p.center('DROP AT THE', 1, C.paper), p.center('ARROW', 7, C.paper));
     },
     down() {
       if (drop) return;
@@ -832,8 +841,8 @@ export function idle(p: Pen, id: MachineId, t: number, extra: string) {
   }
   p.rect(0, 0, p.w, p.h, id === 'poker' ? C.navy : C.ink);
   for (let i = 0; i < 12; i++) p.rect(4 + i * 6, 4, 4, 2, (i + Math.floor(t * 6)) % 3 ? C.asphalt : C.sodium);
-  p.center(id === 'poker' ? 'DEAL' : 'INSERT', 20, blink ? C.sodiumLight : C.sodium, 2);
-  p.center(id === 'poker' ? 'ME IN' : 'COIN', 33, blink ? C.sodiumLight : C.sodium, 2);
+  p.center(id === 'poker' ? 'DEAL' : 'PRESS', 20, blink ? C.sodiumLight : C.sodium, 2);
+  p.center(id === 'poker' ? 'ME IN' : 'PLAY', 33, blink ? C.sodiumLight : C.sodium, 2);
   if (id === 'pinball') {
     p.center('HIGH SCORES', 52, C.mint);
     HOUSE_SCORES.forEach(([n, v], i) => p.text(`${n} ${v}`, 12, 60 + i * 7, C.bone));

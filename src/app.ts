@@ -1,6 +1,7 @@
 // Shared runtime state for the UI. The sim never imports this.
 import type { AwaySummary } from './game/sim';
 import type { GameState } from './game/state';
+import type { JSX } from 'preact';
 
 export type Screen = 'boot' | 'howto' | 'story' | 'game' | 'room';
 export interface Tip {
@@ -31,6 +32,7 @@ export const app = {
   toast: '' as string,
   toastUntil: 0,
   refresh: () => {},
+  testPanel: null as null | (() => JSX.Element | null), // ?test=1 only, loaded on demand
 };
 
 export function toast(msg: string) {
