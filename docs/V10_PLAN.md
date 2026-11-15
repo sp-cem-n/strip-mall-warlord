@@ -247,7 +247,9 @@ Other habits that help: commit the Grapevine WIP as its own slice before startin
 
 ## 6. Repo cleanup
 
-Josh asked how this repo looks next to Mall Bats, and whether we have built an objectively working mess. The honest answer: **the game code is not the mess.** `src` is about **8,200 lines across 55 files**. Mall Bats, for reference, is about **12,500 lines across 35 files**. We are smaller, and more split already, not a larger spaghetti bowl. A human can still get lost, but the volume is fine.
+Josh asked how this repo looks next to Mall Bats, and whether we have built an objectively working mess. The honest answer: **the game code is not the mess.** `src` is about **8,200 lines across 55 files**. Mall Bats, for reference, is about **12,500 lines across 35 files**. We are smaller, not a larger spaghetti bowl. A human can still get lost, but the volume is fine.
+
+**Why we have more files with less code:** we split too eagerly. Our average file is about 150 lines; Mall Bats sits closer to 350. At one end, `machines.ts` is 788 lines and should be broken up. At the other, **a dozen files are under 50 lines** — a constructor helper, a mute button, a 13-line RNG — each with its own import path. That is why 8,200 lines became 55 files instead of ~35. The target is to group by thing, at roughly **150–400 lines** per file: merge the crumbs into their neighbors, and split the oversized ones when the minigame rework touches them. Do not flatten everything into a handful of 800-line dumps, and do not keep a file just to hold one function.
 
 **The mess is around the code**, and that is what makes the repo look like it was assembled in a hurry:
 
@@ -265,7 +267,73 @@ Josh asked how this repo looks next to Mall Bats, and whether we have built an o
 
 **Clean history, with a brake on force-push.** Safe anytime: the screenshot deletion, the doc collapse, ordinary commits that do not rewrite `main`. At the `v0.9` tag, offer Josh a **clean history plan** — squash the five WIP commits into the features they actually shipped, and optionally drop screenshot blobs from history so clones stay small. If that needs a force-push of `main` (or of `v09`), **stop and get Josh's approval first.** The alternative that never rewrites `main` is a fresh `release` branch (or an orphan) that becomes the default, with `v0.9` tagged there, and old `main` left as archive. Do not force-push as a courtesy; ask.
 
-**Split the big files when the minigame rework touches them anyway.** One file per game under something like `src/ui/games/`, a thin `room.ts` for shared payout and Attract, and no 800-line switch. Do not spend a Tuesday on a pure move-only refactor; split as D3 rewrites each game. That is also a usage cut (§5).
+**Split the big files when the minigame rework touches them anyway**, and merge the crumbs at the same time. Do not spend a Tuesday on a pure move-only refactor; fold or split a file when you already have to touch it (D3 for games, A0/`CONTEXT.md` can list the target paths). That is also a usage cut (§5).
+
+**Tiny files (under 50 lines): merge most, keep a few on purpose.**
+
+| File | Lines | Call |
+|---|---|---|
+| `content/make.ts` | 7 | **Merge into `defs.ts`.** The `B` / `S` / `E` / `BOSS` constructors belong next to the types they build. Region files then import from `defs` only. |
+| `rng.ts` | 13 | **Merge into `state.ts`.** The stream is `state.seed`; battle, room, bot, and sim can import it from there. |
+| `art/font.ts` | 15 | **Merge into `art/grid.ts`.** The 3×5 glyphs are a grid-drawing primitive. |
+| `art/logos.ts` | 17 | **Merge into `art/sign.ts`.** It is only the night-sky star tile; room logos are already PNGs. |
+| `Speaker.tsx` | 17 | **Merge into `Pylon.tsx`** (and export it for the title screen). Mute already lives on the top bar. |
+| `Calls.tsx` | 27 | **Merge into `Lot.tsx`.** Overtime is only rendered there. |
+| `Receipt.tsx` | 43 | **Merge into `Pylon.tsx`.** The receipt is part of the top bar; only the pylon imports it. |
+| `rates.ts` | 44 | **Merge into `economy.ts`.** Live +/s is the purse's display math, and economy already sits at 329 lines — still inside the 400-line cap. |
+| `content/copy.ts` | 23 | **Keep.** Pre-dawn How to Play and story words. The leak check greps this file; do not fold it into `dawn.ts` or `Screens.tsx`. |
+| `knobs.ts` | 49 | **Keep.** The seam `balance.ts --knob` patches. `defs.ts` already re-exports it. |
+| `art/palette.ts` | 46 | **Keep.** Twenty-three colors, imported by almost every art and game file. A shared palette should stay one obvious module. |
+| `ui/format.ts` | 29 | **Keep.** `fmt` / `fmtClock` are imported all over the UI and by `sim.ts`. A widely shared helper is cheaper as its own file than pulled through a screen. |
+
+That drops about eight files and answers the "why so many" question without touching the leak boundary.
+
+**Keep Bypass and dawn content separate.** `scripts/check.ts` allows post-dawn words only in `src/game/content/dawn.ts` and `src/game/content/bypass.ts` (plus `debug.ts`). Do not merge those two into `route9.ts`, `copy.ts`, or `defs.ts`. When M4 adds the Rolodex, it gets its own leak-gated file (`content/rolodex.ts`), same rule. Pre-dawn copy stays in `copy.ts`.
+
+**Target folder layout**, grouped by thing, one file per venue or game, roughly 150–400 lines. Names can shift; the grouping is the point.
+
+```
+src/
+  main.tsx, app.ts, debug.ts
+  game/
+    knobs.ts              # keep: balance seam
+    defs.ts               # types, constructors (make.ts folded in), FIGHTS
+    state.ts              # + rng
+    economy.ts            # till, leases, training, live rates
+    sinks.ts
+    battle.ts
+    sim.ts, bot.ts, save.ts
+    room.ts               # shared payout, Attract, perks — stays thin
+    content/
+      copy.ts             # keep: pre-dawn words, leak-checked
+      route9.ts           # Route 9 lots, shops, enemies
+      battlers.ts         # shared / Route 9 roster (Bypass names belong in bypass.ts)
+      dawn.ts             # keep separate (leak check)
+      bypass.ts           # keep separate (leak check)
+      rolodex.ts          # M4, also leak-gated
+  art/
+    palette.ts            # keep
+    grid.ts               # + font
+    sign.ts               # + star tile
+    people.ts, storefronts.ts, field.ts, frames.ts, landmarks.ts
+    cabinets.ts           # shrinks as rooms get their own art
+  ui/
+    format.ts, audio.ts, styles.css, lights.ts
+    art.ts                # canvas cache, data URLs
+    Pylon.tsx             # + Speaker + Receipt
+    Lot.tsx               # + Calls (Overtime)
+    Shops.tsx, Field.tsx, Roster.tsx, ZoneTrack.tsx
+    BackOffice.tsx, Screens.tsx, TestPanel.tsx
+    funzone/
+      room.tsx            # 2.5D Fun Zone; click a machine to play
+      pusher.ts, whac.ts, skee.ts, claw.ts, pinball.ts, cyclone.ts
+    offramp/
+      room.tsx            # 2.5D Off-Ramp
+      darts.ts, pool.ts, poker.ts, foos.ts, shuffle.ts
+      trivia.ts, tabs.ts, blackjack.ts, fairway.ts
+```
+
+`machines.ts`, `arcade.ts`, `bar3.ts`, `bargames.ts`, and `shuffle.ts` dissolve into those per-game files as D3 rewrites each one. `GameRoom.tsx` becomes the two `room.tsx` files. A trivia question bank can sit next to `trivia.ts` as data, not as a 1,200-entry wall inside the component.
 
 **Line length and formatting.** Soft wrap around 100 columns; nothing casual over 160. No new one-line functions that bury a payout table. Match the file's existing style; do not run a repo-wide prettier pass that diffs every line unless Josh asks for it. A small format pass on a file you already split is fine.
 
