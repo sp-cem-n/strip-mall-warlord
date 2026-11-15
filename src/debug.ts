@@ -65,7 +65,7 @@ export function applyDebug(q: URLSearchParams) {
   }
   if (q.get('smoke') === '1') {
     const c = app.s.crews[app.s.view];
-    for (let guard = 0; !(c.smoke > 0 && c.regroup < c.smoke / 2) && guard < 40000; guard++) step(app.s);
+    for (let guard = 0; !(!c.battle && c.smoke > 0 && c.regroup > 0 && c.regroup < c.smoke / 2) && guard < 40000; guard++) step(app.s);
   }
   if (q.get('walkup') === '1') {
     const c = app.s.crews[app.s.view];
