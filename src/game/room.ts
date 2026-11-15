@@ -8,7 +8,7 @@ import { asphaltMult, bal, cleared, earn, log, rentPerSec, spend } from './econo
 import { rand } from './rng';
 import type { GameState } from './state';
 
-export type MachineId = 'pusher' | 'whac' | 'skee' | 'claw' | 'pinball' | 'cyclone' | 'darts' | 'pool' | 'poker' | 'foos' | 'shuffle' | 'trivia';
+export type MachineId = 'pusher' | 'whac' | 'skee' | 'claw' | 'pinball' | 'cyclone' | 'darts' | 'pool' | 'poker' | 'foos' | 'shuffle' | 'trivia' | 'tabs' | 'blackjack' | 'fairway';
 export type BuffKind = 'bat' | 'duck' | 'troll' | 'ball' | 'watch' | 'well' | 'call' | 'top' | 'royal' | 'quiz' | 'genius' | 'shot';
 export type Cost = { cur: Currency | 'tickets'; n: number };
 export interface Reward { cash?: number; goodwill?: number; tickets?: number; equity?: number; buff?: BuffKind; big?: boolean; text: string }
@@ -144,6 +144,10 @@ export const MACHINES: MachineDef[] = [
     },
   },
   {
+    id: 'tabs', region: 1, name: 'Pull-Tabs', blurb: 'Three tickets from the box. Pull every tab; three alike pays.', needs: DAWN.needsOffRamp, unlock: offRamp, cost: rentCost(6, 1), secs: 8, cool: 0,
+    pay: (s, q) => (q > 0 ? { cash: bypassRent(s) * 18 * q, big: q >= 1, text: q >= 1 ? 'Three sevens. The bartender checks it twice.' : 'A winner.' } : { text: 'Blanks. Into the bucket.' }),
+  },
+  {
     id: 'pool', region: 1, name: 'Pool', blurb: 'Drag back from the cue ball. Six shots.', needs: DAWN.needsExit14, unlock: or((s) => cleared(s, 1, 0, REGIONS[1].lots[0].fights)), cost: rentCost(20, 1), secs: 45, cool: 180,
     pay: (s, q) => {
       const balls = Math.round(q * 6);
@@ -167,6 +171,14 @@ export const MACHINES: MachineDef[] = [
   {
     id: 'shuffle', region: 1, name: 'Shuffleboard', blurb: 'Six pucks against the house. Aim, hold for power, knock his off. The far end is worth more.', needs: 'Capture Town Center, Phase II', unlock: or((s) => cleared(s, 1, 2, REGIONS[1].lots[2].fights)), cost: rentCost(15, 1), secs: 30, cool: 0,
     pay: (s, q) => ({ equity: winPay(s, 1) * 2 * q, text: `${Math.round(q * SHUFFLE_TOP)} points.` }),
+  },
+  {
+    id: 'blackjack', region: 1, name: 'Blackjack', blurb: 'The bartender deals. Hit or stand (H / S); the house stands on 17.', needs: 'Clear fight 4 at the Corporate Campus', unlock: or((s) => cleared(s, 1, 1, 3)), cost: rentCost(20, 1), secs: 15, cool: 0,
+    pay: (s, q) => (q > 0 ? { cash: bypassRent(s) * 20 * (q >= 1 ? 3.5 : q >= 0.5 ? 2.2 : 1), big: q >= 1, text: q >= 1 ? 'Blackjack.' : q >= 0.5 ? 'Beat the house.' : 'Push. Your money back.' } : { text: 'The house wins.' }),
+  },
+  {
+    id: 'fairway', region: 1, name: 'Fairway 9', blurb: 'A short nine. Aim, hold for power. Par 18; water costs a stroke.', needs: 'Clear fight 4 at Town Center, Phase II', unlock: or((s) => cleared(s, 1, 2, 3)), cost: rentCost(20, 1), secs: 60, cool: 0,
+    pay: (s, q) => ({ equity: winPay(s, 1) * 7 * q, big: q >= 1, text: q >= 1 ? 'Under par. The regulars want to see the card.' : q > 0.5 ? 'A decent card.' : 'Lost a few balls.' }),
   },
   {
     id: 'trivia', region: 1, name: 'Bar Trivia', blurb: 'Five questions. Faster is more points.', needs: DAWN.needsGalleria, unlock: or((s) => cleared(s, 1, 3, 5)), cost: rentCost(10, 1), secs: 50, cool: 600,

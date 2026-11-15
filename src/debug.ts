@@ -62,7 +62,7 @@ export function applyDebug(q: URLSearchParams) {
     app.s.room.best = 31250;
     app.s.room.buffs = { bat: 420 };
     app.s.crews[0].cash = Math.max(app.s.crews[0].cash, 1e6);
-    if (app.s.bypass) (app.s.crews[1].shops.offramp ??= 3), app.s.room.unlocked.push('darts', 'pool', 'poker', 'foos', 'shuffle', 'trivia'), (app.s.room.shuffle = 1), (app.s.room.shuffleBest = 12), (app.s.room.buffs.call = 300), (app.s.crews[1].cash = Math.max(app.s.crews[1].cash, 1e7));
+    if (app.s.bypass) (app.s.crews[1].shops.offramp ??= 3), app.s.room.unlocked.push('darts', 'tabs', 'pool', 'poker', 'foos', 'shuffle', 'blackjack', 'fairway', 'trivia'), (app.s.room.shuffle = 1), (app.s.room.shuffleBest = 12), (app.s.room.buffs.call = 300), (app.s.crews[1].cash = Math.max(app.s.crews[1].cash, 1e7));
   }
   if (q.get('landmarks') === '1') {
     app.hasSave = true;

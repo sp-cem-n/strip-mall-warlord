@@ -313,7 +313,7 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   check('hands: royal, full house, jacks, low pair', handTier([12, 11, 10, 9, 8]).join() === '4,ROYAL FLUSH' && handTier([0, 13, 26, 1, 14])[0] === 3 && handTier([9, 22, 2, 30, 45])[0] === 1 && handTier([0, 13, 5, 30, 45])[0] === 0);
   const s0 = slotsOf(t, 1);
   check('shuffleboard: each house score is +6% Equity per win, the third adds a slot', postShuffle(t, 14) === 2 && slotsOf(t, 1) === s0 && postShuffle(t, 17) === 1 && slotsOf(t, 1) === s0 + 1);
-  check('six at the bar, like the arcade', MACHINES.filter((m) => m.region === 1).length === 6 && MACHINES.filter((m) => m.region === 0).length === 6);
+  check('nine at the bar (the Bypass is longer), six in the arcade', MACHINES.filter((m) => m.region === 1).length === 9 && MACHINES.filter((m) => m.region === 0).length === 6);
   t.room.unlocked.push('foos', 'trivia');
   const e0 = t.equity;
   check('foosball pays Equity by the goal', startPlay(t, 'foos') === null && (endPlay(t, 'foos', 0.3), t.equity > e0));

@@ -28,6 +28,9 @@ export const LOOKS: Record<MachineId, CabinetLook> = {
   foos: { body: C.umber, trim: C.mint, marquee: C.mint, ink: C.paper, title: 'FOOSBALL', side: 'dots', tall: true, bar: 'foos' },
   shuffle: { body: C.umber, trim: C.sodium, marquee: C.sodiumLight, ink: C.paper, title: 'SHUFFLEBOARD', side: 'dots', tall: true, bar: 'shuffle' },
   trivia: { body: C.night, trim: C.violet, marquee: C.neon, ink: C.ink, title: 'BAR TRIVIA', side: 'stripes' },
+  tabs: { body: C.brick, trim: C.sodiumLight, marquee: C.sodiumLight, ink: C.ink, title: 'PULL-TABS', side: 'dots' },
+  blackjack: { body: C.forest, trim: C.sodium, marquee: C.paper, ink: C.forest, title: 'BLACKJACK', side: 'stars' },
+  fairway: { body: C.navy, trim: C.green, marquee: C.mint, ink: C.navy, title: 'FAIRWAY 9', side: 'stripes' },
 };
 const BAR_IDS = new Set([...BAR_BUFFS, ...QUIZ].map(([b]) => b));
 // The hand that earned each poker buff (saved in room.hands): a flush pays like trips, so show the real hand.
@@ -130,7 +133,7 @@ function Cabinet({ m }: { m: MachineDef }) {
         rs.until = performance.now();
         return;
       }
-      if (game.current?.key && (e.key === 'a' || e.key === 'A' || e.key === 'd' || e.key === 'D' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W')) {
+      if (game.current?.key && (e.key === 'a' || e.key === 'A' || e.key === 'd' || e.key === 'D' || e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowUp' || 'wWhHsS123'.includes(e.key))) {
         if (e.repeat) return e.preventDefault();
         e.preventDefault();
         game.current.key(e.key, e.type === 'keydown');

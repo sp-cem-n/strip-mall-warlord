@@ -6,6 +6,7 @@ import { foos, foosIdle, trivia, triviaIdle } from './bargames';
 import { BAR_HOUSE, HOUSE_SCORES, PINBALL_TOP, type BuffKind, type MachineId, type PusherField } from '../game/room';
 import { clawV2, pinballV2, pusherV2, whacV2 } from './arcade';
 import { shuffleV2 } from './shuffle';
+import { blackjack, fairway, pullTabs } from './bar3';
 
 export interface Pen {
   rect(x: number, y: number, w: number, h: number, c: number): Pen;
@@ -743,6 +744,9 @@ export function newGame(id: MachineId, o: { shelf: number; speed: number; jackpo
     case 'shuffle': return shuffleV2(o.house);
     case 'foos': return foos();
     case 'trivia': return trivia();
+    case 'tabs': return pullTabs();
+    case 'blackjack': return blackjack();
+    case 'fairway': return fairway();
   }
 }
 
