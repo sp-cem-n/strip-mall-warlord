@@ -4,6 +4,7 @@ import { app } from '../app';
 import { glyph } from '../art/font';
 import { C, HEX } from '../art/palette';
 import { BATTLERS, FIGHTS, REGIONS, WALK_IN_SECONDS, type RegionId, type Role } from '../game/defs';
+import { enemyLineup } from '../game/battle';
 import { curb, lineupOf } from '../game/economy';
 import type { Unit } from '../game/state';
 import { crewArt, enemyArt, fieldArt } from './art';
@@ -142,6 +143,26 @@ function draw(ctx: CanvasRenderingContext2D, t: number, r: RegionId) {
     const regs = b.enemies.filter((e) => !e.boss);
     regs.map((u, i) => [u, walk(enemySpot(i))] as const).sort((a, z) => a[1][1] - z[1][1]).forEach(([u, p]) => drawUnit(ctx, u, p, t));
     for (const u of b.enemies.filter((e) => e.boss)) drawUnit(ctx, u, walk(BOSS_SPOT), t);
+    // the next group waits in line behind the one you're fighting
+    if (c.queueEnter >= 0) {
+      const qk = c.queueEnter / WALK_IN_SECONDS;
+      const qwalk = ([x, y]: [number, number]): [number, number] => [Math.round(x + 36 + qk * 70), Math.round(y - 20 - qk * 46 + (qk > 0 ? Math.abs(Math.sin(t * 10)) * 1.5 : 0))];
+      const next = enemyLineup(r, b.fight);
+      const regs = next.filter((e) => !e.boss);
+      regs.forEach((e, i) => {
+        const [x, y] = qwalk(enemySpot(i));
+        ctx.globalAlpha = 0.85;
+        ctx.drawImage(enemyArt(e.def.name), x - 8, y - 24);
+        ctx.globalAlpha = 1;
+      });
+      const boss = next.find((e) => e.boss);
+      if (boss) {
+        const [x, y] = qwalk(BOSS_SPOT);
+        ctx.globalAlpha = 0.85;
+        ctx.drawImage(enemyArt(boss.def.name), x - 16, y - 48, 32, 48);
+        ctx.globalAlpha = 1;
+      }
+    }
   } else if (c.smoke > 0) smokeBreak(ctx, t, r);
   else {
     const team = lineupOf(s, r);
@@ -155,6 +176,49 @@ function draw(ctx: CanvasRenderingContext2D, t: number, r: RegionId) {
   let by = 132;
   if (c.rally > 0) text(ctx, `RALLY +25% ${Math.ceil(c.rally)}S`, 196, (by += 8), C.sodiumLight);
   if (c.overtime > 0 || b?.overtime) text(ctx, `OVERTIME ${b?.overtime ? 'ON' : ''}`, 196, by - 8, C.mint);
+}
+
+function hitAt(r: RegionId, mx: number, my: number) {
+  const s = app.s;
+  const c = s.crews[r];
+  const b = c.battle;
+  const inside = (x: number, y: number, w: number, h: number) => mx >= x - w / 2 && mx <= x + w / 2 && my >= y - h && my <= y + 2;
+  if (b) {
+    const k = Math.max(0, b.enter) / WALK_IN_SECONDS;
+    const walk = ([x, y]: [number, number]): [number, number] => [x + k * 70, y - k * 46];
+    const spots = crewSpots(b.crew.length);
+    for (let i = 0; i < b.crew.length; i++) {
+      const u = b.crew[i];
+      const [x, y] = spots[i];
+      if (inside(x, y, 16, 24)) return `${u.name} · ${u.role} · HP ${Math.ceil(u.hp)}/${u.maxHp} · ${u.dmg.toFixed(1)} / ${u.interval}s`;
+    }
+    const regs = b.enemies.filter((e) => !e.boss);
+    for (let i = 0; i < regs.length; i++) {
+      const u = regs[i];
+      const [x, y] = walk(enemySpot(i));
+      if (inside(x, y, 16, 24)) return `${u.name}${u.tell ? ` · ${u.tell}` : ''}${u.weak ? ` · weak to ${BATTLERS[u.weak].name}` : ''} · HP ${Math.ceil(u.hp)}/${u.maxHp}`;
+    }
+    for (const u of b.enemies.filter((e) => e.boss)) {
+      const [x, y] = walk(BOSS_SPOT);
+      if (inside(x, y, 32, 48)) return `${u.name} · HP ${Math.ceil(u.hp)}/${u.maxHp}`;
+    }
+  }
+  for (const [i, [id]] of curb(s, r).entries()) {
+    const [x, y] = curbSpot(i);
+    if (inside(x, y, 12, 18)) return `${BATTLERS[id].name} · curb · ${BATTLERS[id].does}`;
+  }
+  if (!b) {
+    const team = lineupOf(s, r);
+    const spots = crewSpots(team.length);
+    for (let i = 0; i < team.length; i++) {
+      const [x, y] = spots[i];
+      if (inside(x, y, 16, 24)) {
+        const d = BATTLERS[team[i]];
+        return `${d.name} · ${d.role}`;
+      }
+    }
+  }
+  return null;
 }
 
 export function Field({ r }: { r: RegionId }) {
@@ -171,5 +235,44 @@ export function Field({ r }: { r: RegionId }) {
     id = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(id);
   }, []);
-  return <canvas ref={ref} width={W} height={H} class="field" style={{ width: "100%", maxWidth: `${W * SCALE}px`, aspectRatio: `${W} / ${H}` }} />;
+  const local = (e: MouseEvent) => {
+    const el = e.currentTarget as HTMLCanvasElement;
+    const box = el.getBoundingClientRect();
+    return [((e.clientX - box.left) / box.width) * W, ((e.clientY - box.top) / box.height) * H] as const;
+  };
+  return (
+    <canvas
+      ref={ref}
+      width={W}
+      height={H}
+      class="field"
+      style={{ width: "100%", maxWidth: `${W * SCALE}px`, aspectRatio: `${W} / ${H}` }}
+      onClick={() => {
+        app.roster = true;
+        app.tip = null;
+        app.refresh();
+      }}
+      onMouseMove={(e) => {
+        const [x, y] = local(e);
+        const line = hitAt(rr.current, x, y);
+        if (line) {
+          const next = { x: e.clientX, y: e.clientY + 16, title: line.split(' · ')[0], lines: line.split(' · ').slice(1) };
+          const cur = app.tip;
+          if (!cur || cur.title !== next.title || cur.lines.join() !== next.lines.join()) {
+            app.tip = next;
+            app.refresh();
+          }
+        } else if (app.tip) {
+          app.tip = null;
+          app.refresh();
+        }
+      }}
+      onMouseLeave={() => {
+        if (app.tip) {
+          app.tip = null;
+          app.refresh();
+        }
+      }}
+    />
+  );
 }

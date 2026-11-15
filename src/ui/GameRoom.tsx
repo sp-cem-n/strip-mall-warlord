@@ -123,7 +123,7 @@ function Cabinet({ m }: { m: MachineDef }) {
   const ap = attractPrice(s, m.id);
   const lv = s.room.attract[m.id] ?? 0;
   return (
-    <div class={`cab ${open ? '' : 'dark'} ${look.tall ? 'tall' : ''}`}>
+    <div class={`cab ${open ? '' : 'dark'} ${look.tall ? 'tall' : ''} ${s.room.attracting?.id === m.id ? 'attracting' : ''}`}>
       {open && <span class={`price-tag ${canAfford(s, m.region, cost) ? '' : 'short'}`}>{tagText(cost)}</span>}
       <canvas
         ref={ref}

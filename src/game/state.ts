@@ -80,6 +80,7 @@ export interface Crew {
   rally: number; // seconds left
   wins: number;
   losses: number;
+  queueEnter: number; // next group walking in behind the current fight; -1 = none, 0 = waiting in line
 }
 
 export interface GameState {
@@ -103,4 +104,9 @@ export interface GameState {
   nextUid: number;
   find: { shop: string; kind: WalkInKind; name: string; left: number } | null; // walk-in, only while you're watching
   findClock: number;
+  consultants: [number[], number[]]; // lots with a hired consultant, per region
+  autoReno: [number[], number[]];
+  landmarks: string[];
+  retainers: number;
+  blitz: Record<string, number>;
 }

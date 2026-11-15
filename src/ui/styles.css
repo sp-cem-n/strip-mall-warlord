@@ -30,7 +30,7 @@ button { font: inherit; }
 .btn.big { font-family: 'Pixelify Sans', sans-serif; font-weight: 500; font-size: 20px; letter-spacing: 0.06em; padding: 6px 18px; min-width: 220px; text-align: center; border-width: 6px; border-image-width: 6px; }
 
 /* ---- the roadside: pylon sign + LED board over grass and Rt. 9 ---- */
-.roadside { position: sticky; top: 0; z-index: 15; display: flex; align-items: flex-end; gap: 18px; padding: 10px 20px 14px; background: var(--night) var(--road) left bottom / 64px 32px repeat-x; }
+.roadside { position: sticky; top: 0; z-index: 15; display: flex; align-items: stretch; gap: 18px; padding: 10px 20px 14px; background-color: var(--night); background-image: var(--stars), var(--road); background-position: left top, left bottom; background-repeat: repeat, repeat-x; background-size: 128px 64px, 64px 32px; }
 .pylon { width: 390px; display: flex; flex-direction: column; }
 .cabinet { display: flex; flex-direction: column; align-items: stretch; gap: 2px; padding: 2px 6px; background: none; border: 10px solid; border-image: var(--pylon) 5 fill / 10px; cursor: pointer; color: var(--bone); font: inherit; }
 /* the sign: chasing bulbs, STRIP MALL in sodium, WARLORD in red neon with a burned-out O */
@@ -56,8 +56,8 @@ button { font: inherit; }
 .tenant .v { font-size: 26px; }
 .tenant .r { margin-left: auto; font-size: 17px; white-space: nowrap; }
 /* a payout lands: it floats up over the tenant */
-.tenant .pop { position: absolute; right: 10px; top: -6px; z-index: 2; font-size: 20px; color: var(--sodium-light); text-shadow: 2px 2px 0 var(--ink); pointer-events: none; animation: pop 2.5s steps(10) forwards; }
-@keyframes pop { 0% { transform: translateY(6px); opacity: 1; } 70% { opacity: 1; } 100% { transform: translateY(-12px); opacity: 0; } }
+.tenant .pop { position: absolute; left: 110px; right: auto; top: -2px; z-index: 2; font-size: 20px; color: var(--sodium-light); text-shadow: 2px 2px 0 var(--ink); pointer-events: none; animation: pop 2.5s steps(10) forwards; }
+@keyframes pop { 0% { transform: translateY(8px); opacity: 1; } 70% { opacity: 1; } 100% { transform: translateY(-28px); opacity: 0; } }
 .t-tickets { background-color: var(--sodium-light); color: var(--brick); }
 .t-tickets .v { color: var(--ink); }
 .t-cash { background-color: var(--paper); color: var(--forest); }
@@ -67,9 +67,9 @@ button { font: inherit; }
 .t-goodwill .v { color: var(--ink); }
 .t-equity { background-color: var(--teal); color: var(--paper); }
 .t-equity .v { color: var(--ink); }
-.pole { display: flex; justify-content: center; gap: 120px; height: 22px; }
-.pole i, .legs i { display: block; width: 14px; background: var(--concrete); border: 2px solid var(--ink); border-top: 0; box-shadow: inset 4px 0 0 var(--stone); }
-.led-sign { display: grid; grid-template-columns: auto auto; gap: 4px 8px; align-items: center; justify-items: center; }
+.pole { display: flex; justify-content: center; gap: 120px; flex: 1 0 22px; min-height: 22px; }
+.pole i, .legs i { display: block; width: 14px; height: 100%; background: var(--concrete); border: 2px solid var(--ink); border-top: 0; box-shadow: inset 4px 0 0 var(--stone); }
+.led-sign { display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto 1fr; gap: 4px 8px; align-items: center; justify-items: center; align-self: stretch; }
 /* the board never changes size: three fixed cells, short forms (1.2K) */
 .led { display: grid; grid-template-columns: 10ch 6ch 4ch; gap: 10px; padding: 2px 10px; font-size: 26px; line-height: 1; white-space: nowrap; color: var(--red); text-shadow: 2px 0 0 var(--brick); background: var(--led) repeat; background-size: 6px 6px; background-clip: padding-box; border: 10px solid; border-image: var(--pylon) 5 / 10px; }
 .led .cell { display: flex; flex-direction: column; align-items: center; }
@@ -78,7 +78,7 @@ button { font: inherit; }
 .hwy, .hwy-gap { justify-self: stretch; height: 30px; }
 .hwy { font-family: 'Pixelify Sans', sans-serif; font-weight: 500; font-size: 16px; letter-spacing: 0.08em; color: var(--paper); background: #2f6b3f; border: 3px solid var(--paper); box-shadow: 0 0 0 2px #2f6b3f, 3px 3px 0 2px var(--ink); cursor: pointer; }
 .hwy:hover { background: var(--forest); }
-.legs { grid-area: 3 / 1; display: flex; gap: 160px; height: 34px; }
+.legs { grid-area: 3 / 1; display: flex; gap: 160px; height: auto; min-height: 34px; align-self: stretch; }
 .debug { color: var(--red); align-self: center; }
 .speaker { padding: 2px; background: none; border: 4px solid; border-image: var(--btn) 2 fill / 4px; cursor: pointer; line-height: 0; }
 .speaker:hover { border-image-source: var(--btn-hot); }
@@ -185,8 +185,8 @@ button { font: inherit; }
 .printer-head { display: flex; justify-content: space-between; align-items: center; padding: 0 8px; font-size: 15px; letter-spacing: 0.08em; color: var(--stone); border: 10px solid; border-image: var(--printer) 5 fill / 10px; }
 .printer-light { width: 8px; height: 8px; background: var(--green); border: 2px solid var(--ink); animation: blink 1.6s steps(2) infinite; }
 @keyframes blink { 50% { background: var(--forest); } }
-.paper { position: relative; margin: -8px 26px 3px; padding: 6px 12px 4px; background: var(--paper); color: var(--ink); font-size: 17px; }
-.paper::after { content: ''; position: absolute; left: 0; right: 0; bottom: -8px; height: 8px; background: var(--tear) repeat-x; background-size: 16px 8px; }
+.paper { position: relative; margin: -8px 26px 3px; padding: 6px 12px 12px; background: var(--paper); color: var(--ink); font-size: 17px; }
+.paper::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background: var(--tear) repeat-x; background-size: 16px 8px; }
 .paper ul { list-style: none; margin: 0; padding: 0; }
 .paper li { display: grid; grid-template-columns: 52px 1fr; padding: 1px 0; }
 .paper .x { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -300,3 +300,32 @@ button { font: inherit; }
 .tp-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .test-panel select { font: inherit; font-size: 16px; color: var(--paper); background: var(--night); border: 2px solid var(--concrete); }
 .test-tab { position: fixed; left: 12px; bottom: 12px; z-index: 50; font-size: 16px; color: var(--paper); background: var(--ink); border: 4px solid var(--violet); cursor: pointer; }
+
+/* inside a game room: no street, a themed lip, no pylon posts */
+.roadside.in-room { background-image: none; background-color: #16141c; padding-bottom: 18px; }
+.roadside.in-room.fz { background-color: #1a1218; box-shadow: inset 0 -10px 0 #3a2a24, inset 0 -14px 0 var(--ink); }
+.roadside.in-room.pub { background-color: #2a2018; box-shadow: inset 0 -10px 0 #6b4a2f, inset 0 -14px 0 #3a2a1c; }
+.roadside.in-room .pole, .roadside.in-room .legs { display: none; }
+.roadside.in-room .led { border-image: var(--pylon) 5 / 10px; }
+.field { cursor: pointer; }
+
+/* roster popup: a card over a still-visible, dimmed plaza */
+.roster-back { position: fixed; inset: 0; z-index: 30; background: rgba(20, 16, 24, 0.55); display: flex; align-items: center; justify-content: center; padding: 24px; }
+.roster { width: min(920px, 100%); max-height: calc(100vh - 48px); overflow: auto; padding: 12px 16px 16px; background: var(--night); border: 8px solid; border-image: var(--frame) 4 fill / 8px; box-shadow: 8px 8px 0 rgba(0,0,0,0.45); }
+.roster-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.roster-head .btn { margin-left: auto; }
+.roster-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.roster-card { display: flex; flex-direction: column; gap: 4px; padding: 8px; background: var(--ink); border: 4px solid var(--concrete); }
+.roster-card .who { display: flex; align-items: center; gap: 8px; }
+.roster-card .dps { font-size: 22px; color: var(--sodium-light); }
+.roster-card .meta { font-size: 15px; color: var(--stone); }
+.roster-curb { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.roster-buf { display: flex; align-items: center; gap: 8px; padding: 4px 8px; background: var(--ink); border: 2px solid var(--plum); }
+.roster-totals { margin-top: 8px; color: var(--stone); }
+.save-box { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.save-box textarea { font: inherit; font-size: 15px; min-height: 52px; color: var(--paper); background: var(--ink); border: 2px solid var(--concrete); padding: 4px 6px; }
+.plaza-buy { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.plaza-buy .item { display: flex; flex-direction: column; gap: 2px; padding: 6px 8px; background: var(--ink); border: 2px solid var(--concrete); min-width: 180px; }
+.cab.attracting { outline: 3px dashed var(--sodium); outline-offset: -3px; }
+.boot-menu.tenant-board { border-image: var(--cinder) 8 fill / 16px; background: var(--night); }
+.boot-logo { display: block; margin: 0 auto 8px; width: 390px; max-width: 100%; height: auto; }

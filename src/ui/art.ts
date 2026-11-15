@@ -8,6 +8,7 @@ import * as F from '../art/frames';
 import { buttonFrame, ICONS, panelFrame } from '../art/frames';
 import { deadTube, facade, scaffold, type Material } from '../art/storefronts';
 import { titleSign } from '../art/sign';
+import { funZoneLogo, offRampLogo, starsTile } from '../art/logos';
 
 const cache = new Map<string, HTMLCanvasElement>();
 export function canvasOf(key: string, make: () => Grid): HTMLCanvasElement {
@@ -40,6 +41,9 @@ export const facadeURL = (id: string, leased: boolean, lit = false) =>
   urlOf(`facade:${id}:${leased}:${lit}`, () => facade(leased ? id : null, materialOf(id), seedOf(id), SHOPS[id].region === 1 ? 'COMING' : 'SHOES', lit));
 export const scaffoldURL = () => urlOf('scaffold', scaffold);
 export const titleSignURL = (ray = false, o = false) => urlOf(`titlesign:${ray}:${o}`, () => titleSign(ray, o));
+export const funZoneLogoURL = (ray = false, o = false) => urlOf(`fzlogo:${ray}:${o}`, () => funZoneLogo(ray, o));
+export const offRampLogoURL = (title = 'THE BAR', dead = false) => urlOf(`orlogo:${title}:${dead}`, () => offRampLogo(title, dead));
+
 export const bootURL = (kinds: (string | null)[], dawn = false) => urlOf(`boot:${kinds.join(',')}:${dawn}`, () => bootScene(kinds, dawn));
 // frames and tiles as CSS variables (border-image / background)
 export function installFrames() {
@@ -60,6 +64,7 @@ export function installFrames() {
   set('lotsign-done', () => F.signFrame(C.green));
   set('cinder', F.cinderTile);
   set('sky', F.skyTile);
+  set('stars', starsTile);
   set('road', F.roadTile);
   set('led', F.ledTile);
   set('tear', F.tearTile);

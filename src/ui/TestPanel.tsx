@@ -4,9 +4,11 @@ import { useState } from 'preact/hooks';
 import { app, toast } from '../app';
 import { botAct } from '../game/bot';
 import { FIGHTS, REGIONS, SHOP_LIST, STEP } from '../game/defs';
+import { DAWN } from '../game/content/dawn';
 import { forLease, rentPerSec } from '../game/economy';
-import { MACHINES, PINBALL_TOP, SHUFFLE_TOP, endPlay, pokerQ, postScore, postShuffle, serviced, type MachineId } from '../game/room';
-import { enterRoom, leaveRoom } from './Pylon';
+import { paveAsphalt } from '../game/sinks';
+import { MACHINES, pokerQ, serviced, startPlay, type MachineId } from '../game/room';
+import { triggerFlicker } from './lights';
 import { fightLabel, payFor, step } from '../game/sim';
 import { fmt } from './format';
 
@@ -76,10 +78,10 @@ function autoTick() {
     const t = (auto.clock[m.id] = (auto.clock[m.id] ?? 0) + TICK * app.speed);
     if (t < m.secs) continue;
     auto.clock[m.id] = 0;
+    if (s.room.attracting) continue;
     const q = m.id === 'poker' ? pokerQ(s, true) : m.id === 'cyclone' ? (Math.random() < 0.1 ? 1 : Math.random() < 0.4 ? 0.5 : 0) : 0.45 + 0.5 * Math.random();
-    if (m.id === 'pinball') postScore(s, Math.round(q * PINBALL_TOP));
-    if (m.id === 'shuffle') postShuffle(s, Math.round(q * SHUFFLE_TOP));
-    endPlay(s, m.id, q);
+    if (startPlay(s, m.id) !== null) continue;
+    s.room.attracting = { id: m.id, q, left: m.secs };
   }
 }
 function setAuto(on: boolean) {
@@ -120,13 +122,15 @@ export function TestPanel() {
       </div>
       {busy && <div class="tp-row dim">{busy}</div>}
       <div class="tp-row">
-        <button class="btn small" onClick={() => ((c.cash += Math.max(1e4, rentPerSec(s, 0) * 3600)), done())}>+1h rent (${fmt(Math.max(1e4, rentPerSec(s, 0) * 3600))})</button>
+        <button class="btn small" onClick={() => ((s.crews[s.view].cash += Math.max(1e4, rentPerSec(s, s.view) * 3600)), done())}>+1h rent (${fmt(Math.max(1e4, rentPerSec(s, s.view) * 3600))})</button>
         <button class="btn small" onClick={() => ((s.goodwill += Math.max(1000, payFor(s, 0) * 100)), done())}>+{fmt(Math.max(1000, payFor(s, 0) * 100))} GW</button>
         <button class="btn small" onClick={() => ((s.tickets += 1000), done())}>+1,000 tickets</button>
+        {s.bypass && <button class="btn small" onClick={() => ((s.equity += 50), done())}>+50 {DAWN.equity}</button>}
       </div>
       <div class="tp-row">
         <button class="btn small" onClick={unlockAll}>Unlock every machine</button>
-        <button class="btn small" onClick={() => (app.screen === 'room' ? leaveRoom() : enterRoom(0))}>{app.screen === 'room' ? 'Back to the plaza' : 'Go to the arcade'}</button>
+        <button class="btn small" onClick={() => ((s.asphalt += paveAsphalt()), done())}>+Asphalt ({paveAsphalt()})</button>
+        <button class="btn small" onClick={() => triggerFlicker()}>Trigger flicker</button>
       </div>
       <div class="tp-row">
         <button class={`btn small ${auto.on ? 'hot' : ''}`} onClick={() => setAuto(!auto.on)}>

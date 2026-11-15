@@ -5,9 +5,9 @@ import { DAWN } from '../game/content/dawn';
 import { app, tip } from '../app';
 import { ASPHALT_BONUS, REGIONS, type RegionId } from '../game/defs';
 import { lotsTaken, rentPerSec, view } from '../game/economy';
-import { lumps, rate, type RateKey } from '../game/rates';
+import { lumps, rateLabel, type RateKey } from '../game/rates';
 import { MACHINES, roomOpen } from '../game/room';
-import { icon, titleSignURL } from './art';
+import { funZoneLogoURL, icon, offRampLogoURL, titleSignURL } from './art';
 import { lit } from './lights';
 import { fmt, fmtClock, fmtWL } from './format';
 import { Receipt } from './Receipt';
@@ -23,12 +23,15 @@ function Tenant({ cls, ic, k, v, rk, pre = '', tipArgs }: { cls: string; ic: str
       <img src={icon(ic)} width={18} height={18} alt="" />
       <span class="k">{k}</span>
       <span class="v">{v}</span>
-      {rk && (
-        <span class="r">
-          +{pre}
-          {fmt(rate(s, rk))}/s
-        </span>
-      )}
+      {rk && (() => {
+        const { n, unit } = rateLabel(s, rk);
+        return (
+          <span class="r">
+            +{pre}
+            {fmt(n)}/{unit}
+          </span>
+        );
+      })()}
       {pop && (
         <span class="pop" key={lump.at}>
           +{pre}
@@ -60,14 +63,8 @@ function Sign({ room }: { room: boolean }) {
   const r = s.view;
   if (room)
     return (
-      <div class={`cabinet marquee-sign ${r ? 'pub' : 'fz'}`}>
-        <span class="bulbrow" />
-        <span class="sign-main">{r ? <b class="neon">{DAWN.bar}</b> : <><b class="neon">FUN ZONE</b> <i>ARCADE</i></>}</span>
-        <span class="sign-sub">
-          <span>{r ? 'Darts · Pool · Poker · Foosball' : 'Outlet Mall · tokens 25¢'}</span>
-          <span class="lit">{r ? 'COLD BEER' : 'OPEN LATE'}</span>
-        </span>
-        <span class="bulbrow" />
+      <div class={`title-sign ${r ? 'pub' : 'fz'}`}>
+        <img src={r ? offRampLogoURL(DAWN.barSign ?? DAWN.bar, lit.has('sign-o')) : funZoneLogoURL(lit.has('sign-ray'), lit.has('sign-o'))} width={390} height={66} alt={r ? DAWN.bar : 'Fun Zone Arcade'} />
       </div>
     );
   return (
@@ -93,10 +90,10 @@ export function Pylon({ room = false }: { room?: boolean }) {
   const cashKey: RateKey = r ? 'cash1' : 'cash0';
   const bar = room && r === 1;
   return (
-    <header class={`roadside ${room ? 'in-room' : ''}`} ref={ref}>
+    <header class={`roadside ${room ? (r ? 'in-room pub' : 'in-room fz') : ''}`} ref={ref}>
       <div class="pylon">
         <Sign room={room} />
-        <Tenant cls="t-cash" ic="cash" k="Cash" v={`$${fmt(c.cash)}`} rk={cashKey} pre="$" tipArgs={[`${REGIONS[r].name} till`, `Last 5 seconds: $${fmt(rate(s, cashKey))}/s, rent $${fmt(rentPerSec(s, r))}/s of it.`, 'Leases, renovations, patrols, Overtime.', 'Every tenant pays on time. Every tenant is you.']} />
+        <Tenant cls="t-cash" ic="cash" k="Cash" v={`$${fmt(c.cash)}`} rk={cashKey} pre="$" tipArgs={[`${REGIONS[r].name} till`, (() => { const { n, unit } = rateLabel(s, cashKey); return `Live rate: $${fmt(n)}/${unit}, rent $${fmt(rentPerSec(s, r))}/s of it.`; })(), 'Leases, renovations, patrols, Overtime.', 'Every tenant pays on time. Every tenant is you.']} />
         {!bar && <Tenant cls="t-goodwill" ic="goodwill" k="Goodwill" v={fmt(s.goodwill)} rk="goodwill" tipArgs={['Goodwill', 'Wins pay it. Training costs it.', s.bypass ? DAWN.goodwillTip : 'People are starting to say nice things about the plaza.']} />}
         {s.bypass && (!room || bar) && <Tenant cls="t-equity" ic="equity" k={DAWN.equity} v={fmt(s.equity)} rk="equity" tipArgs={DAWN.equityTip as [string, ...string[]]} />}
         {room && !bar && <Tenant cls="t-tickets" ic="ticket" k="Tickets" v={fmt(s.tickets)} rk="tickets" tipArgs={['Tickets', 'Skee-Ball, the Cyclone, a few machines more.', 'The prize counter takes them.']} />}

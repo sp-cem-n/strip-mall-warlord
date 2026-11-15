@@ -4,6 +4,7 @@ import { newGame } from '../game/economy';
 import { saveGame } from '../game/save';
 import { Lot } from './Lot';
 import { Pylon } from './Pylon';
+import { closeRoster, RosterPopup } from './Roster';
 import { AskDialog, Boot, HowTo, Story, TipCard, WinCard } from './Screens';
 import { Shops } from './Shops';
 import { BackOffice } from './BackOffice';
@@ -37,6 +38,22 @@ export function App() {
   useEffect(() => {
     app.refresh = () => setN((n) => n + 1);
   }, []);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLInputElement) return;
+      if (e.key === 'Escape') {
+        if (app.roster) return (e.preventDefault(), closeRoster());
+      }
+      if ((e.key === 'r' || e.key === 'R') && (app.screen === 'game' || app.roster)) {
+        e.preventDefault();
+        app.roster = !app.roster;
+        app.tip = null;
+        app.refresh();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
   const screen =
     app.screen === 'boot' ? (
       <Boot onNew={onNew} onResume={onResume} />
@@ -62,6 +79,7 @@ export function App() {
     <>
       {screen}
       {app.toast && performance.now() < app.toastUntil && <div class="toast">{app.toast}</div>}
+      <RosterPopup />
       <WinCard />
       <AskDialog />
       <TipCard />

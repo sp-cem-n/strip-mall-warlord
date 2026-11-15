@@ -1,8 +1,9 @@
 // The parking-lot battlefields (320x150) and the title scene.
 import { DAWN } from '../game/content/dawn';
-import { Grid, hash, textWidth } from './grid';
+import { Grid, hash } from './grid';
 import { C } from './palette';
 import { facade } from './storefronts';
+import { titleSign } from './sign';
 
 // ---- the battlefield ----
 const SKYLINE: Record<string, (g: Grid) => void> = {
@@ -116,14 +117,11 @@ export function bootScene(kinds: (string | null)[], dawn = false): Grid {
   }
   // tree line behind the plaza
   for (let x = 0; x < W; x++) g.vline(x, 44 + Math.floor(hash(x >> 2, 9) * 6), 20, C.forest);
-  // roof sign
-  g.vline(110, 44, 12, C.concrete).vline(210, 44, 12, C.concrete);
-  g.boxed(66, 10, 188, 34, C.ink).rect(68, 12, 184, 30, C.night).hline(68, 12, 184, C.plum);
-  const title = 'STRIP MALL WARLORD';
-  const tx = 160 - Math.floor(textWidth(title, 2) / 2);
-  [...title].forEach((ch, i) => g.text(ch, tx + i * 8, 16, dawn ? C.concrete : i === 12 ? C.brick : C.neon, 2)); // the W is out; at dawn they're all off
-  const sub = 'PINEWOOD PLAZA  EST. 1991';
-  g.text(sub, 160 - Math.floor(textWidth(sub) / 2), 33, C.sodiumLight);
+  // roof sign: the same starburst as the top bar
+  const sign = titleSign(!dawn, !dawn);
+  const sx = Math.floor((320 - sign.w) / 2);
+  g.vline(sx + 20, 40, 14, C.concrete).vline(sx + sign.w - 20, 40, 14, C.concrete);
+  g.blit(sign, sx, 8);
   // the building
   g.boxed(20, 54, 280, 50, C.bone).rect(20, 54, 280, 3, C.stone);
   for (let i = 0; i < 4; i++) g.blit(facade(kinds[i] ?? null, 'home', i + 1), 32 + i * 64, 54);

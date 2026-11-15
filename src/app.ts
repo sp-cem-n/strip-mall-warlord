@@ -33,6 +33,7 @@ export const app = {
   toastUntil: 0,
   refresh: () => {},
   testPanel: null as null | (() => JSX.Element | null), // ?test=1 only, loaded on demand
+  roster: false,
 };
 
 export function toast(msg: string) {

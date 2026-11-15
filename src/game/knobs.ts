@@ -9,7 +9,7 @@ export const HARD_FOCUS = 0.75; // share of a hard hitter's hits that go for the
 export const FRONT_SHARE = 0.6; // enemy hits that go to the front tank; the rest land on anyone. Hard hitters and bosses pick the weakest.
 // Enemy HP and damage growth per fight, one entry per lot: steep while the plaza fills up, gentler once renovations get expensive.
 export const FIGHT_GROWTH = [[1.6, 1.07, 1.07, 1.07, 1.07, 1.07], [1.66, 1.0825, 1.0825, 1.0825]] as const;
-export const LOT_JUMP = [[2, 1.45, 1.103, 1.286, 0.619, 1.089], [2, 4, 1.01, 0.45]] as const; // step entering each lot (entry 0 scales the first fight)
+export const LOT_JUMP = [[2, 1.45, 1.103, 1.286, 0.619, 1.089], [1.9, 4, 1.01, 0.45]] as const; // step entering each lot (entry 0 scales the first fight)
 export const PAY_BASE = [2, 0.2] as const; // Goodwill / Equity per win at a region's first fight. Bypass wins pay thin: most Equity comes from the bank.
 export const PAY_GROWTH = [1.06, 1.09] as const; // per fight, across the region
 export const BOSS_STRENGTH = 1.15; // a boss is this much over the fight before it

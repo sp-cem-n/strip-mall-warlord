@@ -1,13 +1,13 @@
 // Title screen, how to play, the story card, the win card, and the shared pixel dialogs.
 import { DAWN } from '../game/content/dawn';
 import { useEffect, useState } from 'preact/hooks';
-import { app } from '../app';
+import { app, ask, toast } from '../app';
 import { ASPHALT_BONUS, FIGHTS, REGIONS } from '../game/defs';
 import { asphaltGain, leased, pave, view } from '../game/economy';
 import { fightLabel } from '../game/sim';
-import { old, saveGame } from '../game/save';
+import { exportCode, importCode, old, saveGame } from '../game/save';
 import { HOW, STORY } from '../game/content/copy';
-import { bootURL } from './art';
+import { bootURL, titleSignURL } from './art';
 import { fmt, fmtTime } from './format';
 import { Speaker } from './Speaker';
 
@@ -61,6 +61,45 @@ function AwayStats() {
   );
 }
 
+export function SaveBox() {
+  const [code, setCode] = useState('');
+  const copyOut = async () => {
+    try {
+      await navigator.clipboard.writeText(exportCode(app.s));
+      toast('Lease code copied.');
+    } catch {
+      setCode(exportCode(app.s));
+      toast('Copy failed. The code is in the box; select it by hand.');
+    }
+  };
+  const load = () => {
+    const raw = code.trim();
+    if (!raw) return;
+    ask('Load this lease? The current run will be overwritten.', 'Load', 'Never mind', () => {
+      const got = importCode(raw);
+      if (typeof got === 'string') return toast(got);
+      app.s = got;
+      app.away = null;
+      app.hasSave = true;
+      app.oldSave = false;
+      saveGame(got);
+      toast('Lease loaded.');
+      app.refresh();
+    });
+  };
+  return (
+    <div class="save-box">
+      <b>Lease code</b>
+      <span class="dim">Copy a code out, or paste one in.</span>
+      <textarea value={code} placeholder="SMW1." onInput={(e) => setCode((e.target as HTMLTextAreaElement).value)} />
+      <div class="tp-row">
+        <button class="btn small" onClick={copyOut}>Copy lease code</button>
+        <button class="btn small" disabled={!code.trim()} onClick={load}>Load lease</button>
+      </div>
+    </div>
+  );
+}
+
 export function Boot({ onNew, onResume }: { onNew: () => void; onResume: () => void }) {
   const kinds = app.hasSave ? leased(app.s, 0).slice(0, 4).map((x) => x.id) : ['pawn'];
   while (kinds.length < 4) kinds.push(null as unknown as string);
@@ -68,7 +107,8 @@ export function Boot({ onNew, onResume }: { onNew: () => void; onResume: () => v
     <div class="screen boot">
       <Speaker corner />
       <img class="boot-scene" src={bootURL(kinds)} width={960} height={540} alt="Pinewood Plaza at night" />
-      <div class="boot-menu panel-brick">
+      <div class="boot-menu panel-brick tenant-board">
+        <img class="boot-logo" src={titleSignURL()} width={390} height={66} alt="Strip Mall Warlord" />
         {app.oldSave && (
           <div class="notice">
             <b>Notice to tenants:</b> The lease was renegotiated. Your old plaza ({old.from}) is still open at <a href={`./${old.from}/`}>/{old.from}/</a>{old.from === 'v0.5' ? ', save and all' : ''}. Nothing carries over here. Uncle Sal's pawn shop is open at 9.
@@ -86,6 +126,7 @@ export function Boot({ onNew, onResume }: { onNew: () => void; onResume: () => v
         <button class="btn big" onClick={() => ((app.howFrom = 'boot'), (app.screen = 'howto'), app.refresh())}>
           How to Play
         </button>
+        <SaveBox />
       </div>
       <p class="boot-foot dim">Fall 1997 · Route 9 · Ample parking</p>
     </div>

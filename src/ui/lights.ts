@@ -44,3 +44,9 @@ export function startLights(fast = false) { // fast: ?lights=fast, every few sec
   if (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   next();
 }
+
+export function triggerFlicker() {
+  const all = candidates();
+  const id = all[Math.floor(Math.random() * all.length)] ?? 'sign-o';
+  sputter(id, true, () => later(rnd(4, 10) * 1000, () => sputter(id, false, () => {})));
+}

@@ -1,5 +1,5 @@
 import { AURA_STEP, BATTLERS, WALK_IN_SECONDS, BOSS_STRENGTH, HARD_FOCUS, FIGHTS, FIGHT_TIMEOUT, FRONT_SHARE, MAIN_GROWTH, OVERTIME_BOOST, RALLY_BOOST, REGIONS, ROLES, SIDE_HP_GROWTH, TANK_HP_GROWTH, TELL, TRAIN_STEP, WEAK_BONUS, type BattlerDef, type EnemyDef, type Fx, type RegionId, type Role } from './defs';
-import { asphaltMult, curb, fighters, lineupOf, log } from './economy';
+import { asphaltMult, curb, fighters, lineupOf, log, sinkHpBonus } from './economy';
 import { rand } from './rng';
 import { barDmg, barHp, buffOn } from './room';
 import type { Battle, Field, GameState, Unit } from './state';
@@ -16,7 +16,7 @@ export function statsOf(s: GameState, region: RegionId, id: string, level: numbe
   const t = trackMult(s, d.role, region);
   const fights = d.role !== 'tank' && d.role !== 'buffer';
   return {
-    hp: Math.round(d.hp * a * (d.role === 'tank' ? TANK_HP_GROWTH ** L * t : d.role === 'buffer' ? 1 : SIDE_HP_GROWTH ** L)),
+    hp: Math.round(d.hp * a * (1 + (region === 0 ? sinkHpBonus(s) : 0)) * (d.role === 'tank' ? TANK_HP_GROWTH ** L * t : d.role === 'buffer' ? 1 : SIDE_HP_GROWTH ** L)),
     dmg: d.dmg * a * (fights ? MAIN_GROWTH ** L * t : 1),
     interval: d.interval,
     aura: 1 + AURA_STEP * L,
@@ -112,7 +112,9 @@ export function startBattle(s: GameState, r: RegionId): Battle | null {
   // the boss's entrance: once, on the first try
   if (f.boss && fight === c.frontier && c.tries === 0) log(s, r, `${REGIONS[r].lots[f.zone].boss.name.replace(/^(?!The )/, 'The ')} walks out. ${REGIONS[r].lots[f.zone].boss.title}`);
   const fresh = crew.every((u) => u.hp >= u.maxHp);
-  return (c.battle = { fight, t: 0, crew, enemies, field, revived: false, overtime, fresh, enter: WALK_IN_SECONDS });
+  const enter = c.queueEnter >= 0 && c.smoke <= 0 ? c.queueEnter : WALK_IN_SECONDS;
+  c.queueEnter = -1;
+  return (c.battle = { fight, t: 0, crew, enemies, field, revived: false, overtime, fresh, enter });
 }
 
 const alive = (u: Unit) => u.hp > 0;

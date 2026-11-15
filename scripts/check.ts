@@ -34,7 +34,7 @@ check(`Bypass: ${bp.length} shops (${bp.filter((x) => !r9.some((y) => y.battler 
 check('every battler and shop id resolves', SHOP_LIST.every((x) => BATTLERS[x.battler]) && REGIONS.every((r) => r.lots.every((l) => BATTLERS[l.boss.joins])));
 check('every enemy weakness is a battler that region can field', REGIONS.every((r) => r.lots.every((l) => [...l.regulars, l.boss].every((e) => [...SHOP_LIST.filter((x) => x.region === r.id).map((x) => x.battler), ...bosses(r.id)].includes(e.weak)))));
 check('every battler and enemy has its own look', Object.keys(BATTLERS).every((id) => CREW_LOOKS[id] || bosses(0).includes(id) || bosses(1).includes(id)) && REGIONS.every((r) => r.lots.every((l) => [...l.regulars, l.boss].every((e) => ENEMY_LOOKS[e.name]))));
-check('shops unlock in lease order', [0, 1].every((r) => { const l = SHOP_LIST.filter((x) => x.region === r && x.fight >= 0).map((x) => FIGHTS[r].findIndex((f) => f.zone === x.zone && f.i === x.fight)); return l.every((v, i) => v >= 0 && (i === 0 || v > l[i - 1])); }));
+check('shops unlock in lease order', [0, 1].every((r) => { const l = SHOP_LIST.filter((x) => x.region === r && x.fight >= 0).map((x) => FIGHTS[r].findIndex((f) => f.zone === x.zone && f.i === x.fight)); return l.every((v, i) => v >= 0 && (i === 0 || v >= l[i - 1])); }));
 check('fight ladders: Route 9 84, Bypass 56', FIGHTS[0].length === 84 && FIGHTS[1].length === 56);
 check('wins to clear and pay never go down inside a lot', FIGHTS.every((L) => L.every((f, i) => i === 0 || f.boss || L[i - 1].zone !== f.zone || (f.need >= L[i - 1].need && f.pay >= L[i - 1].pay))));
 check(`wins to clear grow gently: ${FIGHTS[0][0].need} at the start, ${FIGHTS[0].at(-2)!.need} at the end; bosses 1`, FIGHTS[0][0].need === 3 && FIGHTS[0].at(-2)!.need === 10 && FIGHTS.every((L) => L.every((f) => !f.boss || f.need === 1)));
@@ -207,10 +207,11 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
 {
   const t = newGame(13);
   t.crews[0].cash = 1e9;
-  t.crews[0].frontier = FIGHTS[0].findIndex((f) => f.zone === 2);
-  check('the Fun Zone is not for lease before the Outlet Mall', lease(t, 'funzone') !== null);
-  t.crews[0].frontier += 1;
-  check('the Fun Zone leases at Outlet fight 1 for $30K and opens the Coin Pusher', SHOPS.funzone.lease === 30000 && (step(t), !t.room.unlocked.length) && lease(t, 'funzone') === null && (step(t), t.room.unlocked.includes('pusher')) && roster(t, 0).some(([id]) => id === 'tokenkid'));
+  const fzAt = FIGHTS[0].findIndex((f) => f.zone === 0 && f.i === 6);
+  t.crews[0].frontier = fzAt;
+  check('the Fun Zone is not for lease before Parking Lot fight 7', lease(t, 'funzone') !== null);
+  t.crews[0].frontier = fzAt + 1;
+  check('the Fun Zone leases at Parking Lot fight 7 for $20K and opens the Coin Pusher', SHOPS.funzone.lease === 20000 && (step(t), !t.room.unlocked.length) && lease(t, 'funzone') === null && (step(t), t.room.unlocked.includes('pusher')) && roster(t, 0).some(([id]) => id === 'tokenkid'));
   const c0 = t.crews[0].cash;
   check('a quarter in, dollars out', startPlay(t, 'pusher') === null && t.crews[0].cash < c0 && (endPlay(t, 'pusher', 0.8), t.crews[0].cash > c0));
   check('locked machines stay dark', startPlay(t, 'claw') !== null);
@@ -228,7 +229,7 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   check('the claw costs 50 tickets', startPlay(t, 'claw') !== null && ((t.tickets = 50), startPlay(t, 'claw') === null) && t.tickets === 0);
   t.tickets = 7500;
   check('prize counter: slots 6 and 7 for tickets', buyPerk(t, 'slot') === null && buyPerk(t, 'slot') === null && slotsOf(t, 0) === START_SLOTS + 2 && buyPerk(t, 'slot') !== null);
-  check('Attract Mode plays by itself, rarely', buyAttract(t, 'pusher') === null && (() => { const p = t.room.plays; for (let i = 0; i < 1800 / STEP + 5; i++) step(t); return t.room.plays === p + 1; })());
+  check('Attract Mode plays by itself, rarely', buyAttract(t, 'pusher') === null && (() => { const p = t.room.plays; for (let i = 0; i < (300 + 10) / STEP + 5; i++) step(t); return t.room.plays === p + 1; })());
   t.crews[0].frontier = FIGHTS[0].length;
   t.ending = 0;
   const room = JSON.stringify({ ...t.room, clock: 0, shelf: 0, buffs: 0 });

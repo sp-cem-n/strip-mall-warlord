@@ -1,7 +1,8 @@
-import { BATTLERS, FIGHTS, OFFLINE_CAP_SECONDS, RALLY_SECONDS, REFERRAL_WINS, REGIONS, RETRY_AFTER, SHOPS, SHOP_LIST, STEP, TIP_SECONDS, WALKIN_EVERY, WALKIN_NAMES, WALKIN_STAYS, type FightDef, type RegionId, type WalkInKind } from './defs';
+import { BATTLERS, FIGHTS, OFFLINE_CAP_SECONDS, RALLY_SECONDS, REFERRAL_WINS, REGIONS, RETRY_AFTER, SHOPS, SHOP_LIST, STEP, TIP_SECONDS, WALK_IN_SECONDS, WALKIN_EVERY, WALKIN_NAMES, WALKIN_STAYS, type FightDef, type RegionId, type WalkInKind } from './defs';
 import { pick } from './rng';
 import { lossReason, startBattle, stepBattle } from './battle';
-import { asphaltMult, autoCovers, available, currencyOf, earn, fightOf, leased, log, rentPerSec, smokeBreak, topFight } from './economy';
+import { asphaltMult, autoCovers, available, currencyOf, earn, fightOf, leased, log, overtime, overtimeCost, rentPerSec, smokeBreak, topFight } from './economy';
+import { tickSinks } from './sinks';
 import type { Battle, GameState } from './state';
 import { boardBonus, buffOn, perk, tickRoom } from './room';
 import { fmt } from '../ui/format';
@@ -14,6 +15,7 @@ export function step(s: GameState, watching = false) {
   s.totalTime += STEP;
   if (watching) walkIns(s);
   tickRoom(s, STEP);
+  tickSinks(s);
   for (const r of s.bypass ? ([0, 1] as const) : ([0] as const)) {
     const c = s.crews[r];
     c.rally = Math.max(0, c.rally - STEP);
@@ -21,9 +23,13 @@ export function step(s: GameState, watching = false) {
     earn(s, r, 'cash', inc);
     s.stats.earned += inc;
     if (c.battle) {
+      if (c.battle.enter <= 0 && c.queueEnter < 0) c.queueEnter = WALK_IN_SECONDS;
+      if (c.queueEnter > 0) c.queueEnter = Math.max(0, c.queueEnter - STEP);
       const result = stepBattle(s, c.battle, STEP, c.rally > 0);
       if (result) resolve(s, r, c.battle, result);
     } else if ((c.regroup -= STEP) <= 0) {
+      const f = FIGHTS[r][Math.min(c.at, FIGHTS[r].length - 1)];
+      if (f.boss && c.at === c.frontier && c.tries >= 2 && c.overtime === 0 && autoCovers(s, r, f.zone) && c.cash >= overtimeCost(s, r)) overtime(s, r);
       if (!startBattle(s, r)) c.regroup = 1;
     }
   }
@@ -56,9 +62,8 @@ function resolve(s: GameState, r: RegionId, b: Battle, result: 'win' | 'loss') {
   c.wins++;
   // damage carries over: whatever they took, they keep until the next smoke break
   for (const u of b.crew) c.wounds[u.id] = 1 - u.hp / u.maxHp;
-  c.regroup = 0.4;
-  c.smoke = 0;
   if (b.crew.some((u) => u.hp <= 0)) smokeBreak(s, r); // somebody's down: smoke break before the next one
+  else (c.regroup = 0), (c.smoke = 0); // already in line: no 0.4s dead air
   const f = ladder[b.fight];
   const pay = payFor(s, r, f, b.field.payUp);
   earn(s, r, REGIONS[r].pay, pay);
@@ -112,7 +117,8 @@ function walkIns(s: GameState) {
     return;
   }
   if ((s.findClock -= STEP) > 0) return;
-  s.findClock = perk(s, 'walkins') ? 75 : WALKIN_EVERY;
+  const ads = 1 - 0.04 * Object.values(s.blitz ?? {}).reduce((a, n) => a + n, 0);
+  s.findClock = (perk(s, 'walkins') ? 75 : WALKIN_EVERY) * Math.max(0.5, ads);
   const shops = leased(s, s.view);
   if (!shops.length) return;
   const sh = pick(s, shops);

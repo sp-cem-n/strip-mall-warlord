@@ -33,11 +33,18 @@ export function loadGame(): GameState | 'old' | null {
     if (s?.version === SAVE_VERSION && Array.isArray(s.crews)) {
       s.room = { ...newRoom(), ...s.room };
       if (typeof s.room.shelf === 'number') s.room.shelf = [s.room.shelf, 10];
+      s.consultants ??= [[], []];
+      s.autoReno ??= [[], []];
+      s.landmarks ??= [];
+      s.retainers ??= 0;
+      s.blitz ??= {};
+      s.room.attracting ??= null;
       for (const c of s.crews) {
         // v0.6 -> v0.7: damage carries over, smoke breaks, one tries counter
         c.tries ??= 0;
         c.wounds ??= {};
         c.smoke ??= 0;
+        c.queueEnter ??= -1;
         delete (c as { streak?: number }).streak;
         delete (c as { stance?: string }).stance;
         if (c.battle && c.battle.enter === undefined) c.battle = null;
@@ -60,5 +67,37 @@ export function clearSave() {
     localStorage.removeItem(KEY);
   } catch {
     /* ignore */
+  }
+}
+
+// A compact, copy-pasteable lease code. Confirm before a load overwrites the current run.
+const PREFIX = 'SMW1.';
+export function exportCode(s: GameState): string {
+  const json = JSON.stringify(s);
+  const bytes = new TextEncoder().encode(json);
+  let bin = '';
+  bytes.forEach((b) => (bin += String.fromCharCode(b)));
+  return PREFIX + btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+export function importCode(raw: string): GameState | string {
+  const t = raw.trim().replace(/\s+/g, '');
+  if (!t.startsWith(PREFIX)) return 'That does not look like a lease code.';
+  try {
+    const b64 = t.slice(PREFIX.length).replace(/-/g, '+').replace(/_/g, '/');
+    const pad = b64.length % 4 === 0 ? '' : '='.repeat(4 - (b64.length % 4));
+    const bin = atob(b64 + pad);
+    const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+    const s = JSON.parse(new TextDecoder().decode(bytes)) as GameState;
+    if (s?.version !== SAVE_VERSION || !Array.isArray(s.crews)) return 'That lease is from another version.';
+    s.consultants ??= [[], []];
+    s.autoReno ??= [[], []];
+    s.landmarks ??= [];
+    s.retainers ??= 0;
+    s.blitz ??= {};
+    s.room = { ...newRoom(), ...s.room, attracting: s.room?.attracting ?? null };
+    for (const c of s.crews) c.queueEnter ??= -1;
+    return s;
+  } catch {
+    return 'Could not read that lease code.';
   }
 }

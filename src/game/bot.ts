@@ -1,6 +1,6 @@
 // A scripted player for balance runs and the debug `advance` param. Plays like someone who checks in now and then.
 import { FIGHTS, RETRY_AFTER, ROLES, SHOPS, REGIONS, type RegionId } from './defs';
-import { advance, bal, buyPatrol, buySlot, convert, curb, forLease, leased, lease, lineupOf, overtime, overtimeCost, patrolBlock, patrolPrice, pave, purse, regionDone, renovate, renovateCost, rentPerSec, slotPrice, topFight, train, trainCost, view } from './economy';
+import { advance, bal, buyPatrol, buySlot, convert, curb, forLease, leased, lease, lineupOf, lotsTaken, overtime, overtimeCost, patrolBlock, patrolPrice, pave, purse, regionDone, renovate, renovateCost, rentPerSec, slotPrice, topFight, train, trainCost, view } from './economy';
 import { collectFind } from './sim';
 import type { GameState } from './state';
 import { BAR_BUFFS, QUIZ, serviced, MACHINE, PERKS, PINBALL_TOP, SHUFFLE_TOP, buffOn, buyPerk, endPlay, perkPrice, pokerQ, postScore, postShuffle, startPlay, type MachineId, type PerkId } from './room';
@@ -69,7 +69,8 @@ export interface BotOpts {
 function crewAct(s: GameState, r: RegionId, o: BotOpts) {
   const c = s.crews[r];
   const R = REGIONS[r];
-  const open = () => forLease(s, r).filter((x) => !x.dawn).sort((a, b) => a.lease - b.lease);
+  // The Fun Zone is a cash sink, not a ladder shop: don't freeze renovations to save up for it.
+  const open = () => forLease(s, r).filter((x) => !x.dawn && x.id !== 'funzone').sort((a, b) => a.lease - b.lease);
   for (let g = 0; g < 5; g++) {
     const next = open()[0];
     if (!next || lease(s, next.id)) break;
@@ -78,6 +79,9 @@ function crewAct(s: GameState, r: RegionId, o: BotOpts) {
   const mgmt = forLease(s, r).find((x) => x.dawn);
   if (mgmt && s.equity >= 2 * mgmt.lease) lease(s, mgmt.id);
   const pending = open()[0]?.lease ?? 0;
+  const arcade = forLease(s, r).find((x) => x.id === 'funzone');
+  // Players can buy it at Parking Lot fight 7; the official bot waits until Outlet, as it used to, so early $20K does not starve Big-Box.
+  if (arcade && lotsTaken(s, 0) >= 2 && c.cash >= arcade.lease) lease(s, arcade.id);
   // Patrol contracts for every lot reached; save up for one when it's under half an hour of rent.
   const zone = FIGHTS[r][Math.min(c.frontier, FIGHTS[r].length - 1)].zone;
   let reserve = 0;

@@ -7,7 +7,7 @@ import { credit } from './rates';
 
 export const SAVE_VERSION = 5;
 const zeroTrack = (): Track => ({ tank: 0, damage: 0, heal: 0, control: 0, buffer: 0 });
-export const newCrew = (r: RegionId): Crew => ({ cash: START_CASH, shops: { [REGIONS[r].start]: 1 }, train: zeroTrack(), frontier: 0, at: 0, kills: 0, farmed: 0, tries: 0, wounds: {}, battle: null, regroup: 2, smoke: 0, overtime: 0, lineup: null, contracts: [], slotBuys: 0, rally: 0, wins: 0, losses: 0 });
+export const newCrew = (r: RegionId): Crew => ({ cash: START_CASH, shops: { [REGIONS[r].start]: 1 }, train: zeroTrack(), frontier: 0, at: 0, kills: 0, farmed: 0, tries: 0, wounds: {}, battle: null, regroup: 2, smoke: 0, overtime: 0, lineup: null, contracts: [], slotBuys: 0, rally: 0, wins: 0, losses: 0, queueEnter: -1 });
 
 export function newGame(seed = Date.now() % 2147483647): GameState {
   return {
@@ -31,6 +31,11 @@ export function newGame(seed = Date.now() % 2147483647): GameState {
     nextUid: 1,
     find: null,
     findClock: 30,
+    consultants: [[], []],
+    autoReno: [[], []],
+    landmarks: [],
+    retainers: 0,
+    blitz: {},
   };
 }
 
@@ -66,7 +71,19 @@ export function pave(s: GameState): GameState {
   return s;
 }
 // Asphalt is Route 9's: +2% rent, stats and Goodwill each. The Bypass only gets Route 9 through Equity.
-export const asphaltMult = (s: GameState, r: RegionId) => (r === 0 ? 1 + ASPHALT_BONUS * s.asphalt : 1);
+export const sinkRentMult = (s: GameState) =>
+  1 +
+  (s.landmarks?.includes('billboard') ? 0.02 : 0) +
+  0.015 * (s.blitz?.radio ?? 0) +
+  0.02 * (s.blitz?.paper ?? 0) +
+  0.03 * (s.blitz?.banner ?? 0);
+export const sinkStatMult = (s: GameState, r: RegionId) =>
+  r === 0
+    ? 1 + (s.landmarks?.includes('pylon') ? 0.04 : 0) + 0.02 * (s.retainers ?? 0)
+    : 1;
+export const sinkHpBonus = (s: GameState) => (s.landmarks?.includes('tower') ? 0.03 : 0);
+export const asphaltMult = (s: GameState, r: RegionId) => (r === 0 ? 1 + ASPHALT_BONUS * s.asphalt : 1) * sinkStatMult(s, r);
+
 
 export const regionDone = (s: GameState, r: RegionId) => s.crews[r].frontier >= FIGHTS[r].length;
 export function cleared(s: GameState, r: RegionId, zone: number, i: number) {
@@ -115,7 +132,7 @@ export function roster(s: GameState, r: RegionId): [string, number][] {
 }
 
 export const rentOf = (s: GameState, id: string, level = s.crews[SHOPS[id].region].shops[id] ?? 0) => (level ? SHOPS[id].rent * RENT_GROWTH ** (level - 1) * asphaltMult(s, SHOPS[id].region) * mgmtMult(s) : 0);
-export const rentPerSec = (s: GameState, r: RegionId) => leased(s, r).reduce((a, x) => a + rentOf(s, x.id), 0);
+export const rentPerSec = (s: GameState, r: RegionId) => leased(s, r).reduce((a, x) => a + rentOf(s, x.id), 0) * (r === 0 ? sinkRentMult(s) : 1);
 export const renovateCost = (id: string, level: number) => Math.round(SHOPS[id].reno * RENO_GROWTH ** (level - 1));
 export const trainCost = (r: RegionId, level: number) => Math.round(TRAIN_BASE[r] * TRAIN_GROWTH ** level);
 export const overtimeCost = (s: GameState, r: RegionId) => Math.max(10, Math.round(rentPerSec(s, r) * OVERTIME_SECONDS * (r === 0 ? 1 - 0.25 * perk(s, 'otCheap') : 1)));
@@ -185,13 +202,14 @@ export function convert(s: GameState, equity = Infinity): string | null {
 }
 
 // ---- Patrols: auto-advance, hired one lot at a time from the lot track. ----
-export const autoCovers = (s: GameState, r: RegionId, zone: number) => s.crews[r].contracts.includes(zone);
+export const autoCovers = (s: GameState, r: RegionId, zone: number) => s.crews[r].contracts.includes(zone) || (s.consultants?.[r] ?? []).includes(zone);
 export const patrolPrice = (_s: GameState, r: RegionId, zone: number) => REGIONS[r].lots[zone].patrol;
 // Everyone steps out back for a smoke. Full HP when they come back.
 export function smokeBreak(s: GameState, r: RegionId) {
   const c = s.crews[r];
   c.wounds = {};
   c.regroup = c.smoke = SMOKE_BREAK_SECONDS;
+  c.queueEnter = -1; // the line walks off
 }
 export const lotReached = (s: GameState, r: RegionId, zone: number) => zone <= FIGHTS[r][Math.min(s.crews[r].frontier, FIGHTS[r].length - 1)].zone;
 export function patrolBlock(s: GameState, r: RegionId, zone: number): string | null {

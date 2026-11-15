@@ -27,8 +27,9 @@ export interface RoomState {
   shuffle: number; // shuffleboard house scores beaten (0-5)
   shuffleBest: number;
   hands: Partial<Record<BuffKind, string>>; // the real poker hand behind each bar buff (a flush pays like trips)
+  attracting: { id: MachineId; q: number; left: number } | null;
 }
-export const newRoom = (): RoomState => ({ unlocked: [], attract: {}, clock: {}, cool: {}, perks: {}, board: 0, best: 0, jackpot: 500, shelf: [10, 10], buffs: {}, plays: 0, shuffle: 0, shuffleBest: 0, hands: {} });
+export const newRoom = (): RoomState => ({ unlocked: [], attract: {}, clock: {}, cool: {}, perks: {}, board: 0, best: 0, jackpot: 500, shelf: [10, 10], buffs: {}, plays: 0, shuffle: 0, shuffleBest: 0, hands: {}, attracting: null });
 
 // ---- rates every payout is priced in, so nothing goes stale ----
 const rent = (s: GameState, r: RegionId) => Math.max(1, rentPerSec(s, r));
@@ -186,7 +187,7 @@ export function buyPerk(s: GameState, id: PerkId): string | null {
 }
 
 // ---- Attract Mode: plays itself, rarely, badly ----
-export const ATTRACT_EVERY = [0, 1800, 1200, 720];
+export const ATTRACT_EVERY = [0, 300, 180, 120]; // 5 / 3 / 2 minutes at Lv 1 / 2 / 3
 export const ATTRACT_SKILL = 0.4;
 export function attractPrice(s: GameState, id: MachineId): Cost | null {
   const lv = s.room.attract[id] ?? 0;
@@ -289,18 +290,28 @@ export function tickRoom(s: GameState, dt: number) {
   }
   for (const k of Object.keys(R.buffs) as BuffKind[]) R.buffs[k] = Math.max(0, (R.buffs[k] ?? 0) - dt);
   R.shelf = R.shelf.map((x) => Math.min(10, x + dt / 60)) as [number, number];
+  if (R.attracting) {
+    R.attracting.left -= dt;
+    if (R.attracting.left <= 0) {
+      const { id, q } = R.attracting;
+      R.attracting = null;
+      if (id === 'shuffle') postShuffle(s, Math.round(q * SHUFFLE_TOP));
+      if (id === 'pinball') postScore(s, Math.round(q * PINBALL_TOP));
+      endPlay(s, id, q, true);
+    }
+  }
   for (const id of Object.keys(R.attract) as MachineId[]) {
     const lv = R.attract[id] ?? 0;
-    if (!lv) continue;
+    if (!lv || R.attracting) continue;
     R.clock[id] = (R.clock[id] ?? 0) + dt;
     if (R.clock[id]! < ATTRACT_EVERY[lv]) continue;
     R.clock[id] = 0;
     if (startPlay(s, id) !== null) continue;
     const q = id === 'cyclone' ? (rand(s) < 0.04 ? 1 : rand(s) < 0.15 ? 0.5 : 0) : id === 'poker' ? pokerQ(s, false) : ATTRACT_SKILL * (0.6 + 0.8 * rand(s));
-    if (id === 'shuffle') postShuffle(s, Math.round(q * SHUFFLE_TOP));
-    endPlay(s, id, q, true);
+    R.attracting = { id, q, left: MACHINE[id].secs };
   }
 }
+
 
 // A video poker hand for players who aren't at the machine (Attract Mode, the bot): Jacks or Better odds, held well or not.
 export function pokerQ(s: GameState, good: boolean) {
