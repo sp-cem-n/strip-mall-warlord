@@ -118,7 +118,7 @@ export function bootScene(kinds: (string | null)[], dawn = false): Grid {
   // tree line behind the plaza
   for (let x = 0; x < W; x++) g.vline(x, 44 + Math.floor(hash(x >> 2, 9) * 6), 20, C.forest);
   // roof sign: the same starburst as the top bar
-  const sign = titleSign(!dawn, !dawn);
+  const sign = titleSign(!dawn, dawn ? 1 << 4 : 0);
   const sx = Math.floor((320 - sign.w) / 2);
   g.vline(sx + 20, 40, 14, C.concrete).vline(sx + sign.w - 20, 40, 14, C.concrete);
   g.blit(sign, sx, 8);

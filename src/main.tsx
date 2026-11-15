@@ -43,7 +43,7 @@ app.screen = (q.get('screen') as Screen) ?? 'boot';
 for (const ev of ['pointerdown', 'keydown']) addEventListener(ev, unlockAudio);
 
 render(<App />, document.getElementById('app')!);
-startLights(q.get('lights') === 'fast');
+startLights(q.get('lights'), q);
 
 let last = performance.now();
 let acc = 0;

@@ -1,6 +1,6 @@
 // The title sign: a '60s starburst and a slanted slab, sodium STRIP MALL over a pink neon WARLORD.
-// One ray of the starburst is burnt out, and so is the O. Nobody has called anyone about either.
-// ray / o = the few seconds a while they sputter back on (see ui/lights.ts).
+// One ray of the starburst is burnt out. Nobody has called anyone about it.
+// ray = the few seconds a while it sputters back on; out = bitmask of WARLORD letters that are dark right now (see ui/lights.ts).
 // 195x33, shown at 2x in the top bar's 390x66 slot.
 import { Grid } from './grid';
 import { C } from './palette';
@@ -41,7 +41,7 @@ function starburst(ray: boolean) {
   return sb.outline();
 }
 
-export function titleSign(ray = false, o = false) {
+export function titleSign(ray = false, out = 0) {
   const g = new Grid(W, H);
   // the slab leans right, lit edge on the right, then the teal underline with daylight on both sides
   for (let y = 3; y < 31; y++) {
@@ -60,13 +60,12 @@ export function titleSign(ray = false, o = false) {
   tube(halo, t, 46, 12, Array(7).fill(C.neon));
   halo.outline(C.plum);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (halo.get(x, y) === C.plum && g.get(x, y) === C.night) g.px(x, y, C.plum);
-  const cols = Array(7).fill(C.neon);
-  if (!o) cols[4] = C.brick;
+  const cols = Array.from({ length: 7 }, (_, n) => (out & (1 << n) ? C.brick : C.neon));
   const end = tube(g, t, 46, 12, cols);
   let x = 46;
   [...t].forEach((ch, n) => {
     const top = F57[ch].split(' ')[0];
-    if (n !== 4 || o) [...top].forEach((b, i) => b === '1' && g.px(x + i, 12, C.paper));
+    if (!(out & (1 << n))) [...top].forEach((b, i) => b === '1' && g.px(x + i, 12, C.paper));
     x += top.length + 2;
   });
 

@@ -1,7 +1,7 @@
 // Small invariant checks. Run: bun scripts/check.ts
 import { BATTLERS, FIGHTS, GOODWILL_PER_EQUITY, MAX_SLOTS, OFFLINE_CAP_SECONDS, REGIONS, SHOPS, SMOKE_BREAK_SECONDS, SHOP_LIST, START_SLOTS, STEP, WEAK_BONUS } from '../src/game/defs';
 import { auras, enemyLineup, startBattle, statsOf, stepBattle } from '../src/game/battle';
-import { advance, asphaltGain, autoCovers, buyPatrol, buySlot, convert, curb, forLease, lease, lineupOf, newGame, overtime, patrolBlock, powerLevel, rentPerSec, patrolPrice, pave, renovate, renovateCost, roster, slotsOf, tierOf, toggleField, train, trainCost, view } from '../src/game/economy';
+import { advance, asphaltGain, fieldFull, autoCovers, buyPatrol, buySlot, convert, curb, forLease, lease, lineupOf, newGame, overtime, patrolBlock, powerLevel, rentPerSec, patrolPrice, pave, renovate, renovateCost, roster, slotsOf, tierOf, toggleField, train, trainCost, view } from '../src/game/economy';
 import { loadGame, old, saveGame } from '../src/game/save';
 import { collectFind, simulateAway, step } from '../src/game/sim';
 import { CREW_LOOKS, ENEMY_LOOKS } from '../src/art/people';
@@ -42,6 +42,16 @@ check('enemy strength never goes down inside a lot', FIGHTS.every((L) => L.every
 check('enemy groups grow: 1 at the start, 6 by Pinewood Commons', enemyLineup(0, 0).length === 1 && enemyLineup(0, FIGHTS[0].length - 2).length === 6);
 check('shop tiers: the Pawn Shop is tier 0, later shops sit higher', tierOf('pawn') === 0 && tierOf(r9.at(-1)!.id) > tierOf(r9[3].id));
 
+// roster: a full field says where more slots come from, and stops offering once there are none
+{
+  const t = newGame(5);
+  const m = fieldFull(t, 0);
+  check('full field: bench someone, or the Back Office / prize counter', m.includes('Bench someone first') && m.includes('Back Office') && m.includes('prize counter'));
+  t.crews[0].slotBuys = 2;
+  t.room.perks.slot = 2;
+  const m2 = fieldFull(t, 0);
+  check(`maxed field (${slotsOf(t, 0)}/${MAX_SLOTS}): just bench someone, no buy line`, slotsOf(t, 0) === MAX_SLOTS && m2.includes('Bench someone first') && !/buy|Back Office|prize/i.test(m2));
+}
 // start
 const s = newGame(1);
 check('start: the pawn shop, one Fixer, nothing else', Object.keys(s.crews[0].shops).join() === 'pawn' && roster(s, 0).length === 1);

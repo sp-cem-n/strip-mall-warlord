@@ -268,9 +268,31 @@ export function toggleField(s: GameState, r: RegionId, id: string): string | nul
   const c = s.crews[r];
   const now = lineupOf(s, r);
   if (now.includes(id)) c.lineup = now.filter((x) => x !== id);
-  else if (now.length >= slotsOf(s, r)) return `All ${slotsOf(s, r)} slots are taken. Bench someone first.`;
+  else if (now.length >= slotsOf(s, r)) return fieldFull(s, r);
   else c.lineup = [...now, id];
   return null;
+}
+// Where more slots can still come from on this road. Empty once the lot is maxed or nothing is left to buy.
+export function slotSources(s: GameState, r: RegionId): string[] {
+  if (slotsOf(s, r) >= MAX_SLOTS) return [];
+  const c = s.crews[r];
+  const out: string[] = [];
+  const officeLeft = SLOT_PRICES[r].length - c.slotBuys > 0;
+  if (r === 0) {
+    if (officeLeft) out.push('the Back Office (Goodwill)');
+    if (perk(s, 'slot') < 2) out.push('the Fun Zone prize counter');
+  } else {
+    if (officeLeft) out.push(DAWN.slotWhere.office);
+    if (perk(s, 'bpSlot') < 1) out.push(DAWN.slotWhere.stool);
+    if (s.room.shuffle < 3) out.push(DAWN.slotWhere.shuffle);
+  }
+  return out;
+}
+export function fieldFull(s: GameState, r: RegionId): string {
+  const n = slotsOf(s, r);
+  const where = slotSources(s, r);
+  const head = `The field is full (${n}/${n}). Bench someone first.`;
+  return where.length ? `${head} Or buy another slot: ${where.join(' or ')}.` : head;
 }
 export const autoPick = (s: GameState, r: RegionId) => (s.crews[r].lineup = null);
 // Arcade and bar perks that add slots (the prize counter, the shuffleboard board). Filled in by the Game Room.

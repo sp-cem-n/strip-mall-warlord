@@ -8,7 +8,12 @@ import * as F from '../art/frames';
 import { buttonFrame, ICONS, panelFrame } from '../art/frames';
 import { deadTube, facade, scaffold, type Material } from '../art/storefronts';
 import { titleSign } from '../art/sign';
-import { funZoneLogo, offRampLogo, starsTile } from '../art/logos';
+import { starsTile } from '../art/logos';
+import barLogo from '../art/bar-logo.png';
+import fzBase from '../art/fz-base.png';
+import fzFun from '../art/fz-fun.png';
+import fzZone from '../art/fz-zone.png';
+import fzLine from '../art/fz-line.png';
 import { landmarkSprite } from '../art/landmarks';
 
 const cache = new Map<string, HTMLCanvasElement>();
@@ -41,9 +46,10 @@ export const hasDeadTube = (id: string) => deadTube(seedOf(id));
 export const facadeURL = (id: string, leased: boolean, lit = false) =>
   urlOf(`facade:${id}:${leased}:${lit}`, () => facade(leased ? id : null, materialOf(id), seedOf(id), SHOPS[id].region === 1 ? 'COMING' : 'SHOES', lit));
 export const scaffoldURL = () => urlOf('scaffold', scaffold);
-export const titleSignURL = (ray = false, o = false) => urlOf(`titlesign:${ray}:${o}`, () => titleSign(ray, o));
-export const funZoneLogoURL = (ray = false, o = false) => urlOf(`fzlogo:${ray}:${o}`, () => funZoneLogo(ray, o));
-export const offRampLogoURL = (title = 'THE BAR', sub = 'OPEN LATE', plate = '14', dead = false) => urlOf(`orlogo:${title}:${sub}:${plate}:${dead}`, () => offRampLogo(title, sub, plate, dead));
+export const titleSignURL = (ray = false, out = 0) => urlOf(`titlesign:${ray}:${out}`, () => titleSign(ray, out));
+// Fun Zone neon script (option B): dead tubes underneath, each lit part on its own layer so it can flicker.
+export const FZ_LOGO = { base: fzBase, fun: fzFun, zone: fzZone, line: fzLine };
+export const barLogoURL = () => barLogo; // Toad's neon matchbook, Josh's pick
 export const landmarkURL = (id: string) => urlOf(`landmark:${id}`, () => landmarkSprite(id));
 
 export const bootURL = (kinds: (string | null)[], dawn = false) => urlOf(`boot:${kinds.join(',')}:${dawn}`, () => bootScene(kinds, dawn));

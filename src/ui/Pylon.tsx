@@ -7,8 +7,8 @@ import { ASPHALT_BONUS, REGIONS, type RegionId } from '../game/defs';
 import { lotsTaken, rentPerSec, view } from '../game/economy';
 import { lumps, rateLabel, type RateKey } from '../game/rates';
 import { MACHINES, roomOpen } from '../game/room';
-import { funZoneLogoURL, icon, offRampLogoURL, titleSignURL } from './art';
-import { lit } from './lights';
+import { FZ_LOGO, icon, barLogoURL, titleSignURL } from './art';
+import { fzOff, lit, signOut } from './lights';
 import { fmt, fmtClock, fmtWL } from './format';
 import { Receipt } from './Receipt';
 import { Speaker } from './Speaker';
@@ -64,12 +64,19 @@ function Sign({ room }: { room: boolean }) {
   if (room)
     return (
       <div class={`title-sign ${r ? 'pub' : 'fz'}`}>
-        <img src={r ? offRampLogoURL(DAWN.bar, 'TIL 2AM', '14', lit.has('sign-o')) : funZoneLogoURL(lit.has('sign-ray'), lit.has('sign-o'))} width={390} height={66} alt={r ? DAWN.bar : 'Fun Zone Arcade'} />
+        {r ? (
+          <img src={barLogoURL()} width={390} height={66} alt={DAWN.bar} />
+        ) : (
+          <span class="fz-logo" role="img" aria-label="Fun Zone Arcade">
+            <img src={FZ_LOGO.base} width={390} height={66} alt="" />
+            {(['fun', 'zone', 'line'] as const).map((p) => <img key={p} src={FZ_LOGO[p]} width={390} height={66} alt="" class={fzOff.has(p) ? 'off' : ''} />)}
+          </span>
+        )}
       </div>
     );
   return (
     <button class="title-sign" onClick={() => ((app.screen = 'boot'), (app.tip = null), app.refresh())} {...tip('Pinewood Plaza', 'Est. 1991. Back to the title screen.')}>
-      <img src={titleSignURL(lit.has('sign-ray'), lit.has('sign-o'))} width={390} height={66} alt="Strip Mall Warlord" />
+      <img src={titleSignURL(lit.has('sign-ray'), signOut.mask)} width={390} height={66} alt="Strip Mall Warlord" />
     </button>
   );
 }

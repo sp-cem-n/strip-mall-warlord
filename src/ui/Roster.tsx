@@ -1,4 +1,5 @@
 // Click the lot or press R: a modal over the still-running fight, laid out like Toad's roster card.
+import { useEffect, useState } from 'preact/hooks';
 import { app, tip } from '../app';
 import { BATTLERS, CURRENCY_NAME, FIGHTS, REGIONS, type Fx, type RegionId, type Target } from '../game/defs';
 import { enemyLineup, statsOf } from '../game/battle';
@@ -70,6 +71,12 @@ function fightLine(r: RegionId) {
 }
 
 export function RosterPopup() {
+  const [msg, setMsg] = useState<string | null>(null);
+  useEffect(() => {
+    if (!msg) return;
+    const t = setTimeout(() => setMsg(null), 6000);
+    return () => clearTimeout(t);
+  }, [msg]);
   if (!app.roster) return null;
   const s = app.s;
   const r = s.view as RegionId;
@@ -97,7 +104,7 @@ export function RosterPopup() {
 
   const setField = (id: string, on: boolean) => {
     if (fielded.has(id) === on) return;
-    toggleField(s, r, id);
+    setMsg(toggleField(s, r, id));
     app.refresh();
   };
 
@@ -229,6 +236,13 @@ export function RosterPopup() {
           </section>
         </div>
 
+        {msg && (
+          <div class="roster-full" role="alert" onClick={() => setMsg(null)}>
+            <b>FIELD FULL</b>
+            <span>{msg}</span>
+            <em>click to dismiss</em>
+          </div>
+        )}
         <div class="roster-foot">
           <button class={`auto ${auto ? 'on' : ''}`} onClick={() => (autoPick(s, r), app.refresh())} {...tip('Auto lineup', 'Best tank, a healer, counters for this fight, then raw power.')}>
             <i />

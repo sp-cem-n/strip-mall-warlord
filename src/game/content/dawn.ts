@@ -38,6 +38,8 @@ export const DAWN = {
   prizeBack: 'The back room',
   shotName: 'Souvenir shot glass',
   shotDoes: '+10% damage on the Bypass crew for 20 minutes',
+  // roster: where more Bypass fighter slots come from
+  slotWhere: { office: 'the Back Office (Equity)', stool: 'the Bar stool at the Fun Zone prize counter', shuffle: 'beating the third house score at Off-Ramp shuffleboard' },
   perks: {
     bpSlot: { name: 'Bar stool', does: 'One more fighter on the Bypass lot', prices: [1000] },
     bpBell: { name: 'Bar bell', does: 'Walk-ins on the Bypass every 75s instead of 90', prices: [800] },

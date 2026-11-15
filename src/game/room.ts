@@ -13,7 +13,7 @@ export type BuffKind = 'bat' | 'duck' | 'troll' | 'ball' | 'watch' | 'well' | 'c
 export type Cost = { cur: Currency | 'tickets'; n: number };
 export interface Reward { cash?: number; goodwill?: number; tickets?: number; equity?: number; buff?: BuffKind; big?: boolean; text: string }
 export interface PusherCoin { x: number; y: number; layer: 'shelf' | 'field'; kind: 'coin' | 'rent' | 'ticket' }
-export interface PusherField { coins: PusherCoin[]; hopper: number; tower: number; inn: number; out: number }
+export interface PusherField { coins: PusherCoin[]; hopper: number; tower: number; inn: number; out: number; rng?: number }
 export interface RoomState {
   unlocked: MachineId[]; // survives paving
   attract: Partial<Record<MachineId, number>>; // Attract Mode level, 0-3
@@ -375,17 +375,23 @@ export function seedPusher(): PusherField {
   return { coins, hopper: 42, tower: 8, inn: 0, out: 0 };
 }
 export const ensurePusher = (s: GameState) => (s.room.pusher ??= seedPusher());
+// The pile has its own little RNG so the cosmetic pile never shifts the game's seeded stream (fights, finds, the bot).
+function pileRand(f: PusherField) {
+  f.rng = (Math.imul(f.rng ?? 1997, 1103515245) + 12345) & 0x7fffffff;
+  return f.rng / 0x80000000;
+}
 function tickPusher(s: GameState, dt: number) {
   const f = ensurePusher(s);
+  const rand = () => pileRand(f);
   f.hopper -= dt;
   if (f.hopper <= 0) {
-    f.hopper = 35 + rand(s) * 25;
+    f.hopper = 35 + rand() * 25;
     const n = Math.min(8, 40 - f.coins.length);
-    for (let i = 0; i < n; i++) f.coins.push({ x: 10 + rand(s) * 20, y: 40 + rand(s) * 8, layer: 'field', kind: rand(s) < 0.08 ? 'ticket' : 'coin' });
+    for (let i = 0; i < n; i++) f.coins.push({ x: 10 + rand() * 20, y: 40 + rand() * 8, layer: 'field', kind: rand() < 0.08 ? 'ticket' : 'coin' });
   }
-  if (f.tower > 0 && rand(s) < dt / 60) {
+  if (f.tower > 0 && rand() < dt / 60) {
     f.tower = Math.max(0, f.tower - 1);
-    f.coins.push({ x: 22 + rand(s) * 8, y: 50, layer: 'field', kind: f.tower === 0 ? 'rent' : 'coin' });
+    f.coins.push({ x: 22 + rand() * 8, y: 50, layer: 'field', kind: f.tower === 0 ? 'rent' : 'coin' });
   }
   if (f.coins.length > 56) f.coins.splice(0, f.coins.length - 56);
 }

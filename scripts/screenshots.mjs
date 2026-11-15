@@ -38,6 +38,9 @@ const shots = [
   ['26-receipt-closed', `${g}&advance=5400&screen=game`, [], '.printer'],
   ['27-landmarks', `${g}&advance=5400&landmarks=1&screen=game`, [], '.shops h2'],
   ['28-autoplay', `?test=1&${g.slice(1).replace('pause=1', 'pause=0')}&room=full&screen=room`, [['click', 'text=Autoplay machines'], ['wait', 2200]]],
+  ['29-roster-full', `${g}&advance=5400&active=1&screen=game`, [['click', 'canvas.field'], ['wait', 300], ['click', '.fc.bench'], ['wait', 200]]],
+  ['30-sign-letters-out', `${g}&advance=5400&screen=game&lights=still&signout=18`, [], '.roadside'],
+  ['31-funzone-zone-off', `${room}&lights=still&fzoff=zone`, [], '.roadside'],
 ];
 
 const browser = await chromium.launch();

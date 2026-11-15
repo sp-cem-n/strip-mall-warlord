@@ -1,6 +1,6 @@
 # v0.9 progress
 
-Last updated: 15 Nov 2026, about 4:35 AM America/New_York.
+Last updated: 15 Nov 2026, about 4:40 AM America/New_York (P1 chunk: logos, flicker, roster full-field, M1+M2 to main).
 
 Worktree: `/workspace/smw-v09` on branch `v09`. Commit author is always Josh Durbin `<149157950+sp-cem-n@users.noreply.github.com>`. Do not work in `/workspace/strip-mall-warlord` (still on `v09-polish`). Mockups live only on this machine at `/workspace/smw-mockups/v09/` and `/workspace/smw-mockups/v09b/`, plus `/workspace/smw-mockups/minigames/`.
 
@@ -12,12 +12,17 @@ Plans: `docs/V09_POLISH.md` (b8de1e9) and `docs/V09_BYPASS.md` (45f76d3), alread
 
 ---
 
-## Live now (M1)
+## Live now (M1 + M2 + P1 polish)
 
-- Live: https://sp-cem-n.github.io/strip-mall-warlord/
-- Branch / commit: live `main` is still **4035230**. Local `v09` is ahead (v09d top bars, M1 receipt/plaza/boot fixes, Toad-matching roster). A prior `git push origin v09` was blocked pending top-bar approval; do not merge to main or publish until Josh signs off (bars are in the approved direction, Fun Zone / Off-Ramp logos still waiting on Toad).
-- Package version is still **0.8.0**. Do not bump or tag until M4.
-- `bun scripts/check.ts`: all good, including leak checks (1093 pre-dawn strings, post-dawn words only in `dawn.ts` / `bypass.ts`).
+- Live: https://sp-cem-n.github.io/strip-mall-warlord/ — `main` = see git log (merge of `v09` after the P1 chunk). Package still **0.8.0**; no tag until M4.
+- P1 chunk (on top of the M2 commits):
+  - Fun Zone logo = Toad's neon script (v09e option B) as four layered PNGs (`src/art/fz-base.png` dead tubes + props, `fz-fun`, `fz-zone`, `fz-line`); generator `/workspace/smw-mockups/v09g/fzlayers.py`. `FZ_LOGO` in `ui/art.ts`, `.fz-logo` in styles.
+  - Off-Ramp logo = Toad's neon matchbook (v09f C2, Josh approved) with the striker shortened and kept clear of CLOSE COVER BEFORE STRIKING: `src/art/bar-logo.png`, generator `/workspace/smw-mockups/v09g/orlogo.py`. Old procedural Fun Zone / Off-Ramp logo code deleted from `art/logos.ts` (only `starsTile` left).
+  - `ui/lights.ts`: three separate schedules. Plaza tubes (ray + dead shop tubes). WARLORD letters (`signOut.mask`, `titleSign(ray, outMask)`): one at a time, ≤2 dark, always sputter out and sputter back. Fun Zone (`fzOff`): FUN / ZONE / underline blinks, 40% hang dark 2–5s, always ends lit; 12% of events are a ~10s tantrum. `?lights=still&signout=MASK&fzoff=zone` freezes for screenshots; `?lights=fast` for testing. The O is no longer permanently dark (boot scene at dawn still darkens it).
+  - Roster full field: `fieldFull` / `slotSources` in `game/economy.ts`, red FIELD FULL strip in the popup (`.roster-full`, auto-clears 6s, click dismisses). Lists only sources still available (Route 9: Back Office Goodwill buys, Fun Zone prize counter; Bypass strings in `DAWN.slotWhere`). Maxed (≥ MAX_SLOTS or nothing left) = just "Bench someone first." Two new checks.
+  - Guard fix: the M2 Coin Pusher pile (`tickPusher`) was drawing from the game's seeded `rand(s)`, which shifted every fight roll and broke `--guard` (Phase II 14 tries, Outlet 13, losses 10%). The pile now has its own RNG (`pileRand`, `room.pusher.rng`). Guard is back to the M1 numbers below.
+- Known, not fixed: at 390×844 the top bar is wider than the screen (receipt / LED board scroll off to the right), same as before.
+- `bun scripts/check.ts`: all good, including leak checks.
 - `bun scripts/balance.ts --guard` (Route 9 15h±1; CI 14–16h, active 11–15.5h, losses 10–30%, frontier ≤50%, boss tries ≤12):
 
   | seed | mode     | Route 9 | losses |
@@ -26,6 +31,12 @@ Plans: `docs/V09_POLISH.md` (b8de1e9) and `docs/V09_BYPASS.md` (45f76d3), alread
   | 1991 | active   | 15h 29m | 19%    |
   | 7    | check-in | 14h 50m | 16%    |
   | 7    | active   | 14h 37m | 15%    |
+
+- New screenshots: `screenshots/v9/<size>/29-roster-full.png`, `30-sign-letters-out.png`, `31-funzone-zone-off.png`, `23-top-bar-bar.png`.
+
+## Next (P2, in order; push live after each checked chunk)
+
+1. Shuffleboard puck collision + foosball keys + Off-Ramp 2.5D games. 2. Pull-Tabs, Blackjack, Fairway 9. 3. Grapevine rumor slips (strings in `dawn.ts`). 4. Hotkeys in How to Play. 5. High-stakes tables. 6. Trivia batches toward 1,200+. Then P3 = M4 Bypass, bump 0.9.0, tag v0.9.
 
 ---
 
@@ -89,7 +100,7 @@ Fun Zone 2.5D cabinets and YOU WON slips are also on `origin/v09`:
 - Night Shift: time-clock ramp (20s 2× and a short multiball), standup targets, flippers on A/D, arrows, and click/tap.
 - YOU WON slip: a dimmed sodium card on the cabinet when the play pays (cash over cost, 20+ tickets, a toy, or a big win). Click or any key dismisses; it auto-clears at 2.8s.
 
-Off-Ramp 2.5D and arcade high-stakes tables stay M3. Do not merge to main until Josh picks logos. Review shots: `screenshots/v9/review/funzone-*-1280x800.png`.
+Off-Ramp 2.5D and arcade high-stakes tables stay M3. Logos are picked and shipped (see top). Review shots: `screenshots/v9/review/funzone-*-1280x800.png`.
 
 ## Not done (M2 cabinets, then M3 → M4)
 
