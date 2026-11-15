@@ -29,8 +29,8 @@ export function RosterPopup() {
     <div class="roster-back" onClick={closeRoster}>
       <div class="roster" onClick={(e) => e.stopPropagation()}>
         <div class="roster-head">
-          <h2>The roster · {REGIONS[r].name}</h2>
-          <span class="dim">{fielded.size} fielded · {buffers.length} on the curb</span>
+          <h2>Night shift · {REGIONS[r].name}</h2>
+          <span class="dim">{fielded.size} on the lot · {buffers.length} on the curb</span>
           <button class="btn small" onClick={() => (autoPick(s, r), app.refresh())}>AUTO</button>
           <button class="btn small" onClick={closeRoster}>✕</button>
         </div>
@@ -42,12 +42,12 @@ export function RosterPopup() {
             const on = fielded.has(id);
             const dp = dps(st.dmg, st.interval);
             return (
-              <div key={id} class="roster-card" {...tip(d.name, d.does, `${d.role} · Lv ${level}`, `HP ${fmt(st.hp)} · dmg ${fmt(st.dmg)} / ${st.interval}s`, `DPS ${fmt(dp)}`)}>
+              <div key={id} class={`roster-card ${d.role}`} {...tip(d.name, d.does, `${d.role} · Lv ${level}`, `HP ${fmt(st.hp)} · dmg ${fmt(st.dmg)} / ${st.interval}s`, `DPS ${fmt(dp)}`)}>
                 <div class="who">
                   <img src={crewURL(id)} width={32} height={48} alt="" />
                   <div>
                     <b>{d.name}</b>
-                    <div class="meta">{d.role} · Lv {level}</div>
+                    <div class="role">{d.role} · Lv {level}</div>
                   </div>
                 </div>
                 <div class="dps">{fmt(dp)} DPS</div>
@@ -61,7 +61,7 @@ export function RosterPopup() {
         </div>
         <div class="roster-curb">
           <h2>On the curb</h2>
-          {buffers.length === 0 && <div class="dim">No buffers yet. They never take a field slot.</div>}
+          {buffers.length === 0 && <div class="dim">Nobody waiting. Curb-side help never takes a field slot.</div>}
           {buffers.map(([id]) => {
             const d = BATTLERS[id];
             const from = aur.filter((a) => a.from === id);
@@ -75,7 +75,7 @@ export function RosterPopup() {
             );
           })}
         </div>
-        <div class="roster-totals dim">Click the lot, press R, or press Esc to close. The fight keeps going behind this card.</div>
+        <div class="roster-totals dim">The lot, R, or Esc closes this. The fight keeps going under the sodium lights.</div>
       </div>
     </div>
   );

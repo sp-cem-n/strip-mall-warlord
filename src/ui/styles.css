@@ -69,16 +69,22 @@ button { font: inherit; }
 .t-equity .v { color: var(--ink); }
 .pole { display: flex; justify-content: center; gap: 120px; flex: 1 0 22px; min-height: 22px; }
 .pole i, .legs i { display: block; width: 14px; height: 100%; background: var(--concrete); border: 2px solid var(--ink); border-top: 0; box-shadow: inset 4px 0 0 var(--stone); }
-.led-sign { display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto 1fr; gap: 4px 8px; align-items: center; justify-items: center; align-self: stretch; }
+/* one structure: highway plate (if any), the LED cabinet, and the posts that bolt into it and stand on the street */
+.led-sign { display: flex; align-items: stretch; gap: 8px; align-self: stretch; }
+.scoreboard { display: flex; flex-direction: column; align-items: stretch; min-width: 0; }
+.led-sign .hwy { margin-bottom: 4px; }
 /* the board never changes size: three fixed cells, short forms (1.2K) */
 .led { display: grid; grid-template-columns: 10ch 6ch 4ch; gap: 10px; padding: 2px 10px; font-size: 26px; line-height: 1; white-space: nowrap; color: var(--red); text-shadow: 2px 0 0 var(--brick); background: var(--led) repeat; background-size: 6px 6px; background-clip: padding-box; border: 10px solid; border-image: var(--pylon) 5 / 10px; }
 .led .cell { display: flex; flex-direction: column; align-items: center; }
 .led small { font-family: 'Pixelify Sans', sans-serif; font-size: 10px; letter-spacing: 0.1em; color: var(--brick); text-shadow: none; }
 .led-buttons { display: flex; flex-direction: column; gap: 4px; }
-.hwy, .hwy-gap { justify-self: stretch; height: 30px; }
-.hwy { font-family: 'Pixelify Sans', sans-serif; font-weight: 500; font-size: 16px; letter-spacing: 0.08em; color: var(--paper); background: #2f6b3f; border: 3px solid var(--paper); box-shadow: 0 0 0 2px #2f6b3f, 3px 3px 0 2px var(--ink); cursor: pointer; }
+.hwy { font-family: 'Pixelify Sans', sans-serif; font-weight: 500; font-size: 16px; letter-spacing: 0.08em; color: var(--paper); background: #2f6b3f; border: 3px solid var(--paper); box-shadow: 0 0 0 2px #2f6b3f, 3px 3px 0 2px var(--ink); cursor: pointer; height: 30px; }
 .hwy:hover { background: var(--forest); }
-.legs { grid-area: 3 / 1; display: flex; gap: 160px; height: auto; min-height: 34px; align-self: stretch; }
+.legs { display: flex; justify-content: space-between; padding: 0 28px; flex: 1 0 28px; min-height: 28px; margin-top: -6px; position: relative; z-index: 0; }
+.legs i { position: relative; z-index: 0; }
+/* a steel collar and two bolts where each post meets the cabinet */
+.legs i::before { content: ''; position: absolute; top: 0; left: -4px; width: 18px; height: 10px; background: var(--stone); border: 2px solid var(--ink); box-shadow: inset 2px 2px 0 var(--bone), inset -1px -1px 0 var(--asphalt); z-index: 1; }
+.legs i::after { content: ''; position: absolute; top: 3px; left: 1px; width: 3px; height: 3px; background: var(--ink); box-shadow: 5px 0 0 var(--ink); z-index: 2; }
 .debug { color: var(--red); align-self: center; }
 .speaker { padding: 2px; background: none; border: 4px solid; border-image: var(--btn) 2 fill / 4px; cursor: pointer; line-height: 0; }
 .speaker:hover { border-image-source: var(--btn-hot); }
@@ -180,31 +186,33 @@ button { font: inherit; }
 .field { display: block; border: 4px solid var(--ink); }
 .legend { font-size: 15px; margin-top: 4px; }
 
-/* the receipt printer */
-.printer { display: flex; flex-direction: column; flex: 1; max-width: 640px; align-self: stretch; justify-content: flex-start; }
-.printer-head { display: flex; justify-content: space-between; align-items: center; padding: 0 8px; font-size: 15px; letter-spacing: 0.08em; color: var(--stone); border: 10px solid; border-image: var(--printer) 5 fill / 10px; }
+/* the receipt printer: tagline pinned at the bottom, torn edge hanging in the grass, never into the street */
+.printer { display: flex; flex-direction: column; flex: 1; max-width: 640px; align-self: stretch; justify-content: flex-start; position: relative; z-index: 5; }
+.printer-head { display: flex; justify-content: space-between; align-items: center; padding: 0 8px; font-size: 15px; letter-spacing: 0.08em; color: var(--stone); border: 10px solid; border-image: var(--printer) 5 fill / 10px; font: inherit; cursor: pointer; text-align: left; }
 .printer-light { width: 8px; height: 8px; background: var(--green); border: 2px solid var(--ink); animation: blink 1.6s steps(2) infinite; }
 @keyframes blink { 50% { background: var(--forest); } }
-.paper { position: relative; margin: -8px 26px 3px; padding: 6px 12px 12px; background: var(--paper); color: var(--ink); font-size: 17px; }
-.paper::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background: var(--tear) repeat-x; background-size: 16px 8px; }
-.paper ul { list-style: none; margin: 0; padding: 0; }
+.paper { position: relative; display: flex; flex-direction: column; margin: -8px 26px 0; padding: 6px 12px 4px; background: var(--paper); color: var(--ink); font-size: 17px; cursor: pointer; overflow: visible; }
+/* the zigzag hangs below the paper, in the grass, never drawn through the tagline */
+.paper::after { content: ''; position: absolute; left: 0; right: 0; bottom: -8px; height: 8px; background: var(--tear) repeat-x; background-size: 16px 8px; pointer-events: none; z-index: 2; }
+.paper ul { list-style: none; margin: 0; padding: 0; flex: 1 1 auto; min-height: 0; overflow: hidden; }
 .paper li { display: grid; grid-template-columns: 52px 1fr; padding: 1px 0; }
 .paper .x { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.printer { position: relative; z-index: 5; }
-.printer-head { font: inherit; cursor: pointer; text-align: left; }
-.paper { cursor: pointer; }
-.printer.open .paper { position: absolute; top: 34px; left: 0; right: 0; margin: 0 26px; max-height: 460px; overflow-y: auto; box-shadow: 0 8px 0 rgba(0,0,0,0.35); }
+/* closed: 4 lines + pinned tagline, fixed height so the bar does not bounce; padding keeps the tear in the grass above the curb */
+.printer:not(.open) { padding-bottom: 18px; overflow: visible; }
+.printer:not(.open) .paper { height: 112px; overflow: visible; }
+.printer.open { height: 0; min-height: var(--printer-h, 168px); overflow: visible; padding-bottom: 0; }
+.printer.open .paper { position: absolute; top: 34px; left: 0; right: 0; margin: 0 26px; max-height: 460px; overflow: visible; box-shadow: 0 8px 0 rgba(0,0,0,0.35); }
+.printer.open .paper ul { overflow-y: auto; max-height: 420px; }
 .printer.open .x { white-space: normal; }
-.printer.open { height: 0; min-height: var(--printer-h, 168px); overflow: visible; }
-.paper::-webkit-scrollbar { width: 10px; } .paper::-webkit-scrollbar-thumb { background: var(--concrete); } .paper::-webkit-scrollbar-track { background: var(--bone, #d8d0b8); }
-.printer:not(.open) .paper { height: 104px; overflow: hidden; } /* fixed: the bar never bounces */
+.paper ul::-webkit-scrollbar { width: 10px; } .paper ul::-webkit-scrollbar-thumb { background: var(--concrete); } .paper ul::-webkit-scrollbar-track { background: var(--bone, #d8d0b8); }
 .paper .t { color: var(--stone); }
 .paper b { font-weight: normal; }
 .r-info { color: var(--asphalt); }
 .r-win { color: var(--ink); }
 .r-loss, .r-capture { color: var(--brick); }
 .r-capture { letter-spacing: 0.03em; }
-.r-foot { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; letter-spacing: 0.12em; color: var(--concrete); padding-bottom: 2px; }
+/* pinned under the log, paper-backed so a dashed tear never clips through the text */
+.r-foot { flex: 0 0 auto; position: relative; z-index: 1; margin-top: 2px; padding: 3px 0 1px; background: var(--paper); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; letter-spacing: 0.12em; color: var(--concrete); }
 
 
 /* ---- full screens ---- */
@@ -302,27 +310,57 @@ button { font: inherit; }
 .test-tab { position: fixed; left: 12px; bottom: 12px; z-index: 50; font-size: 16px; color: var(--paper); background: var(--ink); border: 4px solid var(--violet); cursor: pointer; }
 
 /* inside a game room: no street, a themed lip, no pylon posts */
-/* Rooms keep the same grass and street as the plaza; only the top-left logo changes. */
-.roadside.in-room .led { border-image: var(--pylon) 5 / 10px; }
+.roadside.in-room { background-image: none; padding-bottom: 30px; position: relative; }
+.roadside.in-room .pole, .roadside.in-room .legs { display: none; }
+.roadside.in-room .scoreboard { justify-content: flex-start; }
+.roadside.in-room.fz { background-color: #1a1520; }
+.roadside.in-room.pub { background-color: #16141c; }
+.room-lip { display: none; }
+.roadside.in-room .room-lip { display: block; position: absolute; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 2; }
+/* Fun Zone: purple carpet and a coin-door lip */
+.roadside.in-room.fz .room-lip { height: 28px; background: repeating-linear-gradient(90deg, #3a1830 0 16px, #2a1224 16px 32px), linear-gradient(#4a2240, #2a1224); border-top: 6px solid #1a0e16; box-shadow: inset 0 4px 0 #e0588c44, 0 -2px 0 var(--ink); }
+.roadside.in-room.fz .room-lip::after { content: ''; position: absolute; left: 10%; right: 10%; top: 6px; height: 5px; background: #2a1a14; box-shadow: inset 0 0 0 1px #5a3a28, 0 0 0 2px #1a1420; }
+/* Off-Ramp: a wood bartop, wet rings from the last round */
+.roadside.in-room.pub .room-lip { height: 30px; background: linear-gradient(#3a2418, #5a3a28 40%, #2a1a10); border-top: 6px solid #6a4a32; box-shadow: inset 0 3px 0 #8a6a48, 0 -2px 0 var(--ink); }
+.roadside.in-room.pub .room-lip::before { content: ''; position: absolute; left: 0; right: 0; top: 8px; height: 2px; background: #2a1a10; opacity: 0.5; }
+.roadside.in-room.pub .room-lip::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; border: 2px solid #4a3020; left: 24%; top: 8px; box-shadow: 220px 2px 0 -1px #4a3020, 480px 4px 0 0 #4a3020; }
 .field { cursor: pointer; }
 
-/* roster popup: a card over a still-visible, dimmed plaza */
-.roster-back { position: fixed; inset: 0; z-index: 30; background: rgba(20, 16, 24, 0.55); display: flex; align-items: center; justify-content: center; padding: 24px; }
-.roster { width: min(920px, 100%); max-height: calc(100vh - 48px); overflow: auto; padding: 12px 16px 16px; background: var(--night); border: 8px solid; border-image: var(--frame) 4 fill / 8px; box-shadow: 8px 8px 0 rgba(0,0,0,0.45); }
-.roster-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+/* roster popup: a sodium-night card over a still-visible, dimmed plaza */
+.roster-back { position: fixed; inset: 0; z-index: 30; background: rgba(12, 8, 16, 0.62); display: flex; align-items: center; justify-content: center; padding: 24px; }
+.roster { width: min(920px, 100%); max-height: calc(100vh - 48px); overflow: auto; padding: 12px 16px 16px; background: #1a1620; border: 8px solid; border-image: var(--frame) 4 fill / 8px; box-shadow: 0 0 0 2px var(--sodium), 8px 8px 0 rgba(0,0,0,0.55); }
+.roster-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid var(--asphalt); }
+.roster-head h2 { color: var(--sodium-light); text-shadow: 0 0 8px var(--sodium), 2px 2px 0 var(--ink); margin: 0; }
 .roster-head .btn { margin-left: auto; }
 .roster-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.roster-card { display: flex; flex-direction: column; gap: 4px; padding: 8px; background: var(--ink); border: 4px solid var(--concrete); }
+.roster-card { display: flex; flex-direction: column; gap: 4px; padding: 8px 8px 8px 10px; background: linear-gradient(#1c1824, #16121c); border: 4px solid var(--asphalt); box-shadow: inset 4px 0 0 var(--sodium), inset 0 0 0 2px #2a2430; }
+.roster-card.tank { box-shadow: inset 4px 0 0 var(--blue), inset 0 0 0 2px #2a2430; }
+.roster-card.damage { box-shadow: inset 4px 0 0 var(--red), inset 0 0 0 2px #2a2430; }
+.roster-card.heal { box-shadow: inset 4px 0 0 var(--mint), inset 0 0 0 2px #2a2430; }
+.roster-card.control { box-shadow: inset 4px 0 0 var(--violet), inset 0 0 0 2px #2a2430; }
 .roster-card .who { display: flex; align-items: center; gap: 8px; }
-.roster-card .dps { font-size: 22px; color: var(--sodium-light); }
+.roster-card .who img { background: var(--night); box-shadow: 2px 2px 0 var(--ink); }
+.roster-card .dps { font-size: 22px; color: var(--sodium-light); text-shadow: 0 0 6px var(--sodium); }
 .roster-card .meta { font-size: 15px; color: var(--stone); }
-.roster-curb { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
-.roster-buf { display: flex; align-items: center; gap: 8px; padding: 4px 8px; background: var(--ink); border: 2px solid var(--plum); }
+.roster-card .role { font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sodium); }
+.roster-card .btn.on { color: var(--mint); }
+.roster-curb { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 2px dashed var(--asphalt); }
+.roster-curb h2 { color: var(--bone); }
+.roster-buf { display: flex; align-items: center; gap: 8px; padding: 4px 8px; background: #16121c; border: 2px solid var(--plum); box-shadow: inset 0 0 0 1px #2a2030; }
 .roster-totals { margin-top: 8px; color: var(--stone); }
 .save-box { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
-.save-box textarea { font: inherit; font-size: 15px; min-height: 52px; color: var(--paper); background: var(--ink); border: 2px solid var(--concrete); padding: 4px 6px; }
-.plaza-buy { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.plaza-buy .item { display: flex; flex-direction: column; gap: 2px; padding: 6px 8px; background: var(--ink); border: 2px solid var(--concrete); min-width: 180px; }
+.save-box textarea { font: inherit; font-size: 15px; min-height: 72px; color: var(--paper); background: var(--ink); border: 2px solid var(--concrete); padding: 4px 6px; user-select: text; resize: vertical; word-break: break-all; }
+.plaza-title { display: flex; align-items: center; gap: 10px; }
+.plaza-title .landmarks { display: flex; align-items: flex-end; gap: 6px; margin-left: auto; }
+.plaza-title .landmarks img { display: block; width: 40px; height: 48px; cursor: default; image-rendering: pixelated; }
+.plaza-title .landmarks img:hover { filter: brightness(1.2); }
+.boot-door { font: inherit; font-size: 20px; width: 40px; height: 34px; padding: 0; background: none; color: var(--paper); border: 4px solid; border-image: var(--btn) 2 fill / 4px; cursor: pointer; line-height: 1; }
+.boot-door:hover { border-image-source: var(--btn-hot); }
+.plaza-buy { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-top: 8px; }
+.plaza-buy .item { display: flex; flex-direction: column; justify-content: space-between; gap: 8px; padding: 8px; background: var(--ink); border: 2px solid var(--concrete); min-height: 86px; min-width: 0; }
+.plaza-buy .item b { font-size: 16px; line-height: 1.15; color: var(--paper); }
+.plaza-buy .item .btn, .plaza-buy .item .have { margin-top: auto; }
+.plaza-buy .item .have { color: var(--mint); font-size: 15px; }
 .cab.attracting { outline: 3px dashed var(--sodium); outline-offset: -3px; }
 .boot-menu.tenant-board { border-image: var(--cinder) 8 fill / 16px; background: var(--night); }
 .boot-logo { display: block; margin: 0 auto 8px; width: 390px; max-width: 100%; height: auto; }

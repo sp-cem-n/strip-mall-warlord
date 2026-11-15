@@ -7,8 +7,9 @@ import { BATTLERS, CURRENCY_NAME, REGIONS, SHOPS, WALKIN_STAYS, type RegionId, t
 import { bal, leaseCur, tierOf, bossLevel, currencyOf, forLease, joined, lease, leased, lineupOf, regionDone, renovate, renovateCost, rentOf, toggleField } from '../game/economy';
 import { statsOf } from '../game/battle';
 import { collectFind, walkInValue } from '../game/sim';
+import { LANDMARKS, hasLandmark } from '../game/sinks';
 import type { GameState } from '../game/state';
-import { crewURL, facadeURL, scaffoldURL } from './art';
+import { crewURL, facadeURL, landmarkURL, scaffoldURL } from './art';
 import { register } from './audio';
 import { fmt } from './format';
 
@@ -196,8 +197,23 @@ export function Shops() {
   list.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
   return (
     <section class="wall shops">
-      <h2>
-        {REGIONS[r].chrome.plaza}
+      <h2 class="plaza-title">
+        <span>{REGIONS[r].chrome.plaza}</span>
+        <span class="landmarks">
+          {LANDMARKS.filter((d) => hasLandmark(s, d.id)).map((d) => {
+            const n = s.landmarks.filter((id) => id === d.id).length;
+            return (
+              <img
+                key={d.id}
+                src={landmarkURL(d.id)}
+                width={20}
+                height={24}
+                alt={d.name}
+                {...tip(d.name, n > 1 ? `×${n} on the lot.` : 'On the lot.', d.does)}
+              />
+            );
+          })}
+        </span>
       </h2>
       <div class="strip" ref={strip}>
         {list.map((sh) => (

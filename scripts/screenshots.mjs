@@ -33,8 +33,11 @@ const shots = [
   ['21-top-bar', `${g}&advance=5400&screen=game`, [], '.roadside'],
   ['22-top-bar-arcade', room, [], '.roadside'],
   ['23-top-bar-bar', bar, [], '.roadside'],
-  ['24-back-office', `${g}&advance=7200&screen=game`, [['click', 'text=Back Office'], ['wait', 300]]],
+  ['24-back-office', `${g}&advance=7200&landmarks=1&screen=game`, [['click', 'text=Back Office'], ['wait', 300]]],
   ['25-howto', `${g}&screen=howto`],
+  ['26-receipt-closed', `${g}&advance=5400&screen=game`, [], '.printer'],
+  ['27-landmarks', `${g}&advance=5400&landmarks=1&screen=game`, [], '.shops h2'],
+  ['28-autoplay', `?test=1&${g.slice(1).replace('pause=1', 'pause=0')}&room=full&screen=room`, [['click', 'text=Autoplay machines'], ['wait', 2200]]],
 ];
 
 const browser = await chromium.launch();

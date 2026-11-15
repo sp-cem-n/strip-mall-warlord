@@ -114,39 +114,42 @@ export function Pylon({ room = false }: { room?: boolean }) {
       <Doors room={room} />
       {app.speed !== 1 && <div class="debug">debug ×{app.speed}</div>}
       <div class="led-sign">
-        {s.bypass && !room ? (
-          <button class="hwy" onClick={() => (view(s, r ? 0 : 1), (app.tip = null), app.refresh())} {...tip(REGIONS[r ? 0 : 1].name, `${lotsTaken(s, r ? 0 : 1)}/${REGIONS[r ? 0 : 1].lots.length} lots.`)}>
-            {DAWN.hwy[r]}
-          </button>
-        ) : (
-          <span class="hwy-gap" />
-        )}
-        <span />
-        <div class="led" {...tip(REGIONS[r].name, `${c.wins} fights won, ${c.losses} lost.`, `${fmtClock(s.totalTime)} on the clock, all runs.`, 'The board was $40 a month. It shows.')}>
-          <span class="cell wl">
-            {fmtWL(c.wins)}-{fmtWL(c.losses)}
-            <small>W-L</small>
-          </span>
-          <span class="cell clock">
-            {fmtClock(s.totalTime)}
-            <small>CLOCK</small>
-          </span>
-          <span class="cell lots">
-            {lotsTaken(s, r)}/{REGIONS[r].lots.length}
-            <small>LOTS</small>
-          </span>
+        <div class="scoreboard">
+          {s.bypass && !room && (
+            <button class="hwy" onClick={() => (view(s, r ? 0 : 1), (app.tip = null), app.refresh())} {...tip(REGIONS[r ? 0 : 1].name, `${lotsTaken(s, r ? 0 : 1)}/${REGIONS[r ? 0 : 1].lots.length} lots.`)}>
+              {DAWN.hwy[r]}
+            </button>
+          )}
+          <div class="led" {...tip(REGIONS[r].name, `${c.wins} fights won, ${c.losses} lost.`, `${fmtClock(s.totalTime)} on the clock, all runs.`, 'The board was $40 a month. It shows.')}>
+            <span class="cell wl">
+              {fmtWL(c.wins)}-{fmtWL(c.losses)}
+              <small>W-L</small>
+            </span>
+            <span class="cell clock">
+              {fmtClock(s.totalTime)}
+              <small>CLOCK</small>
+            </span>
+            <span class="cell lots">
+              {lotsTaken(s, r)}/{REGIONS[r].lots.length}
+              <small>LOTS</small>
+            </span>
+          </div>
+          <div class="legs">
+            <i />
+            <i />
+          </div>
         </div>
         <div class="led-buttons">
+          <button class="boot-door" onClick={() => ((app.screen = 'boot'), (app.tip = null), app.refresh())} {...tip('Title screen', 'Back to the lease and the night sky.')} aria-label="Title screen">
+            ✕
+          </button>
           <Speaker />
           <button class="help" onClick={() => ((app.howFrom = room ? 'room' : 'game'), (app.screen = 'howto'), (app.tip = null), app.refresh())} {...tip('How to play')}>
             ?
           </button>
         </div>
-        <div class="legs">
-          <i />
-          <i />
-        </div>
       </div>
+      {room && <div class="room-lip" aria-hidden="true" />}
     </header>
   );
 }

@@ -17,6 +17,7 @@
 //   ?pause=1        freeze the sim (for screenshots)
 //   ?walkin=1       put a walk-in at the first shop
 //   ?room=full      every arcade machine unlocked, 3,000 tickets, a few perks (after roster=full: the bar too)
+//   ?landmarks=1    plant the three Route 9 landmarks and a consultant, for plaza / Back Office shots
 import { app } from './app';
 import { botAct } from './game/bot';
 import { FIGHTS, SHOP_LIST, STEP } from './game/defs';
@@ -62,6 +63,12 @@ export function applyDebug(q: URLSearchParams) {
     app.s.room.buffs = { bat: 420 };
     app.s.crews[0].cash = Math.max(app.s.crews[0].cash, 1e6);
     if (app.s.bypass) (app.s.crews[1].shops.offramp ??= 3), app.s.room.unlocked.push('darts', 'pool', 'poker', 'foos', 'shuffle', 'trivia'), (app.s.room.shuffle = 1), (app.s.room.shuffleBest = 12), (app.s.room.buffs.call = 300), (app.s.crews[1].cash = Math.max(app.s.crews[1].cash, 1e7));
+  }
+  if (q.get('landmarks') === '1') {
+    app.hasSave = true;
+    app.s.landmarks = ['billboard', 'tower', 'pylon'];
+    app.s.consultants = [[0, 1], app.s.consultants[1] ?? []];
+    app.s.autoReno = [[0], app.s.autoReno[1] ?? []];
   }
   if (q.get('smoke') === '1') {
     const c = app.s.crews[app.s.view];

@@ -67,12 +67,13 @@ function unlockAll() {
 }
 
 // Autoplay: every unlocked machine plays itself, one game per its usual length, on the house (no coin, no tickets).
-// The cabinets stay dark; the payouts land in the purse and the +/s on the top bar like a real play.
+// Test-mode autoplay: same path as Attract Mode, so the cabinet on screen actually plays.
 const auto = { on: false, timer: 0, clock: {} as Partial<Record<MachineId, number>> };
 const TICK = 0.25;
 function autoTick() {
   const s = app.s;
   if (app.paused) return;
+  let started = false;
   for (const m of MACHINES) {
     if (!s.room.unlocked.includes(m.id) || serviced(s, m.id) > 0) continue;
     const t = (auto.clock[m.id] = (auto.clock[m.id] ?? 0) + TICK * app.speed);
@@ -82,12 +83,23 @@ function autoTick() {
     const q = m.id === 'poker' ? pokerQ(s, true) : m.id === 'cyclone' ? (Math.random() < 0.1 ? 1 : Math.random() < 0.4 ? 0.5 : 0) : 0.45 + 0.5 * Math.random();
     if (startPlay(s, m.id) !== null) continue;
     s.room.attracting = { id: m.id, q, left: m.secs };
+    started = true;
+    break;
   }
+  if (started) app.refresh();
 }
 function setAuto(on: boolean) {
   auto.on = on;
   clearInterval(auto.timer);
-  if (on) auto.timer = setInterval(autoTick, TICK * 1000) as unknown as number;
+  auto.clock = {};
+  if (on) {
+    // First eligible cabinet starts almost immediately, so you can see it work.
+    for (const m of MACHINES) {
+      if (app.s.room.unlocked.includes(m.id)) auto.clock[m.id] = Math.max(0, m.secs - 0.5);
+    }
+    auto.timer = setInterval(autoTick, TICK * 1000) as unknown as number;
+    autoTick();
+  }
   app.refresh();
 }
 

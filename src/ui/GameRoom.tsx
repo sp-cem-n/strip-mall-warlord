@@ -40,6 +40,9 @@ function Cabinet({ m }: { m: MachineDef }) {
   const ready = useRef(0); // the READY beat: a moment after the coin drops before the game takes input
   const ended = useRef(0); // a beat after a game ends, so the last tap doesn't buy the next one
   const result = useRef<{ text: string; until: number } | null>(null);
+  const autoQ = useRef<number | null>(null); // set while Attract Mode or test autoplay is on this cabinet
+  const autoPoked = useRef(false);
+  const autoAt = useRef(0);
   const [, setN] = useState(0);
   const s = app.s;
   const open = s.room.unlocked.includes(m.id);
@@ -57,9 +60,39 @@ function Cabinet({ m }: { m: MachineDef }) {
         const lit = app.s.room.unlocked.includes(m.id);
         ctx.drawImage(canvasOf(`cab:${m.id}:${lit}`, () => cabinet(look, lit, lit ? undefined : m.needs)), 0, 0);
         if (lit) {
+          const att = app.s.room.attracting;
+          // A play the sim already paid for: put it on the screen so you can watch.
+          if (att?.id === m.id && !game.current && now >= ended.current) {
+            att.held = true;
+            autoQ.current = att.q;
+            autoPoked.current = false;
+            autoAt.current = now;
+            ready.current = now + 500;
+            game.current = newGame(m.id, {
+              shelf: app.s.room.shelf[0],
+              speed: Math.min(20, 9 + app.s.room.plays * 0.05),
+              jackpot: `${app.s.room.jackpot}`,
+              onGrab: () => false,
+            });
+          }
           const p = pen(ctx, sc.x, sc.y, sc.w, sc.h);
           const g = game.current;
           if (g) {
+            if (autoQ.current !== null && now >= ready.current) {
+              const q = autoQ.current;
+              if (!autoPoked.current) {
+                autoPoked.current = true;
+                const j = (q - 0.5) * 10;
+                g.down(sc.w / 2 + j, Math.floor(sc.h * 0.35));
+              } else if (now >= ready.current + 180) {
+                g.up(sc.w / 2, Math.floor(sc.h * 0.35));
+              }
+              // games that need a hold or a long run still end in a few seconds so you can see the next one
+              if (now - autoAt.current > 2800 && !g.over) {
+                g.over = true;
+                g.q = q;
+              }
+            }
             if (now >= ready.current) g.update(dt);
             g.draw(p, now / 1000);
             if (now < ready.current) (p.rect(0, Math.floor(sc.h / 2) - 6, sc.w, 13, C.ink), p.center('READY', Math.floor(sc.h / 2) - 2, C.sodiumLight));
@@ -74,17 +107,27 @@ function Cabinet({ m }: { m: MachineDef }) {
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      const att = app.s.room.attracting;
+      if (att?.id === m.id) att.held = false;
+    };
   }, [m.id]);
   function finish(g: Game) {
     game.current = null;
     ended.current = performance.now() + 700;
+    const watched = autoQ.current;
+    autoQ.current = null;
+    autoPoked.current = false;
     let text = g.label ?? '';
     if (m.id !== 'claw') {
       if (m.id === 'pinball' && g.score !== undefined && postScore(app.s, g.score)) text += ' NEW HIGH';
       if (m.id === 'shuffle' && g.score !== undefined && postShuffle(app.s, g.score)) text += ' NEW HIGH';
       if (m.id === 'poker' && g.q > 0) text = g.label ?? text;
-      const rw = endPlay(app.s, m.id, g.q, m.id === 'poker');
+      // Attract / test autoplay already paid; only endPlay once. If we walked off mid-play, tickRoom may have settled it.
+      const stillOurs = !watched || app.s.room.attracting?.id === m.id;
+      if (watched !== null && app.s.room.attracting?.id === m.id) app.s.room.attracting = null;
+      const rw = stillOurs ? endPlay(app.s, m.id, g.q, m.id === 'poker' || watched !== null) : { text: '' };
       if (m.id === 'poker' && rw.buff) {
         const hand = (app.s.room.hands[rw.buff] = g.label![0] + g.label!.slice(1).toLowerCase());
         if (rw.big) log(app.s, m.region, `${m.name}: ${hand}. ${BUFFS[rw.buff].does}.`, 'win');
@@ -92,6 +135,9 @@ function Cabinet({ m }: { m: MachineDef }) {
       const got = m.id === 'poker' ? '' : [rw.cash && `+$${fmt(rw.cash)}`, rw.goodwill && `+${fmt(rw.goodwill)} GW`, rw.tickets && `+${fmt(rw.tickets)} TICKETS`, rw.equity && `+${fmt(rw.equity)} EQ`].filter(Boolean).join(' ');
       text = got || text;
       if (rw.cash || rw.tickets) register();
+    } else if (watched !== null && app.s.room.attracting?.id === m.id) {
+      app.s.room.attracting = null;
+      endPlay(app.s, m.id, g.q, true);
     }
     result.current = { text, until: performance.now() + 2500 };
     app.refresh();
@@ -132,6 +178,7 @@ function Cabinet({ m }: { m: MachineDef }) {
         onPointerDown={(e) => {
           // tap the cabinet: the coin goes in, then the same screen plays
           if (!open) return;
+          if (autoQ.current !== null) return; // watching Attract Mode / test autoplay
           if (!game.current) return insert();
           if (performance.now() < ready.current) return;
           const [x, y] = local(e);

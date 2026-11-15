@@ -26,7 +26,6 @@ import {
   retainOpen,
 } from '../game/sinks';
 import { fmt } from './format';
-import { SaveBox } from './Screens';
 
 const TRACKS: Record<Role, [string, string]> = {
   tank: ['Conditioning', 'tank HP'],
@@ -153,11 +152,10 @@ function Plaza({ r }: { r: RegionId }) {
   return (
     <div class="plaza-buy">
       {items.map((it) => (
-        <div key={it.key} class="item">
+        <div key={it.key} class="item" {...tip(it.name, it.does)}>
           <b>{it.name}</b>
-          <span class="dim">{it.does}</span>
           {it.have ? (
-            <span class="dim">Bought</span>
+            <span class="have">Bought</span>
           ) : (
             <button class="btn small" disabled={!it.ok} onClick={() => (toast(it.buy() ?? it.name), app.refresh())}>
               ${fmt(it.cost)}
@@ -181,10 +179,6 @@ export function BackOffice() {
         Plaza <span class="dim">· Consultants, signs, contracts</span>
       </h2>
       <Plaza r={r} />
-      <h2>
-        Lease <span class="dim">· A code for this run</span>
-      </h2>
-      <SaveBox />
     </section>
   );
 }

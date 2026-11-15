@@ -7,7 +7,7 @@ import { asphaltGain, leased, pave, view } from '../game/economy';
 import { fightLabel } from '../game/sim';
 import { exportCode, importCode, old, saveGame } from '../game/save';
 import { HOW, STORY } from '../game/content/copy';
-import { bootURL, titleSignURL } from './art';
+import { bootURL } from './art';
 import { fmt, fmtTime } from './format';
 import { Speaker } from './Speaker';
 
@@ -62,14 +62,15 @@ function AwayStats() {
 }
 
 export function SaveBox() {
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState(() => (app.hasSave ? exportCode(app.s) : ''));
   const copyOut = async () => {
+    const out = exportCode(app.s);
+    setCode(out);
     try {
-      await navigator.clipboard.writeText(exportCode(app.s));
+      await navigator.clipboard.writeText(out);
       toast('Lease code copied.');
     } catch {
-      setCode(exportCode(app.s));
-      toast('Copy failed. The code is in the box; select it by hand.');
+      toast('Copy failed. Select the code in the box and copy it yourself.');
     }
   };
   const load = () => {
@@ -108,7 +109,6 @@ export function Boot({ onNew, onResume }: { onNew: () => void; onResume: () => v
       <Speaker corner />
       <img class="boot-scene" src={bootURL(kinds)} width={960} height={540} alt="Pinewood Plaza at night" />
       <div class="boot-menu panel-brick tenant-board">
-        <img class="boot-logo" src={titleSignURL()} width={390} height={66} alt="Strip Mall Warlord" />
         {app.oldSave && (
           <div class="notice">
             <b>Notice to tenants:</b> The lease was renegotiated. Your old plaza ({old.from}) is still open at <a href={`./${old.from}/`}>/{old.from}/</a>{old.from === 'v0.5' ? ', save and all' : ''}. Nothing carries over here. Uncle Sal's pawn shop is open at 9.

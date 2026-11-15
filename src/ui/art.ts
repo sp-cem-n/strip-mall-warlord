@@ -9,6 +9,7 @@ import { buttonFrame, ICONS, panelFrame } from '../art/frames';
 import { deadTube, facade, scaffold, type Material } from '../art/storefronts';
 import { titleSign } from '../art/sign';
 import { funZoneLogo, offRampLogo, starsTile } from '../art/logos';
+import { landmarkSprite } from '../art/landmarks';
 
 const cache = new Map<string, HTMLCanvasElement>();
 export function canvasOf(key: string, make: () => Grid): HTMLCanvasElement {
@@ -43,6 +44,7 @@ export const scaffoldURL = () => urlOf('scaffold', scaffold);
 export const titleSignURL = (ray = false, o = false) => urlOf(`titlesign:${ray}:${o}`, () => titleSign(ray, o));
 export const funZoneLogoURL = (ray = false, o = false) => urlOf(`fzlogo:${ray}:${o}`, () => funZoneLogo(ray, o));
 export const offRampLogoURL = (title = 'THE BAR', sub = 'OPEN LATE', plate = '14', dead = false) => urlOf(`orlogo:${title}:${sub}:${plate}:${dead}`, () => offRampLogo(title, sub, plate, dead));
+export const landmarkURL = (id: string) => urlOf(`landmark:${id}`, () => landmarkSprite(id));
 
 export const bootURL = (kinds: (string | null)[], dawn = false) => urlOf(`boot:${kinds.join(',')}:${dawn}`, () => bootScene(kinds, dawn));
 // frames and tiles as CSS variables (border-image / background)
