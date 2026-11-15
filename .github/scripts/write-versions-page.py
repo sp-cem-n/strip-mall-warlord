@@ -8,11 +8,13 @@ import subprocess
 from pathlib import Path
 
 
-def subject(ref: str) -> str:
-    out = subprocess.check_output(
-        ["git", "log", "-1", "--format=%s", ref], text=True
-    ).strip()
-    return html.escape(out)
+def git(*args: str) -> str:
+    return html.escape(subprocess.check_output(["git", *args], text=True).strip())
+
+
+# Tag + date only, and main @ sha: commit subjects can spoil what's coming.
+def date(ref: str) -> str:
+    return git("log", "-1", "--format=%cs", ref)
 
 
 def main() -> None:
@@ -24,12 +26,12 @@ def main() -> None:
 
     base = f"/{args.repo}"
     items = [
-        f'        <li><a href="{base}/">Latest</a> <span class="muted">current main — {subject("HEAD")}</span></li>'
+        f'        <li><a href="{base}/">Latest</a> <span class="muted">main @ {git("rev-parse", "--short", "HEAD")}</span></li>'
     ]
     for tag in reversed(args.tags):
         safe = html.escape(tag)
         items.append(
-            f'        <li><a href="{base}/{safe}/">{safe}</a> <span class="muted">{subject(tag)}</span></li>'
+            f'        <li><a href="{base}/{safe}/">{safe}</a> <span class="muted">{date(tag)}</span></li>'
         )
 
     page = f"""<!doctype html>

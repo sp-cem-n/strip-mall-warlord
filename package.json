@@ -1,7 +1,7 @@
 {
   "name": "strip-mall-warlord",
   "productName": "Strip Mall Warlord",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "description": "An idle tycoon about a dying 1990s strip mall and the crew it raises.",
   "private": true,
   "type": "module",

@@ -62,6 +62,13 @@ jobs:
           # project sites live at https://<user>.github.io/<repo>/
           BASE_PATH: /${{ github.event.repository.name }}/
 
+      # a tag never changes, so its build is cached by name
+      - uses: actions/cache@v4
+        with:
+          path: /tmp/smw-built
+          key: smw-archives-${{ hashFiles('.github/scripts/inject-storage-namespace.py') }}-${{ github.run_id }}
+          restore-keys: smw-archives-${{ hashFiles('.github/scripts/inject-storage-namespace.py') }}-
+
       - name: Build archived tagged versions
         env:
           REPO: ${{ github.event.repository.name }}
@@ -74,6 +81,12 @@ jobs:
             echo "No version tags matching v* found; skipping archives."
           else
             for tag in "${tags[@]}"; do
+              mkdir -p "${GITHUB_WORKSPACE}/dist/${tag}"
+              if [ -f "/tmp/smw-built/${tag}/index.html" ]; then
+                echo "$tag: cached"
+                cp -a "/tmp/smw-built/${tag}/." "${GITHUB_WORKSPACE}/dist/${tag}/"
+                continue
+              fi
               echo "::group::Build $tag"
               worktree="/tmp/smw-archive/${tag}"
               rm -rf "$worktree"
@@ -90,8 +103,9 @@ jobs:
               )
               python3 "${GITHUB_WORKSPACE}/.github/scripts/inject-storage-namespace.py" \
                 "$worktree/dist/index.html" "$tag"
-              mkdir -p "${GITHUB_WORKSPACE}/dist/${tag}"
               cp -a "$worktree/dist/." "${GITHUB_WORKSPACE}/dist/${tag}/"
+              mkdir -p "/tmp/smw-built/${tag}"
+              cp -a "$worktree/dist/." "/tmp/smw-built/${tag}/"
               git worktree remove --force "$worktree"
               echo "::endgroup::"
             done

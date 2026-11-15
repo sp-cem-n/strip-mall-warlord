@@ -106,7 +106,7 @@ A tall panel in the empty right column, in the same glass/neon style. It has thr
 - **Receipt.** The collapsed view keeps the last 5 lines for the viewed region, each clamped to 2 lines (no "…" dead ends).
   - **Click it** (or press Enter) to unroll the paper downward: a scrollable history of the **last 60 lines for that region**, fully wrapped, with timestamps and ×n repeats.
   - Click again or press Esc to close.
-  - The log becomes `log: Record<RegionId, LogLine[]>`, 60 each.
+  - As built: the log stays one flat `LogLine[]` with a per-region cap of 60 (`LOG_KEEP`).
 - **Copy cuts** (the delete list, with any new copy held to the same rule):
   - "· fights run themselves" (Lot header)
   - "· every shop pays rent and sends one crew member" (Shops header)

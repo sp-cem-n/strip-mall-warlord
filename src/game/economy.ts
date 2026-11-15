@@ -125,9 +125,6 @@ export function log(s: GameState, r: RegionId, text: string, tone: LogLine['tone
   if (s.log.filter((l) => l.r === r).length > LOG_KEEP) s.log.splice(s.log.findIndex((l) => l.r === r), 1);
 }
 
-// Any purchase lets auto-advance try the frontier again right away.
-const bought = (_c: Crew) => {};
-
 export function lease(s: GameState, id: string): string | null {
   const sh = SHOPS[id];
   const c = sh && s.crews[sh.region];
@@ -136,7 +133,6 @@ export function lease(s: GameState, id: string): string | null {
   const err = spend(s, sh.region, REGIONS[sh.region].leaseIn, sh.lease);
   if (err) return err;
   c.shops[id] = 1;
-  bought(c);
   log(s, sh.region, `${sh.name} leased. ${BATTLERS[sh.battler].name} joins the crew.`, 'capture');
   return null;
 }
@@ -149,7 +145,6 @@ export function renovate(s: GameState, id: string): string | null {
   const err = spend(s, sh.region, 'cash', renovateCost(id, lv));
   if (err) return err;
   c.shops[id] = lv + 1;
-  bought(c);
   return null;
 }
 
@@ -158,7 +153,6 @@ export function train(s: GameState, r: RegionId, role: Role): string | null {
   const err = spend(s, r, REGIONS[r].trainIn, trainCost(r, c.train[role]));
   if (err) return err;
   c.train[role]++;
-  bought(c);
   return null;
 }
 
@@ -194,7 +188,6 @@ export function buyPatrol(s: GameState, r: RegionId, zone: number): string | nul
   if (err) return err;
   const c = s.crews[r];
   c.contracts.push(zone);
-  bought(c);
   log(s, r, `Patrol hired: ${REGIONS[r].lots[zone].name}.`);
   return null;
 }
@@ -208,7 +201,6 @@ export function buySlot(s: GameState, r: RegionId): string | null {
   const err = spend(s, r, REGIONS[r].trainIn, price);
   if (err) return err;
   s.crews[r].slotBuys++;
-  bought(s.crews[r]);
   return null;
 }
 export const curb = (s: GameState, r: RegionId) => roster(s, r).filter(([id]) => BATTLERS[id].role === 'buffer');
