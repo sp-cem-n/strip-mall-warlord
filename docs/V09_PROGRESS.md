@@ -1,6 +1,6 @@
 # v0.9 progress
 
-Last updated: 15 Nov 2026, about 3:55 AM America/New_York.
+Last updated: 15 Nov 2026, about 4:20 AM America/New_York.
 
 Worktree: `/workspace/smw-v09` on branch `v09`. Commit author is always Josh Durbin `<149157950+sp-cem-n@users.noreply.github.com>`. Do not work in `/workspace/strip-mall-warlord` (still on `v09-polish`). Mockups live only on this machine at `/workspace/smw-mockups/v09/` and `/workspace/smw-mockups/v09b/`, plus `/workspace/smw-mockups/minigames/`.
 
@@ -71,9 +71,21 @@ The boot screen is a flex column so the lease-code box stays on-screen at 1280×
 
 ---
 
-## Not done (M2 → M4)
+## M2 in progress (ticket economy landed; cabinets next)
 
-Nothing from M2, M3, or M4 has been implemented or committed. `package.json` is still 0.8.0. There is no `v0.9` tag and no `/v0.9/` archive.
+Ticket economy is on local / `origin/v09` (not merged to main):
+
+- Skee typical payout is 28+60q (70 tickets at 70% skill); jackpot stays 140.
+- Coin Pusher sometimes drops an 8–20 ticket token.
+- Pre-dawn shelf is 9 items; first prize is the House mug at 250 tickets; mid prizes in the mid hundreds; the second fighter slot stays 5,000.
+- After dawn, a back-room shelf in `dawn.ts` (Bypass slot and doorbell, longer claw buffs, souvenir shot glass).
+- `roomAct` buys the cheapest affordable prize, including after a visit's plays. Official `--guard` still does **not** pass `--room` (a modest official Skee habit bought power perks and pulled Route 9 well under target). Acceptance is a `--room` check-in: a first prize within 2h of Skee. `bun scripts/check.ts` and `--guard` both pass; Route 9 times match the earlier M1 guard.
+
+Next: Toad's 2.5D Fun Zone cabinets from `/workspace/smw-mockups/v09b/` (pusher, claw, Whac, Night Shift) and YOU WON slips. Off-Ramp 2.5D stays M3. Do not merge to main until Josh picks logos.
+
+## Not done (M2 cabinets, then M3 → M4)
+
+M3 and M4 have not been implemented. Ticket economy above is the first half of M2. `package.json` is still 0.8.0. There is no `v0.9` tag and no `/v0.9/` archive.
 
 ### M2 — Fun Zone 2.5D, ticket economy, arcade high-stakes
 

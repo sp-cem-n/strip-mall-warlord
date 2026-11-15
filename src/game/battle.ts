@@ -88,8 +88,9 @@ export function startBattle(s: GameState, r: RegionId): Battle | null {
   const crew = team.map(([id, lv]) => {
     const d = BATTLERS[id];
     const st = statsOf(s, r, id, lv);
-    const toy = r === 0 ? (k: 'bat' | 'duck') => (buffOn(s, k) ? 1.3 : 1) : (k: 'bat' | 'duck') => (k === 'bat' ? barDmg(s) : barHp(s));
-    let hp = ot * toy('duck'), dmg = ot * toy('bat'), haste = 1, dr = d.fx?.k === 'dr' ? d.fx.v : 0;
+    const toy = (k: 'bat' | 'duck') => (buffOn(s, k) ? 1.3 : 1);
+    const bar = (k: 'bat' | 'duck') => (r === 1 ? (k === 'bat' ? barDmg(s) : barHp(s)) : 1);
+    let hp = ot * toy('duck') * bar('duck') * (r === 1 && buffOn(s, 'shot') ? 1.1 : 1), dmg = ot * toy('bat') * bar('bat') * (r === 1 && buffOn(s, 'shot') ? 1.1 : 1), haste = 1, dr = d.fx?.k === 'dr' ? d.fx.v : 0;
     for (const { fx } of aur) {
       if (fx.k === 'hpUp' && targets(fx.to, d)) hp += fx.v;
       if (fx.k === 'dmgUp' && targets(fx.to, d)) dmg += fx.v;

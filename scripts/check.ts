@@ -9,7 +9,7 @@ import type { GameState } from '../src/game/state';
 import { HOW, STORY } from '../src/game/content/copy';
 import { botAct } from '../src/game/bot';
 import { QUESTIONS } from '../src/ui/bargames';
-import { BAR_BUFFS, BUFFS, MACHINES, PERKS, QUIZ, boardBonus, buffOn, buyAttract, buyPerk, endPlay, postShuffle, startPlay } from '../src/game/room';
+import { BAR_BUFFS, BUFFS, MACHINES, PERKS, QUIZ, boardBonus, buffOn, buyAttract, buyPerk, endPlay, grant, perk, perkPrice, postShuffle, shelfOf, startPlay } from '../src/game/room';
 import { handTier } from '../src/ui/machines';
 import { readdirSync, readFileSync } from 'node:fs';
 
@@ -229,6 +229,41 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   check('the claw costs 50 tickets', startPlay(t, 'claw') !== null && ((t.tickets = 50), startPlay(t, 'claw') === null) && t.tickets === 0);
   t.tickets = 7500;
   check('prize counter: slots 6 and 7 for tickets', buyPerk(t, 'slot') === null && buyPerk(t, 'slot') === null && slotsOf(t, 0) === START_SLOTS + 2 && buyPerk(t, 'slot') !== null);
+  const firstPrice = Math.min(...Object.keys(PERKS).map((id) => perkPrice(newGame(1), id as keyof typeof PERKS)));
+  check(`prize counter: ${Object.keys(PERKS).length} pre-dawn prizes, first costs ${firstPrice} tickets`, Object.keys(PERKS).length >= 8 && Object.keys(PERKS).length <= 10 && firstPrice >= 200 && firstPrice <= 400);
+  {
+    const u = newGame(14);
+    u.room.unlocked.push('pusher', 'skee');
+    u.tickets = 400;
+    check('prize counter sells the cheapest prize first', buyPerk(u, 'mug') === null && u.tickets === 150 && perk(u, 'mug') === 1);
+    check('the back room is closed before dawn', shelfOf(u).every((id) => id in PERKS) && perkPrice(u, 'bpSlot') === Infinity);
+  }
+  {
+    const u = newGame(14);
+    u.room.unlocked.push('skee');
+    u.crews[0].cash = 1e6;
+    u.tickets = 0;
+    let next = 0;
+    while (u.totalTime < 2 * 3600) {
+      if (u.totalTime >= next) (botAct(u, { room: true }, 600), (next = u.totalTime + 600));
+      step(u);
+    }
+    const bought = Object.values(u.room.perks).some((n) => (n ?? 0) > 0);
+    check(`a Fun Zone visit buys a first prize within 2h of Skee (tickets ${u.tickets}, perks ${JSON.stringify(u.room.perks)})`, bought);
+  }
+  {
+    const u = newGame(14);
+    u.bypass = true;
+    view(u, 1);
+    const ot0 = u.crews[0].overtime;
+    grant(u, 'watch');
+    grant(u, 'ball');
+    check('claw toys apply to the crew that is fighting', u.crews[1].overtime === 5 && u.crews[1].rally >= 30 && u.crews[0].overtime === ot0);
+    u.tickets = 2000;
+    check('the back room opens after dawn', shelfOf(u).includes('bpSlot') && buyPerk(u, 'bpSlot') === null && slotsOf(u, 1) === START_SLOTS + 1);
+  }
+  const typ = MACHINES.find((m) => m.id === 'skee')!.pay(newGame(1), 0.7).tickets ?? 0;
+  check(`Skee typical payout is ${typ} tickets at 70% quality`, typ >= 50 && typ < 140);
   check('Attract Mode plays by itself, rarely', buyAttract(t, 'pusher') === null && (() => { const p = t.room.plays; for (let i = 0; i < (300 + 10) / STEP + 5; i++) step(t); return t.room.plays === p + 1; })());
   t.crews[0].frontier = FIGHTS[0].length;
   t.ending = 0;
@@ -276,7 +311,7 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   for (const l of REGIONS[0].lots) texts.push(l.name, l.blurb, l.clearText, ...[...l.regulars, l.boss].flatMap((e) => [e.name, e.title]));
   texts.push(REGIONS[0].name, ...Object.values(REGIONS[0].chrome));
   for (const m of MACHINES.filter((x) => x.region === 0)) texts.push(m.name, m.blurb, m.needs);
-  for (const [k, b] of Object.entries(BUFFS)) if (![...BAR_BUFFS, ...QUIZ].some(([x]) => x === k)) texts.push(b.name, b.does);
+  for (const [k, b] of Object.entries(BUFFS)) if (k !== 'shot' && ![...BAR_BUFFS, ...QUIZ].some(([x]) => x === k)) texts.push(b.name, b.does);
   for (const p of Object.values(PERKS)) texts.push(p.name, p.does);
   let t = newGame(12);
   let next = 0;

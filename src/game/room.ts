@@ -9,7 +9,7 @@ import { rand } from './rng';
 import type { GameState } from './state';
 
 export type MachineId = 'pusher' | 'whac' | 'skee' | 'claw' | 'pinball' | 'cyclone' | 'darts' | 'pool' | 'poker' | 'foos' | 'shuffle' | 'trivia';
-export type BuffKind = 'bat' | 'duck' | 'troll' | 'ball' | 'watch' | 'well' | 'call' | 'top' | 'royal' | 'quiz' | 'genius';
+export type BuffKind = 'bat' | 'duck' | 'troll' | 'ball' | 'watch' | 'well' | 'call' | 'top' | 'royal' | 'quiz' | 'genius' | 'shot';
 export type Cost = { cur: Currency | 'tickets'; n: number };
 export interface Reward { cash?: number; goodwill?: number; tickets?: number; equity?: number; buff?: BuffKind; big?: boolean; text: string }
 export interface RoomState {
@@ -52,6 +52,7 @@ export const BUFFS: Record<BuffKind, { name: string; does: string }> = {
   royal: { name: 'Royal Flush', does: '+50% crew damage and HP' },
   quiz: { name: 'Three Right', does: DAWN.quiz },
   genius: { name: 'Five for Five', does: DAWN.genius },
+  shot: { name: DAWN.shotName, does: DAWN.shotDoes },
 };
 export const BUFF_SECONDS = 600;
 // the bar's buffs, by poker hand: [kind, seconds, damage, HP]
@@ -87,8 +88,10 @@ export const MACHINES: MachineDef[] = [
     pay: (s, q) => {
       const cost = rent(s, 0) * 5;
       const pile = s.room.shelf[0] / 10;
-      if (q > 0.9 && pile > 0.5 && rand(s) < 0.08) return { cash: rent(s, 0) * 120, big: true, text: 'A Rent Check coin went over the edge.' };
-      return { cash: cost * (0.4 + 2.6 * q) * (0.4 + 0.6 * pile), text: q > 0.7 ? 'Clean drop.' : 'Bounced.' };
+      const tickets = q > 0.45 && rand(s) < 0.22 ? 8 + Math.floor(rand(s) * 13) : 0;
+      const token = tickets ? ' A ticket token went over too.' : '';
+      if (q > 0.9 && pile > 0.5 && rand(s) < 0.08) return { cash: rent(s, 0) * 120, tickets, big: true, text: 'A Rent Check coin went over the edge.' + token };
+      return { cash: cost * (0.4 + 2.6 * q) * (0.4 + 0.6 * pile), tickets, text: (q > 0.7 ? 'Clean drop.' : 'Bounced.') + token };
     },
   },
   {
@@ -97,12 +100,16 @@ export const MACHINES: MachineDef[] = [
   },
   {
     id: 'skee', region: 0, name: 'Skee-Ball', blurb: 'Nine balls. Hold for power.', needs: 'Clear fight 6 at the Outlet Mall', unlock: fz((s) => cleared(s, 0, 2, 5)), cost: rentCost(15), secs: 25, cool: 60,
-    pay: (_s, q) => (q >= 1 ? { tickets: 140, big: true, text: '450 or better. The machine sings.' } : { tickets: Math.round(10 + 30 * q), text: `${Math.round(450 * q)} points.` }),
+    pay: (s, q) => {
+      const mul = 1 + 0.2 * perk(s, 'mug');
+      if (q >= 1) return { tickets: 140, big: true, text: '450 or better. The machine sings.' };
+      return { tickets: Math.round((28 + 60 * q) * mul), text: `${Math.round(450 * q)} points.` };
+    },
   },
   {
     id: 'claw', region: 0, name: 'Claw Machine', blurb: 'Press to go. Press to drop.', needs: 'Capture the Outlet Mall', unlock: fz((s) => cleared(s, 0, 2, REGIONS[0].lots[2].fights)), cost: () => ({ cur: 'tickets', n: 50 }), secs: 10, cool: 60,
     pay: (s, q) => {
-      if (rand(s) > q) return { text: 'It slipped. It always slips.' };
+      if (rand(s) > q + 0.12 * perk(s, 'grip')) return { text: 'It slipped. It always slips.' };
       const roll = rand(s);
       const buff: BuffKind = roll < 0.06 ? 'watch' : roll < 0.37 ? 'bat' : roll < 0.68 ? 'duck' : roll < 0.86 ? 'troll' : 'ball';
       return { buff, big: true, text: `Got the ${BUFFS[buff].name}: ${BUFFS[buff].does}.` };
@@ -167,22 +174,46 @@ export const MACHINE: Record<MachineId, MachineDef> = Object.fromEntries(MACHINE
 export const roomOpen = (s: GameState, r: RegionId) => MACHINES.some((m) => m.region === r && s.room.unlocked.includes(m.id));
 
 // ---- the prize counter (tickets, permanent) ----
-export type PerkId = 'slot' | 'otCheap' | 'otLong' | 'walkins';
-export const PERKS: Record<PerkId, { name: string; does: string; prices: number[] }> = {
-  slot: { name: 'Fighter slot', does: 'One more fighter on the lot', prices: [1200, 5000] },
-  otCheap: { name: 'Overtime coupon', does: 'Overtime costs 25% less', prices: [800, 800] },
-  otLong: { name: 'Overtime punch card', does: 'Overtime lasts 4 fights', prices: [2000] },
-  walkins: { name: 'Doorbell', does: 'Walk-ins every 75s instead of 90', prices: [1200] },
+// Pre-dawn shelf. After dawn, DAWN.perks is a second shelf on the same counter.
+export type PrePerkId = 'mug' | 'nudge' | 'chime' | 'rally' | 'otCheap' | 'grip' | 'walkins' | 'slot' | 'otLong';
+export type DawnPerkId = keyof typeof DAWN.perks;
+export type PerkId = PrePerkId | DawnPerkId;
+export type PerkDef = { name: string; does: string; prices: number[] };
+export const PERKS: Record<PrePerkId, PerkDef> = {
+  mug: { name: 'House mug', does: 'Skee-Ball pays 20% more tickets', prices: [250] },
+  nudge: { name: 'Attract card', does: 'One Attract Mode level on Skee-Ball, or the Coin Pusher if Skee is still locked', prices: [300] },
+  chime: { name: 'Service bell', does: 'The next walk-in shows up in a few seconds', prices: [350] },
+  rally: { name: 'Free whistle', does: 'A 30s rally, right now', prices: [400] },
+  otCheap: { name: 'Overtime coupon', does: 'Overtime costs 25% less', prices: [450, 700] },
+  grip: { name: 'Grip tape', does: 'The claw is a little less likely to slip', prices: [550] },
+  walkins: { name: 'Doorbell', does: 'Walk-ins every 75s instead of 90', prices: [650] },
+  slot: { name: 'Fighter slot', does: 'One more fighter on the lot', prices: [800, 5000] },
+  otLong: { name: 'Overtime punch card', does: 'Overtime lasts 4 fights', prices: [1400] },
 };
 export const perk = (s: GameState, id: PerkId) => s.room.perks[id] ?? 0;
-export const perkPrice = (s: GameState, id: PerkId) => PERKS[id].prices[perk(s, id)] ?? Infinity;
+export const perkInfo = (s: GameState, id: PerkId): PerkDef | null =>
+  (id in PERKS ? PERKS[id as PrePerkId] : s.bypass ? DAWN.perks[id as DawnPerkId] : null);
+export const shelfOf = (s: GameState): PerkId[] =>
+  s.bypass ? [...(Object.keys(PERKS) as PrePerkId[]), ...(Object.keys(DAWN.perks) as DawnPerkId[])] : (Object.keys(PERKS) as PrePerkId[]);
+export const perkPrice = (s: GameState, id: PerkId) => perkInfo(s, id)?.prices[perk(s, id)] ?? Infinity;
 export function buyPerk(s: GameState, id: PerkId): string | null {
+  const p = perkInfo(s, id);
   const price = perkPrice(s, id);
-  if (!isFinite(price)) return 'Sold out';
+  if (!p || !isFinite(price)) return 'Sold out';
   if (s.tickets < price) return 'Not enough tickets';
   s.tickets -= price;
   s.room.perks[id] = perk(s, id) + 1;
-  log(s, 0, `Prize counter: ${PERKS[id].name}. ${PERKS[id].does}.`, 'win');
+  if (id === 'nudge') {
+    const m = s.room.unlocked.includes('skee') ? 'skee' : s.room.unlocked.includes('pusher') ? 'pusher' : null;
+    if (m) s.room.attract[m] = Math.min(3, (s.room.attract[m] ?? 0) + 1);
+  }
+  if (id === 'chime') s.findClock = Math.min(s.findClock, 15);
+  if (id === 'rally') {
+    const c = s.crews[s.view];
+    c.rally = Math.max(c.rally, 30);
+  }
+  if (id === 'shot') s.room.buffs.shot = 1200;
+  log(s, 0, `Prize counter: ${p.name}. ${p.does}.`, 'win');
   return null;
 }
 
@@ -270,12 +301,16 @@ export function postScore(s: GameState, score: number): number {
   return gained;
 }
 
-function grant(s: GameState, b: BuffKind) {
+export function grant(s: GameState, b: BuffKind) {
   delete s.room.hands[b]; // the cabinet writes the real hand back after
-  const c = s.crews[0];
+  const c = s.crews[s.view];
   if (b === 'ball') c.rally = Math.max(c.rally, 30);
   else if (b === 'watch') c.overtime += 5;
-  else s.room.buffs[b] = BAR_BUFFS.find(([k]) => k === b)?.[1] ?? BUFF_SECONDS;
+  else {
+    const base = BAR_BUFFS.find(([k]) => k === b)?.[1] ?? BUFF_SECONDS;
+    const toys = b === 'bat' || b === 'duck' || b === 'troll';
+    s.room.buffs[b] = base * (toys && perk(s, 'clawLong') ? 2 : 1);
+  }
 }
 export const buffOn = (s: GameState, b: BuffKind) => (s.room.buffs[b] ?? 0) > 0;
 

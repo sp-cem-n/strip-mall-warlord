@@ -34,4 +34,15 @@ export const DAWN = {
   chairman: '+10% Equity per win.',
   shuffleBoard: (beat: number, slot: boolean, who: string) => `Shuffleboard: ${who} is off the board. Equity per win +${Math.round(0.06 * beat * 100)}%.${slot ? ' And a fighter slot.' : ''}`,
   shufflePanel: (pct: number) => ` · Equity per win +${pct}%`,
+  // Fun Zone prize counter, second shelf (same counter, after dawn)
+  prizeBack: 'The back room',
+  shotName: 'Souvenir shot glass',
+  shotDoes: '+10% damage on the Bypass crew for 20 minutes',
+  perks: {
+    bpSlot: { name: 'Bar stool', does: 'One more fighter on the Bypass lot', prices: [1000] },
+    bpBell: { name: 'Bar bell', does: 'Walk-ins on the Bypass every 75s instead of 90', prices: [800] },
+    clawLong: { name: 'Longer grip', does: 'Claw toys last 20 minutes', prices: [700] },
+    shot: { name: 'Souvenir shot glass', does: '+10% damage on the Bypass crew for 20 minutes', prices: [500] },
+  },
 };
+

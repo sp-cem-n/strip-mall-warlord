@@ -6,7 +6,7 @@ import { CAB_H, CAB_W, cabinet, carpet, paneling, screenOf, type CabinetLook } f
 import { C } from '../art/palette';
 import { CURRENCY_SHORT } from '../game/defs';
 import { log } from '../game/economy';
-import { ATTRACT_EVERY, BAR_BUFFS, QUIZ, BAR_HOUSE, BUFFS, HOUSE_SCORES, postShuffle, MACHINES, PERKS, attractPrice, buffOn, buyAttract, buyPerk, canAfford, endPlay, perk, perkPrice, postScore, serviced, startPlay, type BuffKind, type Cost, type MachineDef, type MachineId, type PerkId } from '../game/room';
+import { ATTRACT_EVERY, BAR_BUFFS, QUIZ, BAR_HOUSE, BUFFS, HOUSE_SCORES, postShuffle, MACHINES, PERKS, attractPrice, buffOn, buyAttract, buyPerk, canAfford, endPlay, perk, perkInfo, perkPrice, postScore, serviced, shelfOf, startPlay, type BuffKind, type Cost, type MachineDef, type MachineId, type PerkId, type PrePerkId } from '../game/room';
 import { canvasOf, urlOf } from './art';
 import { fmt, fmtTime } from './format';
 import { idle, newGame, pen, type Game } from './machines';
@@ -237,32 +237,45 @@ function BarCounter() {
   );
 }
 
+function PerkRow({ id }: { id: PerkId }) {
+  const s = app.s;
+  const p = perkInfo(s, id);
+  if (!p) return null;
+  const price = perkPrice(s, id);
+  return (
+    <div class="perk">
+      <span>
+        <b>{p.name}</b>
+        <span class="dim">
+          {p.does}
+          {p.prices.length > 1 ? ` · ${perk(s, id)}/${p.prices.length}` : ''}
+        </span>
+      </span>
+      <button class="btn small" disabled={!isFinite(price) || s.tickets < price} onClick={() => (toast(buyPerk(s, id) ?? p.name), app.refresh())}>
+        {isFinite(price) ? `${fmt(price)} tk` : 'Got it'}
+      </button>
+    </div>
+  );
+}
+
 function Counter() {
   const s = app.s;
+  const pre = Object.keys(PERKS) as PrePerkId[];
+  const back = shelfOf(s).filter((id) => !(id in PERKS));
+  const clawed = (Object.keys(BUFFS) as BuffKind[]).filter((b) => !BAR_IDS.has(b) && b !== 'shot' && buffOn(s, b));
   return (
     <section class="counter">
       <h2>Prize counter</h2>
       <div class="plush" />
-      {(Object.keys(PERKS) as PerkId[]).map((id) => {
-        const p = PERKS[id];
-        const price = perkPrice(s, id);
-        return (
-          <div key={id} class="perk">
-            <span>
-              <b>{p.name}</b>
-              <span class="dim">
-                {p.does}
-                {p.prices.length > 1 ? ` · ${perk(s, id)}/${p.prices.length}` : ''}
-              </span>
-            </span>
-            <button class="btn small" disabled={!isFinite(price) || s.tickets < price} onClick={() => (toast(buyPerk(s, id) ?? p.name), app.refresh())}>
-              {isFinite(price) ? `${fmt(price)} tk` : 'Got it'}
-            </button>
-          </div>
-        );
-      })}
+      {pre.map((id) => (
+        <PerkRow key={id} id={id} />
+      ))}
+      {!!back.length && <h3>{DAWN.prizeBack}</h3>}
+      {back.map((id) => (
+        <PerkRow key={id} id={id} />
+      ))}
       <h3>On the shelf</h3>
-      {(Object.keys(BUFFS) as BuffKind[]).filter((b) => !BAR_IDS.has(b) && buffOn(s, b)).map((b) => (
+      {clawed.map((b) => (
         <div key={b} class="perk">
           <span>
             <b>{BUFFS[b].name}</b> <span class="dim">{BUFFS[b].does}</span>
@@ -270,7 +283,15 @@ function Counter() {
           <span class="dim">{fmtTime(s.room.buffs[b] ?? 0)}</span>
         </div>
       ))}
-      {!(Object.keys(BUFFS) as BuffKind[]).some((b) => !BAR_IDS.has(b) && buffOn(s, b)) && <div class="dim">Nothing from the claw yet.</div>}
+      {buffOn(s, 'shot') && (
+        <div class="perk">
+          <span>
+            <b>{BUFFS.shot.name}</b> <span class="dim">{BUFFS.shot.does}</span>
+          </span>
+          <span class="dim">{fmtTime(s.room.buffs.shot ?? 0)}</span>
+        </div>
+      )}
+      {!clawed.length && <div class="dim">Nothing from the claw yet.</div>}
       <h3>Night Shift board</h3>
       {HOUSE_SCORES.map(([n, v], i) => (
         <div key={n} class={`perk ${i < s.room.board ? 'beat' : ''}`}>

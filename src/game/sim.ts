@@ -118,7 +118,7 @@ function walkIns(s: GameState) {
   }
   if ((s.findClock -= STEP) > 0) return;
   const ads = 1 - 0.04 * Object.values(s.blitz ?? {}).reduce((a, n) => a + n, 0);
-  s.findClock = (perk(s, 'walkins') ? 75 : WALKIN_EVERY) * Math.max(0.5, ads);
+  s.findClock = ((s.view === 0 ? perk(s, 'walkins') : perk(s, 'bpBell')) ? 75 : WALKIN_EVERY) * Math.max(0.5, ads);
   const shops = leased(s, s.view);
   if (!shops.length) return;
   const sh = pick(s, shops);
@@ -126,7 +126,7 @@ function walkIns(s: GameState) {
 }
 
 export function walkInValue(s: GameState, kind: WalkInKind): number {
-  const troll = s.view === 0 && buffOn(s, 'troll') ? 2 : 1;
+  const troll = buffOn(s, 'troll') ? 2 : 1;
   if (kind === 'cash') return rentPerSec(s, s.view) * TIP_SECONDS * troll;
   if (kind === 'referral') return payFor(s, s.view) * REFERRAL_WINS * troll;
   return 0;

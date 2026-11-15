@@ -3,7 +3,7 @@ import { FIGHTS, RETRY_AFTER, ROLES, SHOPS, REGIONS, type RegionId } from './def
 import { advance, bal, buyPatrol, buySlot, convert, curb, forLease, leased, lease, lineupOf, lotsTaken, overtime, overtimeCost, patrolBlock, patrolPrice, pave, purse, regionDone, renovate, renovateCost, rentPerSec, slotPrice, topFight, train, trainCost, view } from './economy';
 import { collectFind } from './sim';
 import type { GameState } from './state';
-import { BAR_BUFFS, QUIZ, serviced, MACHINE, PERKS, PINBALL_TOP, SHUFFLE_TOP, buffOn, buyPerk, endPlay, perkPrice, pokerQ, postScore, postShuffle, startPlay, type MachineId, type PerkId } from './room';
+import { BAR_BUFFS, QUIZ, serviced, MACHINE, PINBALL_TOP, SHUFFLE_TOP, buffOn, buyPerk, endPlay, perkPrice, pokerQ, postScore, postShuffle, shelfOf, startPlay, type MachineId } from './room';
 import { rand } from './rng';
 
 // The room player: half of online time, at about 70% skill. Keeps a claw toy going, spends tickets at the counter.
@@ -33,17 +33,18 @@ function roomAct(s: GameState, o: BotOpts, dt: number) {
   o.barBudget = (o.barBudget ?? 0) + (bar ? dt * 0.35 : 0);
   if (bar) barAct(s, o);
   o.roomBudget = (o.roomBudget ?? 0) + dt * (bar ? 0.15 : 0.5);
-  // prize counter in order (fighter slots first), saving up for the next one rather than grabbing what's cheap
-  for (const id of Object.keys(PERKS) as PerkId[]) {
-    while (s.tickets >= perkPrice(s, id) && !buyPerk(s, id));
-    if (isFinite(perkPrice(s, id))) break;
-  }
+  // cheapest affordable prize first; never sit on tickets for a later slot
+  const buyShelf = () => {
+    const ids = shelfOf(s).slice().sort((a, b) => perkPrice(s, a) - perkPrice(s, b));
+    for (const id of ids) while (isFinite(perkPrice(s, id)) && s.tickets >= perkPrice(s, id) && !buyPerk(s, id));
+  };
+  buyShelf();
   for (let g = 0; g < 20 && o.roomBudget > 0; g++) {
     let id: MachineId | undefined;
     if (s.tickets >= 50 && !buffOn(s, 'bat') && !buffOn(s, 'duck') && s.room.unlocked.includes('claw')) id = 'claw';
     else {
       const open = MIX.filter(([m]) => s.room.unlocked.includes(m));
-      if (!open.length) return;
+      if (!open.length) break;
       let x = rand(s) * open.reduce((a, [, w]) => a + w, 0);
       id = open.find(([, w]) => (x -= w) < 0)?.[0] ?? open[0][0];
     }
@@ -53,6 +54,7 @@ function roomAct(s: GameState, o: BotOpts, dt: number) {
     if (id === 'pinball') postScore(s, Math.round(q * PINBALL_TOP));
     endPlay(s, id, q, true);
   }
+  buyShelf();
 }
 
 export interface BotOpts {
