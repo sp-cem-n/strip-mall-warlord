@@ -348,3 +348,16 @@ src/
 ## Already decided, do not reopen
 
 Fun Zone at Parking Lot fight 7 for $20,000. Off-Ramp at Exit 14 fight 4. Attract 5 / 3 / 2 minutes. Grapevine is the Off-Ramp's reward identity. Trivia 1,200+, pre-1998, no scraped sets. Fairway 9 is the third bar game. Rival buyouts are out. Blitzes are permanent and stacking. In-game currency only; no sweepstakes parlors. Test mode stays on the live site. Bypass M4 knobs in `V09_BYPASS.md` §12 (reno 1.50, 20 GW/EQ, 12h post-dawn cap, arcade resets on sale unless *Keep the Room*, Bypass hides until dawn, walls ≤60% / 30). Working titles: Sell to the REIT, Uncle Sal's Rolodex, Rolodex cards. v1.0 is the finished game with sound. From here, polish and cohesion, not new features.
+
+---
+
+## Josh's calls, 15 Nov (supersede anything above)
+
+- **Patrols stay** (pre-dawn, lot track). Do NOT merge them into consultants (cancels B2). Consultants are the post-dawn cash sink, scoped **per lot** and covering that lot's 3–4 shops. Their extra job beyond patrols is auto-renovation (a second upgrade), so the two don't overlap.
+- **1997 pass:** Vape Shop becomes Smoke Shop. Cell Phone Kiosk becomes a RadioShack-style electronics store (parody name, not the real brand). Full period check of every shop name, blurb, tip and How to Play line.
+- **Achievements:** quietly count hidden stats from v0.9 (bulbs relit, non-autoplay pusher scores, random events clicked, etc.); the UI stays hidden until the first REIT sale.
+- **Saves:** one clean save wipe is allowed at 1.0; no migration needed across reworks before then.
+- **Minigames:** all 15 get the full rework for 1.0.
+- **No reduce-flicker toggle.**
+- **Balance:** add a skilled active-player simulation alongside the check-in bot.
+- **Mobile:** 2.5D rooms are desktop first; portrait comes after 1.0.
