@@ -24,8 +24,9 @@ export interface RoomState {
   plays: number;
   shuffle: number; // shuffleboard house scores beaten (0-5)
   shuffleBest: number;
+  hands: Partial<Record<BuffKind, string>>; // the real poker hand behind each bar buff (a flush pays like trips)
 }
-export const newRoom = (): RoomState => ({ unlocked: [], attract: {}, clock: {}, cool: {}, perks: {}, board: 0, best: 0, jackpot: 500, shelf: [10, 10], buffs: {}, plays: 0, shuffle: 0, shuffleBest: 0 });
+export const newRoom = (): RoomState => ({ unlocked: [], attract: {}, clock: {}, cool: {}, perks: {}, board: 0, best: 0, jackpot: 500, shelf: [10, 10], buffs: {}, plays: 0, shuffle: 0, shuffleBest: 0, hands: {} });
 
 // ---- rates every payout is priced in, so nothing goes stale ----
 const rent = (s: GameState, r: RegionId) => Math.max(1, rentPerSec(s, r));
@@ -267,6 +268,7 @@ export function postScore(s: GameState, score: number): number {
 }
 
 function grant(s: GameState, b: BuffKind) {
+  delete s.room.hands[b]; // the cabinet writes the real hand back after
   const c = s.crews[0];
   if (b === 'ball') c.rally = Math.max(c.rally, 30);
   else if (b === 'watch') c.overtime += 5;

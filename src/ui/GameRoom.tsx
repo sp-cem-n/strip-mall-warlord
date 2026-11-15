@@ -4,6 +4,7 @@ import { app, tip, toast } from '../app';
 import { CAB_H, CAB_W, cabinet, carpet, paneling, screenOf, type CabinetLook } from '../art/cabinets';
 import { C } from '../art/palette';
 import { CURRENCY_SHORT } from '../game/defs';
+import { log } from '../game/economy';
 import { ATTRACT_EVERY, BAR_BUFFS, QUIZ, BAR_HOUSE, BUFFS, HOUSE_SCORES, postShuffle, MACHINES, PERKS, attractPrice, buffOn, buyAttract, buyPerk, canAfford, endPlay, perk, perkPrice, postScore, serviced, startPlay, type BuffKind, type Cost, type MachineDef, type MachineId, type PerkId } from '../game/room';
 import { canvasOf, urlOf } from './art';
 import { fmt, fmtTime } from './format';
@@ -26,6 +27,7 @@ export const LOOKS: Record<MachineId, CabinetLook> = {
   trivia: { body: C.night, trim: C.violet, marquee: C.neon, ink: C.ink, title: 'BAR TRIVIA', side: 'stripes' },
 };
 const BAR_IDS = new Set([...BAR_BUFFS, ...QUIZ].map(([b]) => b));
+// The hand that earned each poker buff (saved in room.hands): a flush pays like trips, so show the real hand.
 export const costText = (c: Cost) => (c.cur === 'tickets' ? `${fmt(c.n)} tickets` : c.cur === 'cash' ? `$${fmt(c.n)}` : `${fmt(c.n)} ${CURRENCY_SHORT[c.cur]}`);
 
 function Cabinet({ m }: { m: MachineDef }) {
@@ -74,7 +76,11 @@ function Cabinet({ m }: { m: MachineDef }) {
       if (m.id === 'pinball' && g.score !== undefined && postScore(app.s, g.score)) text += ' NEW HIGH';
       if (m.id === 'shuffle' && g.score !== undefined && postShuffle(app.s, g.score)) text += ' NEW HIGH';
       if (m.id === 'poker' && g.q > 0) text = g.label ?? text;
-      const rw = endPlay(app.s, m.id, g.q);
+      const rw = endPlay(app.s, m.id, g.q, m.id === 'poker');
+      if (m.id === 'poker' && rw.buff) {
+        const hand = (app.s.room.hands[rw.buff] = g.label![0] + g.label!.slice(1).toLowerCase());
+        if (rw.big) log(app.s, m.region, `${m.name}: ${hand}. ${BUFFS[rw.buff].does}.`, 'win');
+      }
       const got = m.id === 'poker' ? '' : [rw.cash && `+$${fmt(rw.cash)}`, rw.goodwill && `+${fmt(rw.goodwill)} GW`, rw.tickets && `+${fmt(rw.tickets)} TICKETS`, rw.equity && `+${fmt(rw.equity)} EQ`].filter(Boolean).join(' ');
       text = got || text;
       if (rw.cash || rw.tickets) register();
@@ -155,7 +161,7 @@ function BarCounter() {
       {on.map(([b]) => (
         <div key={b} class="perk">
           <span>
-            <b>{BUFFS[b].name}</b> <span class="dim">{BUFFS[b].does}</span>
+            <b>{s.room.hands[b] ?? BUFFS[b].name}</b> <span class="dim">{BUFFS[b].does}</span>
           </span>
           <span class="dim">{fmtTime(s.room.buffs[b] ?? 0)}</span>
         </div>

@@ -3,7 +3,7 @@
 import { glyph } from '../art/font';
 import { C, HEX } from '../art/palette';
 import { foos, foosIdle, trivia, triviaIdle } from './bargames';
-import { BAR_HOUSE, HOUSE_SCORES, PINBALL_TOP, POKER_HANDS, SHUFFLE_TOP, type MachineId } from '../game/room';
+import { BAR_HOUSE, HOUSE_SCORES, PINBALL_TOP, SHUFFLE_TOP, type MachineId } from '../game/room';
 
 export interface Pen {
   rect(x: number, y: number, w: number, h: number, c: number): Pen;
@@ -637,10 +637,14 @@ function pool(): Game {
 // ---- Video Poker: Jacks or Better. Click cards to hold, then DRAW. ----
 const SUITS = [
   [0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0], // hearts
-  [0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0], // diamonds
+  [0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0], // diamonds, hollow so it can't read as a cross
   [0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0], // clubs
   [0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0], // spades
 ];
+// Four-color deck: hearts red, diamonds blue, clubs green, spades black.
+const SUIT_INK = [C.red, C.blue, C.forest, C.ink];
+// The paytable shows what each payout tier covers, so a flush doesn't light up THREE OF A KIND.
+const PAYTABLE = ['STR/ROYAL FLUSH', 'FULL HOUSE/QUADS', 'TRIPS/STR/FLUSH', 'JACKS/TWO PAIR'];
 const RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 export function handTier(cards: number[]): [number, string] {
   const r = cards.map((c) => c % 13).sort((a, b) => a - b);
@@ -677,15 +681,15 @@ function poker(): Game {
     draw(p, now) {
       p.rect(0, 0, p.w, p.h, C.navy);
       const [tier] = handTier(hand);
-      POKER_HANDS.slice(1).reverse().forEach((n, i) => p.text(n, 3, 2 + i * 6, drawn && tier === 4 - i ? (Math.floor(now * 6) % 2 ? C.sodiumLight : C.paper) : C.bone));
+      PAYTABLE.forEach((n, i) => p.text(n, 3, 2 + i * 6, drawn && tier === 4 - i ? (Math.floor(now * 6) % 2 ? C.sodiumLight : C.paper) : C.bone));
       hand.forEach((c, i) => {
         const x = cardX(i), y = 28;
         if (flip > 0 && !held[i] && drawn) return void p.rect(x, y, 14, 20, C.red).rect(x + 2, y + 2, 10, 16, C.brick);
         p.rect(x, y, 14, 20, C.paper).rect(x, y + 19, 14, 1, C.stone);
-        const suit = Math.floor(c / 13), red = suit < 2;
-        p.text(RANKS[c % 13], x + 1, y + 1, red ? C.red : C.ink);
+        const suit = Math.floor(c / 13), ink = SUIT_INK[suit];
+        p.text(RANKS[c % 13], x + 1, y + 1, ink);
         const bits = SUITS[suit];
-        for (let j = 0; j < 25; j++) if (bits[j]) p.rect(x + 2 + (j % 5) * 2, y + 7 + Math.floor(j / 5) * 2, 2, 2, red ? C.red : C.ink);
+        for (let j = 0; j < 25; j++) if (bits[j]) p.rect(x + 2 + (j % 5) * 2, y + 7 + Math.floor(j / 5) * 2, 2, 2, ink);
         if (held[i]) p.text('HELD', x - 1, y + 22, C.sodiumLight);
       });
       p.rect(14, 62, 50, 11, drawn ? C.asphalt : C.sodium);
