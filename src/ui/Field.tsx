@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'preact/hooks';
 import { app } from '../app';
 import { glyph } from '../art/font';
 import { C, HEX } from '../art/palette';
-import { BATTLERS, FIGHTS, REGIONS, type RegionId, type Role } from '../game/defs';
+import { BATTLERS, FIGHTS, REGIONS, WALK_IN_SECONDS, type RegionId, type Role } from '../game/defs';
 import { curb, lineupOf } from '../game/economy';
 import type { Unit } from '../game/state';
 import { crewArt, enemyArt, fieldArt } from './art';
@@ -92,6 +92,39 @@ function drawUnit(ctx: CanvasRenderingContext2D, u: Unit, [x, y]: [number, numbe
   }
 }
 
+// SMOKE BREAK: the crew steps back to the curb by the lamp, a few cigarettes going, a bar filling up.
+function smokeBreak(ctx: CanvasRenderingContext2D, t: number, r: RegionId) {
+  const c = app.s.crews[r];
+  const team = lineupOf(app.s, r);
+  const done = 1 - Math.max(0, c.regroup) / Math.max(0.01, c.smoke);
+  team.forEach((id, i) => {
+    // up on the curb, either side of the lamp post
+    const x = 92 + i * 17 + (i >= Math.ceil(team.length / 2) ? 14 : 0);
+    const y = 62 + (i % 2) * 3;
+    ctx.drawImage(crewArt(id), x - 8, y - 24);
+    if (i % 2) return;
+    // a lit cigarette and its smoke: three puffs rising and drifting, pixel squares
+    ctx.fillStyle = HEX[C.sodiumLight];
+    ctx.fillRect(x + 5, y - 13, 1, 1);
+    for (let p = 0; p < 3; p++) {
+      const ph = (t * 0.7 + p / 3 + i * 0.37) % 1;
+      const sz = 2 + Math.floor(ph * 3);
+      ctx.globalAlpha = 0.85 * (1 - ph * 0.8);
+      ctx.fillStyle = HEX[ph < 0.4 ? C.bone : C.stone];
+      ctx.fillRect(Math.round(x + 6 + Math.sin((ph + i) * 6) * 2 + ph * 4), Math.round(y - 15 - ph * 16), sz, sz);
+    }
+    ctx.globalAlpha = 1;
+  });
+  const bw = 90, bx = 160 - bw / 2, by = 104;
+  text(ctx, 'SMOKE BREAK', center('SMOKE BREAK', 160), 94, C.sodiumLight);
+  ctx.fillStyle = HEX[C.ink];
+  ctx.fillRect(bx - 1, by - 1, bw + 2, 6);
+  ctx.fillStyle = HEX[C.asphalt];
+  ctx.fillRect(bx, by, bw, 4);
+  ctx.fillStyle = HEX[C.sodium];
+  ctx.fillRect(bx, by, Math.round(bw * done), 4);
+}
+
 function draw(ctx: CanvasRenderingContext2D, t: number, r: RegionId) {
   const s = app.s;
   const c = s.crews[r];
@@ -103,14 +136,17 @@ function draw(ctx: CanvasRenderingContext2D, t: number, r: RegionId) {
     const spots = crewSpots(b.crew.length);
     const order = b.crew.map((u, i) => [u, spots[i]] as const).sort((a, z) => a[1][1] - z[1][1]);
     for (const [u, p] of order) drawUnit(ctx, u, p, t);
+    // the next group walks in from the back of the lot (upper right) to where the last one fell
+    const k = Math.max(0, b.enter) / WALK_IN_SECONDS;
+    const walk = ([x, y]: [number, number]): [number, number] => [Math.round(x + k * 70), Math.round(y - k * 46 + (k > 0 ? Math.abs(Math.sin(t * 10)) * 1.5 : 0))];
     const regs = b.enemies.filter((e) => !e.boss);
-    regs.map((u, i) => [u, enemySpot(i)] as const).sort((a, z) => a[1][1] - z[1][1]).forEach(([u, p]) => drawUnit(ctx, u, p, t));
-    for (const u of b.enemies.filter((e) => e.boss)) drawUnit(ctx, u, BOSS_SPOT, t);
-  } else {
+    regs.map((u, i) => [u, walk(enemySpot(i))] as const).sort((a, z) => a[1][1] - z[1][1]).forEach(([u, p]) => drawUnit(ctx, u, p, t));
+    for (const u of b.enemies.filter((e) => e.boss)) drawUnit(ctx, u, walk(BOSS_SPOT), t);
+  } else if (c.smoke > 0) smokeBreak(ctx, t, r);
+  else {
     const team = lineupOf(s, r);
     const spots = crewSpots(team.length);
     team.map((id, i) => [id, spots[i]] as const).sort((a, z) => a[1][1] - z[1][1]).forEach(([id, [x, y]]) => ctx.drawImage(crewArt(id), x - 8, y - 24));
-    text(ctx, 'REGROUPING', center('REGROUPING', 236), 96, C.bone);
   }
   curb(s, r).forEach(([id], i) => {
     const [x, y] = curbSpot(i);

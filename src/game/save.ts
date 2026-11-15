@@ -28,7 +28,18 @@ export function loadGame(): GameState | 'old' | null {
   if (!raw) return null;
   try {
     const s = JSON.parse(raw) as GameState;
-    if (s?.version === SAVE_VERSION && Array.isArray(s.crews)) return ((s.room = { ...newRoom(), ...s.room }), s);
+    if (s?.version === SAVE_VERSION && Array.isArray(s.crews)) {
+      s.room = { ...newRoom(), ...s.room };
+      for (const c of s.crews) {
+        // v0.6 -> v0.7: damage carries over, smoke breaks, one tries counter
+        c.tries ??= 0;
+        c.wounds ??= {};
+        c.smoke ??= 0;
+        delete (c as { streak?: number }).streak;
+        if (c.battle && c.battle.taken === undefined) c.battle = null;
+      }
+      return s;
+    }
     const tag = ARCHIVE[s?.version];
     if (tag) {
       old.from = tag;

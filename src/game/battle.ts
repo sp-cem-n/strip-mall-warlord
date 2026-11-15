@@ -1,4 +1,4 @@
-import { AURA_STEP, BATTLERS, BOSS_STRENGTH, HARD_FOCUS, ENEMY_DMG, FIGHTS, FIGHT_TIMEOUT, FRONT_SHARE, MAIN_GROWTH, OVERTIME_BOOST, RALLY_BOOST, REGIONS, ROLES, SIDE_HP_GROWTH, STANCE, TANK_HP_GROWTH, TELL, TRAIN_STEP, WEAK_BONUS, type BattlerDef, type EnemyDef, type Fx, type RegionId, type Role } from './defs';
+import { AURA_STEP, BATTLERS, WALK_IN_SECONDS, BOSS_STRENGTH, HARD_FOCUS, ENEMY_DMG, FIGHTS, FIGHT_TIMEOUT, FRONT_SHARE, MAIN_GROWTH, OVERTIME_BOOST, RALLY_BOOST, REGIONS, ROLES, SIDE_HP_GROWTH, STANCE, TANK_HP_GROWTH, TELL, TRAIN_STEP, WEAK_BONUS, type BattlerDef, type EnemyDef, type Fx, type RegionId, type Role } from './defs';
 import { asphaltMult, curb, fighters, lineupOf, log } from './economy';
 import { rand } from './rng';
 import { barDmg, barHp, buffOn } from './room';
@@ -89,7 +89,7 @@ export function startBattle(s: GameState, r: RegionId): Battle | null {
     const d = BATTLERS[id];
     const st = statsOf(s, r, id, lv);
     const toy = r === 0 ? (k: 'bat' | 'duck') => (buffOn(s, k) ? 1.3 : 1) : (k: 'bat' | 'duck') => (k === 'bat' ? barDmg(s) : barHp(s));
-    let hp = STANCE[c.stance].hp * ot * toy('duck'), dmg = STANCE[c.stance].dmg * ot * toy('bat'), haste = 1, dr = d.fx?.k === 'dr' ? d.fx.v : 0;
+    let hp = ot * toy('duck'), dmg = STANCE[c.stance].dmg * ot * toy('bat'), haste = 1, dr = d.fx?.k === 'dr' ? d.fx.v : 0;
     for (const { fx } of aur) {
       if (fx.k === 'hpUp' && targets(fx.to, d)) hp += fx.v;
       if (fx.k === 'dmgUp' && targets(fx.to, d)) dmg += fx.v;
@@ -98,6 +98,7 @@ export function startBattle(s: GameState, r: RegionId): Battle | null {
     const u = unit(s, 'crew', id, d.role, d.name, st.hp * hp, st.dmg * dmg, st.interval * Math.max(0.4, haste), null, false);
     u.dr = Math.min(dr, CAPS.dr!);
     u.twin = d.fx?.k === 'twin';
+    u.hp = Math.round(u.maxHp * (1 - (c.wounds[id] ?? 0)));
     return u;
   });
   const f = FIGHTS[r][fight];
@@ -108,8 +109,10 @@ export function startBattle(s: GameState, r: RegionId): Battle | null {
     e.tell = def.tell;
     return e;
   });
-  if (f.boss && c.streak === 0) log(s, r, `${REGIONS[r].lots[f.zone].boss.name.replace(/^(?!The )/, 'The ')} walks out. ${REGIONS[r].lots[f.zone].boss.title}`);
-  return (c.battle = { fight, t: 0, crew, enemies, field, revived: false, overtime });
+  // the boss's entrance: once, on the first try
+  if (f.boss && fight === c.frontier && c.tries === 0) log(s, r, `${REGIONS[r].lots[f.zone].boss.name.replace(/^(?!The )/, 'The ')} walks out. ${REGIONS[r].lots[f.zone].boss.title}`);
+  const fresh = crew.every((u) => u.hp >= u.maxHp);
+  return (c.battle = { fight, t: 0, crew, enemies, field, revived: false, overtime, fresh, taken: STANCE[c.stance].taken, enter: WALK_IN_SECONDS });
 }
 
 const alive = (u: Unit) => u.hp > 0;
@@ -120,7 +123,7 @@ function hit(s: GameState, rally: boolean, b: Battle, from: Unit, target: Unit, 
     const weak = target.weak === from.id;
     dmg *= (weak ? 1 + WEAK_BONUS : 1) * (1 + b.field.mark) * (rally ? 1 + RALLY_BOOST : 1);
     target.lastWeak = weak;
-  } else dmg *= 1 - target.dr;
+  } else dmg *= (1 - target.dr) * b.taken;
   target.hp = Math.max(0, target.hp - dmg);
   target.flash = 0.35;
   target.lastDmg = dmg;
@@ -173,6 +176,8 @@ function act(s: GameState, rally: boolean, u: Unit, b: Battle) {
 }
 
 export function stepBattle(s: GameState, b: Battle, dt: number, rally = false): 'win' | 'loss' | null {
+  if (b.enter > 0) return void (b.enter -= dt), null; // still walking in from the back of the lot
+  if (!b.crew.some(alive)) return 'loss';
   b.t += dt;
   for (const u of [...b.crew, ...b.enemies]) {
     if (!alive(u)) continue;

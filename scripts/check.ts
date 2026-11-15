@@ -1,5 +1,5 @@
 // Small invariant checks. Run: bun scripts/check.ts
-import { BATTLERS, FIGHTS, GOODWILL_PER_EQUITY, MAX_SLOTS, OFFLINE_CAP_SECONDS, REGIONS, SHOPS, SHOP_LIST, START_SLOTS, STEP, WEAK_BONUS } from '../src/game/defs';
+import { BATTLERS, FIGHTS, GOODWILL_PER_EQUITY, MAX_SLOTS, OFFLINE_CAP_SECONDS, REGIONS, RETRY_AFTER, SHOPS, SMOKE_BREAK_SECONDS, SHOP_LIST, START_SLOTS, STEP, WEAK_BONUS } from '../src/game/defs';
 import { auras, enemyLineup, lossReason, startBattle, statsOf, stepBattle } from '../src/game/battle';
 import { advance, asphaltGain, autoCovers, buyPatrol, buySlot, convert, curb, forLease, lease, lineupOf, newGame, overtime, patrolBlock, patrolPrice, pave, renovate, renovateCost, retryAfter, roster, setStance, slotsOf, tierOf, toggleField, train, trainCost, view } from '../src/game/economy';
 import { loadGame, old, saveGame } from '../src/game/save';
@@ -64,7 +64,7 @@ check('training costs Goodwill and only Route 9', train(s, 0, 'tank') === null &
   check('signing it turns on auto for the lot', buyPatrol(t, 0, 0) === null && autoCovers(t, 0, 0) && t.crews[0].cash === 0);
   t.crews[0].frontier = 9;
   check('Big-Box patrol needs the Security Office', patrolBlock(t, 0, 1) !== null && ((t.crews[0].shops.security = 4), patrolBlock(t, 0, 1) === null));
-  check('Security Office: 5% off a level, retries sooner', patrolPrice(t, 0, 1) === Math.round(REGIONS[0].lots[1].patrol * 0.8) && retryAfter(t, 0) === 7);
+  check('Security Office: 5% off a level', patrolPrice(t, 0, 1) === Math.round(REGIONS[0].lots[1].patrol * 0.8) && retryAfter(t, 0) === RETRY_AFTER);
 }
 check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0, 1) === null && advance(s, 0, 1) !== null && s.crews[0].at === 2);
 {
@@ -72,7 +72,23 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   t.crews[0].frontier = 30;
   t.crews[0].at = 30;
   for (let i = 0; i < 2000 && t.crews[0].at === 30; i++) step(t);
-  check('a loss at the frontier: falls back one fight to farm', t.crews[0].at === 29 && t.crews[0].losses === 1 && t.log.some((l) => l.text.includes('Falling back')));
+  check('a fresh loss at the frontier: smoke break, back one fight to farm', t.crews[0].at === 29 && t.crews[0].losses === 1 && t.crews[0].tries === 1 && t.crews[0].smoke === SMOKE_BREAK_SECONDS && Object.keys(t.crews[0].wounds).length === 0);
+}
+{
+  // damage carries over: a win leaves wounds, the next fight starts on them
+  const t = newGame(4);
+  t.crews[0].frontier = 6;
+  t.crews[0].at = 6;
+  let worn = false;
+  for (let i = 0; i < 4000 && !worn; i++) {
+    step(t);
+    const b = t.crews[0].battle;
+    worn = !!b && b.t === 0 && !b.fresh && b.crew.some((u) => u.hp < u.maxHp);
+  }
+  check('damage carries over: after a win the next group walks in on a hurt crew', worn);
+  const c = t.crews[0];
+  advance(t, 0, c.at > 0 ? -1 : 1);
+  check('moving to a new fight is a smoke break: full HP', Object.keys(c.wounds).length === 0 && c.smoke === SMOKE_BREAK_SECONDS && c.regroup === SMOKE_BREAK_SECONDS);
 }
 
 // battle rules
@@ -108,7 +124,8 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   check('fight 1 is one enemy; the first boss brings two', lu.length === 1 && enemyLineup(0, 8).length === 3 && enemyLineup(0, 8)[0].boss);
   setStance(t, 0, 'rush');
   const rush = startBattle(t, 0)!;
-  check('Rush: more damage, less HP', rush.crew[0].dmg > b.crew[0].dmg && rush.crew[0].maxHp < b.crew[0].maxHp);
+  check('Rush: more damage dealt, more taken; Dig In: less of both', rush.crew[0].dmg > b.crew[0].dmg && rush.taken > b.taken && (setStance(t, 0, 'dig'), startBattle(t, 0)!.taken < b.taken));
+  setStance(t, 0, 'even');
   t.crews[0].cash = 1e12;
   check('overtime: costs rent, boosts the next 3 fights', overtime(t, 0) === null && t.crews[0].overtime === 3 && startBattle(t, 0)!.overtime && (t.crews[0].overtime as number) === 2);
   check('loss reason points at the play for hard hitters', lossReason({ ...b, t: 5, enemies: [{ ...b.enemies[0], hp: 1, tell: 'hard' }] }, 'even').includes('Dig In'));

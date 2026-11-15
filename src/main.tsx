@@ -20,6 +20,8 @@ installFrames();
 //   ?seed=N         fixed RNG seed for a new game
 //   ?advance=SEC    let the scripted player play SEC seconds before showing (?active=1: grabs walk-ins, calls plays)
 //   ?midbattle=1    after advancing, stop a few seconds into a fight
+//   ?smoke=1        after advancing, stop halfway through a smoke break
+//   ?walkup=1       after advancing, stop as the next group walks in on a hurt crew
 //   ?roster=full    Route 9 finished: all 19 shops at Lv 45 and the 6 bosses on the crew (25 on the field)
 //   ?win=1          with roster=full: show the dawn win card
 //   ?region=1       watch the Bypass crew (needs the Bypass found: roster=full does that)
@@ -81,6 +83,14 @@ if (q.get('room') === 'full') {
   app.s.room.buffs = { bat: 420 };
   app.s.crews[0].cash = Math.max(app.s.crews[0].cash, 1e6);
   if (app.s.bypass) (app.s.crews[1].shops.offramp ??= 3), app.s.room.unlocked.push('darts', 'pool', 'poker', 'shuffle'), (app.s.room.shuffle = 1), (app.s.room.shuffleBest = 12), (app.s.room.buffs.call = 300), (app.s.crews[1].cash = Math.max(app.s.crews[1].cash, 1e7));
+}
+if (q.get('smoke') === '1') {
+  const c = app.s.crews[app.s.view];
+  for (let guard = 0; !(c.smoke > 0 && c.regroup < c.smoke / 2) && guard < 40000; guard++) step(app.s);
+}
+if (q.get('walkup') === '1') {
+  const c = app.s.crews[app.s.view];
+  for (let guard = 0; !(c.battle && !c.battle.fresh && c.battle.enter > 0 && c.battle.enter < 1.2) && guard < 40000; guard++) step(app.s);
 }
 if (q.get('midbattle') === '1') {
   const c = app.s.crews[app.s.view];

@@ -44,6 +44,9 @@ export interface Battle {
   field: Field;
   revived: boolean;
   overtime: boolean;
+  fresh: boolean; // the crew started at full HP
+  taken: number; // damage the crew takes (the play)
+  enter: number; // seconds left of the enemies walking in
 }
 
 export interface LogLine {
@@ -65,9 +68,11 @@ export interface Crew {
   at: number; // the fight the crew is on; always <= frontier
   kills: number; // wins on the frontier fight
   farmed: number; // wins below the frontier since the last try
-  streak: number; // losses in a row
+  tries: number; // losses at the frontier since it last moved
+  wounds: Record<string, number>; // share of HP each fighter is missing; carries over between fights until a smoke break
   battle: Battle | null;
-  regroup: number;
+  regroup: number; // seconds until the next fight
+  smoke: number; // length of the current smoke break (0 = the next group is just walking in)
   stance: Stance;
   overtime: number; // fights left
   lineup: string[] | null; // fighters you picked for the lot; null = the auto pick

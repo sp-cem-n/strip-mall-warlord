@@ -6,11 +6,11 @@ import { fmt } from './format';
 
 const PLAYS: [Stance, string, string][] = [
   ['even', 'Even', 'No adjustments.'],
-  ['rush', 'Rush', `+${Math.round((STANCE.rush.dmg - 1) * 100)}% damage, ${Math.round((STANCE.rush.hp - 1) * 100)}% HP. For tanky enemies and running out the clock.`],
-  ['dig', 'Dig In', `+${Math.round((STANCE.dig.hp - 1) * 100)}% HP, ${Math.round((STANCE.dig.dmg - 1) * 100)}% damage. For enemies who hit hard.`],
+  ['rush', 'Rush', `+${Math.round((STANCE.rush.dmg - 1) * 100)}% damage dealt, +${Math.round((STANCE.rush.taken - 1) * 100)}% damage taken.`],
+  ['dig', 'Dig In', `${Math.round((STANCE.dig.dmg - 1) * 100)}% damage dealt, ${Math.round((STANCE.dig.taken - 1) * 100)}% damage taken.`],
 ];
-export 
-function Calls({ r }: { r: RegionId }) {
+
+export function Calls({ r }: { r: RegionId }) {
   const s = app.s;
   const c = s.crews[r];
   const cost = overtimeCost(s, r);

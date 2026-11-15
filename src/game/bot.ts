@@ -1,6 +1,5 @@
 // A scripted player for balance runs and the debug `advance` param. Plays like someone who checks in now and then.
-import { FIGHTS, ROLES, SHOPS, REGIONS, type RegionId } from './defs';
-import { enemyLineup } from './battle';
+import { FIGHTS, ROLES, SHOPS, REGIONS, type RegionId, type Stance } from './defs';
 import { advance, bal, buyPatrol, buySlot, convert, curb, forLease, leased, lease, lineupOf, overtime, overtimeCost, patrolBlock, patrolPrice, pave, purse, regionDone, renovate, renovateCost, rentPerSec, retryAfter, setStance, slotPrice, topFight, train, trainCost, view } from './economy';
 import { collectFind } from './sim';
 import type { GameState } from './state';
@@ -97,13 +96,15 @@ function crewAct(s: GameState, r: RegionId, o: BotOpts) {
     if (eqPending && trainCost(r, c.train[role]) > purse(s, r) - eqPending) break;
     if (purse(s, r) < trainCost(r, c.train[role]) || train(s, r, role)) break;
   }
-  if (o.manual !== false && c.at < topFight(s, r) && (c.at + 1 < c.frontier || c.farmed >= retryAfter(s, r))) advance(s, r, 1);
+  if (o.manual !== false && c.at < topFight(s, r) && c.farmed >= retryAfter(s, r)) advance(s, r, 1);
   if (o.active) {
     const f = FIGHTS[r][Math.min(c.at, FIGHTS[r].length - 1)];
-    const tells = enemyLineup(r, c.at).map((e) => e.def.tell);
-    const lead = tells[0];
-    setStance(s, r, lead === 'tanky' ? 'rush' : lead === 'hard' ? 'dig' : 'even');
-    if (f.boss && c.at === c.frontier && c.streak > 0 && c.overtime === 0 && c.cash >= overtimeCost(s, r) && overtimeCost(s, r) < (pending || Infinity) * 0.5) overtime(s, r);
+    const play = (globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env.SMW_PLAY ?? 'adapt';
+    // adapt: Rush while the crew is walking through fights; Dig In once it hits a wall or is running on fumes
+    const worn = Math.max(0, ...Object.values(c.wounds)) > 0.4;
+    const wall = c.at === c.frontier && (c.tries > 0 || f.boss);
+    setStance(s, r, play === 'adapt' ? (wall || worn ? 'dig' : 'rush') : (play as Stance));
+    if (f.boss && c.at === c.frontier && c.tries > 0 && c.overtime === 0 && c.cash >= overtimeCost(s, r) && overtimeCost(s, r) < (pending || Infinity) * 0.5) overtime(s, r);
   }
 }
 

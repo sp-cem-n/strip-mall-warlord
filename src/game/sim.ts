@@ -1,7 +1,7 @@
-import { BATTLERS, FALL_BACK_AFTER, FIGHTS, OFFLINE_CAP_SECONDS, RALLY_SECONDS, REFERRAL_WINS, REGIONS, REGROUP_SECONDS, SHOPS, SHOP_LIST, STEP, TIP_SECONDS, WALKIN_EVERY, WALKIN_NAMES, WALKIN_STAYS, type FightDef, type RegionId, type WalkInKind } from './defs';
+import { BATTLERS, FIGHTS, OFFLINE_CAP_SECONDS, RALLY_SECONDS, REFERRAL_WINS, REGIONS, SHOPS, SHOP_LIST, STEP, TIP_SECONDS, WALKIN_EVERY, WALKIN_NAMES, WALKIN_STAYS, type FightDef, type RegionId, type WalkInKind } from './defs';
 import { pick } from './rng';
 import { lossReason, startBattle, stepBattle } from './battle';
-import { asphaltMult, autoCovers, available, currencyOf, earn, fightOf, leased, log, rentPerSec, retryAfter, topFight } from './economy';
+import { asphaltMult, autoCovers, available, currencyOf, earn, fightOf, leased, log, rentPerSec, retryAfter, smokeBreak, topFight } from './economy';
 import type { Battle, GameState } from './state';
 import { boardBonus, buffOn, perk, tickRoom } from './room';
 import { fmt } from '../ui/format';
@@ -39,24 +39,25 @@ export function fightLabel(r: RegionId, idx: number) {
 function resolve(s: GameState, r: RegionId, b: Battle, result: 'win' | 'loss') {
   const c = s.crews[r];
   c.battle = null;
-  c.regroup = REGROUP_SECONDS;
   const ladder = FIGHTS[r];
+  const wasAt = c.at;
   if (result === 'loss') {
     c.losses++;
-    c.streak++;
-    if (c.streak >= FALL_BACK_AFTER && c.at > 0) {
+    if (b.fight === c.frontier) c.tries++;
+    smokeBreak(s, r);
+    // Lost fresh: this one is a wall, drop back a fight. Lost worn down: same fight after the smoke.
+    if (b.fresh && c.at > 0) {
       c.at--;
-      c.streak = 0;
       c.farmed = 0;
-      log(s, r, `Lost ${fightLabel(r, b.fight)}. Falling back to farm ${fightLabel(r, c.at)}. ${lossReason(b, c.stance)}`, 'loss');
-    } else {
-      if (c.at === 0) c.regroup = 5;
-      log(s, r, `Lost ${fightLabel(r, b.fight)}. ${lossReason(b, c.stance)}`, 'loss');
-    }
+      log(s, r, `Lost ${fightLabel(r, b.fight)}. Back to ${fightLabel(r, c.at)} after a smoke. ${lossReason(b, c.stance)}`, 'loss');
+    } else log(s, r, `Lost ${fightLabel(r, b.fight)}, worn down. Smoke break, then again.`, 'loss');
     return;
   }
   c.wins++;
-  c.streak = 0;
+  // damage carries over: whatever they took, they keep until the next smoke break
+  for (const u of b.crew) c.wounds[u.id] = 1 - u.hp / u.maxHp;
+  c.regroup = 0.4;
+  c.smoke = 0;
   const f = ladder[b.fight];
   const pay = payFor(s, r, f, b.field.payUp);
   earn(s, r, REGIONS[r].pay, pay);
@@ -64,17 +65,17 @@ function resolve(s: GameState, r: RegionId, b: Battle, result: 'win' | 'loss') {
   if (b.fight === c.frontier) {
     if (++c.kills < f.need) return log(s, r, `Won ${fightLabel(r, b.fight)}. ${c.kills}/${f.need} to move up.`, 'win');
     clearFight(s, r);
-    return;
+  } else {
+    // farming below the frontier: move up after a few wins
+    c.farmed++;
+    log(s, r, `Won ${fightLabel(r, b.fight)}. +${fmt(pay)} ${currencyOf(r)}.`, 'win');
+    const next = ladder[c.at + 1];
+    if (next && c.at + 1 <= topFight(s, r) && autoCovers(s, r, next.zone) && c.farmed >= retryAfter(s, r)) {
+      c.at++;
+      c.farmed = 0;
+    }
   }
-  // farming below the frontier
-  c.farmed++;
-  log(s, r, `Won ${fightLabel(r, b.fight)}. +${fmt(pay)} ${currencyOf(r)}.`, 'win');
-  const next = ladder[c.at + 1];
-  if (!next || c.at + 1 > topFight(s, r) || !autoCovers(s, r, next.zone)) return;
-  if (c.at + 1 < c.frontier || c.farmed >= retryAfter(s, r)) {
-    c.at++;
-    c.farmed = 0;
-  }
+  if (c.at !== wasAt) smokeBreak(s, r);
 }
 
 function clearFight(s: GameState, r: RegionId) {
@@ -85,6 +86,7 @@ function clearFight(s: GameState, r: RegionId) {
   c.frontier++;
   c.kills = 0;
   c.farmed = 0;
+  c.tries = 0;
   if (f.boss) {
     log(s, r, `CAPTURED ${lot.name.toUpperCase()}. ${lot.clearText}`, 'capture');
     log(s, r, `${BATTLERS[lot.boss.joins].name} joins the crew. ${BATTLERS[lot.boss.joins].does}`, 'capture');
