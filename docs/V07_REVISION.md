@@ -347,7 +347,7 @@ S42. **Arcade at full screen, one click away, plaza header kept (fixes 15, 22 wi
 | D29. Asphalt's stats and rent terms (Goodwill term kept) | S37 | Two of three compounding multipliers |
 | D30. S31's price change | S36 slot move | A number that doesn't do anything |
 
-### Current proposal (running list, Passes 1–3, merged and deduped)
+### Current proposal (running list after Pass 3; superseded by the Final proposal at the end)
 
 **Accepted (build these):**
 - **Combat and pacing:**
@@ -405,4 +405,132 @@ S42. **Arcade at full screen, one click away, plaza header kept (fixes 15, 22 wi
 
 ## Pass 4 (Toad)
 
-*(placeholder)*
+Evidence: a throwaway copy of `702ec59` in `/tmp` with env toggles; nothing from it is committed. Pass 3's variant D everywhere: fast climb deleted in `sim.ts:74` and `bot.ts:100`, retry after 6. Runs: `bun scripts/balance.ts 50 <seed> [--active] [--room] --pave=1`, seeds 1991 and 7. Rule for this pass: where a proposal conflicts with an answer Josh already gave, his answer is the default and the alternative becomes an open decision. Numbering continues: problems **55+**, solutions **S43+**, deletions **D31+**.
+
+### 1. Problems (including in Pass 3's solutions)
+
+**What checks out:** S32 (retry 6) reproduces exactly. Check-in Route 9 is 15h50 / 15h40, Galleria 36h52 / 37h23; active Route 9 12h34, Galleria 31h41; active + room Route 9 9h19, Galleria 21h28. S36 (Fun Zone at Outlet f1, $30K, machines gated on the lease) holds up: check-in leases it at **1h00** and active at **36:31**, and Big-Box isn't delayed.
+
+55. **S37 (asphalt boosts Goodwill per win only) stalls the Bypass.** 50h check-in, seed 1991:
+
+    | Asphalt | Paves | Galleria |
+    |---|---|---|
+    | As built (rent + stats + Goodwill, linear) | 15 (one every ~2h20) | 36h52 |
+    | Rent + Goodwill, no stats | 11 | 39h33 |
+    | All three at `asphalt^0.7` | 8 | **not reached** (Phase II at 37h21) |
+    | **S37: Goodwill only** | **3** (run 2 takes 14h50) | **not reached** (Phase II at 34h43) |
+
+    Fast reruns are how the Bypass gets its Equity, so any nerf to asphalt is also a Bypass retime. The loop is the one Josh asked for (t19u). The default is to keep it as built (decision 4).
+56. **D18 (Commons −4 fights) undoes S32's pacing.** With S32 + S35, check-in Route 9 goes from 15h54 to **11h42**, well outside 15h ±1. The dead stretch (Problem 5) can't be fixed by cutting fights while Route 9 is on target. Note that the Commons has **18** fights, not 14 (correcting Pass 1 and Pass 2).
+57. **S35's numbers don't clear S35's own guard.**
+    - Big-Box 1.45 works: frontier loss goes from 0% to 5%.
+    - Campus 7.3 brings its frontier from 66% only to **58%**, still above the 40% band.
+    - Exit 14 2.2 changes **nothing** (37/34 either way). The Exit 14 losses come from the Bypass crew's cold start at dawn plus check-in's 10-minute looks, not from the jump. Active + room has 26% there.
+    
+    As specced, the CI gate would block every deploy from the day it lands.
+58. **S38 [Spend it] reuses `crewAct`, which makes choices the player should make.** It buys patrols and slots, renovates the bot's lineup, and converts 50% of Goodwill to Equity (`bot.ts:65-100`). It also keeps `bot.ts` in the shipped bundle, which undoes S19's goal (today only `main.tsx`'s debug block pulls it in).
+59. **S39 adds a dev dependency, a test-build hook in `tip()`, and a render harness at four game states**, all to detect leaks after the fact. The leak-prone strings are a short list (about 15, mostly tooltips in `Pylon.tsx`, `BackOffice.tsx`, `Shops.tsx:156-157`, `GameRoom.tsx`).
+60. **The Security Office isn't a tank.** The Night Watchman is a control unit with a `mark` aura: enemies take +15% damage, and each renovation adds +4% (`battlers.ts:10`). Pass 2's S25 and Pass 3's S34 ("$0-rent tank", "+5% HP aura") are both wrong about it. Its renovations already have a job, so nothing new is needed when the patrol terms go.
+61. **The "Losing?" hint can never show.** `Shops.tsx:162` checks `c.streak >= 2`, but with `FALL_BACK_AFTER = 1` `streak` never passes 1. S22 has to move it to `tries` along with the boss intro and the bot's Overtime check (S41).
+62. **Active bosses still grind under D:** Galleria tries are **27** (active) and **28** (active + room), against 1–5 at check-in. S41 matters, and the guard should run the active row too, or it misses this.
+
+### 2. Better solutions
+
+S43. **Keep paving as built (fixes 55; replaces S37 and S26).** Josh asked for the loop, and the Bypass pace depends on it. If he wants fewer paves, the cheapest knob is the bot-free one: `asphaltGain` (one number). Re-time the Bypass in the same change.
+
+S44. **Fill the dead stretch with an unlock that already exists, not cut fights (fixes 5, 56; replaces D18).** Move Cyclone's unlock from the Lifestyle capture (~6h50) to Commons fight 9 (~11h). One condition in `room.ts`. Pinball stays at the Office capture.
+
+S45. **The guard is a flag, not a CI gate (fixes 57, 62; trims S19/S35).** `bun scripts/balance.ts --guard` checks frontier loss 10–40%, overall ≤ 12%, boss tries ≤ 6, and Route 9 14–16h, for check-in *and* active, on both seeds. It exits 1 on a miss. Run it in each milestone's "done when" step and before tagging, not on every deploy (copy fixes shouldn't wait ~90 s on balance). No new file. Campus needs one more number after S32 lands (7.3 isn't enough). Leave Exit 14 alone.
+
+S46. **[Spend it] = renovations only, from one shared function (fixes 58).** Move the bot's "renovate the cheapest useful shop" loop into `economy.ts` as `renovateCheapest(s, r)`. The away card's button and the bot both call it. No patrols, slots, training or conversion, so the player's choices stay theirs, and `bot.ts` leaves the bundle with S19. Net lines ≈ 0.
+
+S47. **A dawn copy table instead of a render harness (fixes 59; replaces S39).** Every string that may mention the Bypass, Equity or a second crew lives in one `DAWN` object in `content/bypass.ts`, and the UI reads them only from there. The test is a plain grep: the `LEAK` regex must not match any string literal in `src/` outside that file. That makes leaks hard to write instead of something caught afterwards, with no dependency and no `tip()` hook. The existing CUT regex scans `src/game/*.ts` too (Problem 38).
+
+S48. **Arcade $ limit = one number (narrows S33).** Under Josh's map (the default), slow the pusher shelf refill from 1 coin / 3 s to 1 / 60 s. A full shelf (10) pays well and an empty one doesn't break even, so $/hr has a ceiling with no new state. Darts reuses the same shelf code. Goodwill and Equity machines (whac, pinball, pool) get floats only if the S45 guard's active + room row still runs fast.
+
+### 3. Deletions
+
+| Cut | Replaced by | Removes |
+|---|---|---|
+| D31. S37 / S26 asphalt rewrites, S7 modifiers | S43 (as built) | A Bypass retime nobody asked for |
+| D32. D18 Commons cut | S44 | 4 fights' worth of tuning churn |
+| D33. CI wiring of the balance guard; a separate `balance-guard.ts` | S45 flag on the existing script | A CI step and a file |
+| D34. `crewAct` behind [Spend it]; `bot.ts` in the prod bundle | S46 | The bot's choices made in the player's name |
+| D35. S39's `preact-render-to-string`, `tip()` registry, 4-state harness | S47 | A dev dependency and ~30 lines |
+| D36. S33's per-machine floats (unless S45 says otherwise) | S48 | New `RoomState` fields |
+| D37. S35's Exit 14 change | — | A number that did nothing |
+| D38. `streak`, `FALL_BACK_AFTER`, the dead `streak >= 2` hint condition | S22 `tries` | 1 field, 1 knob, 3 readers |
+
+## Final proposal for Josh (after Passes 1–4)
+
+Defaults follow your earlier answers. Each conflicting alternative is an open decision below. Pass 3's running list above is superseded by this one.
+
+### In v0.7
+
+**Combat and pacing**
+- Delete the fast climb. The crew retries the next fight after **6** farmed wins, above or below the frontier. The Security Office no longer shortens retries. Measured: losses drop from 22–58% to ~10% overall; Route 9 lands at 15h50 check-in / 12h34 active / 9h19 active + room; Galleria at 36h52 / 31h41 / 21h28.
+- Your 3 → 10 wins ramp stays.
+- One `tries` counter replaces `streak` and `FALL_BACK_AFTER`. The boss "walks out" line shows once, on his first attempt. The "Losing?" hint and the bot's Overtime check read `tries`.
+- Wall fixes: Big-Box `LOT_JUMP` 1.259 → ~1.45, and Campus 8.59 → retuned until it's under 40% frontier loss. Exit 14 stays as is.
+- Balance guard: `balance.ts --guard`, covering check-in and active on 2 seeds, run before each tag.
+
+**Unlocks**
+- Fun Zone at Outlet fight 1 for $30K (check-in ~1h00, active ~37 min). Every arcade machine also requires the lease.
+- Cyclone unlocks at Commons fight 9 instead of the Lifestyle capture, to break up the long Commons stretch.
+
+**Auto-advance (your per-lot ask)**
+- One "Hire a patrol" button per lot on the lot track, priced at that lot's first lease (Parking Lot $50).
+- The Patrol tab, discounts and the Security Office's price and retry roles go. The Night Watchman stays a $0-rent control unit (enemies take +15% damage).
+
+**Offline**
+- The away card leads with what came in, then **[Spend it]**: renovations only, through a shared `renovateCheapest()`.
+
+**Arcade and bar (your reward map)**
+- The coin pusher still nets $, skee pays tickets, the claw gives buffs. The pusher shelf refills 1 coin per 60 s (it's 3 s now), which caps $/hr. Darts uses the same shelf.
+- The Cyclone jackpot pays tickets before and after dawn (no Equity branch).
+- Video poker: four-color deck (♦ blue, ♣ green) with a hollow diamond. The receipt names the real hand.
+- Cabinet input: a separate coin button, a READY beat, and pinball flipper labels. One SFX table. One animation loop for the room.
+- Arcade stays its own full screen (your ask). Clicking the Fun Zone shop card opens it, and the plaza header stays visible.
+
+**Receipt and copy**
+- One live win line. The history keeps captures, leases, unlocks, toys and the away summary.
+- Rewrite the explainer tooltips and the `src/game` log lines ("moves up on its own", "press ▸ when the crew is ready").
+- Leak-proofing: all post-dawn strings move to one `DAWN` table, and a grep test fails on any Bypass, Equity or second-crew word anywhere else.
+
+**Code**
+- One region-shaped room config (the bar and the arcade use one code path).
+- `knobs.ts` becomes plain constants, and the debug params go in a dev-only `debug.ts`.
+- Delete the no-op `bought()`.
+
+**Release**
+- Versions page lists the tag plus date, and "Latest" shows `main @ sha` (no commit subjects, so no v0.5 spoiler).
+- Cut "Then comes the Bypass." from the README.
+- `package.json` takes the tag's version.
+- Delete `screenshots/*.png` and `v2`–`v5`.
+- The V06 §7 log note says the log is flat with a per-region cap.
+- A v0.6 release note about where the screenshots are; deploy caches archived tags.
+
+### Cut (not building)
+- Flat 3 wins.
+- Fall back after 2 losses, the boss pity ramp, the offline "hold at 70%" tracker.
+- The generated power curve.
+- The security budget slider.
+- The hourly room cap and the 3× Attract rate.
+- The live fight strip, marquee, arcade wall, back-bar and Ledger strip.
+- The 3-engine rewrite of the mini-games and the headless-engine bot.
+- The 2× card redraw.
+- Playwright and render-to-string leak tests.
+- The Fun Zone price-only move.
+- Cutting 4 Commons fights.
+- Per-pave lot modifiers and asphalt rewrites.
+- The CI balance gate.
+- `streak`, `FALL_BACK_AFTER`, `bought()`, the Patrol tab and patrol discounts.
+
+### Open decisions for Josh
+1. **Auto-advance:** a patrol per lot on the lot track (default, your ask) / one Security Office lease per region.
+2. **Arcade rewards:** your map with a slower pusher refill as the $ cap (default) / tickets-only arcade and buffs-only bar.
+3. **Arcade screen:** full screen, one click from the Fun Zone card (default, your ask) / inside the right column.
+4. **Paving:** keep as built (default; the Bypass pace depends on it) / Goodwill-only asphalt (no Galleria within 50h) / diminishing `^0.7` (no Galleria within 50h).
+5. **Shuffleboard** (ours, not yours): cut it and sell the 9th Bypass slot for Equity / keep it.
+6. **Prize-counter fighter slots:** keep for tickets (as built) / move to Goodwill.
+7. **Offline:** away card plus [Spend it] (renovations only) / away card only.
