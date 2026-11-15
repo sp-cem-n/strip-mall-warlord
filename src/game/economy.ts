@@ -105,7 +105,12 @@ export const trainCost = (r: RegionId, level: number) => Math.round(TRAIN_BASE[r
 export const overtimeCost = (s: GameState, r: RegionId) => Math.max(10, Math.round(rentPerSec(s, r) * OVERTIME_SECONDS * (r === 0 ? 1 - 0.25 * perk(s, 'otCheap') : 1)));
 export const overtimeFights = (s: GameState, r: RegionId) => OVERTIME_FIGHTS + (r === 0 ? perk(s, 'otLong') : 0);
 
-export function log(s: GameState, r: RegionId, text: string, tone: LogLine['tone'] = 'info') {
+export function log(s: GameState, r: RegionId, text: string, tone: LogLine['tone'] = 'info', live = false) {
+  if (live) {
+    const last = [...s.log].reverse().find((l) => l.r === r);
+    if (last?.live) return void Object.assign(last, { t: s.time, text, tone, n: undefined });
+    return void s.log.push({ t: s.time, r, text, tone, live });
+  }
   for (let i = s.log.length - 1; i >= Math.max(0, s.log.length - 3); i--) {
     const l = s.log[i];
     if (l.r === r && l.text === text) {

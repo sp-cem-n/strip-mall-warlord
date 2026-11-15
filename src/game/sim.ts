@@ -50,7 +50,7 @@ function resolve(s: GameState, r: RegionId, b: Battle, result: 'win' | 'loss') {
       c.at--;
       c.farmed = 0;
       log(s, r, `Lost ${fightLabel(r, b.fight)}. Back to ${fightLabel(r, c.at)} after a smoke. ${lossReason(b)}`, 'loss');
-    } else log(s, r, `Lost ${fightLabel(r, b.fight)}, worn down. Smoke break, then again.`, 'loss');
+    } else log(s, r, `Lost ${fightLabel(r, b.fight)}, worn down. Smoke break, then again.`, 'loss', true);
     return;
   }
   c.wins++;
@@ -63,12 +63,12 @@ function resolve(s: GameState, r: RegionId, b: Battle, result: 'win' | 'loss') {
   earn(s, r, REGIONS[r].pay, pay);
   s.stats[REGIONS[r].pay as 'goodwill' | 'equity'] += pay;
   if (b.fight === c.frontier) {
-    if (++c.kills < f.need) return log(s, r, `Won ${fightLabel(r, b.fight)}. ${c.kills}/${f.need} to move up.`, 'win');
+    if (++c.kills < f.need) return log(s, r, `Won ${fightLabel(r, b.fight)}. ${c.kills}/${f.need} to move up.`, 'win', true);
     clearFight(s, r);
   } else {
     // farming below the frontier: move up after a few wins
     c.farmed++;
-    log(s, r, `Won ${fightLabel(r, b.fight)}. +${fmt(pay)} ${currencyOf(r)}.`, 'win');
+    log(s, r, `Won ${fightLabel(r, b.fight)}. +${fmt(pay)} ${currencyOf(r)}.`, 'win', true);
     const next = ladder[c.at + 1];
     if (next && c.at + 1 <= topFight(s, r) && autoCovers(s, r, next.zone) && c.farmed >= RETRY_AFTER) {
       c.at++;

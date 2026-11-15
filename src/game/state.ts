@@ -54,6 +54,7 @@ export interface LogLine {
   text: string;
   tone: 'win' | 'loss' | 'info' | 'capture';
   n?: number;
+  live?: boolean; // the running fight line: the next one replaces it
 }
 
 export type Track = Record<Role, number>;
