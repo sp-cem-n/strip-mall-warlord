@@ -34,6 +34,7 @@ export const app = {
   refresh: () => {},
   testPanel: null as null | (() => JSX.Element | null), // ?test=1 only, loaded on demand
   roster: false,
+  savePop: false, // the floppy button's lease-code popup
 };
 
 export function toast(msg: string) {

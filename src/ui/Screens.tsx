@@ -84,6 +84,7 @@ export function SaveBox() {
       app.hasSave = true;
       app.oldSave = false;
       saveGame(got);
+      app.savePop = false;
       toast('Lease loaded.');
       app.refresh();
     });
@@ -92,10 +93,25 @@ export function SaveBox() {
     <div class="save-box">
       <b>Lease code</b>
       <span class="dim">Copy a code out, or paste one in.</span>
-      <textarea value={code} placeholder="SMW1." onInput={(e) => setCode((e.target as HTMLTextAreaElement).value)} />
+      <textarea value={code} spellcheck={false} onFocus={(e) => (e.target as HTMLTextAreaElement).select()} placeholder="SMW1." onInput={(e) => setCode((e.target as HTMLTextAreaElement).value)} />
       <div class="tp-row">
         <button class="btn small" onClick={copyOut}>Copy lease code</button>
         <button class="btn small" disabled={!code.trim()} onClick={load}>Load lease</button>
+      </div>
+    </div>
+  );
+}
+
+// The floppy in the top bar: the same lease code box, as a popup over the game.
+export function SavePopup() {
+  if (!app.savePop) return null;
+  const close = () => ((app.savePop = false), app.refresh());
+  return (
+    <div class="roster-back" onClick={close}>
+      <div class="save-pop panel-brick" onClick={(e) => e.stopPropagation()}>
+        <button class="roster-x" onClick={close} aria-label="Close">✕</button>
+        <SaveBox />
+        <span class="dim">Select the code to copy it yourself, or use the button. Esc closes.</span>
       </div>
     </div>
   );

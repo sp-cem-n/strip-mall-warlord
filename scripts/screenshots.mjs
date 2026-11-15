@@ -41,7 +41,9 @@ const shots = [
   ['29-roster-full', `${g}&advance=5400&active=1&screen=game`, [['click', 'canvas.field'], ['wait', 300], ['click', '.fc.bench'], ['wait', 200]]],
   ['30-sign-letters-out', `${g}&advance=5400&screen=game&lights=still&signout=18`, [], '.roadside'],
   ['31-funzone-zone-off', `${room}&lights=still&fzoff=zone`, [], '.roadside'],
+  ['32-save-popup', `${g}&advance=900&screen=game`, [['click', '.boot-door.save'], ['wait', 200]]],
 ];
+const only = process.env.ONLY ? new RegExp(process.env.ONLY) : null;
 
 const browser = await chromium.launch();
 let errors = 0;
@@ -51,7 +53,7 @@ for (const [w, h] of sizes) {
   const page = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
   page.on('pageerror', (e) => (errors++, console.error('pageerror', e.message)));
   page.on('console', (m) => m.type() === 'error' && (errors++, console.error('console', m.text())));
-  for (const [file, query, steps = [], clip] of shots) {
+  for (const [file, query, steps = [], clip] of shots.filter(([f]) => !only || only.test(f))) {
     await page.goto(base + query);
     await page.waitForSelector('.screen, .root');
     await page.waitForTimeout(500);

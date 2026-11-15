@@ -147,8 +147,8 @@ export function Pylon({ room = false }: { room?: boolean }) {
           </div>
         </div>
         <div class="led-buttons">
-          <button class="boot-door" onClick={() => ((app.screen = 'boot'), (app.tip = null), app.refresh())} {...tip('Title screen', 'Back to the lease and the night sky.')} aria-label="Title screen">
-            ✕
+          <button class="boot-door save" onClick={() => ((app.savePop = true), (app.tip = null), app.refresh())} {...tip('Lease code', 'Copy your save out, or load one in.')} aria-label="Save code">
+            <Floppy />
           </button>
           <Speaker />
           <button class="help" onClick={() => ((app.howFrom = room ? 'room' : 'game'), (app.screen = 'howto'), (app.tip = null), app.refresh())} {...tip('How to play')}>
@@ -158,6 +158,20 @@ export function Pylon({ room = false }: { room?: boolean }) {
       </div>
       {room && <div class="room-lip" aria-hidden="true" />}
     </header>
+  );
+}
+
+// A 3.5" floppy, 14x14 pixels.
+function Floppy() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 14 14" shape-rendering="crispEdges" aria-hidden="true">
+      <path d="M1 1h11l1 1v11H1z" fill="#1a1420" />
+      <path d="M2 2h10v10H2z" fill="#4a6aa8" />
+      <path d="M4 2h6v4H4z" fill="#cfc6b0" />
+      <path d="M8 3h1v2H8z" fill="#1a1420" />
+      <path d="M3 8h8v4H3z" fill="#f3e6c8" />
+      <path d="M4 9h6v1H4zM4 11h4v1H4z" fill="#8f8a86" />
+    </svg>
   );
 }
 

@@ -5,7 +5,7 @@ import { saveGame } from '../game/save';
 import { Lot } from './Lot';
 import { Pylon } from './Pylon';
 import { closeRoster, RosterPopup } from './Roster';
-import { AskDialog, Boot, HowTo, Story, TipCard, WinCard } from './Screens';
+import { AskDialog, Boot, HowTo, SavePopup, Story, TipCard, WinCard } from './Screens';
 import { Shops } from './Shops';
 import { BackOffice } from './BackOffice';
 import { GameRoom } from './GameRoom';
@@ -42,6 +42,7 @@ export function App() {
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLInputElement) return;
       if (e.key === 'Escape') {
+        if (app.savePop) return (e.preventDefault(), (app.savePop = false), app.refresh());
         if (app.roster) return (e.preventDefault(), closeRoster());
       }
       if ((e.key === 'r' || e.key === 'R') && (app.screen === 'game' || app.roster)) {
@@ -80,6 +81,7 @@ export function App() {
       {screen}
       {app.toast && performance.now() < app.toastUntil && <div class="toast">{app.toast}</div>}
       <RosterPopup />
+      <SavePopup />
       <WinCard />
       <AskDialog />
       <TipCard />

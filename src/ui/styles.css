@@ -421,6 +421,11 @@ button { font: inherit; }
 .plaza-title .landmarks img { display: block; width: 40px; height: 48px; cursor: default; image-rendering: pixelated; }
 .plaza-title .landmarks img:hover { filter: brightness(1.2); }
 .boot-door { font: inherit; font-size: 20px; width: 40px; height: 34px; padding: 0; background: none; color: var(--paper); border: 4px solid; border-image: var(--btn) 2 fill / 4px; cursor: pointer; line-height: 1; }
+.boot-door svg { display: block; margin: auto; }
+.save-pop { align-self: center; height: auto; position: relative; display: flex; flex-direction: column; gap: 8px; width: min(560px, 100%); padding: 16px; }
+.save-pop .roster-x { position: absolute; top: 8px; right: 8px; }
+.save-pop .save-box { flex: 0 0 auto; }
+.save-pop textarea { min-height: 96px; user-select: text; -webkit-user-select: text; }
 .boot-door:hover { border-image-source: var(--btn-hot); }
 .plaza-buy { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-top: 8px; }
 .plaza-buy .item { display: flex; flex-direction: column; justify-content: space-between; gap: 8px; padding: 8px; background: var(--ink); border: 2px solid var(--concrete); min-height: 86px; min-width: 0; }
