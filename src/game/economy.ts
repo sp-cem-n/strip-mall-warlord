@@ -1,11 +1,11 @@
 import { enemyLineup, statsOf } from './battle';
-import { ASPHALT_BONUS, CURRENCY_NAME, type Currency, BATTLERS, FIGHTS, fightIndex, GOODWILL_PER_EQUITY, MAX_SLOTS, OVERTIME_FIGHTS, OVERTIME_SECONDS, PATROL_DISCOUNT, PATROL_DISCOUNT_CAP, REGIONS, RENO_GROWTH, RENT_GROWTH, RETRY_AFTER, ROLES, SMOKE_BREAK_SECONDS, SHOPS, SLOT_PRICES, START_SLOTS, SHOP_LIST, START_CASH, TRAIN_BASE, TRAIN_GROWTH, type RegionId, type Role, type ShopDef, type Stance, LOG_KEEP } from './defs';
+import { ASPHALT_BONUS, CURRENCY_NAME, type Currency, BATTLERS, FIGHTS, fightIndex, GOODWILL_PER_EQUITY, MAX_SLOTS, OVERTIME_FIGHTS, OVERTIME_SECONDS, PATROL_DISCOUNT, PATROL_DISCOUNT_CAP, REGIONS, RENO_GROWTH, RENT_GROWTH, RETRY_AFTER, ROLES, SMOKE_BREAK_SECONDS, SHOPS, SLOT_PRICES, START_SLOTS, SHOP_LIST, START_CASH, TRAIN_BASE, TRAIN_GROWTH, type RegionId, type Role, type ShopDef, LOG_KEEP } from './defs';
 import type { Crew, GameState, LogLine, Track } from './state';
 import { newRoom, perk } from './room';
 
 export const SAVE_VERSION = 5;
 const zeroTrack = (): Track => ({ tank: 0, damage: 0, heal: 0, control: 0, buffer: 0 });
-export const newCrew = (r: RegionId): Crew => ({ cash: START_CASH, shops: { [REGIONS[r].start]: 1 }, train: zeroTrack(), frontier: 0, at: 0, kills: 0, farmed: 0, tries: 0, wounds: {}, battle: null, regroup: 2, smoke: 0, stance: 'even', overtime: 0, lineup: null, contracts: [], slotBuys: 0, rally: 0, wins: 0, losses: 0 });
+export const newCrew = (r: RegionId): Crew => ({ cash: START_CASH, shops: { [REGIONS[r].start]: 1 }, train: zeroTrack(), frontier: 0, at: 0, kills: 0, farmed: 0, tries: 0, wounds: {}, battle: null, regroup: 2, smoke: 0, overtime: 0, lineup: null, contracts: [], slotBuys: 0, rally: 0, wins: 0, losses: 0 });
 
 export function newGame(seed = Date.now() % 2147483647): GameState {
   return {
@@ -257,10 +257,6 @@ export function advance(s: GameState, r: RegionId, dir: 1 | -1): string | null {
   c.battle = null;
   smokeBreak(s, r);
   return null;
-}
-
-export function setStance(s: GameState, r: RegionId, stance: Stance) {
-  s.crews[r].stance = stance;
 }
 
 // Overtime: pay two minutes of this crew's rent; the next 3 fights get +25% HP and damage.

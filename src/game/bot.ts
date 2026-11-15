@@ -1,6 +1,6 @@
 // A scripted player for balance runs and the debug `advance` param. Plays like someone who checks in now and then.
-import { FIGHTS, ROLES, SHOPS, REGIONS, type RegionId, type Stance } from './defs';
-import { advance, bal, buyPatrol, buySlot, convert, curb, forLease, leased, lease, lineupOf, overtime, overtimeCost, patrolBlock, patrolPrice, pave, purse, regionDone, renovate, renovateCost, rentPerSec, retryAfter, setStance, slotPrice, topFight, train, trainCost, view } from './economy';
+import { FIGHTS, ROLES, SHOPS, REGIONS, type RegionId } from './defs';
+import { advance, bal, buyPatrol, buySlot, convert, curb, forLease, leased, lease, lineupOf, overtime, overtimeCost, patrolBlock, patrolPrice, pave, purse, regionDone, renovate, renovateCost, rentPerSec, retryAfter, slotPrice, topFight, train, trainCost, view } from './economy';
 import { collectFind } from './sim';
 import type { GameState } from './state';
 import { BAR_BUFFS, MACHINE, PERKS, PINBALL_TOP, SHUFFLE_TOP, buffOn, buyPerk, endPlay, perkPrice, pokerQ, postScore, postShuffle, startPlay, type MachineId, type PerkId } from './room';
@@ -99,11 +99,6 @@ function crewAct(s: GameState, r: RegionId, o: BotOpts) {
   if (o.manual !== false && c.at < topFight(s, r) && c.farmed >= retryAfter(s, r)) advance(s, r, 1);
   if (o.active) {
     const f = FIGHTS[r][Math.min(c.at, FIGHTS[r].length - 1)];
-    const play = (globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env.SMW_PLAY ?? 'adapt';
-    // adapt: Rush while the crew is walking through fights; Dig In once it hits a wall or is running on fumes
-    const worn = Math.max(0, ...Object.values(c.wounds)) > 0.4;
-    const wall = c.at === c.frontier && (c.tries > 0 || f.boss);
-    setStance(s, r, play === 'adapt' ? (wall || worn ? 'dig' : 'rush') : (play as Stance));
     if (f.boss && c.at === c.frontier && c.tries > 0 && c.overtime === 0 && c.cash >= overtimeCost(s, r) && overtimeCost(s, r) < (pending || Infinity) * 0.5) overtime(s, r);
   }
 }

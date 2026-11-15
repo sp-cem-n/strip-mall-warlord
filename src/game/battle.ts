@@ -1,4 +1,4 @@
-import { AURA_STEP, BATTLERS, WALK_IN_SECONDS, BOSS_STRENGTH, HARD_FOCUS, ENEMY_DMG, FIGHTS, FIGHT_TIMEOUT, FRONT_SHARE, MAIN_GROWTH, OVERTIME_BOOST, RALLY_BOOST, REGIONS, ROLES, SIDE_HP_GROWTH, STANCE, TANK_HP_GROWTH, TELL, TRAIN_STEP, WEAK_BONUS, type BattlerDef, type EnemyDef, type Fx, type RegionId, type Role } from './defs';
+import { AURA_STEP, BATTLERS, WALK_IN_SECONDS, BOSS_STRENGTH, HARD_FOCUS, ENEMY_DMG, FIGHTS, FIGHT_TIMEOUT, FRONT_SHARE, MAIN_GROWTH, OVERTIME_BOOST, RALLY_BOOST, REGIONS, ROLES, SIDE_HP_GROWTH, TANK_HP_GROWTH, TELL, TRAIN_STEP, WEAK_BONUS, type BattlerDef, type EnemyDef, type Fx, type RegionId, type Role } from './defs';
 import { asphaltMult, curb, fighters, lineupOf, log } from './economy';
 import { rand } from './rng';
 import { barDmg, barHp, buffOn } from './room';
@@ -89,7 +89,7 @@ export function startBattle(s: GameState, r: RegionId): Battle | null {
     const d = BATTLERS[id];
     const st = statsOf(s, r, id, lv);
     const toy = r === 0 ? (k: 'bat' | 'duck') => (buffOn(s, k) ? 1.3 : 1) : (k: 'bat' | 'duck') => (k === 'bat' ? barDmg(s) : barHp(s));
-    let hp = ot * toy('duck'), dmg = STANCE[c.stance].dmg * ot * toy('bat'), haste = 1, dr = d.fx?.k === 'dr' ? d.fx.v : 0;
+    let hp = ot * toy('duck'), dmg = ot * toy('bat'), haste = 1, dr = d.fx?.k === 'dr' ? d.fx.v : 0;
     for (const { fx } of aur) {
       if (fx.k === 'hpUp' && targets(fx.to, d)) hp += fx.v;
       if (fx.k === 'dmgUp' && targets(fx.to, d)) dmg += fx.v;
@@ -112,7 +112,7 @@ export function startBattle(s: GameState, r: RegionId): Battle | null {
   // the boss's entrance: once, on the first try
   if (f.boss && fight === c.frontier && c.tries === 0) log(s, r, `${REGIONS[r].lots[f.zone].boss.name.replace(/^(?!The )/, 'The ')} walks out. ${REGIONS[r].lots[f.zone].boss.title}`);
   const fresh = crew.every((u) => u.hp >= u.maxHp);
-  return (c.battle = { fight, t: 0, crew, enemies, field, revived: false, overtime, fresh, taken: STANCE[c.stance].taken, enter: WALK_IN_SECONDS });
+  return (c.battle = { fight, t: 0, crew, enemies, field, revived: false, overtime, fresh, enter: WALK_IN_SECONDS });
 }
 
 const alive = (u: Unit) => u.hp > 0;
@@ -123,7 +123,7 @@ function hit(s: GameState, rally: boolean, b: Battle, from: Unit, target: Unit, 
     const weak = target.weak === from.id;
     dmg *= (weak ? 1 + WEAK_BONUS : 1) * (1 + b.field.mark) * (rally ? 1 + RALLY_BOOST : 1);
     target.lastWeak = weak;
-  } else dmg *= (1 - target.dr) * b.taken;
+  } else dmg *= 1 - target.dr;
   target.hp = Math.max(0, target.hp - dmg);
   target.flash = 0.35;
   target.lastDmg = dmg;
@@ -196,14 +196,11 @@ export function stepBattle(s: GameState, b: Battle, dt: number, rally = false): 
 }
 
 // Why did we lose? Point at the fix.
-export function lossReason(b: Battle, stance: keyof typeof STANCE): string {
+export function lossReason(b: Battle): string {
   const have = new Set(b.crew.map((u) => u.id));
   const roles = new Set(b.crew.map((u) => u.role));
   const standing = b.enemies.filter(alive);
-  const tanky = standing.some((e) => e.tell === 'tanky');
-  if (b.t >= FIGHT_TIMEOUT) return stance !== 'rush' && tanky ? 'Ran out the clock on a tank. Try the Rush play.' : 'Ran out the clock. Needs more damage.';
-  const hard = b.enemies.some((e) => e.tell === 'hard');
-  if (stance !== 'dig' && hard) return 'They hit hard. Try the Dig In play.';
+  if (b.t >= FIGHT_TIMEOUT) return 'Ran out the clock. Needs more damage.';
   const counter = standing.find((e) => e.weak && !have.has(e.weak));
   if (counter && counter.weak) return `Outmatched. A ${BATTLERS[counter.weak].name} would hit the ${counter.name} 25% harder.`;
   if (!roles.has('heal') && b.t > 12) return 'Long fight, nobody patching people up.';

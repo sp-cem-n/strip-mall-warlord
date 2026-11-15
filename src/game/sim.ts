@@ -49,7 +49,7 @@ function resolve(s: GameState, r: RegionId, b: Battle, result: 'win' | 'loss') {
     if (b.fresh && c.at > 0) {
       c.at--;
       c.farmed = 0;
-      log(s, r, `Lost ${fightLabel(r, b.fight)}. Back to ${fightLabel(r, c.at)} after a smoke. ${lossReason(b, c.stance)}`, 'loss');
+      log(s, r, `Lost ${fightLabel(r, b.fight)}. Back to ${fightLabel(r, c.at)} after a smoke. ${lossReason(b)}`, 'loss');
     } else log(s, r, `Lost ${fightLabel(r, b.fight)}, worn down. Smoke break, then again.`, 'loss');
     return;
   }

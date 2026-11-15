@@ -36,7 +36,8 @@ export function loadGame(): GameState | 'old' | null {
         c.wounds ??= {};
         c.smoke ??= 0;
         delete (c as { streak?: number }).streak;
-        if (c.battle && c.battle.taken === undefined) c.battle = null;
+        delete (c as { stance?: string }).stance;
+        if (c.battle && c.battle.enter === undefined) c.battle = null;
       }
       return s;
     }

@@ -1,4 +1,4 @@
-import type { RegionId, Role, Stance, Tell, WalkInKind } from './defs';
+import type { RegionId, Role, Tell, WalkInKind } from './defs';
 import type { RoomState } from './room';
 
 export interface Unit {
@@ -45,7 +45,6 @@ export interface Battle {
   revived: boolean;
   overtime: boolean;
   fresh: boolean; // the crew started at full HP
-  taken: number; // damage the crew takes (the play)
   enter: number; // seconds left of the enemies walking in
 }
 
@@ -73,7 +72,6 @@ export interface Crew {
   battle: Battle | null;
   regroup: number; // seconds until the next fight
   smoke: number; // length of the current smoke break (0 = the next group is just walking in)
-  stance: Stance;
   overtime: number; // fights left
   lineup: string[] | null; // fighters you picked for the lot; null = the auto pick
   contracts: number[]; // lots with a Patrol contract (auto-advance)

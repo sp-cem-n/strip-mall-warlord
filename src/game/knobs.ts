@@ -34,9 +34,6 @@ export const GOODWILL_PER_EQUITY = env('SMW_R', 10); // conversion: Goodwill buy
 export const ASPHALT_BONUS = env('SMW_A', 0.02); // per asphalt: Route 9 rent, stats and Goodwill
 export const PATROL_DISCOUNT = 0.05; // per Security Office level, off every Patrol contract
 export const PATROL_DISCOUNT_CAP = 0.5;
-// The play: Rush hits harder and takes more; Dig In hits softer and takes less. Damage carries over between fights, so it decides how long a streak lasts.
-export const STANCE = { even: { taken: 1, dmg: 1 }, rush: { taken: 1.25, dmg: env('SMW_RD', 1.3) }, dig: { taken: 0.75, dmg: env('SMW_DD', 0.8) } } as const;
-export type Stance = keyof typeof STANCE;
 export const TELL = { tanky: { hp: 1.4, dmg: 0.8 }, hard: { hp: 0.8, dmg: 1.3 } } as const;
 export const OVERTIME_SECONDS = 120; // costs this many seconds of the region's rent
 export const OVERTIME_FIGHTS = 3;

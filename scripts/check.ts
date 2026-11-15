@@ -1,7 +1,7 @@
 // Small invariant checks. Run: bun scripts/check.ts
 import { BATTLERS, FIGHTS, GOODWILL_PER_EQUITY, MAX_SLOTS, OFFLINE_CAP_SECONDS, REGIONS, RETRY_AFTER, SHOPS, SMOKE_BREAK_SECONDS, SHOP_LIST, START_SLOTS, STEP, WEAK_BONUS } from '../src/game/defs';
-import { auras, enemyLineup, lossReason, startBattle, statsOf, stepBattle } from '../src/game/battle';
-import { advance, asphaltGain, autoCovers, buyPatrol, buySlot, convert, curb, forLease, lease, lineupOf, newGame, overtime, patrolBlock, patrolPrice, pave, renovate, renovateCost, retryAfter, roster, setStance, slotsOf, tierOf, toggleField, train, trainCost, view } from '../src/game/economy';
+import { auras, enemyLineup, startBattle, statsOf, stepBattle } from '../src/game/battle';
+import { advance, asphaltGain, autoCovers, buyPatrol, buySlot, convert, curb, forLease, lease, lineupOf, newGame, overtime, patrolBlock, patrolPrice, pave, renovate, renovateCost, retryAfter, roster, slotsOf, tierOf, toggleField, train, trainCost, view } from '../src/game/economy';
 import { loadGame, old, saveGame } from '../src/game/save';
 import { collectFind, simulateAway, step } from '../src/game/sim';
 import { CREW_LOOKS, ENEMY_LOOKS } from '../src/art/people';
@@ -122,13 +122,8 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   check(`weakness is a small bonus (+${WEAK_BONUS * 100}%)`, WEAK_BONUS <= 0.25);
   const lu = enemyLineup(0, 0);
   check('fight 1 is one enemy; the first boss brings two', lu.length === 1 && enemyLineup(0, 8).length === 3 && enemyLineup(0, 8)[0].boss);
-  setStance(t, 0, 'rush');
-  const rush = startBattle(t, 0)!;
-  check('Rush: more damage dealt, more taken; Dig In: less of both', rush.crew[0].dmg > b.crew[0].dmg && rush.taken > b.taken && (setStance(t, 0, 'dig'), startBattle(t, 0)!.taken < b.taken));
-  setStance(t, 0, 'even');
   t.crews[0].cash = 1e12;
   check('overtime: costs rent, boosts the next 3 fights', overtime(t, 0) === null && t.crews[0].overtime === 3 && startBattle(t, 0)!.overtime && (t.crews[0].overtime as number) === 2);
-  check('loss reason points at the play for hard hitters', lossReason({ ...b, t: 5, enemies: [{ ...b.enemies[0], hp: 1, tell: 'hard' }] }, 'even').includes('Dig In'));
 }
 
 // ending, the Bypass, paving
