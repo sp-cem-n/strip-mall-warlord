@@ -9,8 +9,8 @@ export const ROUTE9_SHOPS: ShopDef[] = [
   S('vape', 'Vape Shop', 'hustler', 0, 0, 6, 600, 6, 'Open 24 hours, give or take.', 'cash', 'Reseller'),
   S('security', 'Security Office', 'watchman', 0, 0, BOSS, 2000, 0, "It doesn't make money. It makes sure.", 'referral', 'Retired cop'),
   S('video', 'Video Rental', 'latefee', 0, 1, 3, 5000, 20, 'Be kind. Rewind.', 'cash', 'Returning a tape'),
-  S('funzone', 'Fun Zone Arcade', 'tokenkid', 0, 1, 4, 8000, 25, 'Tokens, tickets, and a claw that has never once let go.', 'cash', 'Needs change for a five'),
   S('payday', 'Payday Loans', 'lawyer', 0, 1, BOSS, 15000, 45, 'Cash today. Interest forever.', 'cash', 'Borrower'),
+  S('funzone', 'Fun Zone Arcade', 'tokenkid', 0, 2, 0, 30000, 60, 'Tokens, tickets, and a claw that has never once let go.', 'cash', 'Needs change for a five'),
   S('nails', 'Nail Salon', 'nailtech', 0, 2, 2, 40000, 90, 'Walk-ins welcome. Opinions included.', 'referral', 'Regular'),
   S('tanning', 'Tanning Salon', 'tanning', 0, 2, 6, 90000, 160, 'A healthy glow. Medically, a glow.', 'rally', 'Bronzed guy'),
   S('karaoke', 'Karaoke Bar', 'karaoke', 0, 2, 10, 200000, 300, 'Two-drink minimum. One-song maximum.', 'rally', 'Wants the mic'),
@@ -33,7 +33,6 @@ export const ROUTE9: RegionDef = {
   trainIn: 'goodwill',
   chrome: { plaza: 'Pinewood Plaza', mgmt: 'PINEWOOD PLAZA MGMT', sub: 'Pinewood Plaza · Rt. 9 · Fall 1997' },
   start: 'pawn',
-  security: 'security',
   ending: 'The rendering is now a parking lot. Yours.',
   lots: [
     { id: 'lot', name: 'The Parking Lot', short: 'Lot', blurb: 'Faded lines, one working lamp post, a shopping cart nobody owns.', fights: 8, patrol: 50,

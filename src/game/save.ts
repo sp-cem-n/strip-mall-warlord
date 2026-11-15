@@ -30,6 +30,7 @@ export function loadGame(): GameState | 'old' | null {
     const s = JSON.parse(raw) as GameState;
     if (s?.version === SAVE_VERSION && Array.isArray(s.crews)) {
       s.room = { ...newRoom(), ...s.room };
+      if (typeof s.room.shelf === 'number') s.room.shelf = [s.room.shelf, 10];
       for (const c of s.crews) {
         // v0.6 -> v0.7: damage carries over, smoke breaks, one tries counter
         c.tries ??= 0;

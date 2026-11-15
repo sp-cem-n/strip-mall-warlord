@@ -19,13 +19,13 @@ export interface RoomState {
   board: number; // pinball house scores beaten (0-5)
   best: number; // your best pinball score
   jackpot: number; // Cyclone, progressive
-  shelf: number; // coin pusher pile, 0-10
+  shelf: [number, number]; // what's left to win: the coin pusher's pile, and the darts pot. 0-10, one back a minute
   buffs: Partial<Record<BuffKind, number>>; // seconds left
   plays: number;
   shuffle: number; // shuffleboard house scores beaten (0-5)
   shuffleBest: number;
 }
-export const newRoom = (): RoomState => ({ unlocked: [], attract: {}, clock: {}, cool: {}, perks: {}, board: 0, best: 0, jackpot: 500, shelf: 10, buffs: {}, plays: 0, shuffle: 0, shuffleBest: 0 });
+export const newRoom = (): RoomState => ({ unlocked: [], attract: {}, clock: {}, cool: {}, perks: {}, board: 0, best: 0, jackpot: 500, shelf: [10, 10], buffs: {}, plays: 0, shuffle: 0, shuffleBest: 0 });
 
 // ---- rates every payout is priced in, so nothing goes stale ----
 const rent = (s: GameState, r: RegionId) => Math.max(1, rentPerSec(s, r));
@@ -67,29 +67,32 @@ export interface MachineDef {
   cool: number; // seconds out of service after a big win
 }
 
+// every machine needs its room leased first
 const funZone = (s: GameState) => !!s.crews[0].shops.funzone;
 const offRamp = (s: GameState) => !!s.crews[1].shops.offramp;
+const fz = (f: (s: GameState) => boolean) => (s: GameState) => funZone(s) && f(s);
+const or = (f: (s: GameState) => boolean) => (s: GameState) => offRamp(s) && f(s);
 const bypassRent = (s: GameState) => rent(s, 1);
 export const MACHINES: MachineDef[] = [
   {
     id: 'pusher', region: 0, name: 'Coin Pusher', blurb: 'Drop it in front of the pile.', needs: 'Lease the Fun Zone', unlock: funZone, cost: rentCost(5), secs: 4, cool: 120,
     pay: (s, q) => {
       const cost = rent(s, 0) * 5;
-      const pile = s.room.shelf / 10;
+      const pile = s.room.shelf[0] / 10;
       if (q > 0.9 && pile > 0.5 && rand(s) < 0.08) return { cash: rent(s, 0) * 120, big: true, text: 'A Rent Check coin went over the edge.' };
       return { cash: cost * (0.4 + 2.6 * q) * (0.4 + 0.6 * pile), text: q > 0.7 ? 'Clean drop.' : 'Bounced.' };
     },
   },
   {
-    id: 'whac', region: 0, name: 'Whac-a-Shoplifter', blurb: 'Bonk shoplifters. Not customers.', needs: 'Capture Big-Box Plaza', unlock: (s) => cleared(s, 0, 1, REGIONS[0].lots[1].fights), cost: rentCost(20), secs: 32, cool: 0,
+    id: 'whac', region: 0, name: 'Whac-a-Shoplifter', blurb: 'Bonk shoplifters. Not customers.', needs: 'Capture Big-Box Plaza', unlock: fz((s) => cleared(s, 0, 1, REGIONS[0].lots[1].fights)), cost: rentCost(20), secs: 32, cool: 0,
     pay: (s, q) => ({ goodwill: winPay(s, 0) * 0.5 * Math.round(30 * q), text: `${Math.round(30 * q)} bonks.` }),
   },
   {
-    id: 'skee', region: 0, name: 'Skee-Ball', blurb: 'Nine balls. Hold for power.', needs: 'Clear fight 6 at the Outlet Mall', unlock: (s) => cleared(s, 0, 2, 5), cost: rentCost(15), secs: 25, cool: 60,
+    id: 'skee', region: 0, name: 'Skee-Ball', blurb: 'Nine balls. Hold for power.', needs: 'Clear fight 6 at the Outlet Mall', unlock: fz((s) => cleared(s, 0, 2, 5)), cost: rentCost(15), secs: 25, cool: 60,
     pay: (_s, q) => (q >= 1 ? { tickets: 140, big: true, text: '450 or better. The machine sings.' } : { tickets: Math.round(10 + 30 * q), text: `${Math.round(450 * q)} points.` }),
   },
   {
-    id: 'claw', region: 0, name: 'Claw Machine', blurb: 'Press to go. Press to drop.', needs: 'Capture the Outlet Mall', unlock: (s) => cleared(s, 0, 2, REGIONS[0].lots[2].fights), cost: () => ({ cur: 'tickets', n: 50 }), secs: 10, cool: 60,
+    id: 'claw', region: 0, name: 'Claw Machine', blurb: 'Press to go. Press to drop.', needs: 'Capture the Outlet Mall', unlock: fz((s) => cleared(s, 0, 2, REGIONS[0].lots[2].fights)), cost: () => ({ cur: 'tickets', n: 50 }), secs: 10, cool: 60,
     pay: (s, q) => {
       if (rand(s) > q) return { text: 'It slipped. It always slips.' };
       const roll = rand(s);
@@ -98,16 +101,13 @@ export const MACHINES: MachineDef[] = [
     },
   },
   {
-    id: 'pinball', region: 0, name: 'Night Shift', blurb: 'Pinball. Left half, right half.', needs: 'Capture Sunrise Office Park', unlock: (s) => cleared(s, 0, 3, REGIONS[0].lots[3].fights), cost: rentCost(20), secs: 70, cool: 0,
+    id: 'pinball', region: 0, name: 'Night Shift', blurb: 'Pinball. Left half, right half.', needs: 'Capture Sunrise Office Park', unlock: fz((s) => cleared(s, 0, 3, REGIONS[0].lots[3].fights)), cost: rentCost(20), secs: 70, cool: 0,
     pay: (s, q) => ({ goodwill: winPay(s, 0) * 8 * q, text: `${Math.round(PINBALL_TOP * q).toLocaleString('en-US')} points.` }),
   },
   {
-    id: 'cyclone', region: 0, name: 'Cyclone', blurb: 'Stop it on the jackpot.', needs: 'Capture the Lifestyle Center', unlock: (s) => cleared(s, 0, 4, REGIONS[0].lots[4].fights), cost: rentCost(15), secs: 6, cool: 600,
+    id: 'cyclone', region: 0, name: 'Cyclone', blurb: 'Stop it on the jackpot.', needs: 'Clear fight 9 at Pinewood Commons', unlock: fz((s) => cleared(s, 0, 5, 8)), cost: rentCost(15), secs: 6, cool: 600,
     pay: (s, q) => {
-      if (q >= 1) {
-        const eq = s.bypass ? Math.max(1, Math.round((winPay(s, 0) / 12 / 10) * 900)) : 0;
-        return { tickets: s.room.jackpot, equity: eq || undefined, big: true, text: `JACKPOT. ${s.room.jackpot} tickets${eq ? ` and ${eq} Equity` : ''}.` };
-      }
+      if (q >= 1) return { tickets: s.room.jackpot, big: true, text: `JACKPOT. ${s.room.jackpot} tickets.` };
       return { tickets: q >= 0.5 ? 50 : 2 + Math.floor(rand(s) * 9), text: q >= 0.5 ? 'One light off.' : 'Missed.' };
     },
   },
@@ -115,12 +115,13 @@ export const MACHINES: MachineDef[] = [
   {
     id: 'darts', region: 1, name: 'Darts', blurb: 'Three darts. Click when it drifts over the bull.', needs: 'Lease the Off-Ramp', unlock: offRamp, cost: rentCost(15, 1), secs: 8, cool: 60,
     pay: (s, q) => {
-      if (q >= 1) return { cash: bypassRent(s) * 120, big: true, text: 'Three in the bull. The bar goes quiet.' };
-      return { cash: bypassRent(s) * 15 * (0.4 + 2.6 * q), text: q > 0.6 ? 'Good darts.' : 'Wall.' };
+      const pot = s.room.shelf[1] / 10;
+      if (q >= 1 && pot > 0.5) return { cash: bypassRent(s) * 120, big: true, text: 'Three in the bull. The bar goes quiet.' };
+      return { cash: bypassRent(s) * 15 * (0.4 + 2.6 * q) * (0.4 + 0.6 * pot), text: q > 0.6 ? 'Good darts.' : 'Wall.' };
     },
   },
   {
-    id: 'pool', region: 1, name: 'Pool', blurb: 'Drag back from the cue ball. Six shots.', needs: 'Capture the Exit 14 Power Center', unlock: (s) => cleared(s, 1, 0, REGIONS[1].lots[0].fights), cost: rentCost(20, 1), secs: 45, cool: 180,
+    id: 'pool', region: 1, name: 'Pool', blurb: 'Drag back from the cue ball. Six shots.', needs: 'Capture the Exit 14 Power Center', unlock: or((s) => cleared(s, 1, 0, REGIONS[1].lots[0].fights)), cost: rentCost(20, 1), secs: 45, cool: 180,
     pay: (s, q) => {
       const balls = Math.round(q * 6);
       if (q >= 1) return { equity: winPay(s, 1) * 10 + 5 * (FIGHTS[1][Math.min(s.crews[1].frontier, FIGHTS[1].length - 1)].zone + 1), big: true, text: 'Ran the rack.' };
@@ -128,7 +129,7 @@ export const MACHINES: MachineDef[] = [
     },
   },
   {
-    id: 'poker', region: 1, name: 'Video Poker', blurb: 'Jacks or Better. Click to hold, then draw.', needs: 'Clear fight 6 at the Corporate Campus', unlock: (s) => cleared(s, 1, 1, 5), cost: rentCost(10, 1), secs: 10, cool: 600,
+    id: 'poker', region: 1, name: 'Video Poker', blurb: 'Jacks or Better. Click to hold, then draw.', needs: 'Clear fight 6 at the Corporate Campus', unlock: or((s) => cleared(s, 1, 1, 5)), cost: rentCost(10, 1), secs: 10, cool: 600,
     pay: (_s, q) => {
       const tier = Math.round(q * 4);
       if (!tier) return { text: 'Nothing.' };
@@ -137,7 +138,7 @@ export const MACHINES: MachineDef[] = [
     },
   },
   {
-    id: 'shuffle', region: 1, name: 'Shuffleboard', blurb: 'Six pucks. Hold for power. The far end is worth more.', needs: 'Capture Town Center, Phase II', unlock: (s) => cleared(s, 1, 2, REGIONS[1].lots[2].fights), cost: rentCost(15, 1), secs: 30, cool: 0,
+    id: 'shuffle', region: 1, name: 'Shuffleboard', blurb: 'Six pucks. Hold for power. The far end is worth more.', needs: 'Capture Town Center, Phase II', unlock: or((s) => cleared(s, 1, 2, REGIONS[1].lots[2].fights)), cost: rentCost(15, 1), secs: 30, cool: 0,
     pay: (s, q) => ({ equity: winPay(s, 1) * 2 * q, text: `${Math.round(q * SHUFFLE_TOP)} points.` }),
   },
 ];
@@ -214,7 +215,7 @@ export function endPlay(s: GameState, id: MachineId, q: number, quiet = false): 
   if (rw.equity) earn(s, r, 'equity', rw.equity);
   if (rw.tickets) s.tickets += rw.tickets;
   if (rw.buff) grant(s, rw.buff);
-  if (id === 'pusher') s.room.shelf = Math.max(0, s.room.shelf - 1);
+  if (id === 'pusher' || id === 'darts') s.room.shelf[id === 'pusher' ? 0 : 1] = Math.max(0, s.room.shelf[id === 'pusher' ? 0 : 1] - 1);
   if (id === 'cyclone') s.room.jackpot = q >= 1 ? 500 : s.room.jackpot + 5;
   if (rw.big && m.cool) s.room.cool[id] = s.totalTime + m.cool;
   s.room.plays++;
@@ -266,7 +267,7 @@ export function tickRoom(s: GameState, dt: number) {
     }
   }
   for (const k of Object.keys(R.buffs) as BuffKind[]) R.buffs[k] = Math.max(0, (R.buffs[k] ?? 0) - dt);
-  R.shelf = Math.min(10, R.shelf + dt / 3);
+  R.shelf = R.shelf.map((x) => Math.min(10, x + dt / 60)) as [number, number];
   for (const id of Object.keys(R.attract) as MachineId[]) {
     const lv = R.attract[id] ?? 0;
     if (!lv) continue;

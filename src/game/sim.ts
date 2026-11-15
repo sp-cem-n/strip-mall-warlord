@@ -1,7 +1,7 @@
-import { BATTLERS, FIGHTS, OFFLINE_CAP_SECONDS, RALLY_SECONDS, REFERRAL_WINS, REGIONS, SHOPS, SHOP_LIST, STEP, TIP_SECONDS, WALKIN_EVERY, WALKIN_NAMES, WALKIN_STAYS, type FightDef, type RegionId, type WalkInKind } from './defs';
+import { BATTLERS, FIGHTS, OFFLINE_CAP_SECONDS, RALLY_SECONDS, REFERRAL_WINS, REGIONS, RETRY_AFTER, SHOPS, SHOP_LIST, STEP, TIP_SECONDS, WALKIN_EVERY, WALKIN_NAMES, WALKIN_STAYS, type FightDef, type RegionId, type WalkInKind } from './defs';
 import { pick } from './rng';
 import { lossReason, startBattle, stepBattle } from './battle';
-import { asphaltMult, autoCovers, available, currencyOf, earn, fightOf, leased, log, rentPerSec, retryAfter, smokeBreak, topFight } from './economy';
+import { asphaltMult, autoCovers, available, currencyOf, earn, fightOf, leased, log, rentPerSec, smokeBreak, topFight } from './economy';
 import type { Battle, GameState } from './state';
 import { boardBonus, buffOn, perk, tickRoom } from './room';
 import { fmt } from '../ui/format';
@@ -70,7 +70,7 @@ function resolve(s: GameState, r: RegionId, b: Battle, result: 'win' | 'loss') {
     c.farmed++;
     log(s, r, `Won ${fightLabel(r, b.fight)}. +${fmt(pay)} ${currencyOf(r)}.`, 'win');
     const next = ladder[c.at + 1];
-    if (next && c.at + 1 <= topFight(s, r) && autoCovers(s, r, next.zone) && c.farmed >= retryAfter(s, r)) {
+    if (next && c.at + 1 <= topFight(s, r) && autoCovers(s, r, next.zone) && c.farmed >= RETRY_AFTER) {
       c.at++;
       c.farmed = 0;
     }
@@ -101,7 +101,7 @@ function clearFight(s: GameState, r: RegionId) {
   }
   const next = ladder[c.frontier];
   if (autoCovers(s, r, next.zone)) c.at = c.frontier;
-  else if (next.i === 0) log(s, r, `${REGIONS[r].lots[next.zone].name} is open. No patrol out there yet: press ▸ when the crew is ready.`);
+  else if (next.i === 0) log(s, r, `${REGIONS[r].lots[next.zone].name} is open.`);
 }
 
 // A walk-in every 90s or so, at the crew you're watching.

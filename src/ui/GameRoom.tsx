@@ -86,9 +86,9 @@ function Cabinet({ m }: { m: MachineDef }) {
     if (err) return toast(err);
     register();
     game.current = newGame(m.id, {
-      shelf: app.s.room.shelf,
+      shelf: app.s.room.shelf[0],
       speed: Math.min(20, 9 + app.s.room.plays * 0.05),
-      jackpot: app.s.bypass ? `${app.s.room.jackpot} + EQUITY` : `${app.s.room.jackpot}`,
+      jackpot: `${app.s.room.jackpot}`,
       onGrab: (q) => {
         const rw = endPlay(app.s, 'claw', q);
         if (rw.buff) toast(`${BUFFS[rw.buff].name}: ${BUFFS[rw.buff].does}`);

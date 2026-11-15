@@ -1,6 +1,6 @@
 // A scripted player for balance runs and the debug `advance` param. Plays like someone who checks in now and then.
-import { FIGHTS, ROLES, SHOPS, REGIONS, type RegionId } from './defs';
-import { advance, bal, buyPatrol, buySlot, convert, curb, forLease, leased, lease, lineupOf, overtime, overtimeCost, patrolBlock, patrolPrice, pave, purse, regionDone, renovate, renovateCost, rentPerSec, retryAfter, slotPrice, topFight, train, trainCost, view } from './economy';
+import { FIGHTS, RETRY_AFTER, ROLES, SHOPS, REGIONS, type RegionId } from './defs';
+import { advance, bal, buyPatrol, buySlot, convert, curb, forLease, leased, lease, lineupOf, overtime, overtimeCost, patrolBlock, patrolPrice, pave, purse, regionDone, renovate, renovateCost, rentPerSec, slotPrice, topFight, train, trainCost, view } from './economy';
 import { collectFind } from './sim';
 import type { GameState } from './state';
 import { BAR_BUFFS, MACHINE, PERKS, PINBALL_TOP, SHUFFLE_TOP, buffOn, buyPerk, endPlay, perkPrice, pokerQ, postScore, postShuffle, startPlay, type MachineId, type PerkId } from './room';
@@ -81,7 +81,7 @@ function crewAct(s: GameState, r: RegionId, o: BotOpts) {
   while (isFinite(slotPrice(s, r)) && !(R.trainIn === R.leaseIn && pending && bal(s, r, R.trainIn) - slotPrice(s, r) < pending) && !buySlot(s, r));
   // renovate what fights or buffs (and the Security Office), cheapest first
   const useful = new Set([...lineupOf(s, r), ...curb(s, r).map(([id]) => id)]);
-  const cands = leased(s, r).filter((x) => useful.has(x.battler) || x.id === R.security);
+  const cands = leased(s, r).filter((x) => useful.has(x.battler));
   for (let g = 0; g < 200; g++) {
     const cheapest = cands.sort((a, b) => renovateCost(a.id, c.shops[a.id]) - renovateCost(b.id, c.shops[b.id]))[0];
     if (!cheapest) break;
@@ -96,7 +96,7 @@ function crewAct(s: GameState, r: RegionId, o: BotOpts) {
     if (eqPending && trainCost(r, c.train[role]) > purse(s, r) - eqPending) break;
     if (purse(s, r) < trainCost(r, c.train[role]) || train(s, r, role)) break;
   }
-  if (o.manual !== false && c.at < topFight(s, r) && c.farmed >= retryAfter(s, r)) advance(s, r, 1);
+  if (o.manual !== false && c.at < topFight(s, r) && c.farmed >= RETRY_AFTER) advance(s, r, 1);
   if (o.active) {
     const f = FIGHTS[r][Math.min(c.at, FIGHTS[r].length - 1)];
     if (f.boss && c.at === c.frontier && c.tries > 0 && c.overtime === 0 && c.cash >= overtimeCost(s, r) && overtimeCost(s, r) < (pending || Infinity) * 0.5) overtime(s, r);

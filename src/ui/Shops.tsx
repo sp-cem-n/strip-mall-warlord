@@ -80,7 +80,7 @@ function Unit({ sh }: { sh: ShopDef }) {
               <span>
                 ▲ +{fmt(nx.hp - st.hp)} HP +{fmt(nx.dmg - st.dmg)} {d.role === 'heal' ? 'HEAL' : 'DMG'}
               </span>
-              <span>{sh.rent ? `▲ +$${fmt(dRent)}/s rent` : '▲ patrols 5% cheaper'}</span>
+              <span>{sh.rent ? `▲ +$${fmt(dRent)}/s rent` : 'no rent'}</span>
             </>
           ) : (
             <>
@@ -159,9 +159,8 @@ function uncleSays(s: GameState, r: RegionId): string {
   }
   if (!c.shops.dojo && forLease(s, 0).some((x) => x.id === 'dojo')) return 'Lease the Dojo. Somebody has to stand in front.';
   if (forLease(s, 0).length) return 'Something is for lease. Every shop is one more person in the lot.';
-  if (c.tries >= 3) return 'Losing? Renovate, train, call a different play, or let them farm the fight behind them.';
-  if (c.shops.security && !c.contracts.includes(1) && c.frontier > 9) return 'Big-Box needs a patrol. The Back Office has the paperwork.';
-  if (!c.contracts.includes(0) && c.cash >= 50) return 'Fifty bucks and the Parking Lot patrols itself. Back Office.';
+  if (c.tries >= 3) return 'Losing? Renovate, train, or let them farm the fight behind them.';
+  if (!c.contracts.includes(0) && c.cash >= 50) return 'Fifty bucks and the Parking Lot patrols itself.';
   return regionDone(s, 0) ? "They didn't pave it. You might. Asphalt keeps." : "Don't let them pave it.";
 }
 

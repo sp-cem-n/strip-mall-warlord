@@ -1,7 +1,7 @@
-// The Back Office: training (Goodwill / Equity), patrol contracts ($), and later the arcade. One tab at a time.
+// The Back Office: training (Goodwill / Equity), and later the arcade. One tab at a time.
 import { app, tip, toast } from '../app';
 import { BATTLERS, CURRENCY_SHORT, GOODWILL_PER_EQUITY, REGIONS, ROLES, TRAIN_STEP, type RegionId, type Role } from '../game/defs';
-import { autoCovers, bal, buyPatrol, convert, currencyOf, lotReached, patrolBlock, patrolPrice, purse, retryAfter, roster, secLevel, train, trainCost } from '../game/economy';
+import { convert, currencyOf, purse, roster, train, trainCost } from '../game/economy';
 import { fmt } from './format';
 import { MACHINES, roomOpen } from '../game/room';
 
@@ -12,7 +12,7 @@ const TRACKS: Record<Role, [string, string]> = {
   control: ['Paperwork', 'control effects and hits'],
   buffer: ['Team Building', 'buffer auras'],
 };
-export type OfficeTab = 'training' | 'patrol' | 'arcade';
+export type OfficeTab = 'training' | 'arcade';
 export const office = { tab: 'training' as OfficeTab };
 
 function Training({ r }: { r: RegionId }) {
@@ -58,37 +58,6 @@ function Training({ r }: { r: RegionId }) {
   );
 }
 
-function Patrol({ r }: { r: RegionId }) {
-  const s = app.s;
-  const lv = secLevel(s, r);
-  return (
-    <>
-      {REGIONS[r].lots.map((l, z) => {
-        if (!lotReached(s, r, z)) return null;
-        const on = autoCovers(s, r, z);
-        const price = patrolPrice(s, r, z);
-        const block = patrolBlock(s, r, z);
-        return (
-          <div key={l.id} class="track">
-            <b {...tip(l.name, on ? 'Patrolled. The crew moves up here on its own.' : 'Unpatrolled. Press ▸ to move up here.')}>{l.short}</b>
-            <span class="dim">{on ? 'on patrol' : block && block !== 'Already patrolled' ? block : `$${fmt(price)}`}</span>
-            {on ? (
-              <span class="auto on">AUTO</span>
-            ) : (
-              <button class="btn small" disabled={!!block || bal(s, r, 'cash') < price} onClick={() => (toast(buyPatrol(s, r, z) ?? `${l.short}: on patrol`), app.refresh())}>
-                Sign ${fmt(price)}
-              </button>
-            )}
-          </div>
-        );
-      })}
-      <div class="dim tnote">
-        Security Office Lv {lv}: contracts −{Math.round(Math.min(50, lv * 5))}%, retries after {retryAfter(s, r)} wins.
-      </div>
-    </>
-  );
-}
-
 function Arcade({ r }: { r: RegionId }) {
   const s = app.s;
   const open = MACHINES.filter((m) => m.region === r && s.room.unlocked.includes(m.id));
@@ -116,7 +85,6 @@ export function BackOffice() {
   const r = s.view;
   const tabs: [OfficeTab, string][] = [
     ['training', `Training · ${currencyOf(r)}`],
-    ['patrol', 'Patrol · $'],
   ];
   if (roomOpen(s, r)) tabs.push(['arcade', r === 0 ? `Arcade · ${fmt(s.tickets)} tk` : 'Bar']);
   if (!tabs.some(([k]) => k === office.tab)) office.tab = 'training';
@@ -133,7 +101,6 @@ export function BackOffice() {
         </span>
       </h2>
       {office.tab === 'training' && <Training r={r} />}
-      {office.tab === 'patrol' && <Patrol r={r} />}
       {office.tab === 'arcade' && roomOpen(s, r) && <Arcade r={r} />}
     </section>
   );

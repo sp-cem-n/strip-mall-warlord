@@ -1,7 +1,7 @@
 // Small invariant checks. Run: bun scripts/check.ts
-import { BATTLERS, FIGHTS, GOODWILL_PER_EQUITY, MAX_SLOTS, OFFLINE_CAP_SECONDS, REGIONS, RETRY_AFTER, SHOPS, SMOKE_BREAK_SECONDS, SHOP_LIST, START_SLOTS, STEP, WEAK_BONUS } from '../src/game/defs';
+import { BATTLERS, FIGHTS, GOODWILL_PER_EQUITY, MAX_SLOTS, OFFLINE_CAP_SECONDS, REGIONS, SHOPS, SMOKE_BREAK_SECONDS, SHOP_LIST, START_SLOTS, STEP, WEAK_BONUS } from '../src/game/defs';
 import { auras, enemyLineup, startBattle, statsOf, stepBattle } from '../src/game/battle';
-import { advance, asphaltGain, autoCovers, buyPatrol, buySlot, convert, curb, forLease, lease, lineupOf, newGame, overtime, patrolBlock, patrolPrice, pave, renovate, renovateCost, retryAfter, roster, slotsOf, tierOf, toggleField, train, trainCost, view } from '../src/game/economy';
+import { advance, asphaltGain, autoCovers, buyPatrol, buySlot, convert, curb, forLease, lease, lineupOf, newGame, overtime, patrolBlock, patrolPrice, pave, renovate, renovateCost, roster, slotsOf, tierOf, toggleField, train, trainCost, view } from '../src/game/economy';
 import { loadGame, old, saveGame } from '../src/game/save';
 import { collectFind, simulateAway, step } from '../src/game/sim';
 import { CREW_LOOKS, ENEMY_LOOKS } from '../src/art/people';
@@ -63,8 +63,7 @@ check('training costs Goodwill and only Route 9', train(s, 0, 'tank') === null &
   t.crews[0].cash = 50;
   check('signing it turns on auto for the lot', buyPatrol(t, 0, 0) === null && autoCovers(t, 0, 0) && t.crews[0].cash === 0);
   t.crews[0].frontier = 9;
-  check('Big-Box patrol needs the Security Office', patrolBlock(t, 0, 1) !== null && ((t.crews[0].shops.security = 4), patrolBlock(t, 0, 1) === null));
-  check('Security Office: 5% off a level', patrolPrice(t, 0, 1) === Math.round(REGIONS[0].lots[1].patrol * 0.8) && retryAfter(t, 0) === RETRY_AFTER);
+  check('Big-Box patrol: sold once the lot is reached, at its sign price', patrolBlock(t, 0, 1) === null && patrolPrice(t, 0, 1) === REGIONS[0].lots[1].patrol);
 }
 check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0, 1) === null && advance(s, 0, 1) !== null && s.crews[0].at === 2);
 {
@@ -191,11 +190,22 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
 {
   const t = newGame(13);
   t.crews[0].cash = 1e9;
-  t.crews[0].frontier = 15;
-  check('the Fun Zone leases at Big-Box and opens the Coin Pusher', lease(t, 'funzone') === null && (step(t), t.room.unlocked.includes('pusher')) && roster(t, 0).some(([id]) => id === 'tokenkid'));
+  t.crews[0].frontier = FIGHTS[0].findIndex((f) => f.zone === 2);
+  check('the Fun Zone is not for lease before the Outlet Mall', lease(t, 'funzone') !== null);
+  t.crews[0].frontier += 1;
+  check('the Fun Zone leases at Outlet fight 1 for $30K and opens the Coin Pusher', SHOPS.funzone.lease === 30000 && (step(t), !t.room.unlocked.length) && lease(t, 'funzone') === null && (step(t), t.room.unlocked.includes('pusher')) && roster(t, 0).some(([id]) => id === 'tokenkid'));
   const c0 = t.crews[0].cash;
   check('a quarter in, dollars out', startPlay(t, 'pusher') === null && t.crews[0].cash < c0 && (endPlay(t, 'pusher', 0.8), t.crews[0].cash > c0));
   check('locked machines stay dark', startPlay(t, 'claw') !== null);
+  {
+    const u = newGame(14);
+    u.crews[0].frontier = FIGHTS[0].findIndex((f) => f.zone === 3);
+    step(u);
+    check('every machine needs the lease: Big-Box captured, no Fun Zone, no Whac', !u.room.unlocked.includes('whac'));
+    u.room.shelf = [0, 0];
+    for (let i = 0; i < 60 / STEP; i++) step(u);
+    check('the pusher pile and the darts pot come back one a minute', Math.abs(u.room.shelf[0] - 1) < 0.05 && Math.abs(u.room.shelf[1] - 1) < 0.05);
+  }
   t.room.unlocked.push('claw');
   t.tickets = 49;
   check('the claw costs 50 tickets', startPlay(t, 'claw') !== null && ((t.tickets = 50), startPlay(t, 'claw') === null) && t.tickets === 0);

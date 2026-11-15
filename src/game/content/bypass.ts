@@ -29,7 +29,6 @@ export const BYPASS: RegionDef = {
   trainIn: 'equity',
   chrome: { plaza: 'Exit 14, Rt. 9 Bypass', mgmt: 'EXIT 14 MGMT', sub: 'Exit 14 · Rt. 9 Bypass · 1998' },
   start: 'storage',
-  security: 'security2',
   ending: 'The Bypass is yours. Route 9 North is still being surveyed.',
   lots: [
     { id: 'power', name: 'Exit 14 Power Center', short: 'Exit 14', blurb: 'Six big boxes, one parking lot, no trees. Opened 1998.', fights: 10, patrol: 500,

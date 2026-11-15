@@ -1,5 +1,5 @@
 import { enemyLineup, statsOf } from './battle';
-import { ASPHALT_BONUS, CURRENCY_NAME, type Currency, BATTLERS, FIGHTS, fightIndex, GOODWILL_PER_EQUITY, MAX_SLOTS, OVERTIME_FIGHTS, OVERTIME_SECONDS, PATROL_DISCOUNT, PATROL_DISCOUNT_CAP, REGIONS, RENO_GROWTH, RENT_GROWTH, RETRY_AFTER, ROLES, SMOKE_BREAK_SECONDS, SHOPS, SLOT_PRICES, START_SLOTS, SHOP_LIST, START_CASH, TRAIN_BASE, TRAIN_GROWTH, type RegionId, type Role, type ShopDef, LOG_KEEP } from './defs';
+import { ASPHALT_BONUS, CURRENCY_NAME, type Currency, BATTLERS, FIGHTS, fightIndex, GOODWILL_PER_EQUITY, MAX_SLOTS, OVERTIME_FIGHTS, OVERTIME_SECONDS, REGIONS, RENO_GROWTH, RENT_GROWTH, ROLES, SMOKE_BREAK_SECONDS, SHOPS, SLOT_PRICES, START_SLOTS, SHOP_LIST, START_CASH, TRAIN_BASE, TRAIN_GROWTH, type RegionId, type Role, type ShopDef, LOG_KEEP } from './defs';
 import type { Crew, GameState, LogLine, Track } from './state';
 import { newRoom, perk } from './room';
 
@@ -169,11 +169,9 @@ export function convert(s: GameState, equity = Infinity): string | null {
   return null;
 }
 
-// ---- Patrol contracts: auto-advance, bought one lot at a time. The Security Office sells them (after the first lot) and discounts them. ----
-export const secLevel = (s: GameState, r: RegionId) => s.crews[r].shops[REGIONS[r].security] ?? 0;
+// ---- Patrols: auto-advance, hired one lot at a time from the lot track. ----
 export const autoCovers = (s: GameState, r: RegionId, zone: number) => s.crews[r].contracts.includes(zone);
-export const patrolPrice = (s: GameState, r: RegionId, zone: number) => Math.round(REGIONS[r].lots[zone].patrol * (1 - Math.min(PATROL_DISCOUNT_CAP, PATROL_DISCOUNT * secLevel(s, r))));
-export const retryAfter = (_s: GameState, _r: RegionId) => RETRY_AFTER;
+export const patrolPrice = (_s: GameState, r: RegionId, zone: number) => REGIONS[r].lots[zone].patrol;
 // Everyone steps out back for a smoke. Full HP when they come back.
 export function smokeBreak(s: GameState, r: RegionId) {
   const c = s.crews[r];
@@ -184,7 +182,6 @@ export const lotReached = (s: GameState, r: RegionId, zone: number) => zone <= F
 export function patrolBlock(s: GameState, r: RegionId, zone: number): string | null {
   if (autoCovers(s, r, zone)) return 'Already patrolled';
   if (!lotReached(s, r, zone)) return 'Not open yet';
-  if (zone > 0 && !secLevel(s, r)) return 'Lease the Security Office first';
   return null;
 }
 export function buyPatrol(s: GameState, r: RegionId, zone: number): string | null {
@@ -193,7 +190,7 @@ export function buyPatrol(s: GameState, r: RegionId, zone: number): string | nul
   const c = s.crews[r];
   c.contracts.push(zone);
   bought(c);
-  log(s, r, `Patrol contract signed: ${REGIONS[r].lots[zone].name}. The crew moves up on its own there.`);
+  log(s, r, `Patrol hired: ${REGIONS[r].lots[zone].name}.`);
   return null;
 }
 
