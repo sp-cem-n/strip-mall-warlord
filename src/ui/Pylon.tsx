@@ -64,7 +64,7 @@ function Sign({ room }: { room: boolean }) {
   if (room)
     return (
       <div class={`title-sign ${r ? 'pub' : 'fz'}`}>
-        <img src={r ? offRampLogoURL(DAWN.barSign ?? DAWN.bar, lit.has('sign-o')) : funZoneLogoURL(lit.has('sign-ray'), lit.has('sign-o'))} width={390} height={66} alt={r ? DAWN.bar : 'Fun Zone Arcade'} />
+        <img src={r ? offRampLogoURL(DAWN.bar, 'TIL 2AM', '14', lit.has('sign-o')) : funZoneLogoURL(lit.has('sign-ray'), lit.has('sign-o'))} width={390} height={66} alt={r ? DAWN.bar : 'Fun Zone Arcade'} />
       </div>
     );
   return (

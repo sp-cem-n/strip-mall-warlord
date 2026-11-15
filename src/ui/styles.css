@@ -30,7 +30,7 @@ button { font: inherit; }
 .btn.big { font-family: 'Pixelify Sans', sans-serif; font-weight: 500; font-size: 20px; letter-spacing: 0.06em; padding: 6px 18px; min-width: 220px; text-align: center; border-width: 6px; border-image-width: 6px; }
 
 /* ---- the roadside: pylon sign + LED board over grass and Rt. 9 ---- */
-.roadside { position: sticky; top: 0; z-index: 15; display: flex; align-items: stretch; gap: 18px; padding: 10px 20px 14px; background-color: var(--night); background-image: var(--stars), var(--road); background-position: left top, left bottom; background-repeat: repeat, repeat-x; background-size: 128px 64px, 64px 32px; }
+.roadside { position: sticky; top: 0; z-index: 15; display: flex; align-items: stretch; gap: 18px; padding: 10px 20px 14px; background-color: var(--night); background-image: var(--road), var(--stars); background-position: left bottom, left top; background-repeat: repeat-x, repeat; background-size: 64px 32px, 256px 128px; }
 .pylon { width: 390px; display: flex; flex-direction: column; }
 .cabinet { display: flex; flex-direction: column; align-items: stretch; gap: 2px; padding: 2px 6px; background: none; border: 10px solid; border-image: var(--pylon) 5 fill / 10px; cursor: pointer; color: var(--bone); font: inherit; }
 /* the sign: chasing bulbs, STRIP MALL in sodium, WARLORD in red neon with a burned-out O */
@@ -302,10 +302,7 @@ button { font: inherit; }
 .test-tab { position: fixed; left: 12px; bottom: 12px; z-index: 50; font-size: 16px; color: var(--paper); background: var(--ink); border: 4px solid var(--violet); cursor: pointer; }
 
 /* inside a game room: no street, a themed lip, no pylon posts */
-.roadside.in-room { background-image: none; background-color: #16141c; padding-bottom: 18px; }
-.roadside.in-room.fz { background-color: #1a1218; box-shadow: inset 0 -10px 0 #3a2a24, inset 0 -14px 0 var(--ink); }
-.roadside.in-room.pub { background-color: #2a2018; box-shadow: inset 0 -10px 0 #6b4a2f, inset 0 -14px 0 #3a2a1c; }
-.roadside.in-room .pole, .roadside.in-room .legs { display: none; }
+/* Rooms keep the same grass and street as the plaza; only the top-left logo changes. */
 .roadside.in-room .led { border-image: var(--pylon) 5 / 10px; }
 .field { cursor: pointer; }
 

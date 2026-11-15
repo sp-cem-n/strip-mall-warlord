@@ -42,7 +42,7 @@ export const facadeURL = (id: string, leased: boolean, lit = false) =>
 export const scaffoldURL = () => urlOf('scaffold', scaffold);
 export const titleSignURL = (ray = false, o = false) => urlOf(`titlesign:${ray}:${o}`, () => titleSign(ray, o));
 export const funZoneLogoURL = (ray = false, o = false) => urlOf(`fzlogo:${ray}:${o}`, () => funZoneLogo(ray, o));
-export const offRampLogoURL = (title = 'THE BAR', dead = false) => urlOf(`orlogo:${title}:${dead}`, () => offRampLogo(title, dead));
+export const offRampLogoURL = (title = 'THE BAR', sub = 'OPEN LATE', plate = '14', dead = false) => urlOf(`orlogo:${title}:${sub}:${plate}:${dead}`, () => offRampLogo(title, sub, plate, dead));
 
 export const bootURL = (kinds: (string | null)[], dawn = false) => urlOf(`boot:${kinds.join(',')}:${dawn}`, () => bootScene(kinds, dawn));
 // frames and tiles as CSS variables (border-image / background)
