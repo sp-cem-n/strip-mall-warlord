@@ -1,3 +1,4 @@
+import { DAWN } from './content/dawn';
 import { enemyLineup, statsOf } from './battle';
 import { ASPHALT_BONUS, CURRENCY_NAME, type Currency, BATTLERS, FIGHTS, fightIndex, GOODWILL_PER_EQUITY, MAX_SLOTS, OVERTIME_FIGHTS, OVERTIME_SECONDS, REGIONS, RENO_GROWTH, RENT_GROWTH, ROLES, SMOKE_BREAK_SECONDS, SHOPS, SLOT_PRICES, START_SLOTS, SHOP_LIST, START_CASH, TRAIN_BASE, TRAIN_GROWTH, type RegionId, type Role, type ShopDef, LOG_KEEP } from './defs';
 import type { Crew, GameState, LogLine, Track } from './state';
@@ -160,11 +161,11 @@ export function train(s: GameState, r: RegionId, role: Role): string | null {
 export function convert(s: GameState, equity = Infinity): string | null {
   if (!s.bypass) return 'Nothing to convert into';
   const n = Math.min(equity, Math.floor(s.goodwill / GOODWILL_PER_EQUITY));
-  if (n < 1) return `Takes ${GOODWILL_PER_EQUITY} Goodwill per Equity`;
+  if (n < 1) return DAWN.convertShort;
   s.goodwill -= n * GOODWILL_PER_EQUITY;
   s.equity += n;
   s.stats.banked += n;
-  log(s, 1, `Converted ${n * GOODWILL_PER_EQUITY} Goodwill into ${n} Equity. The bank called it "a relationship."`);
+  log(s, 1, DAWN.converted(n * GOODWILL_PER_EQUITY, n));
   return null;
 }
 

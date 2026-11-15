@@ -1,4 +1,5 @@
 // The plaza: one fixed-layout card per storefront. Leased shops renovate; new ones come up for lease in order.
+import { DAWN } from '../game/content/dawn';
 import { app, tip, toast } from '../app';
 import { BATTLERS, CURRENCY_NAME, REGIONS, SHOPS, WALKIN_STAYS, type RegionId, type ShopDef } from '../game/defs';
 import { bal, tierOf, bossLevel, currencyOf, forLease, joined, lease, leased, lineupOf, regionDone, renovate, renovateCost, rentOf, toggleField } from '../game/economy';
@@ -153,9 +154,9 @@ function BreakRoom({ r }: { r: RegionId }) {
 function uncleSays(s: GameState, r: RegionId): string {
   const c = s.crews[r];
   if (r === 1) {
-    if (c.wins < 5) return "Sal never made it up here. New road, new crew. Bring Goodwill: the bank turns it into Equity.";
-    if (forLease(s, 1).length) return 'Bypass leases cost Equity, not dollars. Convert Goodwill from Route 9, or win it here.';
-    return regionDone(s, 1) ? 'Somebody is surveying Route 9 North. Not yet.' : 'Same rules, bigger checks.';
+    if (c.wins < 5) return DAWN.hintNew;
+    if (forLease(s, 1).length) return DAWN.hintLease;
+    return regionDone(s, 1) ? DAWN.hintDone : 'Same rules, bigger checks.';
   }
   if (!c.shops.dojo && forLease(s, 0).some((x) => x.id === 'dojo')) return 'Lease the Dojo. Somebody has to stand in front.';
   if (forLease(s, 0).length) return 'Something is for lease. Every shop is one more person in the lot.';

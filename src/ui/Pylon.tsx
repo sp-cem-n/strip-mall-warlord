@@ -1,6 +1,7 @@
 // The top bar is the plaza's roadside pylon sign: stacked tenant panels, the office receipt printer, and a rented LED board.
+import { DAWN } from '../game/content/dawn';
 import { app, tip } from '../app';
-import { ASPHALT_BONUS, GOODWILL_PER_EQUITY, REGIONS } from '../game/defs';
+import { ASPHALT_BONUS, REGIONS } from '../game/defs';
 import { lotsTaken, rentPerSec } from '../game/economy';
 import { icon } from './art';
 import { fmt, fmtTime } from './format';
@@ -29,15 +30,15 @@ export function Pylon() {
           <span class="v">${fmt(c.cash)}</span>
           <span class="r">+${fmt(rent)}/s</span>
         </div>
-        <div class="tenant t-goodwill" {...tip('Goodwill', 'Wins pay it. Training costs it.', s.bypass ? `The bank turns ${GOODWILL_PER_EQUITY} Goodwill into 1 Equity.` : 'People are starting to say nice things about the plaza.')}>
+        <div class="tenant t-goodwill" {...tip('Goodwill', 'Wins pay it. Training costs it.', s.bypass ? DAWN.goodwillTip : 'People are starting to say nice things about the plaza.')}>
           <img src={icon('goodwill')} width={18} height={18} alt="" />
           <span class="k">Goodwill</span>
           <span class="v">{fmt(s.goodwill)}</span>
         </div>
         {s.bypass && (
-          <div class="tenant t-equity" {...tip('Equity', 'Bypass leases and training cost it. Bypass wins pay a little.', `Mostly you buy it: ${GOODWILL_PER_EQUITY} Route 9 Goodwill each.`, 'The bank calls it "a relationship."')}>
+          <div class="tenant t-equity" {...tip(...(DAWN.equityTip as [string, ...string[]]))}>
             <img src={icon('equity')} width={18} height={18} alt="" />
-            <span class="k">Equity</span>
+            <span class="k">{DAWN.equity}</span>
             <span class="v">{fmt(s.equity)}</span>
           </div>
         )}

@@ -1,4 +1,5 @@
 // The Back Office: training (Goodwill / Equity), and later the arcade. One tab at a time.
+import { DAWN } from '../game/content/dawn';
 import { app, tip, toast } from '../app';
 import { BATTLERS, CURRENCY_SHORT, GOODWILL_PER_EQUITY, REGIONS, ROLES, TRAIN_STEP, type RegionId, type Role } from '../game/defs';
 import { convert, currencyOf, purse, roster, train, trainCost } from '../game/economy';
@@ -42,7 +43,7 @@ function Training({ r }: { r: RegionId }) {
         );
       })}
       {s.bypass && (
-        <div class="bank" {...tip('The bank', `${GOODWILL_PER_EQUITY} Goodwill buys 1 Equity. One way.`)}>
+        <div class="bank" {...tip('The bank', DAWN.bankTip)}>
           <span>
             <b>Bank:</b> {fmt(s.goodwill)} GW → {fmt(Math.floor(s.goodwill / GOODWILL_PER_EQUITY))} EQ
           </span>
@@ -64,7 +65,7 @@ function Arcade({ r }: { r: RegionId }) {
   return (
     <>
       <button class="btn big hot arcade-go" onClick={() => ((app.screen = 'room'), (app.tip = null), app.refresh())}>
-        {r === 0 ? 'Walk over to the Fun Zone' : 'Stop in at the Off-Ramp'}
+        {r === 0 ? 'Walk over to the Fun Zone' : DAWN.barGo}
       </button>
       {MACHINES.filter((m) => m.region === r).map((m) => (
         <div key={m.id} class="track">

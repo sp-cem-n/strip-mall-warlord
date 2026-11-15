@@ -1,4 +1,5 @@
 // Everyone who can stand in a parking lot for you: shop hires, then the bosses who quit and join.
+import { DAWN } from './dawn';
 import type { BattlerDef, WalkInKind } from '../defs';
 import { B } from './make';
 
@@ -44,7 +45,7 @@ export const BATTLER_LIST: BattlerDef[] = [
   B('leasingdir', 'Leasing Director', 'damage', 200, 30, 1.5, 'Heavy hitter.', 'Quit on a Friday. Left a voicemail.'),
   B('vp', 'VP of Real Estate Strategy', 'buffer', 210, 12, 1.5, 'Whole crew +10% damage.', 'Circles back. Hits on the way.', { k: 'dmgUp', to: 'all', v: 0.1 }),
   B('partner', 'Managing Partner', 'buffer', 260, 16, 1.5, 'Whole crew +15% HP.', 'Has a boat. Has opinions about your boat.', { k: 'hpUp', to: 'all', v: 0.15 }),
-  B('chairman', 'The Chairman', 'buffer', 300, 20, 1.5, '+10% Equity per win.', 'Owns the mall. Rents the chair.', { k: 'payUp', v: 0.1 }),
+  B('chairman', 'The Chairman', 'buffer', 300, 20, 1.5, DAWN.chairman, 'Owns the mall. Rents the chair.', { k: 'payUp', v: 0.1 }),
 ];
 
 export const WALKIN_NAMES: Record<WalkInKind, string[]> = {

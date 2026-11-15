@@ -271,6 +271,17 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   texts.push(...pre.map((l) => l.text));
   const bad = texts.filter((x) => LEAK.test(x));
   check(`pre-dawn copy: ${texts.length} strings and receipt lines, no Bypass / Equity / second-crew hints${bad.length ? ` (${bad.slice(0, 3).join(' | ')})` : ''}`, bad.length === 0);
+  // every post-dawn word lives in content/dawn.ts or content/bypass.ts: grep the strings in the rest of src/
+  const DAWN_WORDS = /bypass|equity|exit 14|off-ramp|galleria|route 9 north|second crew|both crews|each crew|other crew|own till/i;
+  const walk = (d: string): string[] => readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(`${d}/${e.name}`) : /\.tsx?$/.test(e.name) ? [`${d}/${e.name}`] : []));
+  const OK = new Set(['src/game/content/dawn.ts', 'src/game/content/bypass.ts', 'src/debug.ts']);
+  const strays: string[] = [];
+  for (const f of walk('src').filter((x) => !OK.has(x))) {
+    const code = readFileSync(f, 'utf8').split('\n').filter((x) => !/^\s*(\/\/|import )/.test(x)).map((x) => x.replace(/\s\/\/ .*$/, '')).join('\n');
+    const lits = code.match(/'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`\\]|\\.)*`|>[^<>{}\n]*</g) ?? [];
+    for (const l of lits.map((x) => x.replace(/\$\{[^}]*\}/g, ''))) if (DAWN_WORDS.test(l) && !/^['"`][a-z0-9 _-]+['"`]$/.test(l)) strays.push(`${f.slice(4)}: ${l.slice(0, 50)}`);
+  }
+  check(`post-dawn words only in content/dawn.ts and content/bypass.ts${strays.length ? ` (${strays.slice(0, 4).join(' | ')})` : ''}`, strays.length === 0);
   const CUT = /fights run themselves|nice to have|never required|ignoring them|this crew only|only this crew|both crews|own till|every shop pays rent and sends/i;
   const ui = readdirSync('src/ui').filter((f) => f.endsWith('.tsx')).flatMap((f) => readFileSync(`src/ui/${f}`, 'utf8').split('\n').filter((x) => CUT.test(x)).map((x) => `${f}: ${x.trim().slice(0, 60)}`));
   check(`no design-explaining copy in the UI${ui.length ? ` (${ui.join(' | ')})` : ''}`, ui.length === 0);

@@ -1,4 +1,5 @@
 // The Fun Zone: big cabinets you actually play, the prize counter, and Attract Mode. Its own screen.
+import { DAWN } from '../game/content/dawn';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { app, tip, toast } from '../app';
 import { CAB_H, CAB_W, cabinet, carpet, paneling, screenOf, type CabinetLook } from '../art/cabinets';
@@ -175,7 +176,7 @@ function BarCounter() {
         </div>
       ))}
       <div class="dim">
-        Yours: {s.room.shuffleBest} · Equity per win +{Math.round(s.room.shuffle * 6)}%{s.room.shuffle >= 3 ? ' · +1 fighter slot' : ''}
+        Yours: {s.room.shuffleBest}{DAWN.shufflePanel(Math.round(s.room.shuffle * 6))}{s.room.shuffle >= 3 ? ' · +1 fighter slot' : ''}
       </div>
     </section>
   );
@@ -239,13 +240,13 @@ export function GameRoom() {
   return (
     <div class={`screen room ${bar ? 'pub' : ''}`} style={{ backgroundImage: `url(${bar ? urlOf('paneling', paneling) : urlOf('carpet', carpet)})` }}>
       <header class="room-bar">
-        <span class="room-sign">{bar ? 'THE OFF-RAMP' : 'FUN ZONE ARCADE'}</span>
+        <span class="room-sign">{bar ? DAWN.bar : 'FUN ZONE ARCADE'}</span>
         <span class="tenant t-cash">
           <span class="k">Cash</span> <span class="v">${fmt(s.crews[s.view].cash)}</span>
         </span>
         {bar ? (
           <span class="tenant t-equity">
-            <span class="k">Equity</span> <span class="v">{fmt(s.equity)}</span>
+            <span class="k">{DAWN.equity}</span> <span class="v">{fmt(s.equity)}</span>
           </span>
         ) : (
           <>
@@ -258,7 +259,7 @@ export function GameRoom() {
           </>
         )}
         <button class="btn big" onClick={back}>
-          {bar ? 'Back to the Bypass' : 'Back to the plaza'}
+          {bar ? DAWN.barBack : 'Back to the plaza'}
         </button>
       </header>
       <div class="room-floor">

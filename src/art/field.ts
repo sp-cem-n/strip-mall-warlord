@@ -1,4 +1,5 @@
 // The parking-lot battlefields (320x150) and the title scene.
+import { DAWN } from '../game/content/dawn';
 import { Grid, hash, textWidth } from './grid';
 import { C } from './palette';
 import { facade } from './storefronts';
@@ -54,7 +55,7 @@ const SKYLINE: Record<string, (g: Grid) => void> = {
   galleria: (g) => {
     g.boxed(20, 14, 280, 32, C.paper).hline(20, 14, 280, C.navy);
     g.boxed(140, 2, 40, 44, C.blue).dither(141, 3, 38, 42, C.mint);
-    g.text('BYPASS GALLERIA', 40, 26, C.navy);
+    g.text(DAWN.galleriaSign, 40, 26, C.navy);
   },
 };
 

@@ -1,4 +1,5 @@
 // Types and the assembled content. The content itself lives in content/*.ts, the numbers in knobs.ts.
+import { DAWN } from './content/dawn';
 import { BATTLER_LIST } from './content/battlers';
 import { BYPASS, BYPASS_SHOPS } from './content/bypass';
 import { BOSS } from './content/make';
@@ -83,7 +84,7 @@ export interface LotDef {
 
 // Every currency in the game goes through the purse helpers in economy.ts.
 export type Currency = 'cash' | 'goodwill' | 'equity';
-export const CURRENCY_NAME: Record<Currency, string> = { cash: 'cash', goodwill: 'Goodwill', equity: 'Equity' };
+export const CURRENCY_NAME: Record<Currency, string> = { cash: 'cash', goodwill: 'Goodwill', equity: DAWN.equity };
 export const CURRENCY_SHORT: Record<Currency, string> = { cash: '$', goodwill: 'GW', equity: 'EQ' };
 
 export interface RegionDef {

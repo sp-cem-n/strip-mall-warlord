@@ -1,7 +1,8 @@
 // Title screen, how to play, the story card, the win card, and the shared pixel dialogs.
+import { DAWN } from '../game/content/dawn';
 import { useEffect, useState } from 'preact/hooks';
 import { app } from '../app';
-import { ASPHALT_BONUS, FIGHTS, GOODWILL_PER_EQUITY, REGIONS } from '../game/defs';
+import { ASPHALT_BONUS, FIGHTS, REGIONS } from '../game/defs';
 import { asphaltGain, leased, pave, view } from '../game/economy';
 import { fightLabel } from '../game/sim';
 import { old, saveGame } from '../game/save';
@@ -33,7 +34,7 @@ function AwayStats() {
         <b>${fmt(a.earned)}</b>
       </div>
       <div class="away-row">
-        <span>Goodwill{s.bypass ? ' / Equity' : ''}</span>
+        <span>Goodwill{s.bypass ? DAWN.awayPay : ''}</span>
         <b>
           +{fmt(a.goodwill)}
           {s.bypass ? ` / +${fmt(a.equity)}` : ''}
@@ -208,7 +209,7 @@ export function WinCard() {
     <div class="modal-bg">
       <div class="panel-brick wincard">
         <img src={bootURL(leased(s, 0).slice(0, 4).map((x) => x.id), true)} width={640} height={360} alt="Pinewood Plaza at dawn" />
-        <h2>{r === 0 ? 'Dawn on Route 9' : 'The Bypass'}</h2>
+        <h2>{r === 0 ? 'Dawn on Route 9' : DAWN.bypass}</h2>
         <p>{REGIONS[r].ending}</p>
         {r === 0 ? (
           <>
@@ -217,7 +218,8 @@ export function WinCard() {
             </p>
             {s.paves === 0 && (
               <div class="reveal">
-                <b>One more thing.</b> The state opened the Route 9 Bypass this morning. Exit 14 has a Self Storage with your name on the lease. New road, new crew, new money: <b>Equity</b>. The bank will turn {GOODWILL_PER_EQUITY} Goodwill into 1 Equity, any time.
+                <b>One more thing.</b> {DAWN.reveal[0]} <b>{DAWN.reveal[1]}</b>
+                {DAWN.reveal[2]}
               </div>
             )}
             <div class="ask-buttons">

@@ -36,7 +36,7 @@ while (s.totalTime < hours * 3600) {
     nextAct = s.totalTime + (o.active || s.totalTime >= 1800 ? every : Math.min(every, 60)); // check-in players watch the first half hour
   }
   const before = s.crews.map((c) => ({ b: c.battle, front: c.battle && c.battle.fight === c.frontier, w: c.wins, l: c.losses, paves: s.paves }));
-  step(s, o.active);
+  step(s, o.active && !process.env.SMW_NOWATCH);
   for (const r of [0, 1] as const) {
     const c = s.crews[r], p = before[r];
     if (!p.b || c.battle === p.b || p.paves !== s.paves || (r === 0 && s.paves)) continue;

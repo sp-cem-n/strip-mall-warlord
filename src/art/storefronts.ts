@@ -1,4 +1,5 @@
 // Storefront facades (64x56) and the scaffolding that goes up while one is leased.
+import { DAWN } from '../game/content/dawn';
 import { Grid, hash, textWidth } from './grid';
 import { C } from './palette';
 
@@ -19,7 +20,7 @@ const A = (text: string, bg: number, fg: number, awning: number, decor: Decor, l
 const SHOP_ART: Record<string, ShopArt> = {
   pawn: A('PAWN', C.sodium, C.ink, C.sodium, 'pawn'),
   funzone: A('FUNZONE', C.violet, C.sodiumLight, C.neon, 'arcade'),
-  offramp: A('OFF-RAMP', C.umber, C.sodiumLight, C.brick, 'bar', 'COLD BEER'),
+  offramp: A(DAWN.barSign, C.umber, C.sodiumLight, C.brick, 'bar', 'COLD BEER'),
   dojo: A('DOJO', C.red, C.paper, C.red, 'dojo'),
   laundromat: A('SUDS', C.blue, C.paper, C.blue, 'laundromat'),
   vape: A('VAPE', C.plum, C.neon, C.violet, 'vape'),

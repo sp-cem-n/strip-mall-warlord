@@ -1,6 +1,7 @@
 // The Game Room: the Fun Zone arcade on Route 9 (and, after dawn, the bar on the Bypass). DOM-free.
 // Every machine is data: what unlocks it, what a play costs, and payout(q) for a play of quality q (0..1).
 // The UI's mini-games, Attract Mode and the balance bot all go through startPlay / endPlay, so they pay the same.
+import { DAWN } from './content/dawn';
 import { FIGHTS, REGIONS, type Currency, type RegionId } from './defs';
 import { asphaltMult, bal, cleared, earn, log, rentPerSec, spend } from './economy';
 import { rand } from './rng';
@@ -47,8 +48,8 @@ export const BUFFS: Record<BuffKind, { name: string; does: string }> = {
   call: { name: 'Three of a Kind', does: '+20% crew damage' },
   top: { name: 'Full House', does: '+30% crew damage and HP' },
   royal: { name: 'Royal Flush', does: '+50% crew damage and HP' },
-  quiz: { name: 'Three Right', does: '+10% Equity per win' },
-  genius: { name: 'Five for Five', does: '+25% Equity per win' },
+  quiz: { name: 'Three Right', does: DAWN.quiz },
+  genius: { name: 'Five for Five', does: DAWN.genius },
 };
 export const BUFF_SECONDS = 600;
 // the bar's buffs, by poker hand: [kind, seconds, damage, HP]
@@ -118,7 +119,7 @@ export const MACHINES: MachineDef[] = [
   },
   // ---- The Off-Ramp, on the Bypass ----
   {
-    id: 'darts', region: 1, name: 'Darts', blurb: 'Three darts. Click when it drifts over the bull.', needs: 'Lease the Off-Ramp', unlock: offRamp, cost: rentCost(15, 1), secs: 8, cool: 60,
+    id: 'darts', region: 1, name: 'Darts', blurb: 'Three darts. Click when it drifts over the bull.', needs: DAWN.needsOffRamp, unlock: offRamp, cost: rentCost(15, 1), secs: 8, cool: 60,
     pay: (s, q) => {
       const pot = s.room.shelf[1] / 10;
       if (q >= 1 && pot > 0.5) return { cash: bypassRent(s) * 120, big: true, text: 'Three in the bull. The bar goes quiet.' };
@@ -126,7 +127,7 @@ export const MACHINES: MachineDef[] = [
     },
   },
   {
-    id: 'pool', region: 1, name: 'Pool', blurb: 'Drag back from the cue ball. Six shots.', needs: 'Capture the Exit 14 Power Center', unlock: or((s) => cleared(s, 1, 0, REGIONS[1].lots[0].fights)), cost: rentCost(20, 1), secs: 45, cool: 180,
+    id: 'pool', region: 1, name: 'Pool', blurb: 'Drag back from the cue ball. Six shots.', needs: DAWN.needsExit14, unlock: or((s) => cleared(s, 1, 0, REGIONS[1].lots[0].fights)), cost: rentCost(20, 1), secs: 45, cool: 180,
     pay: (s, q) => {
       const balls = Math.round(q * 6);
       if (q >= 1) return { equity: winPay(s, 1) * 10 + 5 * (FIGHTS[1][Math.min(s.crews[1].frontier, FIGHTS[1].length - 1)].zone + 1), big: true, text: 'Ran the rack.' };
@@ -151,7 +152,7 @@ export const MACHINES: MachineDef[] = [
     pay: (s, q) => ({ equity: winPay(s, 1) * 2 * q, text: `${Math.round(q * SHUFFLE_TOP)} points.` }),
   },
   {
-    id: 'trivia', region: 1, name: 'Bar Trivia', blurb: 'Five questions. Faster is more points.', needs: 'Clear fight 6 at the Bypass Galleria', unlock: or((s) => cleared(s, 1, 3, 5)), cost: rentCost(10, 1), secs: 50, cool: 600,
+    id: 'trivia', region: 1, name: 'Bar Trivia', blurb: 'Five questions. Faster is more points.', needs: DAWN.needsGalleria, unlock: or((s) => cleared(s, 1, 3, 5)), cost: rentCost(10, 1), secs: 50, cool: 600,
     pay: (_s, q) => {
       const right = Math.round(q * 5);
       if (right >= 5) return { buff: 'genius', big: true, text: `Five for five: ${BUFFS.genius.does} for 10 min.` };
@@ -248,7 +249,7 @@ export function postShuffle(s: GameState, score: number): number {
   const gained = beat - s.room.shuffle;
   if (gained > 0) {
     s.room.shuffle = beat;
-    log(s, 1, `Shuffleboard: ${BAR_HOUSE[beat - 1][0]} is off the board. Equity per win +${Math.round(0.06 * beat * 100)}%.${beat >= 3 && beat - gained < 3 ? ' And a fighter slot.' : ''}`, 'capture');
+    log(s, 1, DAWN.shuffleBoard(beat, beat >= 3 && beat - gained < 3, BAR_HOUSE[beat - 1][0]), 'capture');
   }
   return gained;
 }
