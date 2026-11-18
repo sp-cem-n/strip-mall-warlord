@@ -19,6 +19,7 @@ export function step(s: GameState, watching = false) {
   tickSinks(s);
   for (const r of s.bypass ? ([0, 1] as const) : ([0] as const)) {
     const c = s.crews[r];
+    if (c.closed) continue;
     c.rally = Math.max(0, c.rally - STEP);
     const inc = rentPerSec(s, r) * STEP;
     earn(s, r, 'cash', inc);

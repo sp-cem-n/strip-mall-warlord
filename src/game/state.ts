@@ -74,6 +74,7 @@ export interface Crew {
   smoke: number; // length of the current smoke break (0 = the next group is just walking in)
   lineup: string[] | null; // fighters you picked for the lot; null = the auto pick
   contracts: number[]; // lots with a patrol (auto-advance, and a lost wall drops back to a winnable fight)
+  closed?: boolean; // a fresh start (new game, repave) waits for the player to flip the OPEN sign
   parked: boolean; // the player stepped down with ◂: the patrol doesn't climb until ▸ or the next clear
   slotBuys: number; // fighter slots bought in the Back Office
   rally: number; // seconds left

@@ -106,6 +106,14 @@ export function Lot() {
       <div class="field-box">
         <Field r={r} />
         <FarmRate r={r} />
+        {c.closed && (
+          <div class="closed-sign">
+            <button class="btn big hot" onClick={() => ((c.closed = false), toast("Open. Uncle Sal's crew heads out to the lot."), app.refresh())}>
+              Flip the sign
+            </button>
+            <span>The pawn shop opens when you say so.</span>
+          </div>
+        )}
       </div>
     </section>
   );

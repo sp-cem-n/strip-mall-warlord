@@ -18,6 +18,7 @@ function go(screen: typeof app.screen) {
 
 function startOver() {
   app.s = newGame();
+  app.s.crews[0].closed = true;
   app.away = null;
   app.hasSave = true;
   app.oldSave = false;

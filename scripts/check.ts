@@ -44,6 +44,15 @@ check('a boss rematch pays like a regular win; only the capture pays BOSS_PAY', 
   t.crews[0].frontier = FIGHTS[0].length;
   check('a finished road can still rematch its last boss', topFight(t, 0) === FIGHTS[0].length - 1);
 }
+{
+  const t = newGame(3);
+  t.crews[0].closed = true;
+  for (let i = 0; i < 600; i++) step(t);
+  const shut = t.crews[0].wins + t.crews[0].losses === 0 && t.crews[0].cash === newGame(3).crews[0].cash;
+  t.crews[0].closed = false;
+  for (let i = 0; i < 600; i++) step(t);
+  check('Flip the sign: nothing happens on a closed road, and it fights once flipped', shut && t.crews[0].wins > 0);
+}
 check('wins to clear and pay never go down inside a lot', FIGHTS.every((L) => L.every((f, i) => i === 0 || f.boss || L[i - 1].zone !== f.zone || (f.need >= L[i - 1].need && f.pay >= L[i - 1].pay))));
 check(`wins to clear grow gently: ${FIGHTS[0][0].need} at the start, ${FIGHTS[0].at(-2)!.need} at the end; bosses 1`, FIGHTS[0][0].need === 3 && FIGHTS[0].at(-2)!.need === 10 && FIGHTS.every((L) => L.every((f) => !f.boss || f.need === 1)));
 check('enemy strength never goes down inside a lot', FIGHTS.every((L) => L.every((f, i) => i === 0 || L[i - 1].zone !== f.zone || f.strength >= L[i - 1].strength)));
@@ -191,7 +200,7 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   for (let i = 0; i < 20000 && !t.bypass; i++) step(t);
   check('beating the Developer: the ending, then the Bypass', t.bypass && t.ending === 1 && roster(t, 0).some(([id]) => id === 'developer'));
   check('the Bypass is a whole new crew: Self Storage, one Auction Hunter', roster(t, 1).length === 1 && roster(t, 1)[0][0] === 'auction');
-  check('keep the lights on: farming the fight before the Developer (he works for you now)', (() => { const w = t.crews[0].wins; for (let i = 0; i < 2000; i++) step(t); return t.crews[0].wins > w && t.crews[0].at === FIGHTS[0].length - 2; })());
+  check('after dawn: farming the fight before the Developer (he works for you now)', (() => { const w = t.crews[0].wins; for (let i = 0; i < 2000; i++) step(t); return t.crews[0].wins > w && t.crews[0].at === FIGHTS[0].length - 2; })());
   t.goodwill = 50 * GOODWILL_PER_EQUITY + 7;
   check(`bank: ${GOODWILL_PER_EQUITY} Goodwill -> 1 Equity`, convert(t) === null && t.equity >= 50 && t.goodwill === 7);
   t.crews[1].frontier = 3;
