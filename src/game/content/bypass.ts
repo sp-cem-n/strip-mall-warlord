@@ -34,7 +34,7 @@ export const BYPASS: RegionDef = {
   trainIn: 'equity',
   chrome: { plaza: 'Exit 14, Rt. 9 Bypass', mgmt: 'EXIT 14 MGMT' },
   start: 'storage',
-  ending: 'The Bypass is yours. Route 9 North is still being surveyed.',
+  ending: 'The Bypass is yours. Every lot, both exits, and the Chairman\'s good chair.',
   lots: [
     { id: 'power', name: 'Exit 14 Power Center', short: 'Exit 14', blurb: 'Six big boxes, one parking lot, no trees. Opened 1998.', fights: 10, patrol: 500,
       regulars: [E('Power Center Security', 'Golf cart with a siren.', 45, 5, 1.4, 'auction'), E('Inventory Specialist', 'Counts things. Counts you.', 40, 6, 1.5, 'auction', 'hard'), E('Sweeper Truck Driver', 'Out at 3 a.m. Every night.', 70, 4, 1.8, 'bouncer', 'tanky')],

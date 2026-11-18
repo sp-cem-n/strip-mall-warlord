@@ -259,7 +259,7 @@ export function TipCard() {
   );
 }
 
-// The ending. Nothing before it hints that there's a road north.
+// The ending card: dawn on Route 9, or the Bypass taken.
 export function WinCard() {
   const s = app.s;
   if (!s.ending || app.screen !== 'game') return null;
@@ -291,7 +291,7 @@ export function WinCard() {
                 Pave Route 9 (+{gain})
               </button>
               <button class="btn hot" onClick={() => (view(s, 1), close())}>
-                Drive north
+                {DAWN.drive}
               </button>
             </div>
           </>

@@ -17,7 +17,8 @@ export const DAWN = {
   // the Bypass hints under the shops
   hintNew: 'Sal never made it up here. New road, new crew. Bring Goodwill: the bank turns it into Equity.',
   hintLease: 'Bypass leases cost Equity, not dollars. Convert Goodwill from Route 9, or win it here.',
-  hintDone: 'Somebody is surveying Route 9 North. Not yet.',
+  drive: 'Take the Bypass',
+  hintDone: 'Both roads are yours. Farm them, or pave Route 9 and run it again faster.',
   // the Off-Ramp
   bar: 'THE OFF-RAMP',
   barGo: 'Stop in at the Off-Ramp',
