@@ -7,10 +7,11 @@ import { fmtClock } from './format';
 const FOOTERS = ['NO REFUNDS. NO EXCEPTIONS.', 'PARKING VALIDATED: NEVER', 'THANK YOU FOR SHOPPING', 'ASK ABOUT OUR VACANCIES', 'NOT A TAX RECEIPT', 'NO LOITERING.']; // short: the footer is one line, always
 export const receipt = { open: false };
 
-export function Receipt() {
+// tall: the pylon has its Asphalt row, so the rolled-up receipt shows a fifth line and stays as tall as the sign
+export function Receipt({ tall }: { tall: boolean }) {
   const s = app.s;
   const all = s.log.filter((l) => l.r === s.view).reverse();
-  const lines = receipt.open ? all : all.slice(0, 4); // four lines rolled up, so the printer is no taller than the pylon
+  const lines = receipt.open ? all : all.slice(0, tall ? 5 : 4);
   const toggle = (e: MouseEvent) => {
     const el = (e.currentTarget as HTMLElement).closest('.printer') as HTMLElement;
     if (!receipt.open) el.style.setProperty('--printer-h', `${el.offsetHeight}px`);
@@ -19,7 +20,7 @@ export function Receipt() {
     app.refresh();
   };
   return (
-    <section class={`printer ${receipt.open ? 'open' : ''}`}>
+    <section class={`printer ${receipt.open ? 'open' : ''} ${tall ? 'tall' : ''}`}>
       <button class="printer-head" onClick={toggle} {...tip(receipt.open ? 'Roll it back up' : 'Unroll the receipt', `The last ${all.length} lines.`)}>
         <span>{REGIONS[s.view].chrome.mgmt} · ACTIVITY</span>
         <span class="printer-light" />

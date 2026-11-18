@@ -9,7 +9,8 @@ import { lumps, rateLabel, type RateKey } from '../game/rates';
 import { MACHINES, roomOpen } from '../game/room';
 import { FZ_LOGO, icon, barLogoURL, titleSignURL } from './art';
 import { fzOff, signOut } from './lights';
-import { fmt, fmtClock, fmtWL } from './format';
+import { fmt, fmtClock } from './format';
+import { fightRate } from '../game/sim';
 import { Receipt } from './Receipt';
 import { Speaker } from './Speaker';
 
@@ -95,6 +96,8 @@ export function Pylon({ room = false }: { room?: boolean }) {
     return () => ro.disconnect();
   }, []);
   const cashKey: RateKey = r ? 'cash1' : 'cash0';
+  const rate = fightRate(s, r, c.at); // this fight's recent record
+  const pct = rate ? Math.round(rate.won * 100) : 0;
   const bar = room && r === 1;
   return (
     <header class={`roadside ${room ? (r ? 'in-room pub' : 'in-room fz') : ''}`} ref={ref}>
@@ -117,7 +120,7 @@ export function Pylon({ room = false }: { room?: boolean }) {
           <i />
         </div>
       </div>
-      <Receipt />
+      <Receipt tall={!room && s.asphalt > 0} />
       <Doors room={room} />
       {app.speed !== 1 && <div class="debug">debug ×{app.speed}</div>}
       <div class="led-sign">
@@ -127,10 +130,10 @@ export function Pylon({ room = false }: { room?: boolean }) {
               {DAWN.hwy[r]}
             </button>
           )}
-          <div class="led" {...tip(REGIONS[r].name, `${c.wins} fights won, ${c.losses} lost.`, `${fmtClock(s.totalTime)} on the clock, all runs.`, 'The board was $40 a month. It shows.')}>
+          <div class="led" {...tip(REGIONS[r].name, rate ? `${pct}% of the last ${rate.n} fights won here.` : 'No fights here yet.', `${fmt(c.wins)} won, ${fmt(c.losses)} lost since the last pave.`, `${fmtClock(s.totalTime)} on the clock, all runs.`, 'The board was $40 a month. It shows.')}>
             <span class="cell wl">
-              {fmtWL(c.wins)}-{fmtWL(c.losses)}
-              <small>W-L</small>
+              {rate ? `${pct}%` : '--'}
+              <small>WIN</small>
             </span>
             <span class="cell clock">
               {fmtClock(s.totalTime)}

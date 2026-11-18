@@ -200,6 +200,7 @@ button { font: inherit; }
 /* closed: 4 lines + pinned tagline, fixed height so the bar does not bounce; padding keeps the tear in the grass above the curb */
 .printer:not(.open) { padding-bottom: 18px; overflow: visible; }
 .printer:not(.open) .paper { height: 112px; overflow: visible; }
+.printer.tall:not(.open) .paper { height: 132px; }
 .printer.open { height: 0; min-height: var(--printer-h, 168px); overflow: visible; padding-bottom: 0; }
 .printer.open .paper { position: absolute; top: 34px; left: 0; right: 0; margin: 0 26px; max-height: 460px; overflow: visible; box-shadow: 0 8px 0 rgba(0,0,0,0.35); }
 .printer.open .paper ul { overflow-y: auto; max-height: 420px; }
