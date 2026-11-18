@@ -132,11 +132,13 @@ button { font: inherit; }
 /* the lot, seen through the storefront glass */
 .glass { padding: 4px 6px 6px; border: 14px solid; border-image: var(--glass) 7 fill / 14px; }
 .zones { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 4px; margin-bottom: 6px; }
-.zone { padding: 1px 3px; font-size: 15px; border: 6px solid; border-image: var(--lotsign) 3 fill / 6px; }
+.zone { padding: 1px 3px; font-size: 15px; min-width: 0; border: 6px solid; border-image: var(--lotsign) 3 fill / 6px; }
+.zones.many { gap: 2px; }
+.zones.many .zone { padding: 1px; }
 .zone.locked { opacity: 0.55; }
 .zone.current { border-image-source: var(--lotsign-now); }
 .zone.done { border-image-source: var(--lotsign-done); }
-.zone-name { color: var(--paper); cursor: help; }
+.zone-name { color: var(--paper); cursor: help; white-space: nowrap; overflow: hidden; }
 .zone-sub { color: var(--stone); }
 .weak { display: inline-grid; place-items: center; width: 16px; height: 16px; font-size: 14px; color: var(--paper); margin-right: 2px; border: 2px solid var(--ink); cursor: help; }
 .field-head { display: flex; gap: 6px; align-items: center; margin-bottom: 3px; }
@@ -313,6 +315,7 @@ button { font: inherit; }
 .og-attract:hover:not(:disabled) { background: var(--violet); }
 .og-play:disabled, .og-attract:disabled { opacity: 0.5; cursor: default; }
 @media (max-width: 760px) {
+  .zones { grid-template-columns: repeat(var(--half), minmax(0, 1fr)); } /* the lot track in two rows */
   .open-game { left: 6px; right: 6px; overflow-y: auto; }
   .og-body { flex-direction: column; }
   .og-screen { flex: none; height: 52vh; }

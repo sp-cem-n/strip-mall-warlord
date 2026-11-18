@@ -37,7 +37,7 @@ check('every battler and shop id resolves', SHOP_LIST.every((x) => BATTLERS[x.ba
 check('every enemy weakness is a battler that region can field', REGIONS.every((r) => r.lots.every((l) => [...l.regulars, l.boss].every((e) => [...SHOP_LIST.filter((x) => x.region === r.id).map((x) => x.battler), ...bosses(r.id)].includes(e.weak)))));
 check('every battler and enemy has its own look', Object.keys(BATTLERS).every((id) => CREW_LOOKS[id] || bosses(0).includes(id) || bosses(1).includes(id)) && REGIONS.every((r) => r.lots.every((l) => [...l.regulars, l.boss].every((e) => ENEMY_LOOKS[e.name]))));
 check('shops unlock in lease order', [0, 1].every((r) => { const l = SHOP_LIST.filter((x) => x.region === r && x.fight >= 0).map((x) => FIGHTS[r].findIndex((f) => f.zone === x.zone && f.i === x.fight)); return l.every((v, i) => v >= 0 && (i === 0 || v >= l[i - 1])); }));
-check('fight ladders: Route 9 84, Bypass 56', FIGHTS[0].length === 84 && FIGHTS[1].length === 56);
+check('fight ladders: Route 9 84, Bypass 106', FIGHTS[0].length === 84 && FIGHTS[1].length === 106 && REGIONS[1].lots.length === 9 && SHOP_LIST.filter((x) => x.region === 1).length === 21);
 check('a boss rematch pays like a regular win; only the capture pays BOSS_PAY', FIGHTS.every((L) => L.every((f, i) => !f.boss || f.pay <= L[i - 1].pay * 1.5)));
 {
   const t = newGame(3);

@@ -21,7 +21,7 @@ export function ZoneTrack({ r }: { r: RegionId }) {
   const cur = CURRENCY_SHORT[REGIONS[r].trainIn];
   const price = (z: number) => patrolPrice(s, r, z);
   return (
-    <div class="zones">
+    <div class={`zones${REGIONS[r].lots.length > 6 ? ' many' : ''}`} style={{ '--half': Math.ceil(REGIONS[r].lots.length / 2) }}>
       {REGIONS[r].lots.map((z, i) => {
         const start = FIGHTS[r].findIndex((f) => f.zone === i);
         const total = z.fights + 1;

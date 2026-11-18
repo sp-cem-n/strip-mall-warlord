@@ -13,7 +13,7 @@ const MATERIAL: Record<Material, { wall: number; trim: number; grime: number }> 
   bypass: { wall: C.paper, trim: C.navy, grime: C.stone }, // EIFS, brand new, still white
 };
 
-type Decor = 'arcade' | 'bar' | 'dojo' | 'smokes' | 'laundromat' | 'pawn' | 'payday' | 'desk' | 'shelves' | 'chair' | 'mic' | 'beds' | 'gym' | 'pets' | 'radio' | 'tooth' | 'tan' | 'wash' | 'storage' | 'golf' | 'dress' | 'film' | 'pretzel';
+type Decor = 'arcade' | 'bar' | 'dojo' | 'smokes' | 'laundromat' | 'pawn' | 'payday' | 'desk' | 'shelves' | 'chair' | 'mic' | 'beds' | 'gym' | 'pets' | 'radio' | 'tooth' | 'tan' | 'wash' | 'storage' | 'golf' | 'dress' | 'blocks' | 'cup' | 'photo' | 'film' | 'pretzel';
 interface ShopArt { text: string; bg: number; fg: number; awning: number; decor: Decor; label?: string }
 const A = (text: string, bg: number, fg: number, awning: number, decor: Decor, label?: string): ShopArt => ({ text, bg, fg, awning, decor, label });
 // one sign per shop; Bypass franchises reuse the original's sign
@@ -48,6 +48,11 @@ const SHOP_ART: Record<string, ShopArt> = {
   bridal: A('BRIDAL', C.paper, C.neon, C.bone, 'dress'),
   cineplex: A('CINEMA', C.ink, C.sodiumLight, C.red, 'film'),
   pretzel: A('PRETZEL', C.sodium, C.umber, C.sodiumLight, 'pretzel'),
+  temp: A('TEMPS', C.bone, C.navy, C.blue, 'desk', 'HIRING'),
+  daycare: A('DAYCARE', C.sodiumLight, C.red, C.mint, 'blocks'),
+  espresso: A('COFFEE', C.forest, C.paper, C.umber, 'cup'),
+  portraits: A('PHOTO', C.violet, C.paper, C.neon, 'photo'),
+  disc: A('DISC', C.ink, C.mint, C.violet, 'shelves', 'CDS'),
   mgmt: A('MGMT', C.navy, C.paper, C.sodium, 'desk', 'OFFICE'),
 };
 for (const [id, base] of [['dojo2', 'dojo'], ['security2', 'security'], ['laundry2', 'laundromat'], ['payday2', 'payday'], ['party2', 'party'], ['grooming2', 'grooming']]) SHOP_ART[id] = SHOP_ART[base];
@@ -154,6 +159,24 @@ function interior(g: Grid, art: ShopArt) {
     case 'dress':
       g.text('SAY YES', 6, 26, C.neon);
       for (const x of [9, 25]) g.block(x + 2, 30, 6, 5, C.paper).rect(x, 35, 10, 10, C.paper).hline(x, 44, 10, C.bone);
+      break;
+    case 'blocks': // a cubby wall and the alphabet blocks
+      g.text('ABC', 7, 26, C.red);
+      for (let i = 0; i < 4; i++) g.rect(7 + i * 8, 31, 6, 5, [C.red, C.blue, C.sodium, C.green][i]).px(9 + i * 8, 33, C.paper);
+      g.rect(11, 39, 5, 5, C.sodium).rect(17, 39, 5, 5, C.blue).rect(14, 34, 5, 5, C.red);
+      g.hline(5, 44, 36, C.stone);
+      break;
+    case 'cup': // the menu board and one machine
+      g.text('LATTE', 6, 26, C.sodiumLight);
+      g.rect(6, 31, 16, 8, C.ink).hline(7, 33, 12, C.paper).hline(7, 35, 9, C.paper);
+      g.block(26, 33, 11, 9, C.stone).rect(28, 35, 7, 3, C.paper).vline(31, 38, 2, C.umber);
+      g.block(5, 42, 36, 4, C.umber).rect(9, 39, 3, 3, C.paper);
+      break;
+    case 'photo': // a backdrop, the umbrella light, a sample 8x10
+      g.text('8X10', 7, 26, C.neon);
+      g.dither(6, 31, 18, 15, C.blue).dither(6, 31, 18, 15, C.violet, 1);
+      g.hline(26, 31, 9, C.paper).hline(27, 32, 7, C.paper).vline(30, 33, 12, C.stone);
+      g.boxed(34, 34, 6, 8, C.paper).rect(36, 36, 2, 2, C.skin);
       break;
     case 'film':
       g.text('TONIGHT', 6, 26, C.sodiumLight);

@@ -10,6 +10,7 @@
 //   ?roster=full    Route 9 finished: all 19 shops at Lv 45 and the 6 bosses on the crew (25 on the field)
 //   ?win=1          with roster=full: show the dawn win card
 //   ?region=1       watch the Bypass crew (needs the Bypass found: roster=full does that)
+//   ?lots=N         with region=1: the first N Bypass lots captured, every unit open by then leased at Lv 20 (9: all 21)
 //   ?away=SEC       pretend the tab was closed SEC seconds ago (stats on the title screen)
 //   ?oldsave=1      show the "lease was renegotiated" notice
 //   ?screen=NAME    boot | howto | story | game | room (default: boot)
@@ -49,6 +50,13 @@ export function applyDebug(q: URLSearchParams) {
     if (q.get('region') === '1') {
       app.s.view = 1;
       app.s.equity = 140;
+      const n = num('lots', 0);
+      if (n) {
+        const b = app.s.crews[1];
+        b.frontier = n >= 9 ? FIGHTS[1].length : FIGHTS[1].findIndex((f) => f.zone === n);
+        b.at = Math.min(b.frontier, FIGHTS[1].length - 1);
+        for (const sh of SHOP_LIST) if (sh.region === 1 && (sh.fight < 0 || FIGHTS[1].findIndex((f) => f.zone === sh.zone && f.i === Math.min(sh.fight, 99)) <= b.frontier || sh.zone < n)) b.shops[sh.id] = 20;
+      }
       for (let i = 0; i < 2000; i++) step(app.s);
     }
   }

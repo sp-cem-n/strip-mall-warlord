@@ -160,7 +160,7 @@ export const MACHINES: MachineDef[] = [
     },
   },
   {
-    id: 'poker', region: 1, name: 'Video Poker', blurb: 'Jacks or Better. Click to hold, then draw. Pays in rumor slips.', needs: 'Clear fight 6 at the Corporate Campus', unlock: or((s) => cleared(s, 1, 1, 5)), cost: rentCost(10, 1), secs: 10, cool: 600,
+    id: 'poker', region: 1, name: 'Video Poker', blurb: 'Jacks or Better. Click to hold, then draw. Pays in rumor slips.', needs: 'Clear fight 6 at the Corporate Campus', unlock: or((s) => cleared(s, 1, 2, 5)), cost: rentCost(10, 1), secs: 10, cool: 600,
     pay: (_s, q) => {
       const tier = Math.round(q * 4);
       if (!tier) return { text: 'Nothing.' };
@@ -169,24 +169,24 @@ export const MACHINES: MachineDef[] = [
     },
   },
   {
-    id: 'foos', region: 1, name: 'Foosball', blurb: 'First to five. Move (or A/D) to line up a man; click or Space to shoot.', needs: 'Capture the Corporate Campus', unlock: or((s) => cleared(s, 1, 1, REGIONS[1].lots[1].fights)), cost: rentCost(20, 1), secs: 60, cool: 0,
+    id: 'foos', region: 1, name: 'Foosball', blurb: 'First to five. Move (or A/D) to line up a man; click or Space to shoot.', needs: 'Capture County Center Drive', unlock: or((s) => cleared(s, 1, 3, REGIONS[1].lots[3].fights)), cost: rentCost(20, 1), secs: 60, cool: 0,
     pay: (s, q) => ({ equity: winPay(s, 1) * 8 * q, big: q >= 1, text: q >= 1 ? 'Five-nothing. They want a rematch.' : `${Math.round(q * 5)} goals.` }),
   },
   {
-    id: 'shuffle', region: 1, name: 'Shuffleboard', blurb: 'Six pucks against the house. Aim, hold for power, knock his off. The far end is worth more.', needs: 'Capture Town Center, Phase II', unlock: or((s) => cleared(s, 1, 2, REGIONS[1].lots[2].fights)), cost: rentCost(15, 1), secs: 30, cool: 0,
+    id: 'shuffle', region: 1, name: 'Shuffleboard', blurb: 'Six pucks against the house. Aim, hold for power, knock his off. The far end is worth more.', needs: 'Capture Town Center, Phase II', unlock: or((s) => cleared(s, 1, 5, REGIONS[1].lots[5].fights)), cost: rentCost(15, 1), secs: 30, cool: 0,
     pay: (s, q) => ({ equity: winPay(s, 1) * 2 * q, text: `${Math.round(q * SHUFFLE_TOP)} points.` }),
   },
   {
-    id: 'blackjack', region: 1, name: 'Blackjack', blurb: 'The bartender deals. Hit, stand, double down or split; the dealer stands on 17. H S D P: Hit / Stand / Double / Split.', needs: 'Clear fight 4 at the Corporate Campus', unlock: or((s) => cleared(s, 1, 1, 3)), cost: rentCost(20, 1), secs: 15, cool: 0,
+    id: 'blackjack', region: 1, name: 'Blackjack', blurb: 'The bartender deals. Hit, stand, double down or split; the dealer stands on 17. H S D P: Hit / Stand / Double / Split.', needs: 'Clear fight 4 on Frontage Road', unlock: or((s) => cleared(s, 1, 1, 3)), cost: rentCost(20, 1), secs: 15, cool: 0,
     // q is hands won over two (a double or a split can win two); exactly BJ_Q is a natural, the cash jackpot
     pay: (s, q) => (q === BJ_Q ? { cash: bypassRent(s) * 90, big: true, text: 'Blackjack. Paid in cash.' } : q > 0 ? { equity: winPay(s, 1) * 3 * q * 2, big: q >= 1, text: q >= 1 ? 'Doubled and won.' : 'Beat the house.' } : { text: 'The house wins.' }),
   },
   {
-    id: 'fairway', region: 1, name: 'Fairway 9', blurb: 'Bar golf, a short nine, par 36. Aim, pull the trackball back to load the swing, roll it forward to hit. Water: +1.', needs: 'Clear fight 4 at Town Center, Phase II', unlock: or((s) => cleared(s, 1, 2, 3)), cost: rentCost(20, 1), secs: 60, cool: 0,
+    id: 'fairway', region: 1, name: 'Fairway 9', blurb: 'Bar golf, a short nine, par 36. Aim, pull the trackball back to load the swing, roll it forward to hit. Water: +1.', needs: 'Clear fight 4 at Fairway Pointe', unlock: or((s) => cleared(s, 1, 4, 3)), cost: rentCost(20, 1), secs: 60, cool: 0,
     pay: (s, q) => ({ equity: winPay(s, 1) * 7 * q, big: q >= 1, text: q >= 1 ? 'Under par. The regulars want to see the card.' : q > 0.5 ? 'A decent card.' : 'Lost a few balls.' }),
   },
   {
-    id: 'trivia', region: 1, name: 'Bar Trivia', blurb: 'Five questions. Faster is more points.', needs: DAWN.needsGalleria, unlock: or((s) => cleared(s, 1, 3, 5)), cost: rentCost(10, 1), secs: 50, cool: 600,
+    id: 'trivia', region: 1, name: 'Bar Trivia', blurb: 'Five questions. Faster is more points.', needs: 'Capture Crossroads 16', unlock: or((s) => cleared(s, 1, 7, REGIONS[1].lots[7].fights)), cost: rentCost(10, 1), secs: 50, cool: 600,
     pay: (_s, q) => {
       const right = Math.round(q * 5);
       if (right >= 5) return { buff: 'genius', big: true, text: `Five for five: ${BUFFS.genius.does} for 10 min.` };

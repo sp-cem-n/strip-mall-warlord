@@ -29,10 +29,8 @@ export const DAWN = {
   barSign: 'OFF-RAMP',
   // the green highway sign over the scoreboard: where it takes you from each road
   hwy: ['BYPASS ▸', '◂ RT 9'],
-  galleriaSign: 'BYPASS GALLERIA',
   needsOffRamp: 'Lease the Off-Ramp',
   needsExit14: 'Capture the Exit 14 Power Center',
-  needsGalleria: 'Clear fight 6 at the Bypass Galleria',
   quiz: '+10% Equity per win',
   genius: '+25% Equity per win',
   chairman: '+10% Equity per win.',

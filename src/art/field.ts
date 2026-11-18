@@ -1,5 +1,5 @@
 // The parking-lot battlefields (320x150) and the title scene.
-import { DAWN } from '../game/content/dawn';
+import { BYPASS_SKY as SKY } from '../game/content/bypass';
 import { Grid, hash } from './grid';
 import { C } from './palette';
 import { awning, facade, sign } from './storefronts';
@@ -53,23 +53,76 @@ const SKYLINE: Record<string, (g: Grid) => void> = {
     for (let i = 0; i < 12; i++) g.vline(20 + i * 26, 40, 6, C.neon); // surveyor flags
     g.rect(112, 38, 14, 4, C.sodium).rect(117, 32, 6, 6, C.sodium).rect(118, 33, 4, 3, C.night).rect(111, 42, 16, 3, C.ink).hline(112, 43, 14, C.stone).rect(106, 37, 3, 7, C.stone).hline(109, 40, 3, C.stone).vline(124, 34, 4, C.stone); // a bulldozer, engine running
   },
+  // The Bypass, same rule: a lit sign with a tube out (or something just as wrong) and one joke prop. Words live in content/bypass.ts.
   power: (g) => {
     for (const [x, w, label, c] of [[10, 90, 'SPORTS DEPOT', C.blue], [110, 100, 'HOME WAREHOUSE', C.sodium], [220, 90, 'PETZONE', C.red]] as const) g.boxed(x, 20, w, 26, C.stone).hline(x, 20, w, c).text(label, x + 4, 26, c);
+    g.vline(190, 8, 12, C.concrete).vline(214, 8, 12, C.concrete);
+    sign(g, 184, 2, SKY.power.sign, C.forest, C.paper, SKY.power.out, 1, 36); // the highway sign, floodlit
+    g.px(186, 9, C.sodiumLight).px(212, 9, C.sodiumLight);
+    for (let i = 0; i < 5; i++) // cones on a pallet in the cart corral, since opening day
+      g.rect(52 + i * 4, 39, 3, 4, C.sodium).px(53 + i * 4, 38, C.sodium).hline(52 + i * 4, 41, 3, C.paper);
+    g.hline(50, 43, 22, C.umber);
+  },
+  frontage: (g) => {
+    g.boxed(16, 22, 120, 24, C.bone);
+    for (let x = 22; x < 130; x += 12) g.rect(x, 28, 7, 6, C.night).rect(x + 2, 36, 4, 9, C.umber);
+    g.vline(150, 10, 36, C.concrete);
+    sign(g, 140, 3, 'NO', C.night, C.neon, [0, 1], 1, 14); // the NO went first
+    sign(g, 154, 3, SKY.frontage.sign, C.navy, C.neon, SKY.frontage.out, 1, 36);
+    g.vline(232, 24, 22, C.stone).vline(290, 24, 22, C.stone).boxed(212, 6, 98, 20, C.paper).text(SKY.frontage.board, 216, 9, C.red).text('24 HRS', 216, 17, C.navy);
+    g.rect(170, 38, 18, 5, C.red).rect(172, 34, 8, 4, C.red).vline(186, 30, 8, C.stone).hline(186, 30, 5, C.stone).px(173, 44, C.ink).px(184, 44, C.ink); // the tow truck
   },
   campus: (g) => {
     g.boxed(60, 6, 90, 40, C.navy).boxed(170, 14, 90, 32, C.navy);
     for (let y = 8; y < 46; y += 4) g.hline(61, y, 88, C.blue).hline(171, y + 8 > 45 ? 45 : y + 8, 88, C.blue);
+    sign(g, 76, 10, SKY.campus.sign, C.navy, C.mint, SKY.campus.out);
     g.rect(150, 40, 20, 6, C.blue).px(160, 36, C.paper).px(159, 37, C.paper).px(161, 37, C.paper); // the fountain, on, aggressively
+    for (const x of [146, 152, 173]) g.rect(x, 41, 3, 2, C.bone).px(x + 3, 40, C.ink).px(x + 3, 39, C.bone); // the geese
+  },
+  county: (g) => {
+    g.boxed(30, 14, 100, 32, C.bone);
+    for (let x = 36; x < 128; x += 12) g.rect(x, 22, 4, 22, C.paper);
+    for (let i = 0; i < 8; i++) g.hline(40 + i * 5, 14 - i, 82 - i * 10, C.bone); // the courthouse pediment
+    g.boxed(180, 18, 100, 28, C.concrete).text(SKY.county.bank, 196, 22, C.paper);
+    g.vline(250, 6, 12, C.stone);
+    sign(g, 238, 0, `${SKY.county.sign}F`, C.night, C.sodium, [], 1, 26); // stuck on 88
+    for (let i = 0; i < 12; i++) g.rect(132 + i * 4, 40, 2, 5, [C.red, C.blue, C.green, C.sodium, C.violet][i % 5]).px(132 + i * 4, 39, C.skin); // the DMV line, out the door and around the building
+  },
+  fairway: (g) => {
+    for (let x = 0; x < 320; x++) g.vline(x, 38 + Math.floor(hash(x >> 3, 9) * 4), 8, C.forest);
+    for (const x of [20, 70, 120]) g.boxed(x, 26, 36, 14, C.paper).px(x + 18, 20, C.brick).hline(x + 2, 25, 32, C.brick).hline(x + 6, 23, 24, C.brick).hline(x + 12, 21, 12, C.brick);
+    sign(g, 170, 4, SKY.fairway.sign, C.forest, C.paper, SKY.fairway.out);
+    g.rect(170, 13, 104, 7, C.paper).text(SKY.fairway.sub, 172, 14, C.forest);
+    g.boxed(230, 30, 50, 14, C.bone).rect(236, 33, 8, 6, C.night).rect(258, 33, 8, 6, C.night).px(261, 35, C.paper).px(260, 34, C.bone).px(262, 36, C.bone); // the trailer and its window
   },
   towncenter: (g) => {
     g.vline(80, 2, 44, C.sodium).hline(60, 2, 80, C.sodium).vline(130, 2, 10, C.stone); // crane
-    g.boxed(150, 18, 140, 28, C.bone).text('LIVE WORK PLAY', 166, 26, C.violet);
+    g.boxed(150, 18, 140, 28, C.bone);
+    sign(g, 160, 22, SKY.towncenter.sign, C.violet, C.paper, SKY.towncenter.out); // PLAY went first
     for (let x = 20; x < 140; x += 10) g.vline(x, 30, 16, C.concrete);
+    g.rect(240, 33, 30, 10, C.sodiumLight).rect(244, 35, 4, 8, C.tan).rect(252, 36, 3, 7, C.tan).rect(260, 38, 3, 5, C.tan).px(245, 34, C.tan).px(253, 35, C.tan); // the cardboard family in the model unit
+  },
+  bargain: (g) => {
+    g.boxed(10, 16, 300, 30, C.stone);
+    g.text(SKY.bargain.ghost, 30, 20, C.concrete, 2); // the dead anchor, its letters' ghosts
+    sign(g, 130, 34, SKY.bargain.sign, C.red, C.paper, SKY.bargain.out);
+    g.px(128, 33, C.sodiumLight).px(205, 33, C.sodiumLight);
+    g.rect(220, 40, 60, 6, C.navy).dither(220, 40, 60, 6, C.blue);
+    for (const x of [230, 252]) g.hline(x, 39, 8, C.stone).vline(x, 39, 3, C.stone).vline(x + 7, 39, 2, C.stone); // carts in the retention pond
+  },
+  crossroads: (g) => {
+    g.boxed(60, 12, 200, 34, C.concrete);
+    sign(g, 110, 2, SKY.crossroads.sign, C.ink, C.sodiumLight, SKY.crossroads.out);
+    g.boxed(90, 16, 140, 12, C.ink).text(SKY.crossroads.marquee, 96, 19, C.paper);
+    for (let x = 90; x < 230; x += 4) g.px(x, 15, (x / 4) % 2 ? C.sodiumLight : C.sodium).px(x, 28, (x / 4) % 2 ? C.sodium : C.sodiumLight); // chasing bulbs
+    g.rect(284, 40, 6, 6, C.stone);
+    for (let i = 0; i < 30; i++) g.px(286 - i, 40 - i, C.paper).px(287 - i, 40 - i, C.bone); // the searchlight
   },
   galleria: (g) => {
     g.boxed(20, 14, 280, 32, C.paper).hline(20, 14, 280, C.navy);
     g.boxed(140, 2, 40, 44, C.blue).dither(141, 3, 38, 42, C.mint);
-    g.text(DAWN.galleriaSign, 40, 26, C.navy);
+    sign(g, 40, 22, SKY.galleria.sign, C.paper, C.navy, SKY.galleria.out, 2);
+    g.rect(150, 36, 4, 3, C.bone).px(153, 35, C.bone).vline(151, 39, 3, C.bone).vline(152, 30, 6, C.sodium); // the carousel horse behind the glass
   },
 };
 

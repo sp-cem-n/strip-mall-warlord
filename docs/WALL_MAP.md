@@ -124,7 +124,9 @@ Units listed are what you can lease by that point (shop fight index in brackets)
 
 ---
 
-## 4. The Bypass, lot by lot (9 lots, DRAFT, Nov 18)
+## 4. The Bypass, lot by lot (9 lots, built Nov 18)
+
+*Built Nov 18 (stage 4):* this layout is in `content/bypass.ts`. The code still has two tells, so Thick, Armored and Bruiser walls are `tanky` regulars and Hard walls are `hard`; Crowd is the boss's escort count. The rest of §2 waits on the tells work. The skylines follow the V10_PLAN table; Crossroads 16 is "Movies" on the lot track.
 
 New crew, Equity wallet. The player already knows all four tells, so the Bypass remixes them in a different order, with new answers. Josh's call, Nov 18: **9 lots and 21 units**, because the longer road needs more milestones. The 4 existing lots keep their bosses; 5 lots are new. The full table (units, bosses, skylines, times) is in `V10_PLAN.md`, "Josh notes, Nov 18", item 11. This is the wall spine only. *est.* throughout.
 
