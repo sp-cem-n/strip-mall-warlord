@@ -26,14 +26,21 @@ import {
   retainOpen,
 } from '../game/sinks';
 import { fmt } from './format';
+import type { GameState } from '../game/state';
 
-const TRACKS: Record<Role, [string, string]> = {
+export const TRACKS: Record<Role, [string, string]> = {
   tank: ['Conditioning', 'tank HP'],
   damage: ['Sparring', 'damage dealer hits'],
   heal: ['First Aid', 'heals'],
   control: ['Paperwork', 'control effects and hits'],
   buffer: ['Team Building', 'buffer auras'],
 };
+
+// For hovers: the Back Office track that lifts this role, and where it stands.
+export function trainedBy(s: GameState, r: RegionId, role: Role) {
+  const lv = s.crews[r].train[role];
+  return `${TRACKS[role][0]} (${currencyOf(r)}) Lv ${lv}: +${Math.round(lv * TRAIN_STEP * 100)}% ${TRACKS[role][1]}`;
+}
 
 function Training({ r }: { r: RegionId }) {
   const s = app.s;

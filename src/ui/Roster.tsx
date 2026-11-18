@@ -6,6 +6,7 @@ import { enemyLineup, statsOf } from '../game/battle';
 import { autoPick, curb, fighters, lineupOf, slotsOf, toggleField } from '../game/economy';
 import { crewURL } from './art';
 import { fmt } from './format';
+import { trainedBy } from './BackOffice';
 
 export function closeRoster() {
   app.roster = false;
@@ -143,7 +144,7 @@ export function RosterPopup() {
                     key={id}
                     class={`fc ${d.role} ${on ? '' : 'bench'}`}
                     onClick={() => setField(id, !on)}
-                    {...tip(d.name, d.does, `${d.role} · Lv ${level}`, `HP ${fmt(hpNow)} / ${fmt(hpMax)}`, `DPS ${fmt(dp)}`)}
+                    {...tip(d.name, d.does, `${d.role} · Lv ${level} · HP ${fmt(hpNow)} / ${fmt(hpMax)} · DPS ${fmt(dp)}`, trainedBy(s, r, d.role))}
                   >
                     <div class="pt">
                       <img src={crewURL(id)} width={48} height={72} alt="" />
@@ -223,7 +224,7 @@ export function RosterPopup() {
               const who = bufferWho(d.fx, d.does);
               const chip = d.fx ? chipOf(d.fx, r) : d.does;
               return (
-                <div key={id} class="bc" {...tip(d.name, d.does, 'Always on. Does not take a field slot.')}>
+                <div key={id} class="bc" {...tip(d.name, d.does, 'Always on. Does not take a field slot.', trainedBy(s, r, d.role))}>
                   <img src={crewURL(id)} width={32} height={48} alt="" />
                   <div>
                     <div class="nm">{d.name}</div>

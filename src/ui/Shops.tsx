@@ -11,6 +11,7 @@ import { LANDMARKS, hasLandmark } from '../game/sinks';
 import type { GameState } from '../game/state';
 import { crewURL, facadeURL, landmarkURL, scaffoldURL } from './art';
 import { register } from './audio';
+import { trainedBy } from './BackOffice';
 import { fmt } from './format';
 
 const act = (err: string | null) => (err && toast(err), app.refresh());
@@ -93,7 +94,7 @@ function Unit({ sh }: { sh: ShopDef }) {
             {lv ? `Lv ${lv}` : 'NEW'}
           </span>
         </div>
-        <div class="crewline" {...tip(`${d.name}${lv ? ` · Lv ${lv}` : ''}`, d.does, `${d.role} · every ${d.interval}s`, d.line)}>
+        <div class="crewline" {...tip(`${d.name}${lv ? ` · Lv ${lv}` : ''}`, d.does, `${d.role} · every ${d.interval}s`, trainedBy(s, sh.region, d.role), d.line)}>
           <img src={crewURL(d.id)} width={16} height={24} alt="" />
           <span class="cl">
             <b class={`role-${d.role}`}>{d.name}</b>
@@ -161,7 +162,7 @@ function BreakRoom({ r }: { r: RegionId }) {
           const d = BATTLERS[id];
           const st = statsOf(s, r, id, lv);
           return (
-            <div key={id} class="bo" {...tip(d.name, d.does, statLine(d.role, st.hp, st.dmg), d.line)}>
+            <div key={id} class="bo" {...tip(d.name, d.does, statLine(d.role, st.hp, st.dmg), trainedBy(s, r, d.role), d.line)}>
               <img src={crewURL(id)} width={32} height={48} alt="" />
               <span>
                 <b class={`role-${d.role}`}>{d.name}</b>
