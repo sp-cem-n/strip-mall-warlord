@@ -45,9 +45,10 @@ const nums = args.filter((a) => /^[\d.]+$/.test(a)).map(Number);
 const flag = (k: string) => args.find((a) => a.startsWith(`--${k}=`))?.split('=')[1];
 const hours = nums[0] ?? 20;
 const seed = nums[1] ?? 1991;
-const every = Number(flag('every') ?? (args.includes('--active') ? 10 : 600));
+const every = Number(flag('every') ?? (args.includes('--active') || args.includes('--skilled') ? 10 : 600));
 const quiet = args.includes('--quiet');
-const o: BotOpts = { active: args.includes('--active'), room: args.includes('--room'), manual: !args.includes('--idle'), pave: flag('pave') === undefined ? undefined : Number(flag('pave')), convert: Number(flag('convert') ?? 0.5) };
+const skilled = args.includes('--skilled');
+const o: BotOpts = { active: skilled || args.includes('--active'), room: skilled || args.includes('--room'), skilled, manual: !args.includes('--idle'), pave: flag('pave') === undefined ? undefined : Number(flag('pave')), convert: Number(flag('convert') ?? 0.5) };
 
 let s: GameState = newGame(seed);
 const seen = new Set<string>();
@@ -104,7 +105,7 @@ while (s.totalTime < hours * 3600) {
   }
 }
 
-const mode = o.active ? (o.room ? 'active + room' : 'active') : o.manual ? 'check-in' : 'idle (never presses Advance)';
+const mode = o.skilled ? 'skilled' : o.active ? (o.room ? 'active + room' : 'active') : o.manual ? 'check-in' : 'idle (never presses Advance)';
 console.log(`Strip Mall Warlord balance: ${hours}h, seed ${seed}, ${mode}, acts every ${every}s${o.pave !== undefined ? `, paves after ${o.pave}h` : ''}, converts ${o.convert! * 100}% (${((Date.now() - t0) / 1000).toFixed(1)}s wall)\n`);
 console.log('Lot            captured   frontier W/L  loss%  HP left  all W/L   loss%  boss tries');
 for (const r of [0, 1] as const)
@@ -135,6 +136,7 @@ async function guard(): Promise<never> {
     { seed, mode: 'check-in', flags: [], route9: [14, 16] },
     { seed, mode: 'active', flags: ['--active', '--every=10'], route9: [11, 15.5] }, // ~12.5h on most seeds; about 1 in 5 lands near 15h
   ]);
+  runs.push({ seed: 1991, mode: 'skilled', flags: ['--skilled'], route9: [7, 12] }); // the skilled player: arcade, claw picks, smart farming; walls only, no loss floor
   const hrs = (t: string) => (t.includes('h') ? Number(t.split('h')[0]) + Number(t.split('h')[1].replace('m', '')) / 60 : Number(t.split(':')[0]) / 60);
   const out = await Promise.all(runs.map((r) => new Response(Bun.spawn([process.execPath, process.argv[1], '20', String(r.seed), ...r.flags, '--quiet', ...knobs]).stdout).text()));
   let bad = 0;
@@ -145,7 +147,7 @@ async function guard(): Promise<never> {
     const [l, n] = (/losses=(\d+)\/(\d+)/.exec(txt) ?? [0, 0, 1]).slice(1).map(Number);
     console.log(`seed ${r.seed} ${r.mode}: Route 9 at ${route9}, losses ${Math.round((100 * l) / n)}%`);
     if (route9 === '-' || hrs(route9) < r.route9[0] || hrs(route9) > r.route9[1]) fail(`Route 9 ending outside ${r.route9[0]}-${r.route9[1]}h`);
-    if (l / n < 0.1 || l / n > 0.3) fail('overall losses outside 10-30%');
+    if (r.mode !== 'skilled' && (l / n < 0.1 || l / n > 0.3)) fail('overall losses outside 10-30%');
     for (const row of txt.split('\n').filter((x) => /^\S.*\d+\/\d+\s+\d+%/.test(x))) {
       const lot = row.slice(0, 14).trim();
       const front = /(\d+)\/(\d+)\s+(\d+)%/.exec(row)!;

@@ -1,7 +1,8 @@
 // A scripted player for balance runs and the debug `advance` param. Plays like someone who checks in now and then.
 import { FIGHTS, RETRY_AFTER, ROLES, SHOPS, REGIONS, type RegionId } from './defs';
 import { advance, bal, buyPatrol, buySlot, convert, curb, forLease, leased, lease, lineupOf, lotsTaken, patrolBlock, patrolPrice, pave, purse, regionDone, renovate, renovateCost, slotPrice, topFight, train, trainCost, view } from './economy';
-import { collectFind } from './sim';
+import { collectFind, fightRate } from './sim';
+import { LANDMARKS, buyLandmark, landmarkCost, landmarkOpen } from './sinks';
 import type { GameState } from './state';
 import { GRAPEVINE, QUIZ, spendSlips, serviced, MACHINE, PINBALL_TOP, SHUFFLE_TOP, buffOn, buyPerk, endPlay, perkPrice, pokerQ, postScore, postShuffle, shelfOf, startPlay, type MachineId } from './room';
 import { rand } from './rng';
@@ -25,7 +26,7 @@ function barAct(s: GameState, o: BotOpts) {
     }
     o.barBudget! -= MACHINE[id].secs;
     if (startPlay(s, id)) continue;
-    const skill = 0.7 * (0.75 + 0.5 * rand(s));
+    const skill = (o.skilled ? 0.9 : 0.7) * (0.75 + 0.5 * rand(s));
     const q = id === 'poker' ? pokerQ(s, true) : id === 'trivia' ? Math.round((0.45 + 0.55 * rand(s)) * 5) / 5 : id === 'pool' ? (rand(s) < 0.05 ? 1 : Math.min(5, Math.round(skill * 6)) / 6) : id === 'darts' ? (rand(s) < 0.03 ? 1 : Math.min(0.95, skill * 0.8)) : Math.min(1, skill);
     if (id === 'shuffle') postShuffle(s, Math.round(q * SHUFFLE_TOP));
     endPlay(s, id, q, true);
@@ -54,7 +55,9 @@ function roomAct(s: GameState, o: BotOpts, dt: number) {
     }
     o.roomBudget -= MACHINE[id].secs;
     if (startPlay(s, id)) continue;
-    const q = id === 'cyclone' ? (rand(s) < 0.12 ? 1 : rand(s) < 0.4 ? 0.5 : 0) : id === 'claw' ? 0.6 : Math.min(1, 0.7 * (0.75 + 0.5 * rand(s)));
+    const good = o.skilled ? 0.9 : 0.7;
+    if (id === 'claw' && o.skilled) s.room.clawPick = s.crews[s.view].tries > 0 ? 'bat' : 'duck'; // a wall wants damage
+    const q = id === 'cyclone' ? (rand(s) < 0.12 ? 1 : rand(s) < 0.4 ? 0.5 : 0) : id === 'claw' ? (o.skilled ? 0.85 : 0.6) : Math.min(1, good * (0.75 + 0.5 * rand(s)));
     if (id === 'pinball') postScore(s, Math.round(q * PINBALL_TOP));
     endPlay(s, id, q, true);
   }
@@ -68,6 +71,7 @@ export interface BotOpts {
   doneAt?: number;
   convert?: number; // share of Goodwill converted to Equity once the Bypass is open
   room?: boolean; // plays the arcade / bar half the time it's online
+  skilled?: boolean; // the skilled player: active and in the room, plays the games well, picks its claw toy, farms the best-paying fight at a wall and buys the plaza's stat landmarks
   roomBudget?: number;
   barBudget?: number;
 }
@@ -118,7 +122,19 @@ function crewAct(s: GameState, r: RegionId, o: BotOpts) {
     if (slotPrice(s, r) <= 6 * trainCost(r, c.train[role]) && trainCost(r, c.train[role]) > purse(s, r) - slotPrice(s, r)) break;
     if (purse(s, r) < trainCost(r, c.train[role]) || train(s, r, role)) break;
   }
-  if (o.manual !== false && c.at < topFight(s, r) && c.farmed >= RETRY_AFTER) advance(s, r, 1);
+  if (o.skilled) skilledAct(s, r);
+  if (o.manual !== false && !c.parked && c.at < topFight(s, r) && c.farmed >= RETRY_AFTER) advance(s, r, 1);
+}
+
+// The skilled player at a wall: steps down to whichever recent fight has paid best, farms it a while, then tries again.
+// Spare Route 9 cash goes on the stat landmarks once one costs under a tenth of the till.
+function skilledAct(s: GameState, r: RegionId) {
+  const c = s.crews[r];
+  if (c.tries >= 2 && c.at === c.frontier) {
+    const best = [...Array(Math.min(6, c.frontier)).keys()].map((k) => c.frontier - 1 - k).map((f) => [f, fightRate(s, r, f)?.perSec ?? 0] as const).sort((a, b) => b[1] - a[1])[0];
+    if (best) while (c.at > best[0]) advance(s, r, -1);
+  } else if (c.parked && c.farmed >= 3 * RETRY_AFTER) advance(s, r, 1);
+  if (r === 0) for (const d of LANDMARKS) if (d.id !== 'billboard' && landmarkOpen(s, d.id) && landmarkCost(s, d.id) < c.cash / 10) buyLandmark(s, d.id);
 }
 
 export function botAct(s: GameState, o: BotOpts = {}, dt = 10): GameState {
