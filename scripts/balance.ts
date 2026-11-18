@@ -37,7 +37,8 @@ if (args.includes('--guard')) await guard();
 const { FIGHTS, REGIONS, SHOP_LIST } = await import('../src/game/defs');
 const { botAct, describeCrew } = await import('../src/game/bot');
 const { lotsTaken, newGame, rentPerSec } = await import('../src/game/economy');
-const { fightLabel, simulateAway, step } = await import('../src/game/sim');
+const { fightLabel, onScreen, simulateAway, step } = await import('../src/game/sim');
+for (const sh of SHOP_LIST) onScreen.add(sh.id); // the active player scrolls to whoever walks in
 const { fmt, fmtTime } = await import('../src/ui/format');
 
 const nums = args.filter((a) => /^[\d.]+$/.test(a)).map(Number);
