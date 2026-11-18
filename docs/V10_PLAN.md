@@ -6,7 +6,6 @@ Prep only. No source changes ship from this doc. The economy map was reviewed he
 
 **v1.0** is the finished game: the minigame overhaul, the post-REIT achievement layer, sound, and a clean repo. After that, only minor changes and bug fixes.
 
-Worktree note, leave as-is: Grapevine rumor slips are half-done and **uncommitted** in `/workspace/smw-v09` (`dawn.ts`, `room.ts`, `GameRoom.tsx`, `scripts/check.ts`). Do not mix them into unrelated commits.
 
 ## Build checklist (Nov 18, consolidated; this order wins)
 
@@ -16,6 +15,7 @@ Coding resumed Nov 18. Each stage ends with `bun scripts/check.ts`, `bun scripts
 2. **Economy and cohesion.** Item 10 overtime out (Gold Watch gets a new toy) · item 16 patrols in Goodwill, drop-back only on a patrolled lot, ◂ parks the crew · item 5 consultant = one post-dawn per-lot auto-renovation · items 4a and 14 boss 25× on first capture only, final bosses rematchable · item 3 one renovation rule · item 13 Plaza: contracts and dead formulas out, landmarks stack, effect on the card · item 15 farm-rate toggle · item 4b–c Equity pay and 20 GW/EQ · walk-ins pay Goodwill or a ticket chance with item 2's per-unit list · poker pays slips, shot glass out (one short boost per room) · skilled active-player sim.
    *Done Nov 18:* A3, overtime out, boss pay, item 16 patrols, item 5 consultants, item 13 Plaza, A7 break-room slots and the Big-Box AUTO gate, knobs retuned to the guard. Then: the Slap Bracelet replaces the Gold Watch, poker pays rumor slips (shot glass cut), item 3 renovation rule, items 4b–c Equity pay and 20 GW/EQ, walk-ins by per-unit list, the skilled sim and a six-seed guard, item 7 win rate and A6 receipt growth (Josh approved the mockups).
 3. **Start, theme, copy.** C1 "Flip the sign" · C2 dawn title · C3 copy pass with the uncle's lines · 1997 pass (Smoke Shop, the RadioShack-style store, Exit 14's "Opened 1998") · item 5 skylines and the Plaza's look.
+   *Done Nov 18:* C1 Flip the sign (Route 9 only; the Bypass waits for its gate), dawn as the Route 9 ending pointing at repave (the Bypass button stays until the gate lands), C2 dawn title, C3 copy pass with the uncle's lines, the 1997 pass (Smoke Shop, Radio Hut and its Sales Associate, Exit 14's grand opening, Segway → golf cart, LinkedIn → résumé, Brand Ambassador → Timeshare Rep, Say Yes to the Dress → "Something borrowed. Everything financed."), item 5 Route 9 skylines (lit sign with a tube out plus one prop each; the Bypass skylines wait for stage 4's mockups).
    *Held for the 2.5D Fun Zone room rework (Toad's `/workspace/smw-mockups/v10-rooms/`):* the Bypass stranger and gate (audit addition 1).
 4. **The 9-lot, 21-unit Bypass** (item 11) and the wall-map rework (`WALL_MAP.md` §2–5), Toad mockups for bosses and skylines first.
 5. **Minigame overhaul** (§4 D, all 15 games).

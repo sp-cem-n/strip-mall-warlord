@@ -2,43 +2,56 @@
 import { DAWN } from '../game/content/dawn';
 import { Grid, hash } from './grid';
 import { C } from './palette';
-import { facade } from './storefronts';
+import { awning, facade, sign } from './storefronts';
 import { titleSign } from './sign';
 
 // ---- the battlefield ----
+// Each Route 9 lot: its old gag, one lit sign with a tube out, and one joke prop. Signs and awnings are the storefront pieces.
 const SKYLINE: Record<string, (g: Grid) => void> = {
   lot: (g) => {
     for (let x = 0; x < 320; x++) g.vline(x, 34 + Math.floor(hash(x >> 3, 3) * 8), 12, C.forest);
     g.vline(54, 20, 26, C.concrete).boxed(30, 8, 40, 14, C.bone).text('RT 9', 42, 12, C.forest);
+    g.vline(250, 18, 28, C.concrete);
+    sign(g, 226, 4, 'MOTEL', C.navy, C.sodiumLight, [], 1, 48);
+    sign(g, 226, 12, 'NO VACANCY', C.night, C.neon, [0, 1], 1, 48); // the NO went years ago
+    g.boxed(118, 36, 11, 6, C.stone).vline(121, 37, 4, C.concrete).vline(124, 37, 4, C.concrete).hline(129, 36, 3, C.concrete).px(119, 43, C.concrete).px(127, 43, C.concrete); // the cart nobody owns, up on the berm
   },
   bigbox: (g) => {
     g.boxed(70, 14, 180, 32, C.concrete).hline(70, 14, 180, C.stone);
     g.text('CIRCUIT', 96, 18, C.red, 2).text('BARN', 160, 18, C.night, 2); // the second word's tubes went first
-    g.rect(200, 30, 40, 16, C.night).text('FOODWAY', 202, 33, C.sodium);
+    sign(g, 200, 30, 'FOODWAY', C.night, C.sodium, [4], 1, 40);
+    g.rect(204, 39, 32, 6, C.paper).text('NEW MGMT', 204, 40, C.red); // it keeps changing names
   },
   outlet: (g) => {
     g.boxed(10, 28, 300, 18, C.bone);
     for (let x = 20; x < 300; x += 46) for (let i = 0; i < 10; i++) g.hline(x + i, 27 - i, 20 - i * 2, C.paper);
-    g.text('PINE CREEK OUTLETS', 110, 34, C.teal);
+    sign(g, 104, 31, 'PINE CREEK OUTLETS', C.navy, C.mint, [14]);
+    awning(g, 30, 38, 40, C.red);
+    g.rect(240, 36, 30, 8, C.red).text('70% OFF', 242, 38, C.paper); // permanently
   },
   lifestyle: (g) => {
     g.boxed(20, 22, 280, 24, C.brick);
     for (let x = 22; x < 300; x += 6) g.vline(x, 24, 20, C.umber);
     g.boxed(150, 2, 20, 44, C.brick).rect(154, 8, 12, 12, C.paper).px(160, 11, C.ink).px(160, 13, C.ink).px(161, 14, C.ink);
-    g.text('THE PROMENADE', 40, 30, C.sodiumLight);
+    sign(g, 36, 28, 'THE PROMENADE', C.umber, C.sodiumLight, [6]);
+    awning(g, 200, 32, 64, C.forest);
+    g.text('WAIT 2 HRS', 212, 39, C.paper); // the cheesecake place
   },
   office: (g) => {
     for (const [x, w, h] of [[30, 60, 30], [110, 80, 38], [210, 70, 26]]) {
       g.boxed(x, 46 - h, w, h, C.concrete);
       for (let y = 50 - h; y < 44; y += 5) for (let i = x + 3; i < x + w - 3; i += 6) g.rect(i, y, 3, 2, hash(i, y) < 0.2 ? C.sodiumLight : C.night);
     }
-    g.text('SUNRISE', 128, 10, C.teal);
+    sign(g, 124, 4, 'SUNRISE', C.night, C.teal, [2]);
+    g.rect(214, 26, 62, 7, C.paper).text('SPACE AVAIL', 223, 27, C.navy); // since 1991
   },
   commons: (g) => {
     for (let x = 0; x < 320; x++) g.vline(x, 36 + Math.floor(hash(x >> 2, 17) * 6), 10, C.forest);
-    g.boxed(40, 30, 40, 14, C.bone).text('SALES', 48, 34, C.navy); // the trailer
+    g.boxed(40, 30, 40, 14, C.bone);
+    sign(g, 46, 32, 'SALES', C.navy, C.sodiumLight, [2], 1, 28); // the trailer
     g.boxed(186, 6, 120, 30, C.paper).text('PINEWOOD COMMONS', 196, 12, C.teal).text('COMING SOON', 212, 22, C.red).vline(206, 37, 9, C.stone).vline(286, 37, 9, C.stone);
     for (let i = 0; i < 12; i++) g.vline(20 + i * 26, 40, 6, C.neon); // surveyor flags
+    g.rect(112, 38, 14, 4, C.sodium).rect(117, 32, 6, 6, C.sodium).rect(118, 33, 4, 3, C.night).rect(111, 42, 16, 3, C.ink).hline(112, 43, 14, C.stone).rect(106, 37, 3, 7, C.stone).hline(109, 40, 3, C.stone).vline(124, 34, 4, C.stone); // a bulldozer, engine running
   },
   power: (g) => {
     for (const [x, w, label, c] of [[10, 90, 'SPORTS DEPOT', C.blue], [110, 100, 'HOME WAREHOUSE', C.sodium], [220, 90, 'PETZONE', C.red]] as const) g.boxed(x, 20, w, 26, C.stone).hline(x, 20, w, c).text(label, x + 4, 26, c);
