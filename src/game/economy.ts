@@ -92,7 +92,7 @@ export function cleared(s: GameState, r: RegionId, zone: number, i: number) {
 }
 export const lotsTaken = (s: GameState, r: RegionId) => REGIONS[r].lots.filter((l, z) => cleared(s, r, z, l.fights)).length;
 // Once a region is done its last boss is on your crew, so the crew farms the fight before him.
-export const topFight = (s: GameState, r: RegionId) => (regionDone(s, r) ? FIGHTS[r].length - 2 : Math.min(s.crews[r].frontier, FIGHTS[r].length - 1));
+export const topFight = (s: GameState, r: RegionId) => Math.min(s.crews[r].frontier, FIGHTS[r].length - 1);
 export const fightOf = (s: GameState, r: RegionId) => FIGHTS[r][Math.min(s.crews[r].at, FIGHTS[r].length - 1)];
 
 // Shops arrive in a fixed order as fights are cleared.

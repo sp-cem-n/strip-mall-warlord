@@ -1,4 +1,4 @@
-import { BATTLERS, FIGHTS, OFFLINE_CAP_SECONDS, RALLY_SECONDS, REFERRAL_WINS, REGIONS, RETRY_AFTER, SHOPS, SHOP_LIST, STEP, TIP_SECONDS, WALK_IN_SECONDS, WALKIN_EVERY, WALKIN_NAMES, WALKIN_STAYS, type FightDef, type RegionId, type WalkInKind } from './defs';
+import { BATTLERS, BOSS_PAY, FIGHTS, OFFLINE_CAP_SECONDS, RALLY_SECONDS, REFERRAL_WINS, REGIONS, RETRY_AFTER, SHOPS, SHOP_LIST, STEP, TIP_SECONDS, WALK_IN_SECONDS, WALKIN_EVERY, WALKIN_NAMES, WALKIN_STAYS, type FightDef, type RegionId, type WalkInKind } from './defs';
 import { pick } from './rng';
 import { lossReason, startBattle, stepBattle } from './battle';
 import { asphaltMult, autoCovers, available, currencyOf, earn, fightOf, leased, log, rentPerSec, smokeBreak, topFight } from './economy';
@@ -82,7 +82,8 @@ function resolve(s: GameState, r: RegionId, b: Battle, result: 'win' | 'loss') {
   if (b.crew.some((u) => u.hp <= 0)) smokeBreak(s, r); // somebody's down: smoke break before the next one
   else (c.regroup = 0), (c.smoke = 0); // already in line: no 0.4s dead air
   const f = ladder[b.fight];
-  const pay = payFor(s, r, f, b.field.payUp);
+  // a boss pays BOSS_PAY wins' worth once, on the capture; a rematch pays like any win there
+  const pay = payFor(s, r, f, b.field.payUp) * (f.boss && b.fight === c.frontier ? BOSS_PAY : 1);
   earn(s, r, REGIONS[r].pay, pay);
   s.stats[REGIONS[r].pay as 'goodwill' | 'equity'] += pay;
   record(s, r, b.fight, true, pay);

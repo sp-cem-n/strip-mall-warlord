@@ -1,7 +1,7 @@
 // The Lot panel: region tabs, the lot signs, the field, and the calls.
 import { app, tip, toast } from '../app';
 import { FIGHTS, REGIONS, type RegionId } from '../game/defs';
-import { advance, autoCovers, autoPick, bal, buySlot, curb, lineupOf, regionDone, slotPrice, slotsOf, topFight } from '../game/economy';
+import { advance, autoCovers, autoPick, bal, buySlot, curb, lineupOf, slotPrice, slotsOf, topFight } from '../game/economy';
 import { CURRENCY_SHORT } from '../game/defs';
 import { fmt } from './format';
 import { enemyLineup } from '../game/battle';
@@ -71,7 +71,6 @@ export function Lot() {
   const r = s.view;
   const c = s.crews[r];
   const ladder = FIGHTS[r];
-  const done = regionDone(s, r);
   const f = ladder[Math.min(c.at, ladder.length - 1)];
   const lot = REGIONS[r].lots[f.zone];
   const atFrontier = c.at === c.frontier;
@@ -93,7 +92,7 @@ export function Lot() {
         <span class="fh-main">
           <b>{boss ? boss.name : `${lot.name} · fight ${f.i + 1}/${lot.fights}`}</b>
           <span class="dim">
-            {done && c.at === ladder.length - 2 ? ' · keeping the lights on' : atFrontier ? ` · ${c.kills}/${f.need} wins to move up` : ` · farming (${c.farmed} wins)`}
+            {atFrontier ? ` · ${c.kills}/${f.need} wins to move up` : ` · farming (${c.farmed} wins)`}
             {tells.length ? ` · ${tells.map((t) => (t === 'tanky' ? 'tanky' : 'hits hard')).join(', ')}` : ''}
           </span>
         </span>

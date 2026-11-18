@@ -4,7 +4,7 @@ import { BATTLER_LIST } from './content/battlers';
 import { BYPASS, BYPASS_SHOPS, MGMT, SAL } from './content/bypass';
 import { BOSS } from './content/make';
 import { ROUTE9, ROUTE9_SHOPS } from './content/route9';
-import { BOSS_PAY, FIGHT_GROWTH, LOT_JUMP, PAY_BASE, PAY_GROWTH, WINS_FIRST, WINS_LAST } from './knobs';
+import { FIGHT_GROWTH, LOT_JUMP, PAY_BASE, PAY_GROWTH, WINS_FIRST, WINS_LAST } from './knobs';
 export * from './knobs';
 export { WALKIN_NAMES } from './content/battlers';
 
@@ -126,7 +126,7 @@ export const FIGHTS: FightDef[][] = REGIONS.map((r) => {
       const boss = i === lot.fights;
       const g = out.length;
       const per = PAY_BASE[r.id] * PAY_GROWTH[r.id] ** g;
-      out.push({ region: r.id, zone, i, boss, need: boss ? 1 : Math.round(WINS_FIRST + ((WINS_LAST - WINS_FIRST) * g) / (n - 1)), pay: Math.max(1, Math.round(boss ? per * BOSS_PAY : per)), strength: str });
+      out.push({ region: r.id, zone, i, boss, need: boss ? 1 : Math.round(WINS_FIRST + ((WINS_LAST - WINS_FIRST) * g) / (n - 1)), pay: Math.max(1, Math.round(per)), strength: str });
     }
   });
   return out;
