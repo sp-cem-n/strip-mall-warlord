@@ -228,7 +228,6 @@ function draw(ctx: CanvasRenderingContext2D, t: number, r: RegionId) {
   });
   let by = 132;
   if (c.rally > 0) text(ctx, `RALLY +25% ${Math.ceil(c.rally)}S`, 196, (by += 8), C.sodiumLight);
-  if (c.overtime > 0 || b?.overtime) text(ctx, `OVERTIME ${b?.overtime ? 'ON' : ''}`, 196, by - 8, C.mint);
 }
 
 function hitAt(r: RegionId, mx: number, my: number) {

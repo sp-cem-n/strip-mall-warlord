@@ -43,7 +43,6 @@ export interface Battle {
   enemies: Unit[];
   field: Field;
   revived: boolean;
-  overtime: boolean;
   fresh: boolean; // the crew started at full HP
   enter: number; // seconds left of the enemies walking in
 }
@@ -73,7 +72,6 @@ export interface Crew {
   battle: Battle | null;
   regroup: number; // seconds until the next fight
   smoke: number; // length of the current smoke break (0 = the next group is just walking in)
-  overtime: number; // fights left
   lineup: string[] | null; // fighters you picked for the lot; null = the auto pick
   contracts: number[]; // lots with a Patrol contract (auto-advance)
   slotBuys: number; // fighter slots bought in the Back Office

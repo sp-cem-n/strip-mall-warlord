@@ -147,8 +147,6 @@ button { font: inherit; }
 .zone.current .bar i { background: var(--sodium); }
 .auto { font-size: 13px; color: var(--concrete); }
 .auto.on { color: var(--mint); }
-.calls { display: flex; gap: 6px; align-items: center; margin-top: 5px; }
-.calls .btn:last-child { margin-left: auto; }
 .btn.hot { color: var(--ink); border-image-source: var(--btn-hot); }
 .role-tank { color: var(--red); } .role-damage { color: var(--sodium); } .role-control { color: var(--green); } .role-heal { color: var(--blue); } .role-buffer { color: var(--violet); }
 .cl b, .bo b, .legend b { font-weight: normal; }

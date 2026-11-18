@@ -1,7 +1,7 @@
 import { BATTLERS, FIGHTS, OFFLINE_CAP_SECONDS, RALLY_SECONDS, REFERRAL_WINS, REGIONS, RETRY_AFTER, SHOPS, SHOP_LIST, STEP, TIP_SECONDS, WALK_IN_SECONDS, WALKIN_EVERY, WALKIN_NAMES, WALKIN_STAYS, type FightDef, type RegionId, type WalkInKind } from './defs';
 import { pick } from './rng';
 import { lossReason, startBattle, stepBattle } from './battle';
-import { asphaltMult, autoCovers, available, currencyOf, earn, fightOf, leased, log, overtime, overtimeCost, rentPerSec, smokeBreak, topFight } from './economy';
+import { asphaltMult, autoCovers, available, currencyOf, earn, fightOf, leased, log, rentPerSec, smokeBreak, topFight } from './economy';
 import { tickSinks } from './sinks';
 import type { Battle, GameState } from './state';
 import { boardBonus, buffOn, perk, tickRoom } from './room';
@@ -27,11 +27,7 @@ export function step(s: GameState, watching = false) {
       if (c.queueEnter > 0) c.queueEnter = Math.max(0, c.queueEnter - STEP);
       const result = stepBattle(s, c.battle, STEP, c.rally > 0);
       if (result) resolve(s, r, c.battle, result);
-    } else if ((c.regroup -= STEP) <= 0) {
-      const f = FIGHTS[r][Math.min(c.at, FIGHTS[r].length - 1)];
-      if (f.boss && c.at === c.frontier && c.tries >= 2 && c.overtime === 0 && autoCovers(s, r, f.zone) && c.cash >= overtimeCost(s, r)) overtime(s, r);
-      if (!startBattle(s, r)) c.regroup = 1;
-    }
+    } else if ((c.regroup -= STEP) <= 0 && !startBattle(s, r)) c.regroup = 1;
   }
 }
 

@@ -1,13 +1,13 @@
 import { DAWN } from './content/dawn';
 import { enemyLineup, statsOf } from './battle';
-import { ASPHALT_BONUS, CURRENCY_NAME, type Currency, BATTLERS, FIGHTS, fightIndex, GOODWILL_PER_EQUITY, MAX_SLOTS, OVERTIME_FIGHTS, OVERTIME_SECONDS, REGIONS, RENO_GROWTH, RENT_GROWTH, ROLES, SMOKE_BREAK_SECONDS, SHOPS, SLOT_PRICES, START_SLOTS, SHOP_LIST, START_CASH, TRAIN_BASE, TRAIN_GROWTH, type RegionId, type Role, type ShopDef, LOG_KEEP, MGMT_RENT } from './defs';
+import { ASPHALT_BONUS, CURRENCY_NAME, type Currency, BATTLERS, FIGHTS, fightIndex, GOODWILL_PER_EQUITY, MAX_SLOTS, REGIONS, RENO_GROWTH, RENT_GROWTH, ROLES, SMOKE_BREAK_SECONDS, SHOPS, SLOT_PRICES, START_SLOTS, SHOP_LIST, START_CASH, TRAIN_BASE, TRAIN_GROWTH, type RegionId, type Role, type ShopDef, LOG_KEEP, MGMT_RENT } from './defs';
 import type { Crew, GameState, LogLine, Track } from './state';
 import { newRoom, perk } from './room';
 import { credit } from './rates';
 
 export const SAVE_VERSION = 5;
 const zeroTrack = (): Track => ({ tank: 0, damage: 0, heal: 0, control: 0, buffer: 0 });
-export const newCrew = (r: RegionId): Crew => ({ cash: START_CASH, shops: { [REGIONS[r].start]: 1 }, train: zeroTrack(), frontier: 0, at: 0, kills: 0, farmed: 0, tries: 0, wounds: {}, battle: null, regroup: 2, smoke: 0, overtime: 0, lineup: null, contracts: [], slotBuys: 0, rally: 0, wins: 0, losses: 0, queueEnter: -1, deck: 0, rec: {}, lastEnd: -1 });
+export const newCrew = (r: RegionId): Crew => ({ cash: START_CASH, shops: { [REGIONS[r].start]: 1 }, train: zeroTrack(), frontier: 0, at: 0, kills: 0, farmed: 0, tries: 0, wounds: {}, battle: null, regroup: 2, smoke: 0, lineup: null, contracts: [], slotBuys: 0, rally: 0, wins: 0, losses: 0, queueEnter: -1, deck: 0, rec: {}, lastEnd: -1 });
 
 export function newGame(seed = Date.now() % 2147483647): GameState {
   return {
@@ -135,8 +135,6 @@ export const rentOf = (s: GameState, id: string, level = s.crews[SHOPS[id].regio
 export const rentPerSec = (s: GameState, r: RegionId) => leased(s, r).reduce((a, x) => a + rentOf(s, x.id), 0) * (r === 0 ? sinkRentMult(s) : 1);
 export const renovateCost = (id: string, level: number) => Math.round(SHOPS[id].reno * RENO_GROWTH ** (level - 1));
 export const trainCost = (r: RegionId, level: number) => Math.round(TRAIN_BASE[r] * TRAIN_GROWTH ** level);
-export const overtimeCost = (s: GameState, r: RegionId) => Math.max(10, Math.round(rentPerSec(s, r) * OVERTIME_SECONDS * (r === 0 ? 1 - 0.25 * perk(s, 'otCheap') : 1)));
-export const overtimeFights = (s: GameState, r: RegionId) => OVERTIME_FIGHTS + (r === 0 ? perk(s, 'otLong') : 0);
 
 export function log(s: GameState, r: RegionId, text: string, tone: LogLine['tone'] = 'info', live = false) {
   if (live) {
@@ -306,18 +304,6 @@ export function advance(s: GameState, r: RegionId, dir: 1 | -1): string | null {
   c.farmed = 0;
   // A fight you haven't cleared: smoke break first. A cleared one gets in line behind whoever is already out there.
   if (to === c.frontier) (c.battle = null), smokeBreak(s, r);
-  return null;
-}
-
-// Overtime: pay two minutes of this crew's rent; the next 3 fights get +25% HP and damage.
-export function overtime(s: GameState, r: RegionId): string | null {
-  const c = s.crews[r];
-  if (c.overtime > 0) return 'Already on overtime';
-  const cost = overtimeCost(s, r);
-  const err = spend(s, r, 'cash', cost);
-  if (err) return err;
-  c.overtime = overtimeFights(s, r);
-  log(s, r, `Overtime approved. Next ${c.overtime} fights: +25% HP and damage. -$${Math.round(cost)}.`);
   return null;
 }
 

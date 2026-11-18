@@ -1,6 +1,6 @@
 // A scripted player for balance runs and the debug `advance` param. Plays like someone who checks in now and then.
 import { FIGHTS, RETRY_AFTER, ROLES, SHOPS, REGIONS, type RegionId } from './defs';
-import { advance, bal, buyPatrol, buySlot, convert, curb, forLease, leased, lease, lineupOf, lotsTaken, overtime, overtimeCost, patrolBlock, patrolPrice, pave, purse, regionDone, renovate, renovateCost, rentPerSec, slotPrice, topFight, train, trainCost, view } from './economy';
+import { advance, bal, buyPatrol, buySlot, convert, curb, forLease, leased, lease, lineupOf, lotsTaken, patrolBlock, patrolPrice, pave, purse, regionDone, renovate, renovateCost, rentPerSec, slotPrice, topFight, train, trainCost, view } from './economy';
 import { collectFind } from './sim';
 import type { GameState } from './state';
 import { BAR_BUFFS, QUIZ, serviced, MACHINE, PINBALL_TOP, SHUFFLE_TOP, buffOn, buyPerk, endPlay, perkPrice, pokerQ, postScore, postShuffle, shelfOf, startPlay, type MachineId } from './room';
@@ -58,7 +58,7 @@ function roomAct(s: GameState, o: BotOpts, dt: number) {
 }
 
 export interface BotOpts {
-  active?: boolean; // grabs walk-ins, calls plays, buys overtime for bosses
+  active?: boolean; // grabs walk-ins and calls plays
   manual?: boolean; // presses Advance (default true); false = pure idle
   pave?: number; // paves Route 9 after farming its last fight this many hours (undefined = never)
   doneAt?: number;
@@ -114,10 +114,6 @@ function crewAct(s: GameState, r: RegionId, o: BotOpts) {
     if (purse(s, r) < trainCost(r, c.train[role]) || train(s, r, role)) break;
   }
   if (o.manual !== false && c.at < topFight(s, r) && c.farmed >= RETRY_AFTER) advance(s, r, 1);
-  if (o.active) {
-    const f = FIGHTS[r][Math.min(c.at, FIGHTS[r].length - 1)];
-    if (f.boss && c.at === c.frontier && c.tries > 0 && c.overtime === 0 && c.cash >= overtimeCost(s, r) && overtimeCost(s, r) < (pending || Infinity) * 0.5) overtime(s, r);
-  }
 }
 
 export function botAct(s: GameState, o: BotOpts = {}, dt = 10): GameState {

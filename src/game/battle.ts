@@ -1,4 +1,4 @@
-import { AURA_STEP, BATTLERS, WALK_IN_SECONDS, BOSS_STRENGTH, HARD_FOCUS, FIGHTS, FIGHT_TIMEOUT, FRONT_SHARE, MAIN_GROWTH, OVERTIME_BOOST, RALLY_BOOST, REGIONS, ROLES, SIDE_HP_GROWTH, TANK_HP_GROWTH, TELL, TRAIN_STEP, WEAK_BONUS, type BattlerDef, type EnemyDef, type Fx, type RegionId, type Role } from './defs';
+import { AURA_STEP, BATTLERS, WALK_IN_SECONDS, BOSS_STRENGTH, HARD_FOCUS, FIGHTS, FIGHT_TIMEOUT, FRONT_SHARE, MAIN_GROWTH, RALLY_BOOST, REGIONS, ROLES, SIDE_HP_GROWTH, TANK_HP_GROWTH, TELL, TRAIN_STEP, WEAK_BONUS, type BattlerDef, type EnemyDef, type Fx, type RegionId, type Role } from './defs';
 import { asphaltMult, curb, fighters, lineupOf, log, sinkHpBonus } from './economy';
 import { rand } from './rng';
 import { barDmg, barHp, buffOn } from './room';
@@ -84,15 +84,12 @@ export function startBattle(s: GameState, r: RegionId): Battle | null {
   const field: Field = { mark: 0, slow: 0, weaken: 0, stun: 0, confuse: 0, regen: 0, revive: 0, payUp: 0 };
   for (const { fx } of aur) if (fx.k in field && 'v' in fx) (field as unknown as Record<string, number>)[fx.k] += fx.v;
   for (const k of Object.keys(CAPS) as (keyof Field)[]) if (k in field) field[k] = Math.min(field[k], CAPS[k as Fx['k']]!);
-  const overtime = c.overtime > 0;
-  const ot = overtime ? 1 + OVERTIME_BOOST : 1;
-  if (overtime) c.overtime--;
   const crew = team.map(([id, lv]) => {
     const d = BATTLERS[id];
     const st = statsOf(s, r, id, lv);
     const toy = (k: 'bat' | 'duck') => (buffOn(s, k) ? 1.3 : 1);
     const bar = (k: 'bat' | 'duck') => (r === 1 ? (k === 'bat' ? barDmg(s) : barHp(s)) : 1);
-    let hp = ot * toy('duck') * bar('duck') * (r === 1 && buffOn(s, 'shot') ? 1.1 : 1), dmg = ot * toy('bat') * bar('bat') * (r === 1 && buffOn(s, 'shot') ? 1.1 : 1), haste = 1, dr = d.fx?.k === 'dr' ? d.fx.v : 0;
+    let hp = toy('duck') * bar('duck') * (r === 1 && buffOn(s, 'shot') ? 1.1 : 1), dmg = toy('bat') * bar('bat') * (r === 1 && buffOn(s, 'shot') ? 1.1 : 1), haste = 1, dr = d.fx?.k === 'dr' ? d.fx.v : 0;
     for (const { fx } of aur) {
       if (fx.k === 'hpUp' && targets(fx.to, d)) hp += fx.v;
       if (fx.k === 'dmgUp' && targets(fx.to, d)) dmg += fx.v;
@@ -118,7 +115,7 @@ export function startBattle(s: GameState, r: RegionId): Battle | null {
   // straight out of a smoke break they're already standing there; otherwise they walk in (or step up from the line)
   const enter = queued ? c.queueEnter : c.smoke > 0 ? 0 : WALK_IN_SECONDS;
   c.queueEnter = -1;
-  return (c.battle = { fight, t: 0, crew, enemies, field, revived: false, overtime, fresh, enter });
+  return (c.battle = { fight, t: 0, crew, enemies, field, revived: false, fresh, enter });
 }
 
 const alive = (u: Unit) => u.hp > 0;

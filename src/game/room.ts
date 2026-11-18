@@ -9,7 +9,7 @@ import { rand } from './rng';
 import type { GameState } from './state';
 
 export type MachineId = 'pusher' | 'whac' | 'skee' | 'claw' | 'pinball' | 'cyclone' | 'darts' | 'pool' | 'poker' | 'foos' | 'shuffle' | 'trivia' | 'tabs' | 'blackjack' | 'fairway';
-export type BuffKind = 'bat' | 'duck' | 'troll' | 'ball' | 'watch' | 'well' | 'call' | 'top' | 'royal' | 'quiz' | 'genius' | 'shot' | 'tip' | 'word';
+export type BuffKind = 'bat' | 'duck' | 'troll' | 'ball' | 'well' | 'call' | 'top' | 'royal' | 'quiz' | 'genius' | 'shot' | 'tip' | 'word';
 export type Cost = { cur: Currency | 'tickets'; n: number };
 export interface Reward { cash?: number; goodwill?: number; tickets?: number; equity?: number; buff?: BuffKind; big?: boolean; slip?: boolean; text: string }
 export interface PusherCoin { x: number; y: number; layer: 'shelf' | 'field'; kind: 'coin' | 'rent' | 'ticket' }
@@ -50,7 +50,6 @@ export const BUFFS: Record<BuffKind, { name: string; does: string }> = {
   duck: { name: 'Rubber Duck', does: '+30% crew HP' },
   troll: { name: 'Troll Doll', does: 'walk-ins pay double' },
   ball: { name: 'Bouncy Ball', does: 'a free 30s rally' },
-  watch: { name: 'Gold Watch', does: '5 free Overtime fights' },
   well: { name: 'Jacks or Better', does: '+10% crew damage' },
   call: { name: 'Three of a Kind', does: '+20% crew damage' },
   top: { name: 'Full House', does: '+30% crew damage and HP' },
@@ -122,7 +121,7 @@ export const MACHINES: MachineDef[] = [
       if (q < 0.25) return { text: pick ? 'It slipped. It always slips.' : 'Closed on a gap.' };
       if (!pick && rand(s) > q + 0.12 * perk(s, 'grip')) return { text: 'It slipped. It always slips.' };
       const roll = rand(s);
-      const buff: BuffKind = pick ?? (roll < 0.06 ? 'watch' : roll < 0.37 ? 'bat' : roll < 0.68 ? 'duck' : roll < 0.86 ? 'troll' : 'ball');
+      const buff: BuffKind = pick ?? (roll < 0.35 ? 'bat' : roll < 0.68 ? 'duck' : roll < 0.86 ? 'troll' : 'ball');
       return { buff, big: true, text: `Got the ${BUFFS[buff].name}: ${BUFFS[buff].does}.` };
     },
   },
@@ -198,7 +197,7 @@ export const roomOpen = (s: GameState, r: RegionId) => MACHINES.some((m) => m.re
 
 // ---- the prize counter (tickets, permanent) ----
 // Pre-dawn shelf. After dawn, DAWN.perks is a second shelf on the same counter.
-export type PrePerkId = 'mug' | 'nudge' | 'chime' | 'rally' | 'otCheap' | 'grip' | 'walkins' | 'slot' | 'otLong';
+export type PrePerkId = 'mug' | 'nudge' | 'chime' | 'rally' | 'grip' | 'walkins' | 'slot';
 export type DawnPerkId = keyof typeof DAWN.perks;
 export type PerkId = PrePerkId | DawnPerkId;
 export type PerkDef = { name: string; does: string; prices: number[] };
@@ -207,11 +206,9 @@ export const PERKS: Record<PrePerkId, PerkDef> = {
   nudge: { name: 'Attract card', does: 'One Attract Mode level on Skee-Ball, or the Coin Pusher if Skee is still locked', prices: [300] },
   chime: { name: 'Service bell', does: 'The next walk-in shows up in a few seconds', prices: [350] },
   rally: { name: 'Free whistle', does: 'A 30s rally, right now', prices: [400] },
-  otCheap: { name: 'Overtime coupon', does: 'Overtime costs 25% less', prices: [450, 700] },
   grip: { name: 'Grip tape', does: 'The claw is a little less likely to slip', prices: [550] },
   walkins: { name: 'Doorbell', does: 'Walk-ins every 75s instead of 90', prices: [650] },
   slot: { name: 'Fighter slot', does: 'One more fighter on the lot', prices: [800, 5000] },
-  otLong: { name: 'Overtime punch card', does: 'Overtime lasts 4 fights', prices: [1400] },
 };
 export const perk = (s: GameState, id: PerkId) => s.room.perks[id] ?? 0;
 export const perkInfo = (s: GameState, id: PerkId): PerkDef | null =>
@@ -342,7 +339,6 @@ export function grant(s: GameState, b: BuffKind) {
   delete s.room.hands[b]; // the cabinet writes the real hand back after
   const c = s.crews[s.view];
   if (b === 'ball') c.rally = Math.max(c.rally, 30);
-  else if (b === 'watch') c.overtime += 5;
   else {
     const base = BAR_BUFFS.find(([k]) => k === b)?.[1] ?? BUFF_SECONDS;
     const toys = b === 'bat' || b === 'duck' || b === 'troll';

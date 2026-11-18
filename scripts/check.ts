@@ -1,7 +1,7 @@
 // Small invariant checks. Run: bun scripts/check.ts
 import { BATTLERS, FIGHTS, GOODWILL_PER_EQUITY, MAX_SLOTS, OFFLINE_CAP_SECONDS, REGIONS, SHOPS, SMOKE_BREAK_SECONDS, SHOP_LIST, START_SLOTS, STEP, WEAK_BONUS } from '../src/game/defs';
 import { auras, enemyLineup, startBattle, statsOf, stepBattle } from '../src/game/battle';
-import { advance, asphaltGain, fieldFull, autoCovers, buyPatrol, buySlot, convert, curb, forLease, lease, lineupOf, newGame, overtime, patrolBlock, powerLevel, rentPerSec, patrolPrice, pave, renovate, renovateCost, roster, slotsOf, tierOf, toggleField, train, trainCost, view } from '../src/game/economy';
+import { advance, asphaltGain, fieldFull, autoCovers, buyPatrol, buySlot, convert, curb, forLease, lease, lineupOf, newGame, patrolBlock, powerLevel, rentPerSec, patrolPrice, pave, renovate, renovateCost, roster, slotsOf, tierOf, toggleField, train, trainCost, view } from '../src/game/economy';
 import { loadGame, old, saveGame } from '../src/game/save';
 import { collectFind, fightRate, onScreen, simulateAway, step } from '../src/game/sim';
 import { CREW_LOOKS, ENEMY_LOOKS } from '../src/art/people';
@@ -155,8 +155,6 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   check(`weakness is a small bonus (+${WEAK_BONUS * 100}%)`, WEAK_BONUS <= 0.25);
   const lu = enemyLineup(0, 0);
   check('fight 1 is one enemy; the first boss brings two', lu.length === 1 && enemyLineup(0, 8).length === 3 && enemyLineup(0, 8)[0].boss);
-  t.crews[0].cash = 1e12;
-  check('overtime: costs rent, boosts the next 3 fights', overtime(t, 0) === null && t.crews[0].overtime === 3 && startBattle(t, 0)!.overtime && (t.crews[0].overtime as number) === 2);
 }
 
 // ending, the Bypass, paving
@@ -267,7 +265,7 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   t.tickets = 7500;
   check('prize counter: slots 6 and 7 for tickets', buyPerk(t, 'slot') === null && buyPerk(t, 'slot') === null && slotsOf(t, 0) === START_SLOTS + 2 && buyPerk(t, 'slot') !== null);
   const firstPrice = Math.min(...Object.keys(PERKS).map((id) => perkPrice(newGame(1), id as keyof typeof PERKS)));
-  check(`prize counter: ${Object.keys(PERKS).length} pre-dawn prizes, first costs ${firstPrice} tickets`, Object.keys(PERKS).length >= 8 && Object.keys(PERKS).length <= 10 && firstPrice >= 200 && firstPrice <= 400);
+  check(`prize counter: ${Object.keys(PERKS).length} pre-dawn prizes, first costs ${firstPrice} tickets`, Object.keys(PERKS).length >= 6 && Object.keys(PERKS).length <= 10 && firstPrice >= 200 && firstPrice <= 400);
   {
     const u = newGame(14);
     u.room.unlocked.push('pusher', 'skee');
@@ -292,10 +290,8 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
     const u = newGame(14);
     u.bypass = true;
     view(u, 1);
-    const ot0 = u.crews[0].overtime;
-    grant(u, 'watch');
     grant(u, 'ball');
-    check('claw toys apply to the crew that is fighting', u.crews[1].overtime === 5 && u.crews[1].rally >= 30 && u.crews[0].overtime === ot0);
+    check('claw toys apply to the crew that is fighting', u.crews[1].rally >= 30 && u.crews[0].rally === 0);
     u.tickets = 2000;
     check('the back room opens after dawn', shelfOf(u).includes('bpSlot') && buyPerk(u, 'bpSlot') === null && slotsOf(u, 1) === START_SLOTS + 1);
   }

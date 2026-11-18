@@ -100,7 +100,7 @@ export function Pylon({ room = false }: { room?: boolean }) {
     <header class={`roadside ${room ? (r ? 'in-room pub' : 'in-room fz') : ''}`} ref={ref}>
       <div class="pylon">
         <Sign room={room} />
-        <Tenant cls="t-cash" ic="cash" k="Cash" v={`$${fmt(c.cash)}`} rk={cashKey} pre="$" tipArgs={[`${REGIONS[r].name} till`, (() => { const { n, unit } = rateLabel(s, cashKey); return `Live rate: $${fmt(n)}/${unit}, rent $${fmt(rentPerSec(s, r))}/s of it.`; })(), 'Leases, renovations, patrols, Overtime.', 'Every tenant pays on time. Every tenant is you.']} />
+        <Tenant cls="t-cash" ic="cash" k="Cash" v={`$${fmt(c.cash)}`} rk={cashKey} pre="$" tipArgs={[`${REGIONS[r].name} till`, (() => { const { n, unit } = rateLabel(s, cashKey); return `Live rate: $${fmt(n)}/${unit}, rent $${fmt(rentPerSec(s, r))}/s of it.`; })(), 'Leases and renovations.', 'Every tenant pays on time. Every tenant is you.']} />
         {!bar && <Tenant cls="t-goodwill" ic="goodwill" k="Goodwill" v={fmt(s.goodwill)} rk="goodwill" tipArgs={['Goodwill', 'Wins pay it. Training costs it.', s.bypass ? DAWN.goodwillTip : 'People are starting to say nice things about the plaza.']} />}
         {s.bypass && (!room || bar) && <Tenant cls="t-equity" ic="equity" k={DAWN.equity} v={fmt(s.equity)} rk="equity" tipArgs={DAWN.equityTip as [string, ...string[]]} />}
         {room && !bar && <Tenant cls="t-tickets" ic="ticket" k="Tickets" v={fmt(s.tickets)} rk="tickets" tipArgs={['Tickets', 'Skee-Ball, the Cyclone, a few machines more.', 'The prize counter takes them.']} />}

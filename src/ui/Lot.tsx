@@ -5,7 +5,6 @@ import { advance, autoCovers, autoPick, bal, buySlot, curb, lineupOf, regionDone
 import { CURRENCY_SHORT } from '../game/defs';
 import { fmt } from './format';
 import { enemyLineup } from '../game/battle';
-import { Calls } from './Calls';
 import { Field } from './Field';
 import { fightRate } from '../game/sim';
 import { useState } from 'preact/hooks';
@@ -106,7 +105,6 @@ export function Lot() {
         <Field r={r} />
         <FarmRate r={r} />
       </div>
-      <Calls r={r} />
     </section>
   );
 }
