@@ -616,8 +616,10 @@ function pool(): Game {
       if (aim && pull && !moving() && !cue.in) {
         const dx = aim.x - pull.x, dy = aim.y - pull.y, len = Math.min(36, Math.hypot(dx, dy));
         const ux = dx / (Math.hypot(dx, dy) || 1), uy = dy / (Math.hypot(dx, dy) || 1);
-        for (let i = 4; i < 40; i += 3) p.rect(Math.round(cue.x + ux * i), Math.round(cue.y + uy * i), 1, 1, C.paper);
-        for (let i = 0; i < 26; i++) p.rect(Math.round(cue.x - ux * (4 + len / 2 + i)), Math.round(cue.y - uy * (4 + len / 2 + i)), 1, 1, i < 3 ? C.blue : C.sodiumLight);
+        // aim dots and the cue stay on the felt, never on the room behind the table
+        const dot = (x: number, y: number, c: number) => x >= 2 && y >= 2 && x < W - 2 && y < H - 2 && p.rect(Math.round(x), Math.round(y), 1, 1, c);
+        for (let i = 4; i < 40; i += 3) dot(cue.x + ux * i, cue.y + uy * i, C.paper);
+        for (let i = 0; i < 26; i++) dot(cue.x - ux * (4 + len / 2 + i), cue.y - uy * (4 + len / 2 + i), i < 3 ? C.blue : C.sodiumLight);
         p.rect(W - 5, H - 4 - Math.round(len), 3, Math.round(len), C.red);
       }
       p.text(`SHOTS ${shots}`, 4, H - 9, C.paper);
