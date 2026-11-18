@@ -2,7 +2,7 @@
 // Usage: bun scripts/balance.ts [hours=20] [seed=1991] [--every=600] [--active] [--idle] [--room] [--pave=H] [--convert=0.5] [--quiet] [--knob NAME=value ...]
 //   check-in: --every=600 (default)   active: --active --every=10   active + arcade: --active --room --every=10   idle: --idle
 //   --knob swaps a knobs.ts constant for this run only, e.g. --knob FIGHT_TIMEOUT=45 --knob "LOT_JUMP=[[2,1.45,1.103,1.286,0.619,1.089],[2,5,1.01,0.45]]"
-//   --guard: check-in and active on 2 seeds; exits 1 if pacing or losses leave the targets. Run it before tagging.
+//   --guard: check-in, active and skilled on 6 seeds; exits 1 if pacing, losses or walls leave the targets. Run it before tagging.
 // Save output under out/ (git-ignored) if you want to keep it.
 import type { BotOpts } from '../src/game/bot';
 import type { GameState } from '../src/game/state';
@@ -129,33 +129,46 @@ botAct(idle, o, 10);
 const away = simulateAway(idle, 8 * 3600);
 console.log(`\nOffline (1 min of play, then 8h away): +$${fmt(away.earned)}, +${fmt(away.goodwill)} Goodwill, ${away.wins}W/${away.losses}L, fights cleared +${away.cleared}, captured: ${away.captured.join(', ') || 'none'}`);
 
-// ---- the guard: the pacing targets from docs/V07_REVISION.md, checked on 2 seeds ----
+// ---- the guard: the pacing targets from docs/V07_REVISION.md ----
+// One seed's Route 9 swings about ±1.5h (the last lot is a long wall), so each mode is judged on its mean over six seeds,
+// with every seed inside the window widened by 2.5h, and each lot's walls on the median run.
 async function guard(): Promise<never> {
   const knobs = knobArgs.flatMap((k) => ['--knob', k]);
-  const runs = [1991, 7].flatMap((seed) => [
-    { seed, mode: 'check-in', flags: [], route9: [14, 16] },
-    { seed, mode: 'active', flags: ['--active', '--every=10'], route9: [11, 15.5] }, // ~12.5h on most seeds; about 1 in 5 lands near 15h
-  ]);
-  runs.push({ seed: 1991, mode: 'skilled', flags: ['--skilled'], route9: [7, 12] }); // the skilled player: arcade, claw picks, smart farming; walls only, no loss floor
-  const hrs = (t: string) => (t.includes('h') ? Number(t.split('h')[0]) + Number(t.split('h')[1].replace('m', '')) / 60 : Number(t.split(':')[0]) / 60);
+  const SEEDS = [1991, 7, 1, 2, 3, 4];
+  const MODES = [
+    { mode: 'check-in', flags: [] as string[], route9: [14, 16], losses: true },
+    { mode: 'active', flags: ['--active', '--every=10'], route9: [11, 15.5], losses: true },
+    { mode: 'skilled', flags: ['--skilled'], route9: [7, 12], losses: false }, // arcade, claw picks, smart farming: walls only, no loss floor
+  ];
+  const hrs = (t: string) => (t === '-' ? 99 : t.includes('h') ? Number(t.split('h')[0]) + Number(t.split('h')[1].replace('m', '')) / 60 : Number(t.split(':')[0]) / 60);
+  const median = (xs: number[]) => xs.slice().sort((x, y) => x - y)[Math.floor(xs.length / 2)];
+  const runs = MODES.flatMap((m) => SEEDS.map((seed) => ({ ...m, seed })));
   const out = await Promise.all(runs.map((r) => new Response(Bun.spawn([process.execPath, process.argv[1], '20', String(r.seed), ...r.flags, '--quiet', ...knobs]).stdout).text()));
   let bad = 0;
   const fail = (why: string) => (bad++, console.log(`  FAIL ${why}`));
-  runs.forEach((r, i) => {
-    const txt = out[i];
-    const route9 = /route9=([^ ]+(?: \d+m)?) /.exec(txt)?.[1] ?? '-';
-    const [l, n] = (/losses=(\d+)\/(\d+)/.exec(txt) ?? [0, 0, 1]).slice(1).map(Number);
-    console.log(`seed ${r.seed} ${r.mode}: Route 9 at ${route9}, losses ${Math.round((100 * l) / n)}%`);
-    if (route9 === '-' || hrs(route9) < r.route9[0] || hrs(route9) > r.route9[1]) fail(`Route 9 ending outside ${r.route9[0]}-${r.route9[1]}h`);
-    if (r.mode !== 'skilled' && (l / n < 0.1 || l / n > 0.3)) fail('overall losses outside 10-30%');
-    for (const row of txt.split('\n').filter((x) => /^\S.*\d+\/\d+\s+\d+%/.test(x))) {
-      const lot = row.slice(0, 14).trim();
-      const front = /(\d+)\/(\d+)\s+(\d+)%/.exec(row)!;
-      const boss = Number(row.trim().split(/\s+/).pop());
-      if (Number(front[3]) > 50) fail(`${lot}: frontier loss ${front[3]}% (over 50%)`);
-      if (boss > 12) fail(`${lot}: ${boss} boss tries (over 12)`);
+  for (const m of MODES) {
+    const mine = runs.map((r, i) => ({ r, txt: out[i] })).filter((x) => x.r.mode === m.mode);
+    const times = mine.map(({ txt }) => hrs(/route9=([^ ]+(?: \d+m)?) /.exec(txt)?.[1] ?? '-'));
+    const losses = mine.map(({ txt }) => (([l, n]) => l / n)((/losses=(\d+)\/(\d+)/.exec(txt) ?? [0, 0, 1]).slice(1).map(Number)));
+    const mean = times.reduce((x, y) => x + y, 0) / times.length;
+    console.log(`${m.mode}: Route 9 mean ${mean.toFixed(1)}h [${times.map((t) => t.toFixed(1)).join(' ')}], losses ${Math.round((100 * losses.reduce((x, y) => x + y, 0)) / losses.length)}%`);
+    if (mean < m.route9[0] || mean > m.route9[1]) fail(`${m.mode}: mean Route 9 outside ${m.route9[0]}-${m.route9[1]}h`);
+    times.forEach((t, i) => (t < m.route9[0] - 2.5 || t > m.route9[1] + 2.5) && fail(`${m.mode} seed ${SEEDS[i]}: Route 9 at ${t.toFixed(1)}h`));
+    if (m.losses && losses.some((l) => l < 0.1 || l > 0.3)) fail(`${m.mode}: overall losses outside 10-30% on a seed`);
+    const lots = new Map<string, { front: number[]; boss: number[] }>();
+    for (const { txt } of mine)
+      for (const row of txt.split('\n').filter((x) => /^\S.*\d+\/\d+\s+\d+%/.test(x))) {
+        const lot = row.slice(0, 14).trim();
+        const e = lots.get(lot) ?? { front: [], boss: [] };
+        e.front.push(Number(/(\d+)\/(\d+)\s+(\d+)%/.exec(row)![3]));
+        e.boss.push(Number(row.trim().split(/\s+/).pop()));
+        lots.set(lot, e);
+      }
+    for (const [lot, e] of lots) {
+      if (median(e.front) > 50) fail(`${m.mode} ${lot}: median frontier loss ${median(e.front)}% (over 50%)`);
+      if (median(e.boss) > 12) fail(`${m.mode} ${lot}: median ${median(e.boss)} boss tries (over 12)`);
     }
-  });
+  }
   console.log(bad ? `\nguard: ${bad} failure(s)` : '\nguard: all within targets');
   process.exit(bad ? 1 : 0);
 }
