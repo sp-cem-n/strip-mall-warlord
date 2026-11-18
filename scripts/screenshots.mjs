@@ -15,7 +15,9 @@ const sizes = [
 const g = '?fresh=1&seed=1991&pause=1';
 const room = `${g}&advance=3600&room=full&screen=room`;
 const bar = `${g}&roster=full&region=1&room=full&screen=room`;
-const cab = (i) => [['click', `.cab:nth-child(${i}) .cab-plate .btn.hot`], ['wait', 800]];
+// open a machine by its spot in the 320x157 room art, then put a coin in
+const open = (x, y) => [['room', x, y], ['wait', 300]];
+const play = (x, y) => [...open(x, y), ['click', '.og-play'], ['wait', 900]];
 
 // [file, query, steps, clip?]
 const shots = [
@@ -26,7 +28,7 @@ const shots = [
   ['05-roster-popup', `${g}&advance=5400&active=1&screen=game`, [['click', 'canvas.field']]],
   ['06-plaza-pylons', `${g}&advance=5400&screen=game`],
   ['07-arcade', room],
-  ['08-arcade-pusher', room, [...cab(1), ['wait', 900]], '.cab:nth-child(1)'],
+  ['08-arcade-pusher', room, play(40, 120), '.open-game'],
   ['14-bar', bar],
   ['19-win-card', `${g}&roster=full&win=1&screen=game`],
   ['20-test-panel', `?test=1&${g.slice(1)}&advance=5400&screen=game`],
@@ -41,11 +43,13 @@ const shots = [
   ['29-roster-full', `${g}&advance=5400&active=1&screen=game`, [['click', 'canvas.field'], ['wait', 300], ['click', '.fc.bench'], ['wait', 200]]],
   ['30-sign-letters-out', `${g}&advance=5400&screen=game&lights=still&signout=18`, [], '.roadside'],
   ['31-funzone-zone-off', `${room}&lights=still&fzoff=zone`, [], '.roadside'],
-  ['33-bar-foos-play', bar, [['click', '.cab:nth-child(5) canvas'], ['wait', 2500]], '.cab:nth-child(5)'],
-  ['34-bar-shuffle-play', bar, [['click', '.cab:nth-child(6) canvas'], ['wait', 1200], ['hold', '.cab:nth-child(6) canvas', 700], ['wait', 2500]], '.cab:nth-child(6)'],
-  ['35-bar-tabs', bar, [['click', '.cab:nth-child(2) canvas'], ['wait', 900], ['click', '.cab:nth-child(2) canvas'], ['click', '.cab:nth-child(2) canvas'], ['click', '.cab:nth-child(2) canvas'], ['wait', 300]], '.cab:nth-child(2)'],
-  ['36-bar-blackjack', bar, [['click', '.cab:nth-child(7) canvas'], ['wait', 1000]], '.cab:nth-child(7)'],
-  ['37-bar-fairway', bar, [['click', '.cab:nth-child(8) canvas'], ['wait', 1200]], '.cab:nth-child(8)'],
+  ['33-bar-foos-play', bar, [...play(45, 125), ['wait', 1600]], '.open-game'],
+  ['34-bar-shuffle-play', bar, [...play(270, 128), ['hold', '.og-screen canvas', 700], ['wait', 2500]], '.open-game'],
+  ['35-bar-tabs', bar, [...play(172, 46), ['click', '.og-screen canvas'], ['click', '.og-screen canvas'], ['click', '.og-screen canvas'], ['wait', 300]], '.open-game'],
+  ['36-bar-blackjack', bar, play(296, 52), '.open-game'],
+  ['38-arcade-counter', room, open(270, 135)],
+  ['39-bar-grapevine', bar, open(205, 40)],
+  ['37-bar-fairway', bar, [...play(84, 50), ['wait', 300]], '.open-game'],
   ['32-save-popup', `${g}&advance=900&screen=game`, [['click', '.boot-door.save'], ['wait', 200]]],
 ];
 const only = process.env.ONLY ? new RegExp(process.env.ONLY) : null;
@@ -68,6 +72,9 @@ for (const [w, h] of sizes) {
       else if (kind === 'click') {
         const loc = page.locator(sel).first();
         if (await loc.count()) await loc.click({ timeout: 4000 }).catch((e) => console.error('click fail', file, sel, e.message));
+      } else if (kind === 'room') {
+        const b = await page.locator('.room-stage canvas').boundingBox();
+        if (b) await page.mouse.click(b.x + (sel / 320) * b.width, b.y + (arg / 157) * b.height);
       } else if (kind === 'hold' || kind === 'drag') {
         const b = await page.locator(sel).boundingBox();
         if (!b) continue;

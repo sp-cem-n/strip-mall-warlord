@@ -264,26 +264,59 @@ button { font: inherit; }
 .btn.on { border-color: var(--mint); color: var(--mint); }
 .backoffice h2 { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
 /* ---- the Fun Zone ---- */
-.screen.room { justify-content: flex-start; align-items: stretch; background-size: 128px 128px; image-rendering: pixelated; padding: 0 0 12px; }
-.screen.room .room-floor { align-self: center; padding: 0 12px; }
-.room-floor { display: flex; gap: 16px; align-items: flex-start; width: 100%; max-width: 1880px; }
-.cabs { display: grid; grid-template-columns: repeat(3, 288px); gap: 18px 28px; flex: 1; justify-content: center; }
-.cab { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.price-tag { position: absolute; top: 420px; left: 50%; transform: translateX(-50%) rotate(-3deg); z-index: 1; padding: 1px 6px; font-size: 15px; line-height: 1.1; white-space: nowrap; color: var(--red); background: var(--paper); border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); pointer-events: none; }
-.cab.tall .price-tag { top: 432px; }
-.price-tag.short { color: var(--stone); background: var(--bone); }
-.cab canvas { display: block; width: 288px; height: 480px; cursor: pointer; image-rendering: pixelated; filter: drop-shadow(0 0 10px rgba(224, 88, 140, 0.35)); touch-action: none; user-select: none; }
-.cab.dark canvas { cursor: default; filter: none; }
-.cab-plate { display: flex; flex-direction: column; gap: 4px; align-items: stretch; width: 288px; padding: 6px; background: var(--ink); border: 2px solid var(--asphalt); font-size: 16px; }
-.cab-plate b { font-weight: normal; color: var(--sodium-light); text-align: center; }
-.counter { width: 340px; padding: 10px 12px; background: var(--night); border: 6px solid var(--sodium); font-size: 16px; position: sticky; top: calc(var(--bar, 0px) + 12px); }
+.screen.room { justify-content: flex-start; align-items: stretch; gap: 0; padding: 0; background: #120e16; }
+.screen.room.pub { background: #100c0c; }
+/* the room: 320x157 art, as big as fits under the bar */
+.room-stage { position: relative; align-self: center; width: min(100%, calc((100vh - var(--bar, 172px)) * 320 / 157)); aspect-ratio: 320 / 157; container-type: inline-size; }
+.room-stage canvas { display: block; width: 100%; height: 100%; touch-action: manipulation; }
+.won-slip { position: absolute; display: flex; flex-direction: column; align-items: center; padding: 0.25cqw 0.55cqw 0.2cqw; font: 1.5cqw/1 'VT323', monospace; color: var(--ink); background: var(--paper); border: 0.25cqw solid var(--ink); box-shadow: 0.3cqw 0.3cqw 0 rgba(10, 8, 14, 0.6); transform: rotate(-3deg); cursor: pointer; white-space: nowrap; }
+.won-slip::before { content: ''; position: absolute; top: -0.5cqw; left: 50%; width: 1.6cqw; height: 0.7cqw; transform: translateX(-50%); background: rgba(207, 198, 176, 0.85); }
+.won-slip b { font-weight: normal; color: var(--red); font-size: 1.2em; }
+.won-slip:nth-of-type(even) { transform: rotate(2deg); }
+/* a YOU WON napkin at the bar: square, scalloped, red pen. (Grapevine rumor slips are the folded blue-pen ones on the spike.) */
+.won-slip.napkin { background: #faf6ee; border: none; border-radius: 0.3cqw; outline: 0.3cqw dotted #faf6ee; outline-offset: 0.15cqw; box-shadow: 0 0 0 0.55cqw rgba(26, 20, 32, 0.35); transform: rotate(4deg); }
+.won-slip.napkin::before { display: none; }
+/* an open game: over the room, under the bar */
+.open-game { position: fixed; z-index: 12; top: calc(var(--bar, 172px) + 10px); left: 24px; right: 24px; bottom: 12px; display: flex; flex-direction: column; padding: 8px 14px 14px; background: #1a1520f2; border: 4px solid var(--sodium); box-shadow: 0 0 0 4px var(--ink), 0 10px 40px #000a; }
+.open-game.pub { background: #1c1612f2; }
+.open-game header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.open-game h2 { margin: 0; font-size: 22px; color: var(--sodium-light); }
+.open-game h2 span { font-family: 'VT323', monospace; font-size: 20px; letter-spacing: 0; text-transform: none; color: var(--bone); text-shadow: none; }
+.og-x { width: 34px; height: 30px; color: var(--paper); background: var(--ink); border: 2px solid var(--bone); cursor: pointer; font-size: 20px; }
+.og-x:hover { color: var(--ink); background: var(--sodium-light); }
+.og-body { flex: 1; min-height: 0; display: flex; gap: 18px; margin-top: 8px; }
+.og-body > .counter { flex: 1; overflow-y: auto; width: auto; border: none; columns: 2 320px; column-gap: 28px; }
+.og-body > .counter > h2 { display: none; }
+.og-body > .counter .perk, .og-body > .counter h3 { break-inside: avoid; break-after: avoid; }
+.og-screen { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; background: #0e0b12; border: 2px solid var(--asphalt); }
+.og-screen canvas { display: block; max-width: 100%; max-height: 100%; height: 100%; cursor: pointer; touch-action: none; user-select: none; }
+.og-side { width: 290px; flex: none; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; font-size: 18px; color: var(--paper); }
+.og-side p { margin: 0; }
+.og-side hr { width: 100%; border: none; border-top: 2px solid var(--asphalt); margin: 4px 0; }
+.og-side h3 { display: flex; align-items: center; gap: 16px; margin: 0; font-family: 'Pixelify Sans', sans-serif; font-weight: 500; font-size: 18px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--neon); }
+.og-pays { color: var(--mint); }
+.og-pips { display: flex; gap: 5px; }
+.og-pips i { width: 12px; height: 12px; background: var(--asphalt); }
+.og-pips i.on { background: var(--sodium-light); }
+.og-play, .og-attract { font-family: 'Pixelify Sans', sans-serif; font-weight: 500; font-size: 20px; letter-spacing: 0.04em; text-align: left; padding: 6px 10px; cursor: pointer; }
+.og-play { color: var(--ink); background: var(--sodium); border: 3px solid var(--sodium-light); }
+.og-play:hover:not(:disabled) { background: var(--sodium-light); }
+.og-attract { color: var(--paper); background: var(--plum); border: 3px solid var(--violet); }
+.og-attract:hover:not(:disabled) { background: var(--violet); }
+.og-play:disabled, .og-attract:disabled { opacity: 0.5; cursor: default; }
+@media (max-width: 760px) {
+  .open-game { left: 6px; right: 6px; overflow-y: auto; }
+  .og-body { flex-direction: column; }
+  .og-screen { flex: none; height: 52vh; }
+  .og-side { width: auto; }
+}
+.counter { padding: 10px 12px; background: var(--night); border: 6px solid var(--sodium); font-size: 16px; }
 .counter h2, .counter h3 { margin: 4px 0; color: var(--sodium-light); font-weight: normal; }
 .perk { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 3px 0; border-bottom: 2px solid var(--asphalt); }
 .perk > span:first-child { display: flex; flex-direction: column; }
 .perk b { font-weight: normal; }
 .perk.beat { color: var(--concrete); text-decoration: line-through; }
 .plush { height: 24px; background: repeating-linear-gradient(90deg, var(--violet) 0 12px, var(--mint) 12px 24px, var(--neon) 24px 36px, var(--sodium-light) 36px 48px); border-bottom: 4px solid var(--ink); margin-bottom: 6px; }
-.room.pub .cab canvas { filter: drop-shadow(0 0 10px rgba(246, 210, 122, 0.25)); }
 .counter.pub { border-color: var(--brick); }
 
 /* the arcade door: a small neon marquee between the receipt and the LED board, bulbs chasing in 2-step pixels */
@@ -314,20 +347,13 @@ button { font: inherit; }
 .test-tab { position: fixed; left: 12px; bottom: 12px; z-index: 50; font-size: 16px; color: var(--paper); background: var(--ink); border: 4px solid var(--violet); cursor: pointer; }
 
 /* inside a game room: no street, a themed lip, no pylon posts */
-.roadside.in-room { background-image: none; padding-bottom: 30px; position: relative; }
+.roadside.in-room { background-image: none; position: relative; }
 .roadside.in-room .pole, .roadside.in-room .legs { display: none; }
 .roadside.in-room .scoreboard { justify-content: flex-start; }
 .roadside.in-room.fz { background-color: #1a1520; }
 .roadside.in-room.pub { background-color: #16141c; }
-.room-lip { display: none; }
-.roadside.in-room .room-lip { display: block; position: absolute; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 2; }
 /* Fun Zone: purple carpet and a coin-door lip */
-.roadside.in-room.fz .room-lip { height: 28px; background: repeating-linear-gradient(90deg, #3a1830 0 16px, #2a1224 16px 32px), linear-gradient(#4a2240, #2a1224); border-top: 6px solid #1a0e16; box-shadow: inset 0 4px 0 #e0588c44, 0 -2px 0 var(--ink); }
-.roadside.in-room.fz .room-lip::after { content: ''; position: absolute; left: 10%; right: 10%; top: 6px; height: 5px; background: #2a1a14; box-shadow: inset 0 0 0 1px #5a3a28, 0 0 0 2px #1a1420; }
 /* Off-Ramp: a wood bartop, wet rings from the last round */
-.roadside.in-room.pub .room-lip { height: 30px; background: linear-gradient(#3a2418, #5a3a28 40%, #2a1a10); border-top: 6px solid #6a4a32; box-shadow: inset 0 3px 0 #8a6a48, 0 -2px 0 var(--ink); }
-.roadside.in-room.pub .room-lip::before { content: ''; position: absolute; left: 0; right: 0; top: 8px; height: 2px; background: #2a1a10; opacity: 0.5; }
-.roadside.in-room.pub .room-lip::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; border: 2px solid #4a3020; left: 24%; top: 8px; box-shadow: 220px 2px 0 -1px #4a3020, 480px 4px 0 0 #4a3020; }
 .field { cursor: pointer; }
 
 /* roster popup: Toad's steel-bevel card over a still-visible, dimmed plaza */
@@ -431,7 +457,6 @@ button { font: inherit; }
 .plaza-buy .item .btn { margin-top: auto; }
 .plaza-buy .item .does { font-size: 14px; line-height: 1.15; color: var(--bone); }
 .plaza-hired { margin: 8px 0 0; font-size: 15px; }
-.cab.attracting { outline: 3px dashed var(--sodium); outline-offset: -3px; }
 .boot-menu.tenant-board { border-image: var(--cinder) 8 fill / 16px; background: var(--night); }
 .boot-logo { display: block; margin: 0 auto 8px; width: 390px; max-width: 100%; height: auto; }
 /* the farm-rate card, top left in the lot's sky */

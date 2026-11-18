@@ -1,6 +1,6 @@
 import { SAVE_VERSION } from './economy';
 import type { GameState } from './state';
-import { newRoom } from './room';
+import { newRoom, type Attracting } from './room';
 
 let KEY = 'smw.save';
 // ?test=1 plays on its own save, so testing never touches the real plaza
@@ -23,7 +23,8 @@ const ARCHIVE: Record<number, string> = { 4: 'v0.5' };
 function fillIn(s: GameState): GameState {
   s.room = { ...newRoom(), ...s.room };
   if (typeof s.room.shelf === 'number') s.room.shelf = [s.room.shelf, 10];
-  s.room.attracting ??= null;
+  const att = s.room.attracting as unknown;
+  s.room.attracting = Array.isArray(att) ? att : att ? [att as Attracting] : [];
   s.consultants ??= [[], []];
   s.landmarks ??= [];
   s.blitz ??= {};

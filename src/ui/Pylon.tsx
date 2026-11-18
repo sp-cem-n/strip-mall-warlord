@@ -106,7 +106,7 @@ export function Pylon({ room = false }: { room?: boolean }) {
         <Tenant cls="t-cash" ic="cash" k="Cash" v={`$${fmt(c.cash)}`} rk={cashKey} pre="$" tipArgs={[`${REGIONS[r].name} till`, (() => { const { n, unit } = rateLabel(s, cashKey); return `Live rate: $${fmt(n)}/${unit}, rent $${fmt(rentPerSec(s, r))}/s of it.`; })(), 'Leases and renovations.', 'Every tenant pays on time. Every tenant is you.']} />
         {!bar && <Tenant cls="t-goodwill" ic="goodwill" k="Goodwill" v={fmt(s.goodwill)} rk="goodwill" tipArgs={['Goodwill', 'Wins pay it. Training costs it.', s.bypass ? DAWN.goodwillTip : 'People are starting to say nice things about the plaza.']} />}
         {s.bypass && (!room || bar) && <Tenant cls="t-equity" ic="equity" k={DAWN.equity} v={fmt(s.equity)} rk="equity" tipArgs={DAWN.equityTip as [string, ...string[]]} />}
-        {room && !bar && <Tenant cls="t-tickets" ic="ticket" k="Tickets" v={fmt(s.tickets)} rk="tickets" tipArgs={['Tickets', 'Skee-Ball, the Cyclone, a few machines more.', 'The prize counter takes them.']} />}
+        {room && !bar && <Tenant cls="t-tickets" ic="ticket" k="Tickets" v={fmt(s.tickets)} rk="tickets" tipArgs={['Tickets', 'Every machine in the Fun Zone pays them.', 'The prize counter takes them.']} />}
         {!room && s.asphalt > 0 && (
           <div class="tenant t-asphalt" {...tip(`Asphalt ${s.asphalt}`, `+${Math.round(ASPHALT_BONUS * 100)}% Route 9 rent, stats and Goodwill each, forever.`, `Paved ${s.paves} time${s.paves === 1 ? '' : 's'}.`, 'The one thing you and the developer agree on.')}>
             <img src={icon('asphalt')} width={18} height={18} alt="" />
@@ -159,7 +159,6 @@ export function Pylon({ room = false }: { room?: boolean }) {
           </button>
         </div>
       </div>
-      {room && <div class="room-lip" aria-hidden="true" />}
     </header>
   );
 }

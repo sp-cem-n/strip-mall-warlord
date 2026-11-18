@@ -6,7 +6,7 @@ import { botAct } from '../game/bot';
 import { FIGHTS, REGIONS, SHOP_LIST, STEP } from '../game/defs';
 import { DAWN } from '../game/content/dawn';
 import { PAVE_ASPHALT, forLease, rentPerSec } from '../game/economy';
-import { MACHINES, pokerQ, serviced, startPlay, type MachineId } from '../game/room';
+import { MACHINE, MACHINES, pokerQ, serviced, startPlay, type MachineId } from '../game/room';
 import { triggerFlicker } from './lights';
 import { fightLabel, payFor, step } from '../game/sim';
 import { fmt } from './format';
@@ -78,10 +78,10 @@ function autoTick() {
     const t = (auto.clock[m.id] = (auto.clock[m.id] ?? 0) + TICK * app.speed);
     if (t < m.secs) continue;
     auto.clock[m.id] = 0;
-    if (s.room.attracting) continue;
+    if (s.room.attracting.some((a) => MACHINE[a.id].region === m.region)) continue;
     const q = m.id === 'poker' ? pokerQ(s, true) : m.id === 'cyclone' ? (Math.random() < 0.1 ? 1 : Math.random() < 0.4 ? 0.5 : 0) : 0.45 + 0.5 * Math.random();
     if (startPlay(s, m.id) !== null) continue;
-    s.room.attracting = { id: m.id, q, left: m.secs };
+    s.room.attracting.push({ id: m.id, q, left: m.secs });
     started = true;
     break;
   }

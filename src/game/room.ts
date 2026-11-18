@@ -31,9 +31,15 @@ export interface RoomState {
   plays: number;
   shuffle: number; // shuffleboard house scores beaten (0-5)
   shuffleBest: number;
-  attracting: { id: MachineId; q: number; left: number; held?: boolean } | null;
+  attracting: Attracting[]; // at most one per room
+  won: Partial<Record<MachineId, string>>; // YOU WON slips Attract Mode left on a machine, until you open it
+  stranger?: 'there' | 'heard'; // the man by the Fun Zone pay phone (after the first repave)
 }
-export const newRoom = (): RoomState => ({ unlocked: [], attract: {}, clock: {}, cool: {}, perks: {}, board: 0, best: 0, jackpot: 500, shelf: [10, 10], buffs: {}, plays: 0, shuffle: 0, shuffleBest: 0, attracting: null });
+export interface Attracting { id: MachineId; q: number; left: number; held?: boolean }
+export const newRoom = (): RoomState => ({ unlocked: [], attract: {}, clock: {}, cool: {}, perks: {}, board: 0, best: 0, jackpot: 500, shelf: [10, 10], buffs: {}, plays: 0, shuffle: 0, shuffleBest: 0, attracting: [], won: {} });
+export const attractOn = (s: GameState, id: MachineId) => s.room.attracting.find((a) => a.id === id);
+const attractIn = (s: GameState, r: RegionId) => s.room.attracting.find((a) => MACHINE[a.id].region === r);
+export const stopAttract = (s: GameState, id: MachineId) => (s.room.attracting = s.room.attracting.filter((a) => a.id !== id));
 
 // ---- rates every payout is priced in, so nothing goes stale ----
 const rent = (s: GameState, r: RegionId) => Math.max(1, rentPerSec(s, r));
@@ -59,6 +65,7 @@ export const BUFF_SECONDS = 600;
 export const CLAW_TOYS: BuffKind[] = ['bat', 'duck', 'troll', 'slap']; // the timed ones; the bouncy ball is a rally
 // video poker pays the Grapevine: rumor slips by hand, nothing to royal flush
 export const POKER_SLIPS = [0, 1, 2, 3, 6];
+export const BJ_Q = 0.75; // blackjack's q for a natural
 export const BAR_HOUSE: [string, number][] = [['MO', 10], ['TERRI', 13], ['GUS', 16], ['BIG AL', 19], ['RAY', 22]];
 export const SHUFFLE_TOP = 24;
 export const POKER_HANDS = ['NOTHING', 'JACKS OR BETTER', 'THREE OF A KIND', 'FULL HOUSE', 'ROYAL FLUSH'];
@@ -90,16 +97,16 @@ export const MACHINES: MachineDef[] = [
     pay: (s, q) => {
       const cost = rent(s, 0) * 5;
       const pile = Math.min(1, (s.room.pusher?.coins.length ?? s.room.shelf[0] * 3) / 40);
-      const tickets = q > 0.45 && rand(s) < 0.22 ? 8 + Math.floor(rand(s) * 13) : 0;
-      const token = tickets ? ' A ticket token went over too.' : '';
+      const token = q > 0.45 && rand(s) < 0.22 ? 8 + Math.floor(rand(s) * 13) : 0;
       const rentCheck = q > 0.92 && (s.room.pusher?.coins.some((c) => c.kind === 'rent') === false || pile > 0.5);
-      const cash = rentCheck ? rent(s, 0) * 120 : cost * (0.4 + 2.6 * q) * (0.4 + 0.6 * Math.max(0.3, pile));
-      return { cash, tickets, big: q > 0.85 || rentCheck, text: (rentCheck ? 'The Rent Check went over the edge.' : q > 0.7 ? 'A clean shove.' : q > 0.35 ? 'A few off the edge.' : 'Mostly stuck.') + token };
+      const tickets = Math.round((3 + 27 * q) * (0.4 + 0.6 * Math.max(0.3, pile))) + token;
+      // the Rent Check is the room's one cash jackpot
+      return { tickets, cash: rentCheck ? cost * 24 : undefined, big: q > 0.85 || rentCheck, text: (rentCheck ? 'The Rent Check went over the edge.' : q > 0.7 ? 'A clean shove.' : q > 0.35 ? 'A few off the edge.' : 'Mostly stuck.') + (token ? ' A ticket token went over too.' : '') };
     },
   },
   {
     id: 'whac', region: 0, name: 'Whac-a-Shoplifter', blurb: 'Bonk shoplifters. Not customers.', needs: 'Capture Big-Box Plaza', unlock: fz((s) => cleared(s, 0, 1, REGIONS[0].lots[1].fights)), cost: rentCost(20), secs: 32, cool: 0,
-    pay: (s, q) => ({ goodwill: winPay(s, 0) * 0.5 * Math.round(30 * q), text: `${Math.round(30 * q)} bonks.` }),
+    pay: (_s, q) => ({ tickets: 2 * Math.round(30 * q), text: `${Math.round(30 * q)} bonks.` }),
   },
   {
     id: 'skee', region: 0, name: 'Skee-Ball', blurb: 'Nine balls. Hold for power.', needs: 'Clear fight 6 at the Outlet Mall', unlock: fz((s) => cleared(s, 0, 2, 5)), cost: rentCost(15), secs: 25, cool: 60,
@@ -123,7 +130,7 @@ export const MACHINES: MachineDef[] = [
   },
   {
     id: 'pinball', region: 0, name: 'Night Shift', blurb: 'Pinball. Left half, right half.', needs: 'Capture Sunrise Office Park', unlock: fz((s) => cleared(s, 0, 3, REGIONS[0].lots[3].fights)), cost: rentCost(20), secs: 70, cool: 0,
-    pay: (s, q) => ({ goodwill: winPay(s, 0) * 8 * q, text: `${Math.round(PINBALL_TOP * q).toLocaleString('en-US')} points.` }),
+    pay: (_s, q) => ({ tickets: Math.round(120 * q), big: q >= 0.9, text: `${Math.round(PINBALL_TOP * q).toLocaleString('en-US')} points.` }),
   },
   {
     id: 'cyclone', region: 0, name: 'Cyclone', blurb: 'Stop it on the jackpot.', needs: 'Clear fight 9 at Pinewood Commons', unlock: fz((s) => cleared(s, 0, 5, 8)), cost: rentCost(15), secs: 6, cool: 600,
@@ -138,12 +145,12 @@ export const MACHINES: MachineDef[] = [
     pay: (s, q) => {
       const pot = s.room.shelf[1] / 10;
       if (q >= 1 && pot > 0.5) return { cash: bypassRent(s) * 120, big: true, text: 'Three in the bull. The bar goes quiet.' };
-      return { cash: bypassRent(s) * 15 * (0.4 + 2.6 * q) * (0.4 + 0.6 * pot), text: q > 0.6 ? 'Good darts.' : 'Wall.' };
+      return { equity: winPay(s, 1) * 1.5 * (0.4 + 2.6 * q) * (0.4 + 0.6 * pot), text: q > 0.6 ? 'Good darts.' : 'Wall.' };
     },
   },
   {
     id: 'tabs', region: 1, name: 'Pull-Tabs', blurb: 'Three tickets from the box. Pull every tab; three alike pays.', needs: DAWN.needsOffRamp, unlock: offRamp, cost: rentCost(6, 1), secs: 8, cool: 0,
-    pay: (s, q) => (q > 0 ? { cash: bypassRent(s) * 18 * q, big: q >= 1, text: q >= 1 ? 'Three sevens. The bartender checks it twice.' : 'A winner.' } : { text: 'Blanks. Into the bucket.' }),
+    pay: (s, q) => (q >= 1 ? { cash: bypassRent(s) * 60, big: true, text: 'Three sevens. The bartender checks it twice.' } : q > 0 ? { equity: winPay(s, 1) * 2 * q, text: 'A winner.' } : { text: 'Blanks. Into the bucket.' }),
   },
   {
     id: 'pool', region: 1, name: 'Pool', blurb: 'Drag back from the cue ball. Six shots.', needs: DAWN.needsExit14, unlock: or((s) => cleared(s, 1, 0, REGIONS[1].lots[0].fights)), cost: rentCost(20, 1), secs: 45, cool: 180,
@@ -171,11 +178,12 @@ export const MACHINES: MachineDef[] = [
     pay: (s, q) => ({ equity: winPay(s, 1) * 2 * q, text: `${Math.round(q * SHUFFLE_TOP)} points.` }),
   },
   {
-    id: 'blackjack', region: 1, name: 'Blackjack', blurb: 'The bartender deals. Hit or stand (H / S); the house stands on 17.', needs: 'Clear fight 4 at the Corporate Campus', unlock: or((s) => cleared(s, 1, 1, 3)), cost: rentCost(20, 1), secs: 15, cool: 0,
-    pay: (s, q) => (q > 0 ? { cash: bypassRent(s) * 20 * (q >= 1 ? 3.5 : q >= 0.5 ? 2.2 : 1), big: q >= 1, text: q >= 1 ? 'Blackjack.' : q >= 0.5 ? 'Beat the house.' : 'Push. Your money back.' } : { text: 'The house wins.' }),
+    id: 'blackjack', region: 1, name: 'Blackjack', blurb: 'The bartender deals. Hit, stand, double down or split; the dealer stands on 17. H S D P: Hit / Stand / Double / Split.', needs: 'Clear fight 4 at the Corporate Campus', unlock: or((s) => cleared(s, 1, 1, 3)), cost: rentCost(20, 1), secs: 15, cool: 0,
+    // q is hands won over two (a double or a split can win two); exactly BJ_Q is a natural, the cash jackpot
+    pay: (s, q) => (q === BJ_Q ? { cash: bypassRent(s) * 90, big: true, text: 'Blackjack. Paid in cash.' } : q > 0 ? { equity: winPay(s, 1) * 3 * q * 2, big: q >= 1, text: q >= 1 ? 'Doubled and won.' : 'Beat the house.' } : { text: 'The house wins.' }),
   },
   {
-    id: 'fairway', region: 1, name: 'Fairway 9', blurb: 'A short nine. Aim, hold for power. Par 18; water costs a stroke.', needs: 'Clear fight 4 at Town Center, Phase II', unlock: or((s) => cleared(s, 1, 2, 3)), cost: rentCost(20, 1), secs: 60, cool: 0,
+    id: 'fairway', region: 1, name: 'Fairway 9', blurb: 'Bar golf, a short nine, par 36. Aim, pull the trackball back to load the swing, roll it forward to hit. Water: +1.', needs: 'Clear fight 4 at Town Center, Phase II', unlock: or((s) => cleared(s, 1, 2, 3)), cost: rentCost(20, 1), secs: 60, cool: 0,
     pay: (s, q) => ({ equity: winPay(s, 1) * 7 * q, big: q >= 1, text: q >= 1 ? 'Under par. The regulars want to see the card.' : q > 0.5 ? 'A decent card.' : 'Lost a few balls.' }),
   },
   {
@@ -350,29 +358,38 @@ export function tickRoom(s: GameState, dt: number) {
   for (const k of Object.keys(R.buffs) as BuffKind[]) R.buffs[k] = Math.max(0, (R.buffs[k] ?? 0) - dt);
   R.shelf = R.shelf.map((x) => Math.min(10, x + dt / 60)) as [number, number];
   if (R.unlocked.includes('pusher')) tickPusher(s, dt);
-  if (R.attracting) {
-    // GameRoom holds the clock while the cabinet is on screen, so you can watch the play.
-    if (!R.attracting.held) {
-      R.attracting.left -= dt;
-      if (R.attracting.left <= 0) {
-        const { id, q } = R.attracting;
-        R.attracting = null;
-        if (id === 'shuffle') postShuffle(s, Math.round(q * SHUFFLE_TOP));
-        if (id === 'pinball') postScore(s, Math.round(q * PINBALL_TOP));
-        endPlay(s, id, q, true);
-      }
-    }
+  // the open game holds its own Attract play, so you can watch it
+  for (const a of R.attracting.filter((a) => !a.held && (a.left -= dt) <= 0)) {
+    stopAttract(s, a.id);
+    if (a.id === 'shuffle') postShuffle(s, Math.round(a.q * SHUFFLE_TOP));
+    if (a.id === 'pinball') postScore(s, Math.round(a.q * PINBALL_TOP));
+    leaveSlip(s, a.id, endPlay(s, a.id, a.q, true));
   }
   for (const id of Object.keys(R.attract) as MachineId[]) {
     const lv = R.attract[id] ?? 0;
-    if (!lv || R.attracting) continue;
+    if (!lv || attractIn(s, MACHINE[id].region)) continue;
     R.clock[id] = (R.clock[id] ?? 0) + dt;
     if (R.clock[id]! < ATTRACT_EVERY[lv]) continue;
     R.clock[id] = 0;
     if (startPlay(s, id) !== null) continue;
     const q = id === 'cyclone' ? (rand(s) < 0.04 ? 1 : rand(s) < 0.15 ? 0.5 : 0) : id === 'poker' ? pokerQ(s, false) : ATTRACT_SKILL * (0.6 + 0.8 * rand(s));
-    R.attracting = { id, q, left: MACHINE[id].secs };
+    R.attracting.push({ id, q, left: MACHINE[id].secs });
   }
+}
+
+// What a play paid, short enough for a slip on the machine ('60 TK', '+40 EQ', '$1.2M', '2 SLIPS').
+export function slipText(rw: Reward): string {
+  if (rw.cash) return `$${short(rw.cash)}`;
+  if (rw.tickets) return `${short(rw.tickets)} TK`;
+  if (rw.equity) return `+${short(rw.equity)} EQ`;
+  if (rw.goodwill) return `+${short(rw.goodwill)} GW`;
+  if (rw.slips) return `${rw.slips} SLIP${rw.slips > 1 ? 'S' : ''}`;
+  return rw.buff ? BUFFS[rw.buff].name.toUpperCase() : '';
+}
+const short = (n: number) => (n >= 1e6 ? `${+(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${+(n / 1e3).toFixed(1)}K` : `${Math.round(n)}`);
+export function leaveSlip(s: GameState, id: MachineId, rw: Reward) {
+  const t = slipText(rw);
+  if (t) s.room.won[id] = t;
 }
 
 

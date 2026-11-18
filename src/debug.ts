@@ -59,11 +59,12 @@ export function applyDebug(q: URLSearchParams) {
     app.s.tickets = 3000;
     app.s.room.perks = { slot: 1, walkins: 1 };
     app.s.room.attract = { pusher: 1, skee: 2 };
+    app.s.room.won = { skee: '240 TK', whac: '60 TK' };
     app.s.room.board = 2;
     app.s.room.best = 31250;
     app.s.room.buffs = { bat: 420 };
     app.s.crews[0].cash = Math.max(app.s.crews[0].cash, 1e6);
-    if (app.s.bypass) (app.s.crews[1].shops.offramp ??= 3), app.s.room.unlocked.push('darts', 'tabs', 'pool', 'poker', 'foos', 'shuffle', 'blackjack', 'fairway', 'trivia'), (app.s.room.shuffle = 1), (app.s.room.shuffleBest = 12), (app.s.room.slips = 4), (app.s.room.buffs.tip = 200), (app.s.crews[1].cash = Math.max(app.s.crews[1].cash, 1e7));
+    if (app.s.bypass) (app.s.crews[1].shops.offramp ??= 3), app.s.room.unlocked.push('darts', 'tabs', 'pool', 'poker', 'foos', 'shuffle', 'blackjack', 'fairway', 'trivia'), (app.s.room.shuffle = 1), (app.s.room.shuffleBest = 12), (app.s.room.slips = 4), (app.s.room.won = { ...app.s.room.won, pool: '+1.2K EQ', shuffle: '+40 EQ' }), (app.s.room.attract.pool = 1), (app.s.room.buffs.tip = 200), (app.s.crews[1].cash = Math.max(app.s.crews[1].cash, 1e7));
   }
   if (q.get('asphalt')) (app.s.asphalt = Number(q.get('asphalt'))), (app.s.paves = 1);
   if (q.get('landmarks') === '1') {

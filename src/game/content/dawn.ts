@@ -35,6 +35,16 @@ export const DAWN = {
   chairman: '+10% Equity per win.',
   shuffleBoard: (beat: number, slot: boolean, who: string) => `Shuffleboard: ${who} is off the board. Equity per win +${Math.round(0.06 * beat * 100)}%.${slot ? ' And a fighter slot.' : ''}`,
   shufflePanel: (pct: number) => ` · Equity per win +${pct}%`,
+  // what an open Off-Ramp game pays (cash is only ever the rare jackpot)
+  pays: {
+    room: 'Pays Equity. Cash only as a rare jackpot. Any game here can turn up a rumor slip.',
+    poker: 'Pays rumor slips for the Grapevine: a full house is 3. No Equity, no cash.',
+    trivia: 'Pays a timed boost: three right is +10% Equity per win, five is +25%.',
+    darts: 'Pays Equity. Three in the bull with a full pot pays cash.',
+    tabs: 'Pays Equity on a winner. Three sevens pays cash.',
+    blackjack: 'Pays Equity; a double or a split wins twice. A natural blackjack pays cash.',
+    shuffle: 'Pays Equity. Beat a house score on the board for Equity per win.',
+  },
   // Fun Zone prize counter, second shelf (same counter, after dawn)
   prizeBack: 'The back room',
   // the Grapevine: rumor slips the Off-Ramp games drop (napkins, torn receipts), spent on a short edge for the Bypass crew

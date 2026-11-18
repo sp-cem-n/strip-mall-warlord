@@ -281,7 +281,7 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   t.crews[0].frontier = fzAt + 1;
   check('the Fun Zone leases at Parking Lot fight 7 for $20K and opens the Coin Pusher', SHOPS.funzone.lease === 20000 && (step(t), !t.room.unlocked.length) && lease(t, 'funzone') === null && (step(t), t.room.unlocked.includes('pusher')) && roster(t, 0).some(([id]) => id === 'tokenkid'));
   const c0 = t.crews[0].cash;
-  check('a quarter in, dollars out', startPlay(t, 'pusher') === null && t.crews[0].cash < c0 && (endPlay(t, 'pusher', 0.8), t.crews[0].cash > c0));
+  check('a quarter in, tickets out; the Rent Check is the cash jackpot', startPlay(t, 'pusher') === null && t.crews[0].cash < c0 && ((t.tickets = 0), !endPlay(t, 'pusher', 0.8).cash && t.tickets > 0));
   check('locked machines stay dark', startPlay(t, 'claw') !== null);
   {
     const u = newGame(14);
@@ -348,7 +348,7 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   t.crews[1].frontier = 5;
   check('the Off-Ramp leases at Exit 14 fight 4 for 2 Equity and opens Darts', SHOPS.offramp.lease === 2 && lease(t, 'offramp') === null && (step(t), t.room.unlocked.includes('darts')) && roster(t, 1).some(([id]) => id === 'bartender') && BATTLERS.bartender.role === 'tank');
   const c0 = t.crews[1].cash = 1e6;
-  check('darts take the Bypass till and pay it back on a good round', startPlay(t, 'darts') === null && t.crews[1].cash < c0 && (endPlay(t, 'darts', 0.9), t.crews[1].cash > c0));
+  check('darts take the Bypass till and pay Equity on a good round', startPlay(t, 'darts') === null && t.crews[1].cash < c0 && !!endPlay(t, 'darts', 0.9).equity);
   check('the bar takes no tickets: Attract Mode upgrades cost $', (t.tickets = 0, buyAttract(t, 'darts') === null && buyAttract(t, 'darts') === null));
   t.room.unlocked.push('poker');
   t.room.slips = 0;
