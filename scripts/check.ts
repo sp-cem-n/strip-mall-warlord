@@ -1,8 +1,9 @@
 // Small invariant checks. Run: bun scripts/check.ts
-import { BATTLERS, FIGHTS, GOODWILL_PER_EQUITY, MAX_SLOTS, OFFLINE_CAP_SECONDS, REGIONS, SHOPS, SMOKE_BREAK_SECONDS, SHOP_LIST, START_SLOTS, STEP, WEAK_BONUS } from '../src/game/defs';
+import { BATTLERS, FIGHTS, PATROL_WINS, GOODWILL_PER_EQUITY, MAX_SLOTS, OFFLINE_CAP_SECONDS, REGIONS, SHOPS, SMOKE_BREAK_SECONDS, SHOP_LIST, START_SLOTS, STEP, WEAK_BONUS } from '../src/game/defs';
 import { auras, enemyLineup, startBattle, statsOf, stepBattle } from '../src/game/battle';
-import { advance, topFight, asphaltGain, fieldFull, autoCovers, buyPatrol, buySlot, convert, curb, forLease, lease, lineupOf, newGame, patrolBlock, powerLevel, rentPerSec, patrolPrice, pave, renovate, renovateCost, roster, slotsOf, tierOf, toggleField, train, trainCost, view } from '../src/game/economy';
+import { advance, topFight, asphaltGain, fieldFull, autoCovers, buyPatrol, buySlot, convert, curb, forLease, lease, lineupOf, newGame, patrolBlock, powerLevel, rentPerSec, patrolPrice, pave, renovate, renovateCost, roster, sinkHpBonus, sinkStatMult, slotsOf, tierOf, toggleField, train, trainCost, view } from '../src/game/economy';
 import { loadGame, old, saveGame } from '../src/game/save';
+import { blitzCost, buyBlitz, buyLandmark, consultOpen, hireConsultant, landmarkCost } from '../src/game/sinks';
 import { collectFind, fightRate, onScreen, simulateAway, step } from '../src/game/sim';
 import { CREW_LOOKS, ENEMY_LOOKS } from '../src/art/people';
 import type { GameState } from '../src/game/state';
@@ -93,19 +94,36 @@ check('training costs Goodwill and only Route 9', train(s, 0, 'tank') === null &
 // auto-advance and the ladder
 {
   const t = newGame(11);
-  check('Parking Lot patrol is $50 from the start', patrolPrice(t, 0, 0) === 50 && !autoCovers(t, 0, 0) && patrolBlock(t, 0, 0) === null);
-  t.crews[0].cash = 50;
-  check('signing it turns on auto for the lot', buyPatrol(t, 0, 0) === null && autoCovers(t, 0, 0) && t.crews[0].cash === 0);
+  const p0 = patrolPrice(t, 0, 0);
+  check(`Parking Lot patrol costs Goodwill, ${PATROL_WINS} first-fight wins (${p0})`, p0 === PATROL_WINS * FIGHTS[0][0].pay && !autoCovers(t, 0, 0) && patrolBlock(t, 0, 0) === null && buyPatrol(t, 0, 0) !== null);
+  t.goodwill = p0;
+  check('hiring it turns on auto for the lot', buyPatrol(t, 0, 0) === null && autoCovers(t, 0, 0) && t.goodwill === 0);
   t.crews[0].frontier = 9;
-  check('Big-Box patrol: sold once the lot is reached, at its sign price', patrolBlock(t, 0, 1) === null && patrolPrice(t, 0, 1) === REGIONS[0].lots[1].patrol);
+  check('Big-Box patrol: sold once the lot is reached, priced off its own first fight', patrolBlock(t, 0, 1) === null && patrolPrice(t, 0, 1) > p0);
+  // ◂ parks the crew: no climbing back up until ▸
+  const c = t.crews[0];
+  c.at = 5;
+  c.frontier = 7;
+  advance(t, 0, -1);
+  c.farmed = 99;
+  const at = c.at;
+  for (let i = 0; i < 600 && c.at === at; i++) step(t);
+  check('◂ parks the crew: the patrol holds while it farms', c.at === at && c.parked);
+  advance(t, 0, 1);
+  check('▸ lets the patrol climb again', !c.parked);
 }
 check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0, 1) === null && advance(s, 0, 1) !== null && s.crews[0].at === 2);
 {
+  const u = newGame(2);
+  u.crews[0].frontier = u.crews[0].at = 30;
+  for (let i = 0; i < 2000 && u.crews[0].losses === 0; i++) step(u);
+  check('no patrol: a lost wall stays put and gets tried again', u.crews[0].losses === 1 && u.crews[0].at === 30);
   const t = newGame(2);
   t.crews[0].frontier = 30;
   t.crews[0].at = 30;
+  t.crews[0].contracts = [FIGHTS[0][30].zone];
   for (let i = 0; i < 2000 && t.crews[0].at === 30; i++) step(t);
-  check('a fresh loss at the frontier: smoke break, back one fight to farm', t.crews[0].at === 29 && t.crews[0].losses === 1 && t.crews[0].tries === 1 && t.crews[0].smoke === SMOKE_BREAK_SECONDS && Object.keys(t.crews[0].wounds).length === 0);
+  check('a fresh loss on a patrolled lot: smoke break, back one fight to farm', t.crews[0].at === 29 && t.crews[0].losses === 1 && t.crews[0].tries === 1 && t.crews[0].smoke === SMOKE_BREAK_SECONDS && Object.keys(t.crews[0].wounds).length === 0);
 }
 {
   // damage carries over: a win leaves wounds, the next fight starts on them
@@ -376,6 +394,38 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   const CUT = /fights run themselves|nice to have|never required|ignoring them|this crew only|only this crew|both crews|own till|every shop pays rent and sends/i;
   const ui = readdirSync('src/ui').filter((f) => f.endsWith('.tsx')).flatMap((f) => readFileSync(`src/ui/${f}`, 'utf8').split('\n').filter((x) => CUT.test(x)).map((x) => `${f}: ${x.trim().slice(0, 60)}`));
   check(`no design-explaining copy in the UI${ui.length ? ` (${ui.join(' | ')})` : ''}`, ui.length === 0);
+}
+
+// the plaza: one check per buy
+{
+  const t = newGame(21);
+  const c = t.crews[0];
+  c.frontier = FIGHTS[0].findIndex((f) => f.zone === 4);
+  c.shops.pawn = 5;
+  c.cash = 1e12;
+  const rent = rentPerSec(t, 0);
+  check('consultants are not sold before dawn', !consultOpen(t, 0, 0));
+  check('a billboard stacks: +2%, then +1% more, at half again the price', (() => {
+    const p1 = landmarkCost(t, 'billboard');
+    buyLandmark(t, 'billboard');
+    const p2 = landmarkCost(t, 'billboard');
+    buyLandmark(t, 'billboard');
+    return Math.abs(rentPerSec(t, 0) / rent - 1.03) < 1e-9 && Math.abs(p2 / p1 - 1.5 * 1.02) < 0.01; // the price is minutes of rent, and rent just went up
+  })());
+  check('a water tower adds crew HP on Route 9', buyLandmark(t, 'tower') === null && sinkHpBonus(t) === 0.03);
+  check('a neon pylon adds Route 9 stats only', buyLandmark(t, 'pylon') === null && sinkStatMult(t, 0) === 1.04 && sinkStatMult(t, 1) === 1);
+  const before = rentPerSec(t, 0);
+  check('a radio spot adds +1.5% rent and costs half again for the reprint', (() => {
+    const p1 = blitzCost(t, 'radio');
+    buyBlitz(t, 'radio');
+    const up = rentPerSec(t, 0) / before;
+    return Math.abs(up - (1.03 + 0.015) / 1.03) < 1e-9 && Math.abs(blitzCost(t, 'radio') / p1 - 1.5 * up) < 0.01;
+  })());
+  t.bypass = true;
+  check('after dawn, a captured lot sells a consultant', consultOpen(t, 0, 0) && hireConsultant(t, 0, 0) === null && !consultOpen(t, 0, 0) && !autoCovers(t, 0, 0));
+  c.cash = renovateCost('pawn', 5) * 2;
+  for (let i = 0; i < 12 / STEP; i++) step(t);
+  check('the consultant renovates its lot when the till covers it twice', c.shops.pawn === 6);
 }
 
 console.log(failed ? `\n${failed} FAILED` : '\nall good');

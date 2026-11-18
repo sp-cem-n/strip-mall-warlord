@@ -77,7 +77,6 @@ export interface LotDef {
   short: string;
   blurb: string;
   fights: number; // regular fights; the boss comes after
-  patrol: number; // patrol price, in that region's dollars
   regulars: EnemyDef[];
   boss: EnemyDef & { joins: string };
   clearText: string;

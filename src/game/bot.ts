@@ -1,10 +1,12 @@
 // A scripted player for balance runs and the debug `advance` param. Plays like someone who checks in now and then.
 import { FIGHTS, RETRY_AFTER, ROLES, SHOPS, REGIONS, type RegionId } from './defs';
-import { advance, bal, buyPatrol, buySlot, convert, curb, forLease, leased, lease, lineupOf, lotsTaken, patrolBlock, patrolPrice, pave, purse, regionDone, renovate, renovateCost, rentPerSec, slotPrice, topFight, train, trainCost, view } from './economy';
+import { advance, bal, buyPatrol, buySlot, convert, curb, forLease, leased, lease, lineupOf, lotsTaken, patrolBlock, patrolPrice, pave, purse, regionDone, renovate, renovateCost, slotPrice, topFight, train, trainCost, view } from './economy';
 import { collectFind } from './sim';
 import type { GameState } from './state';
 import { BAR_BUFFS, QUIZ, serviced, MACHINE, PINBALL_TOP, SHUFFLE_TOP, buffOn, buyPerk, endPlay, perkPrice, pokerQ, postScore, postShuffle, shelfOf, startPlay, type MachineId } from './room';
 import { rand } from './rng';
+
+const PATROL_SAVE = 4; // the bot saves for a patrol that costs under this many training levels
 
 // The room player: half of online time, at about 70% skill. Keeps a claw toy going, spends tickets at the counter.
 const MIX: [MachineId, number][] = [['pusher', 0.35], ['skee', 0.25], ['whac', 0.15], ['pinball', 0.1], ['cyclone', 0.15]];
@@ -84,13 +86,14 @@ function crewAct(s: GameState, r: RegionId, o: BotOpts) {
   const arcade = forLease(s, r).find((x) => x.id === 'funzone');
   // Players can buy it at Parking Lot fight 7; the official bot waits until Outlet, as it used to, so early $20K does not starve Big-Box.
   if (arcade && lotsTaken(s, 0) >= 2 && c.cash >= arcade.lease) lease(s, arcade.id);
-  // Patrol contracts for every lot reached; save up for one when it's under half an hour of rent.
+  // Patrols for every lot reached, paid like training; save up for one when it's under a few training levels.
   const zone = FIGHTS[r][Math.min(c.frontier, FIGHTS[r].length - 1)].zone;
+  const level = trainCost(r, Math.min(...ROLES.map((k) => c.train[k])));
   let reserve = 0;
   for (let z = 0; z <= zone; z++) {
     if (patrolBlock(s, r, z)) continue;
     const price = patrolPrice(s, r, z);
-    if (buyPatrol(s, r, z) && price < rentPerSec(s, r) * 1800) reserve = Math.max(reserve, price);
+    if (buyPatrol(s, r, z) && price < level * PATROL_SAVE) reserve = Math.max(reserve, price);
   }
   // fighter slots, then training
   while (isFinite(slotPrice(s, r)) && !(R.trainIn === R.leaseIn && pending && bal(s, r, R.trainIn) - slotPrice(s, r) < pending) && !buySlot(s, r));
@@ -102,13 +105,13 @@ function crewAct(s: GameState, r: RegionId, o: BotOpts) {
     if (!cheapest) break;
     const cost = renovateCost(cheapest.id, c.shops[cheapest.id]);
     if (R.leaseIn === 'cash' && pending && cost > pending * 0.25) break;
-    if (reserve && c.cash - cost < reserve) break;
     if (renovate(s, cheapest.id)) break;
   }
   const eqPending = R.leaseIn === R.trainIn ? pending : 0;
   for (let g = 0; g < 50; g++) {
     const role = [...ROLES].sort((a, b) => c.train[a] - c.train[b])[0];
     if (eqPending && trainCost(r, c.train[role]) > purse(s, r) - eqPending) break;
+    if (reserve && purse(s, r) - trainCost(r, c.train[role]) < reserve) break;
     // save up for the next fighter slot once it costs less than a handful of training levels
     if (slotPrice(s, r) <= 6 * trainCost(r, c.train[role]) && trainCost(r, c.train[role]) > purse(s, r) - slotPrice(s, r)) break;
     if (purse(s, r) < trainCost(r, c.train[role]) || train(s, r, role)) break;

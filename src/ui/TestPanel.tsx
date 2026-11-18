@@ -5,8 +5,7 @@ import { app, toast } from '../app';
 import { botAct } from '../game/bot';
 import { FIGHTS, REGIONS, SHOP_LIST, STEP } from '../game/defs';
 import { DAWN } from '../game/content/dawn';
-import { forLease, rentPerSec } from '../game/economy';
-import { paveAsphalt } from '../game/sinks';
+import { PAVE_ASPHALT, forLease, rentPerSec } from '../game/economy';
 import { MACHINES, pokerQ, serviced, startPlay, type MachineId } from '../game/room';
 import { triggerFlicker } from './lights';
 import { fightLabel, payFor, step } from '../game/sim';
@@ -141,7 +140,7 @@ export function TestPanel() {
       </div>
       <div class="tp-row">
         <button class="btn small" onClick={unlockAll}>Unlock every machine</button>
-        <button class="btn small" onClick={() => ((s.asphalt += paveAsphalt()), done())}>+Asphalt ({paveAsphalt()})</button>
+        <button class="btn small" onClick={() => ((s.asphalt += PAVE_ASPHALT), done())}>+Asphalt ({PAVE_ASPHALT})</button>
         <button class="btn small" onClick={() => triggerFlicker()}>Trigger flicker</button>
       </div>
       <div class="tp-row">

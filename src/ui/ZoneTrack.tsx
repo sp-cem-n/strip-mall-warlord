@@ -1,7 +1,7 @@
 // The lot signs across the top of the Lot: progress, weakness badges, auto-advance.
 import { app, tip, toast } from '../app';
-import { BATTLERS, FIGHTS, REGIONS, WEAK_BONUS, type RegionId } from '../game/defs';
-import { autoCovers, bal, buyPatrol, patrolPrice } from '../game/economy';
+import { BATTLERS, FIGHTS, PATROL_WINS, REGIONS, WEAK_BONUS, type RegionId } from '../game/defs';
+import { autoCovers, buyPatrol, currencyOf, patrolPrice, purse } from '../game/economy';
 import { fmt } from './format';
 
 function Weak({ id, r, zone }: { id: string; r: RegionId; zone: number }) {
@@ -18,6 +18,8 @@ function Weak({ id, r, zone }: { id: string; r: RegionId; zone: number }) {
 export function ZoneTrack({ r }: { r: RegionId }) {
   const s = app.s;
   const c = s.crews[r];
+  const cur = currencyOf(r);
+  const price = (z: number) => patrolPrice(s, r, z);
   return (
     <div class="zones">
       {REGIONS[r].lots.map((z, i) => {
@@ -47,12 +49,12 @@ export function ZoneTrack({ r }: { r: RegionId }) {
             </div>
             {state !== 'locked' && state !== 'done' && (
               auto ? (
-                <div class="auto on" {...tip('On patrol', 'The crew moves up here on its own.')}>
+                <div class="auto on" {...tip('On patrol', 'The crew moves up here on its own, and drops back a fight when a new one is too much.')}>
                   AUTO
                 </div>
               ) : (
-                <button class="auto hire" disabled={bal(s, r, 'cash') < patrolPrice(s, r, i)} onClick={() => (toast(buyPatrol(s, r, i) ?? `${z.short}: on patrol`), app.refresh())} {...tip('Hire a patrol', `$${fmt(patrolPrice(s, r, i))}. The crew moves up here on its own.`, 'Without one, press ▸.')}>
-                  PATROL ${fmt(patrolPrice(s, r, i))}
+                <button class="auto hire" disabled={purse(s, r) < price(i)} onClick={() => (toast(buyPatrol(s, r, i) ?? `${z.short}: on patrol`), app.refresh())} {...tip('Hire a patrol', `${fmt(price(i))} ${cur}, about ${PATROL_WINS} wins at this lot.`, 'The crew moves up here on its own, and drops back a fight when a new one is too much.', 'Without one, press ▸.')}>
+                  PATROL {fmt(price(i))} {cur}
                 </button>
               )
             )}

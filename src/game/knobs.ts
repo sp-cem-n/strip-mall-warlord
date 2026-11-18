@@ -28,6 +28,7 @@ export const TRAIN_GROWTH = 1.3;
 export const GOODWILL_PER_EQUITY = 10; // conversion: Goodwill buys Equity, one way
 export const ASPHALT_BONUS = 0.02; // per asphalt: Route 9 rent, stats and Goodwill
 export const TELL = { tanky: { hp: 1.4, dmg: 0.8 }, hard: { hp: 0.8, dmg: 1.3 } } as const;
+export const PATROL_WINS = 40; // a patrol costs this many of the lot's first-fight wins, in Goodwill (Equity on the Bypass)
 export const RETRY_AFTER = 6; // farmed wins before the crew moves up a fight (or tries the frontier again)
 export const SMOKE_BREAK_SECONDS = 5; // full heal: after a loss, after a win where somebody went down, or when moving to a new fight
 export const WALK_IN_SECONDS = 2; // during a streak the next group walks in from the back of the lot

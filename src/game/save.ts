@@ -25,9 +25,7 @@ function fillIn(s: GameState): GameState {
   if (typeof s.room.shelf === 'number') s.room.shelf = [s.room.shelf, 10];
   s.room.attracting ??= null;
   s.consultants ??= [[], []];
-  s.autoReno ??= [[], []];
   s.landmarks ??= [];
-  s.retainers ??= 0;
   s.blitz ??= {};
   for (const c of s.crews) {
     c.tries ??= 0;
@@ -35,6 +33,7 @@ function fillIn(s: GameState): GameState {
     c.smoke ??= 0;
     c.queueEnter ??= -1;
     c.deck ??= c.at;
+    c.parked ??= false;
     c.rec ??= {};
     c.lastEnd ??= -1;
     delete (c as { streak?: number }).streak;

@@ -4,10 +4,10 @@ import { useEffect, useRef } from 'preact/hooks';
 import { DAWN } from '../game/content/dawn';
 import { app, tip, toast } from '../app';
 import { BATTLERS, CURRENCY_NAME, REGIONS, SHOPS, WALKIN_STAYS, type RegionId, type ShopDef } from '../game/defs';
-import { bal, leaseCur, tierOf, bossLevel, currencyOf, forLease, joined, lease, leased, lineupOf, regionDone, renovate, renovateCost, rentOf, toggleField } from '../game/economy';
+import { bal, patrolPrice, leaseCur, tierOf, bossLevel, currencyOf, forLease, joined, lease, leased, lineupOf, regionDone, renovate, renovateCost, rentOf, toggleField } from '../game/economy';
 import { statsOf } from '../game/battle';
 import { collectFind, onScreen, walkInValue } from '../game/sim';
-import { LANDMARKS, hasLandmark } from '../game/sinks';
+import { LANDMARKS, hasLandmark, landmarkBuff } from '../game/sinks';
 import type { GameState } from '../game/state';
 import { crewURL, facadeURL, landmarkURL, scaffoldURL } from './art';
 import { register } from './audio';
@@ -188,7 +188,7 @@ function uncleSays(s: GameState, r: RegionId): string {
   if (!c.shops.dojo && forLease(s, 0).some((x) => x.id === 'dojo')) return 'Lease the Dojo. Somebody has to stand in front.';
   if (forLease(s, 0).length) return 'Something is for lease. Every shop is one more person in the lot.';
   if (c.tries >= 3) return 'Losing? Renovate, train, or let them farm the fight behind them.';
-  if (!c.contracts.includes(0) && c.cash >= 50) return 'Fifty bucks and the Parking Lot patrols itself.';
+  if (!c.contracts.includes(0) && s.goodwill >= patrolPrice(s, 0, 0)) return 'Some Goodwill and the Parking Lot patrols itself.';
   return regionDone(s, 0) ? "They didn't pave it. You might. Asphalt keeps." : "Don't let them pave it.";
 }
 
@@ -233,7 +233,7 @@ export function Shops() {
                 width={20}
                 height={24}
                 alt={d.name}
-                {...tip(d.name, n > 1 ? `×${n} on the lot.` : 'On the lot.', d.does)}
+                {...tip(d.name, n > 1 ? `×${n} on the lot.` : 'On the lot.', `+${Math.round(landmarkBuff(s, d.id) * 1000) / 10}% ${d.does}.`, d.art)}
               />
             );
           })}

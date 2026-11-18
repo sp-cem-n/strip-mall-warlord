@@ -5,25 +5,21 @@ import { BATTLERS, CURRENCY_SHORT, GOODWILL_PER_EQUITY, REGIONS, ROLES, TRAIN_ST
 import { convert, currencyOf, purse, roster, train, trainCost } from '../game/economy';
 import {
   BLITZ,
+  BLITZ_WALKIN,
+  CONSULT_DOES,
   LANDMARKS,
-  autoRenoCost,
   blitzCost,
   blitzLevel,
   blitzOpen,
-  buyAutoReno,
   buyBlitz,
   buyLandmark,
-  buyRetainer,
   consultCost,
   consultOpen,
-  hasAutoReno,
-  hasConsultant,
-  hasLandmark,
   hireConsultant,
+  landmarkBuff,
   landmarkCost,
+  landmarkCount,
   landmarkOpen,
-  retainCost,
-  retainOpen,
 } from '../game/sinks';
 import { fmt } from './format';
 import type { GameState } from '../game/state';
@@ -85,92 +81,47 @@ function Training({ r }: { r: RegionId }) {
   );
 }
 
+const pct = (x: number) => `${Math.round(x * 1000) / 10}%`;
+
+// The plaza's buys, each card printing what it does. Hired consultants leave the grid and get one line underneath.
 function Plaza({ r }: { r: RegionId }) {
   const s = app.s;
   const cash = s.crews[r].cash;
   const lots = REGIONS[r].lots;
-  const items: { key: string; name: string; does: string; cost: number; ok: boolean; have: boolean; buy: () => string | null }[] = [];
+  const items: { key: string; name: string; does: string; cost: number; buy: () => string | null }[] = [];
   lots.forEach((lot, z) => {
-    if (hasConsultant(s, r, z) || consultOpen(s, r, z)) {
-      const have = hasConsultant(s, r, z);
-      items.push({
-        key: `c-${r}-${z}`,
-        name: `${lot.name} consultant`,
-        does: have ? (hasAutoReno(s, r, z) ? 'Keeping the lights on, and renovating when the till allows.' : 'Keeping the lights on.') : 'They keep the lights on after you move on.',
-        cost: consultCost(s, r),
-        ok: consultOpen(s, r, z) && cash >= consultCost(s, r),
-        have,
-        buy: () => hireConsultant(s, r, z),
-      });
-      if (have && !hasAutoReno(s, r, z)) {
-        items.push({
-          key: `ar-${r}-${z}`,
-          name: `${lot.name} auto-reno`,
-          does: 'Renovates a shop on this lot when the till can cover it twice over.',
-          cost: autoRenoCost(s, r),
-          ok: cash >= autoRenoCost(s, r),
-          have: false,
-          buy: () => buyAutoReno(s, r, z),
-        });
-      }
-    }
+    if (consultOpen(s, r, z)) items.push({ key: `c-${z}`, name: `${lot.short} consultant`, does: CONSULT_DOES, cost: consultCost(s, r), buy: () => hireConsultant(s, r, z) });
   });
   if (r === 0) {
     for (const d of LANDMARKS) {
-      if (hasLandmark(s, d.id) || landmarkOpen(s, d.id)) {
-        items.push({
-          key: d.id,
-          name: d.name,
-          does: d.does,
-          cost: landmarkCost(s, 0, d.id),
-          ok: landmarkOpen(s, d.id) && cash >= landmarkCost(s, 0, d.id),
-          have: hasLandmark(s, d.id),
-          buy: () => buyLandmark(s, d.id),
-        });
-      }
+      if (!landmarkOpen(s, d.id)) continue;
+      const n = landmarkCount(s, d.id);
+      const next = d.buff * (n ? 0.5 : 1);
+      items.push({ key: d.id, name: n ? `${d.name} · ${n + 1}` : d.name, does: `+${pct(next)} ${d.does}${n ? `, ${pct(landmarkBuff(s, d.id))} now` : ''}. ${d.art}`, cost: landmarkCost(s, d.id), buy: () => buyLandmark(s, d.id) });
     }
     for (const d of BLITZ) {
-      if (blitzOpen(s, d.id)) {
-        const lv = blitzLevel(s, d.id);
-        items.push({
-          key: d.id,
-          name: lv ? `${d.name} · run ${lv + 1}` : d.name,
-          does: d.does,
-          cost: blitzCost(s, 0, d.id),
-          ok: cash >= blitzCost(s, 0, d.id),
-          have: false,
-          buy: () => buyBlitz(s, d.id),
-        });
-      }
+      if (!blitzOpen(s, d.id)) continue;
+      const lv = blitzLevel(s, d.id);
+      items.push({ key: d.id, name: lv ? `${d.name} · run ${lv + 1}` : d.name, does: `+${pct(d.rent)} Route 9 rent, walk-ins ${pct(BLITZ_WALKIN)} sooner. Stacks.`, cost: blitzCost(s, d.id), buy: () => buyBlitz(s, d.id) });
     }
   }
-  if (retainOpen(s, r) || s.retainers > 0) {
-    items.push({
-      key: 'retain',
-      name: s.retainers ? `Crew contract · ${s.retainers + 1}` : 'Crew contract',
-      does: 'Veterans hold a little harder. Stacks.',
-      cost: retainCost(s, r),
-      ok: retainOpen(s, r) && cash >= retainCost(s, r),
-      have: false,
-      buy: () => buyRetainer(s, r),
-    });
-  }
-  if (!items.length) return null;
+  const hired = s.consultants[r].map((z) => lots[z].short);
+  if (!items.length && !hired.length) return null;
   return (
-    <div class="plaza-buy">
-      {items.map((it) => (
-        <div key={it.key} class="item" {...tip(it.name, it.does)}>
-          <b>{it.name}</b>
-          {it.have ? (
-            <span class="have">Bought</span>
-          ) : (
-            <button class="btn small" disabled={!it.ok} onClick={() => (toast(it.buy() ?? it.name), app.refresh())}>
+    <>
+      <div class="plaza-buy">
+        {items.map((it) => (
+          <div key={it.key} class="item">
+            <b>{it.name}</b>
+            <span class="does">{it.does}</span>
+            <button class="btn small" disabled={cash < it.cost} onClick={() => (toast(it.buy() ?? it.name), app.refresh())}>
               ${fmt(it.cost)}
             </button>
-          )}
-        </div>
-      ))}
-    </div>
+          </div>
+        ))}
+      </div>
+      {hired.length > 0 && <p class="dim plaza-hired">Consultants renovating: {hired.join(', ')}.</p>}
+    </>
   );
 }
 
@@ -183,7 +134,7 @@ export function BackOffice() {
       </h2>
       <Training r={r} />
       <h2>
-        Plaza <span class="dim">· Consultants, signs, contracts</span>
+        Plaza <span class="dim">· {app.s.bypass ? 'Landmarks, ads, consultants' : 'Landmarks and ads'}</span>
       </h2>
       <Plaza r={r} />
     </section>

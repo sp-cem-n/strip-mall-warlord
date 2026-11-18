@@ -73,7 +73,8 @@ export interface Crew {
   regroup: number; // seconds until the next fight
   smoke: number; // length of the current smoke break (0 = the next group is just walking in)
   lineup: string[] | null; // fighters you picked for the lot; null = the auto pick
-  contracts: number[]; // lots with a Patrol contract (auto-advance)
+  contracts: number[]; // lots with a patrol (auto-advance, and a lost wall drops back to a winnable fight)
+  parked: boolean; // the player stepped down with ◂: the patrol doesn't climb until ▸ or the next clear
   slotBuys: number; // fighter slots bought in the Back Office
   rally: number; // seconds left
   wins: number;
@@ -105,9 +106,7 @@ export interface GameState {
   nextUid: number;
   find: { shop: string; kind: WalkInKind; name: string; left: number } | null; // walk-in, only while you're watching
   findClock: number;
-  consultants: [number[], number[]]; // lots with a hired consultant, per region
-  autoReno: [number[], number[]];
-  landmarks: string[];
-  retainers: number;
+  consultants: [number[], number[]]; // lots a consultant renovates, per region
+  landmarks: string[]; // one entry per landmark put up; they stack
   blitz: Record<string, number>;
 }

@@ -2,7 +2,7 @@ import { BATTLERS, BOSS_PAY, FIGHTS, OFFLINE_CAP_SECONDS, RALLY_SECONDS, REFERRA
 import { pick } from './rng';
 import { lossReason, startBattle, stepBattle } from './battle';
 import { asphaltMult, autoCovers, available, currencyOf, earn, fightOf, leased, log, rentPerSec, smokeBreak, topFight } from './economy';
-import { tickSinks } from './sinks';
+import { BLITZ_WALKIN, tickSinks } from './sinks';
 import type { Battle, GameState } from './state';
 import { boardBonus, buffOn, perk, tickRoom } from './room';
 import { fmt } from '../ui/format';
@@ -68,8 +68,8 @@ function resolve(s: GameState, r: RegionId, b: Battle, result: 'win' | 'loss') {
     c.losses++;
     if (b.fight === c.frontier) c.tries++;
     smokeBreak(s, r);
-    // Lost the frontier fresh: it's a wall, drop back a fight. Otherwise: same fight after the smoke.
-    if (b.fresh && b.fight === c.frontier && c.at > 0) {
+    // Lost the frontier fresh on a patrolled lot: it's a wall, drop back a fight to farm. Otherwise: same fight after the smoke.
+    if (b.fresh && b.fight === c.frontier && c.at > 0 && autoCovers(s, r, FIGHTS[r][b.fight].zone)) {
       c.at--;
       c.farmed = 0;
       log(s, r, `Lost ${fightLabel(r, b.fight)}. Back to ${fightLabel(r, c.at)} after a smoke. ${lossReason(b)}`, 'loss');
@@ -95,7 +95,7 @@ function resolve(s: GameState, r: RegionId, b: Battle, result: 'win' | 'loss') {
     c.farmed++;
     log(s, r, `Won ${fightLabel(r, b.fight)}. +${fmt(pay)} ${currencyOf(r)}.`, 'win', true);
     const next = ladder[c.at + 1];
-    if (next && c.at + 1 <= topFight(s, r) && autoCovers(s, r, next.zone) && c.farmed >= RETRY_AFTER) {
+    if (next && !c.parked && c.at + 1 <= topFight(s, r) && autoCovers(s, r, next.zone) && c.farmed >= RETRY_AFTER) {
       c.at++;
       c.farmed = 0;
     }
@@ -126,8 +126,9 @@ function clearFight(s: GameState, r: RegionId) {
     return;
   }
   const next = ladder[c.frontier];
-  if (autoCovers(s, r, next.zone)) c.at = c.frontier;
+  if (autoCovers(s, r, next.zone) && !c.parked) c.at = c.frontier;
   else if (next.i === 0) log(s, r, `${REGIONS[r].lots[next.zone].name} is open.`);
+  c.parked = false;
 }
 
 // Shops the player can see right now; the plaza keeps it current. A walk-in only goes where you'd notice it.
@@ -140,7 +141,7 @@ function walkIns(s: GameState) {
     return;
   }
   if ((s.findClock -= STEP) > 0) return;
-  const ads = 1 - 0.04 * Object.values(s.blitz ?? {}).reduce((a, n) => a + n, 0);
+  const ads = Math.max(0, 1 - BLITZ_WALKIN * Object.values(s.blitz).reduce((a, n) => a + n, 0));
   s.findClock = ((s.view === 0 ? perk(s, 'walkins') : perk(s, 'bpBell')) ? 75 : WALKIN_EVERY) * Math.max(0.5, ads);
   const shops = leased(s, s.view).filter((sh) => onScreen.has(sh.id));
   if (!shops.length) return;

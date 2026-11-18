@@ -68,7 +68,6 @@ export function applyDebug(q: URLSearchParams) {
     app.hasSave = true;
     app.s.landmarks = ['billboard', 'tower', 'pylon'];
     app.s.consultants = [[0, 1], app.s.consultants[1] ?? []];
-    app.s.autoReno = [[0], app.s.autoReno[1] ?? []];
   }
   if (q.get('smoke') === '1') {
     const c = app.s.crews[app.s.view];

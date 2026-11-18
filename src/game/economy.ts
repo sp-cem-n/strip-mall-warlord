@@ -1,13 +1,14 @@
 import { DAWN } from './content/dawn';
 import { enemyLineup, statsOf } from './battle';
-import { ASPHALT_BONUS, CURRENCY_NAME, type Currency, BATTLERS, FIGHTS, fightIndex, GOODWILL_PER_EQUITY, MAX_SLOTS, REGIONS, RENO_GROWTH, RENT_GROWTH, ROLES, SMOKE_BREAK_SECONDS, SHOPS, SLOT_PRICES, START_SLOTS, SHOP_LIST, START_CASH, TRAIN_BASE, TRAIN_GROWTH, type RegionId, type Role, type ShopDef, LOG_KEEP, MGMT_RENT } from './defs';
+import { ASPHALT_BONUS, CURRENCY_NAME, type Currency, BATTLERS, FIGHTS, fightIndex, GOODWILL_PER_EQUITY, MAX_SLOTS, REGIONS, RENO_GROWTH, RENT_GROWTH, ROLES, SMOKE_BREAK_SECONDS, SHOPS, SLOT_PRICES, START_SLOTS, SHOP_LIST, START_CASH, TRAIN_BASE, TRAIN_GROWTH, type RegionId, type Role, type ShopDef, LOG_KEEP, MGMT_RENT, PATROL_WINS } from './defs';
+import { BLITZ, blitzLevel, landmarkBuff } from './sinks';
 import type { Crew, GameState, LogLine, Track } from './state';
 import { newRoom, perk } from './room';
 import { credit } from './rates';
 
 export const SAVE_VERSION = 5;
 const zeroTrack = (): Track => ({ tank: 0, damage: 0, heal: 0, control: 0, buffer: 0 });
-export const newCrew = (r: RegionId): Crew => ({ cash: START_CASH, shops: { [REGIONS[r].start]: 1 }, train: zeroTrack(), frontier: 0, at: 0, kills: 0, farmed: 0, tries: 0, wounds: {}, battle: null, regroup: 2, smoke: 0, lineup: null, contracts: [], slotBuys: 0, rally: 0, wins: 0, losses: 0, queueEnter: -1, deck: 0, rec: {}, lastEnd: -1 });
+export const newCrew = (r: RegionId): Crew => ({ cash: START_CASH, shops: { [REGIONS[r].start]: 1 }, train: zeroTrack(), frontier: 0, at: 0, kills: 0, farmed: 0, tries: 0, wounds: {}, battle: null, regroup: 2, smoke: 0, lineup: null, contracts: [], slotBuys: 0, rally: 0, wins: 0, losses: 0, queueEnter: -1, deck: 0, parked: false, rec: {}, lastEnd: -1 });
 
 export function newGame(seed = Date.now() % 2147483647): GameState {
   return {
@@ -32,9 +33,7 @@ export function newGame(seed = Date.now() % 2147483647): GameState {
     find: null,
     findClock: 30,
     consultants: [[], []],
-    autoReno: [[], []],
     landmarks: [],
-    retainers: 0,
     blitz: {},
   };
 }
@@ -55,7 +54,8 @@ export const currencyOf = (r: RegionId) => CURRENCY_NAME[REGIONS[r].pay];
 export const purse = (s: GameState, r: RegionId) => bal(s, r, REGIONS[r].pay);
 
 // Paving Route 9: the Route 9 crew starts over with more asphalt under it. The Bypass is untouched.
-export const asphaltGain = (s: GameState) => (regionDone(s, 0) ? FIGHTS[0].length + 10 * REGIONS[0].lots.length : 0);
+export const PAVE_ASPHALT = FIGHTS[0].length + 10 * REGIONS[0].lots.length;
+export const asphaltGain = (s: GameState) => (regionDone(s, 0) ? PAVE_ASPHALT : 0);
 export function pave(s: GameState): GameState {
   const gain = asphaltGain(s);
   if (!gain) return s;
@@ -71,17 +71,10 @@ export function pave(s: GameState): GameState {
   return s;
 }
 // Asphalt is Route 9's: +2% rent, stats and Goodwill each. The Bypass only gets Route 9 through Equity.
-export const sinkRentMult = (s: GameState) =>
-  1 +
-  (s.landmarks?.includes('billboard') ? 0.02 : 0) +
-  0.015 * (s.blitz?.radio ?? 0) +
-  0.02 * (s.blitz?.paper ?? 0) +
-  0.03 * (s.blitz?.banner ?? 0);
-export const sinkStatMult = (s: GameState, r: RegionId) =>
-  r === 0
-    ? 1 + (s.landmarks?.includes('pylon') ? 0.04 : 0) + 0.02 * (s.retainers ?? 0)
-    : 1;
-export const sinkHpBonus = (s: GameState) => (s.landmarks?.includes('tower') ? 0.03 : 0);
+// Plaza buys (sinks.ts) are Route 9's too: billboards and ad runs raise rent, pylons stats, water towers HP.
+export const sinkRentMult = (s: GameState) => 1 + landmarkBuff(s, 'billboard') + BLITZ.reduce((a, d) => a + d.rent * blitzLevel(s, d.id), 0);
+export const sinkStatMult = (s: GameState, r: RegionId) => (r === 0 ? 1 + landmarkBuff(s, 'pylon') : 1);
+export const sinkHpBonus = (s: GameState) => landmarkBuff(s, 'tower');
 export const asphaltMult = (s: GameState, r: RegionId) => (r === 0 ? 1 + ASPHALT_BONUS * s.asphalt : 1) * sinkStatMult(s, r);
 
 
@@ -199,9 +192,10 @@ export function convert(s: GameState, equity = Infinity): string | null {
   return null;
 }
 
-// ---- Patrols: auto-advance, hired one lot at a time from the lot track. ----
-export const autoCovers = (s: GameState, r: RegionId, zone: number) => s.crews[r].contracts.includes(zone) || (s.consultants?.[r] ?? []).includes(zone);
-export const patrolPrice = (_s: GameState, r: RegionId, zone: number) => REGIONS[r].lots[zone].patrol;
+// ---- Patrols: hired one lot at a time from the lot track, in Goodwill (Equity on the Bypass), priced in farming time.
+// A patrolled lot climbs back up after a few farmed wins, and a fresh loss there drops the crew back to a fight it can win.
+export const autoCovers = (s: GameState, r: RegionId, zone: number) => s.crews[r].contracts.includes(zone);
+export const patrolPrice = (_s: GameState, r: RegionId, zone: number) => Math.round(PATROL_WINS * FIGHTS[r].find((f) => f.zone === zone)!.pay);
 // Everyone steps out back for a smoke. Full HP when they come back.
 export function smokeBreak(s: GameState, r: RegionId) {
   const c = s.crews[r];
@@ -216,7 +210,7 @@ export function patrolBlock(s: GameState, r: RegionId, zone: number): string | n
   return null;
 }
 export function buyPatrol(s: GameState, r: RegionId, zone: number): string | null {
-  const err = patrolBlock(s, r, zone) ?? spend(s, r, 'cash', patrolPrice(s, r, zone));
+  const err = patrolBlock(s, r, zone) ?? spend(s, r, REGIONS[r].trainIn, patrolPrice(s, r, zone));
   if (err) return err;
   const c = s.crews[r];
   c.contracts.push(zone);
@@ -302,6 +296,7 @@ export function advance(s: GameState, r: RegionId, dir: 1 | -1): string | null {
   if (to < 0 || to > topFight(s, r)) return dir > 0 ? 'Win this one first' : 'Already at the first fight';
   c.at = to;
   c.farmed = 0;
+  c.parked = dir < 0; // stepping down by hand holds the patrol until ▸ or the next clear
   // A fight you haven't cleared: smoke break first. A cleared one gets in line behind whoever is already out there.
   if (to === c.frontier) (c.battle = null), smokeBreak(s, r);
   return null;

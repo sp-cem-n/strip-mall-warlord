@@ -86,7 +86,7 @@ export function Lot() {
       </h2>
       <ZoneTrack r={r} />
       <div class="field-head">
-        <button class="btn small" disabled={c.at === 0} onClick={() => (advance(s, r, -1), app.refresh())} {...tip('Back one fight', 'Farm an easier fight. Wins still pay.')}>
+        <button class="btn small" disabled={c.at === 0} onClick={() => (advance(s, r, -1), app.refresh())} {...tip('Back one fight', 'Farm an easier fight. Wins still pay.', 'The patrol waits here until you press ▸.')}>
           ◂
         </button>
         <span class="fh-main">
@@ -96,7 +96,7 @@ export function Lot() {
             {tells.length ? ` · ${tells.map((t) => (t === 'tanky' ? 'tanky' : 'hits hard')).join(', ')}` : ''}
           </span>
         </span>
-        <button class="btn small" disabled={c.at >= topFight(s, r)} onClick={() => (advance(s, r, 1), app.refresh())} {...tip('Advance', 'Move up a fight now instead of waiting.', autoCovers(s, r, f.zone) ? 'This lot moves up by itself after the crew farms a while.' : 'Nobody is watching this lot yet: advance by hand.')}>
+        <button class="btn small" disabled={c.at >= topFight(s, r)} onClick={() => (advance(s, r, 1), app.refresh())} {...tip('Advance', 'Move up a fight now instead of waiting.', !autoCovers(s, r, f.zone) ? 'Nobody is watching this lot yet: advance by hand.' : c.parked ? 'The patrol is paused here. Press ▸ to let it climb again.' : 'This lot moves up by itself after the crew farms a while.')}>
           ▸
         </button>
       </div>

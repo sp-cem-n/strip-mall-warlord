@@ -427,8 +427,9 @@ button { font: inherit; }
 .plaza-buy { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-top: 8px; }
 .plaza-buy .item { display: flex; flex-direction: column; justify-content: space-between; gap: 8px; padding: 8px; background: var(--ink); border: 2px solid var(--concrete); min-height: 86px; min-width: 0; }
 .plaza-buy .item b { font-size: 16px; line-height: 1.15; color: var(--paper); }
-.plaza-buy .item .btn, .plaza-buy .item .have { margin-top: auto; }
-.plaza-buy .item .have { color: var(--mint); font-size: 15px; }
+.plaza-buy .item .btn { margin-top: auto; }
+.plaza-buy .item .does { font-size: 14px; line-height: 1.15; color: var(--bone); }
+.plaza-hired { margin: 8px 0 0; font-size: 15px; }
 .cab.attracting { outline: 3px dashed var(--sodium); outline-offset: -3px; }
 .boot-menu.tenant-board { border-image: var(--cinder) 8 fill / 16px; background: var(--night); }
 .boot-logo { display: block; margin: 0 auto 8px; width: 390px; max-width: 100%; height: auto; }
