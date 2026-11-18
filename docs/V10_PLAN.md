@@ -502,8 +502,8 @@ Read from the code on `v09` (same `src` as `main`), plus a probe run (seed 1991,
 
    **What this needs at build time:**
    - Content: 5 bosses, 15 regulars, 5 skylines and 5 boss sprites (Toad mockups first), plus the 5 new units from the table below.
-   - Fight count: 99 regular fights + 9 bosses, up from 56 total. `FIGHT_GROWTH[1]`, `LOT_JUMP[1]` and the per-lot `patrol` prices need 9 entries.
-   - Pay: `PAY_GROWTH[1]` has to be retuned with the Equity pay fix in item 4, or 1.09 over 108 fights runs away.
+   - Fight count: 97 regular fights + 9 bosses (106 total), up from 56. `FIGHT_GROWTH[1]`, `LOT_JUMP[1]` and the per-lot `patrol` prices need 9 entries.
+   - Pay: `PAY_GROWTH[1]` has to be retuned with the Equity pay fix in item 4, or 1.09 over 106 fights runs away.
    - Balance: re-run both sims and the guard against the 27.5h target and ~3h per lot.
    - Wall map: `WALL_MAP.md` §4 and §5 now carry this layout.
 
