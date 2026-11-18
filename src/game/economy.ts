@@ -7,7 +7,7 @@ import { credit } from './rates';
 
 export const SAVE_VERSION = 5;
 const zeroTrack = (): Track => ({ tank: 0, damage: 0, heal: 0, control: 0, buffer: 0 });
-export const newCrew = (r: RegionId): Crew => ({ cash: START_CASH, shops: { [REGIONS[r].start]: 1 }, train: zeroTrack(), frontier: 0, at: 0, kills: 0, farmed: 0, tries: 0, wounds: {}, battle: null, regroup: 2, smoke: 0, overtime: 0, lineup: null, contracts: [], slotBuys: 0, rally: 0, wins: 0, losses: 0, queueEnter: -1, rec: {}, lastEnd: -1 });
+export const newCrew = (r: RegionId): Crew => ({ cash: START_CASH, shops: { [REGIONS[r].start]: 1 }, train: zeroTrack(), frontier: 0, at: 0, kills: 0, farmed: 0, tries: 0, wounds: {}, battle: null, regroup: 2, smoke: 0, overtime: 0, lineup: null, contracts: [], slotBuys: 0, rally: 0, wins: 0, losses: 0, queueEnter: -1, deck: 0, rec: {}, lastEnd: -1 });
 
 export function newGame(seed = Date.now() % 2147483647): GameState {
   return {
@@ -304,8 +304,8 @@ export function advance(s: GameState, r: RegionId, dir: 1 | -1): string | null {
   if (to < 0 || to > topFight(s, r)) return dir > 0 ? 'Win this one first' : 'Already at the first fight';
   c.at = to;
   c.farmed = 0;
-  c.battle = null;
-  smokeBreak(s, r);
+  // A fight you haven't cleared: smoke break first. A cleared one gets in line behind whoever is already out there.
+  if (to === c.frontier) (c.battle = null), smokeBreak(s, r);
   return null;
 }
 

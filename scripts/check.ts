@@ -115,8 +115,13 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   check('damage carries over: after a win the next group walks in on a hurt crew', worn);
   const c = t.crews[0];
   c.frontier = Math.max(c.frontier, c.at + 2);
+  const going = c.battle;
   advance(t, 0, 1);
-  check('moving to a new fight is a smoke break: full HP', Object.keys(c.wounds).length === 0 && c.smoke === SMOKE_BREAK_SECONDS && c.regroup === SMOKE_BREAK_SECONDS);
+  check('switching to a cleared fight: no smoke break, the group already out there finishes first', c.battle === going && c.smoke === 0);
+  advance(t, 0, 1);
+  check('moving up to a fight not cleared yet is a smoke break: full HP', Object.keys(c.wounds).length === 0 && c.smoke === SMOKE_BREAK_SECONDS && c.regroup === SMOKE_BREAK_SECONDS);
+  for (let i = 0; i < SMOKE_BREAK_SECONDS / STEP + 1; i++) step(t);
+  check('straight out of a smoke break the fight starts, no walk-up', !!c.battle && c.battle.enter === 0 && c.battle.fight === c.at);
 }
 
 // battle rules

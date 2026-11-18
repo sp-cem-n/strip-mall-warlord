@@ -5,7 +5,7 @@ export const HOW = [
   ['Dollars', 'Rent buys leases, renovations and patrols. The card says what the next renovation does.'],
   ['Goodwill', 'Training in the Back Office: five tracks, one per role.'],
   ['The lineup', 'Five fighters take the lot; more slots come later. Buffers stand on the curb and always count. Click the parking lot (or press R) for the roster: stats, DPS, Field and Bench. AUTO picks for you.'],
-  ['Smoke breaks', 'After a loss, after a win where somebody went down, or on the way to a different fight, the crew takes five seconds out back and comes back at full HP. Lose a new fight at full HP and they drop back one to farm, then try again. The receipt says why. Click it for the history.'],
+  ['Smoke breaks', "After a loss, after a win where somebody went down, or on the way to a fight they haven't beaten, the crew takes five seconds out back and comes back at full HP. Switch to a fight they've already beaten and there's no break: the new group gets in line behind whoever is already out there. Lose a new fight at full HP and they drop back one to farm, then try again. The receipt says why. Click it for the history."],
   ['Patrol', 'Hire a patrol on a lot sign and the crew moves up there on its own. Without one, press ▸.'],
   ['Overtime', 'Two minutes of rent: +25% HP and damage for the next three fights.'],
   ['Walk-ins', 'While you watch, somebody walks into a shop: cash, a referral, or a rally. Click them.'],

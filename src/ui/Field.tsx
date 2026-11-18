@@ -199,7 +199,7 @@ function draw(ctx: CanvasRenderingContext2D, t: number, r: RegionId) {
       tr.qOff = queueOff(regs.length);
       const [qx, qy] = LANES[Math.max(0, tr.qLane)];
       const qwalk = ([x, y]: P): P => [Math.round(x + tr.qOff[0] + qk * qx), Math.round(y + tr.qOff[1] + qk * qy + (qk > 0 ? Math.abs(Math.sin(t * 10)) * 1.5 : 0))];
-      const next = enemyLineup(r, b.fight);
+      const next = enemyLineup(r, c.deck);
       const regs2 = next.filter((e) => !e.boss);
       regs2.forEach((e, i) => {
         const [jx, jy] = jitter(i + 1);

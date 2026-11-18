@@ -19,6 +19,31 @@ export function saveGame(s: GameState) {
 export const old = { from: 'v0.4' };
 const ARCHIVE: Record<number, string> = { 4: 'v0.5' };
 
+// Fields added since the save was written get their defaults; a battle from before walk-ins is dropped.
+function fillIn(s: GameState): GameState {
+  s.room = { ...newRoom(), ...s.room };
+  if (typeof s.room.shelf === 'number') s.room.shelf = [s.room.shelf, 10];
+  s.room.attracting ??= null;
+  s.consultants ??= [[], []];
+  s.autoReno ??= [[], []];
+  s.landmarks ??= [];
+  s.retainers ??= 0;
+  s.blitz ??= {};
+  for (const c of s.crews) {
+    c.tries ??= 0;
+    c.wounds ??= {};
+    c.smoke ??= 0;
+    c.queueEnter ??= -1;
+    c.deck ??= c.at;
+    c.rec ??= {};
+    c.lastEnd ??= -1;
+    delete (c as { streak?: number }).streak;
+    delete (c as { stance?: string }).stance;
+    if (c.battle && c.battle.enter === undefined) c.battle = null;
+  }
+  return s;
+}
+
 // 'old' = a save from an earlier loop. The loop changed too much to carry it over.
 export function loadGame(): GameState | 'old' | null {
   let raw: string | null = null;
@@ -30,29 +55,7 @@ export function loadGame(): GameState | 'old' | null {
   if (!raw) return null;
   try {
     const s = JSON.parse(raw) as GameState;
-    if (s?.version === SAVE_VERSION && Array.isArray(s.crews)) {
-      s.room = { ...newRoom(), ...s.room };
-      if (typeof s.room.shelf === 'number') s.room.shelf = [s.room.shelf, 10];
-      s.consultants ??= [[], []];
-      s.autoReno ??= [[], []];
-      s.landmarks ??= [];
-      s.retainers ??= 0;
-      s.blitz ??= {};
-      s.room.attracting ??= null;
-      for (const c of s.crews) {
-        // v0.6 -> v0.7: damage carries over, smoke breaks, one tries counter
-        c.tries ??= 0;
-        c.wounds ??= {};
-        c.smoke ??= 0;
-        c.queueEnter ??= -1;
-        c.rec ??= {};
-        c.lastEnd ??= -1;
-        delete (c as { streak?: number }).streak;
-        delete (c as { stance?: string }).stance;
-        if (c.battle && c.battle.enter === undefined) c.battle = null;
-      }
-      return s;
-    }
+    if (s?.version === SAVE_VERSION && Array.isArray(s.crews)) return fillIn(s);
     const tag = ARCHIVE[s?.version];
     if (tag) {
       old.from = tag;
@@ -91,14 +94,7 @@ export function importCode(raw: string): GameState | string {
     const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
     const s = JSON.parse(new TextDecoder().decode(bytes)) as GameState;
     if (s?.version !== SAVE_VERSION || !Array.isArray(s.crews)) return 'That lease is from another version.';
-    s.consultants ??= [[], []];
-    s.autoReno ??= [[], []];
-    s.landmarks ??= [];
-    s.retainers ??= 0;
-    s.blitz ??= {};
-    s.room = { ...newRoom(), ...s.room, attracting: s.room?.attracting ?? null };
-    for (const c of s.crews) (c.queueEnter ??= -1), (c.rec ??= {}), (c.lastEnd ??= -1);
-    return s;
+    return fillIn(s);
   } catch {
     return 'Could not read that lease code.';
   }

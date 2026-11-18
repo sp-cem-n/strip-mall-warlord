@@ -23,7 +23,7 @@ export function step(s: GameState, watching = false) {
     earn(s, r, 'cash', inc);
     s.stats.earned += inc;
     if (c.battle) {
-      if (c.battle.enter <= 0 && c.queueEnter < 0) c.queueEnter = WALK_IN_SECONDS;
+      if (c.battle.enter <= 0 && c.queueEnter < 0) (c.queueEnter = WALK_IN_SECONDS), (c.deck = c.at);
       if (c.queueEnter > 0) c.queueEnter = Math.max(0, c.queueEnter - STEP);
       const result = stepBattle(s, c.battle, STEP, c.rally > 0);
       if (result) resolve(s, r, c.battle, result);
@@ -103,7 +103,8 @@ function resolve(s: GameState, r: RegionId, b: Battle, result: 'win' | 'loss') {
       c.farmed = 0;
     }
   }
-  if (c.at !== wasAt) smokeBreak(s, r);
+  // moving up to a fight not cleared yet gets a smoke break first; a cleared one just gets in line
+  if (c.at !== wasAt && c.at === c.frontier) smokeBreak(s, r);
 }
 
 function clearFight(s: GameState, r: RegionId) {

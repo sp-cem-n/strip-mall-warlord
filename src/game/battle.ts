@@ -73,7 +73,9 @@ export const fightScale = (r: RegionId, g: number) => (scales[r][g] ??= Math.sqr
 
 export function startBattle(s: GameState, r: RegionId): Battle | null {
   const c = s.crews[r];
-  const fight = Math.min(c.at, FIGHTS[r].length - 1);
+  // the group waiting in line goes next, even if you've since picked another fight; otherwise the fight you're on
+  const queued = c.queueEnter >= 0 && c.smoke <= 0;
+  const fight = Math.min(queued ? c.deck : c.at, FIGHTS[r].length - 1);
   const lv = new Map(fighters(s, r));
   const team: [string, number][] = lineupOf(s, r).map((id) => [id, lv.get(id) ?? 1]);
   if (!team.length) return null;
@@ -113,7 +115,8 @@ export function startBattle(s: GameState, r: RegionId): Battle | null {
   // the boss's entrance: once, on the first try
   if (f.boss && fight === c.frontier && c.tries === 0) log(s, r, `${REGIONS[r].lots[f.zone].boss.name.replace(/^(?!The )/, 'The ')} walks out. ${REGIONS[r].lots[f.zone].boss.title}`);
   const fresh = crew.every((u) => u.hp >= u.maxHp);
-  const enter = c.queueEnter >= 0 && c.smoke <= 0 ? c.queueEnter : WALK_IN_SECONDS;
+  // straight out of a smoke break they're already standing there; otherwise they walk in (or step up from the line)
+  const enter = queued ? c.queueEnter : c.smoke > 0 ? 0 : WALK_IN_SECONDS;
   c.queueEnter = -1;
   return (c.battle = { fight, t: 0, crew, enemies, field, revived: false, overtime, fresh, enter });
 }
