@@ -129,10 +129,17 @@ function smokeBreak(ctx: CanvasRenderingContext2D, t: number, r: RegionId) {
 // Visual only, never touches the fight: when a group that was waiting in line takes over, it steps up from its
 // place in line (STEP_UP seconds) instead of popping onto the spots, and the one-tick gap between fights keeps
 // drawing the last fight, so nothing blinks. The fallen from the last group finish fading under the new one.
+// Each group walks in along one of three lanes; the living close up toward the front as the front line falls.
 const STEP_UP = 0.6;
-const QUEUE_OFF: [number, number] = [36, -20];
-type Trail = { last: Battle | null; lastAt: number; queued: boolean; seen: Battle | null; stepFrom: number; fallen: [Unit, [number, number]][] };
-const trails: Trail[] = [0, 1].map(() => ({ last: null, lastAt: -9, queued: false, seen: null, stepFrom: -9, fallen: [] }));
+const LANES: [number, number][] = [[70, -46], [96, 0], [70, 46]]; // from the upper right, the far right, the lower right
+const lane = () => Math.floor(Math.random() * LANES.length);
+// on deck: behind the last column of the group that's fighting, never on top of it
+const queueOff = (fighting: number): [number, number] => [Math.ceil(fighting / 3) * 24 + 16, -10];
+// a little give in the line so it doesn't look stamped
+const jitter = (n: number): [number, number] => [(Math.imul(n, 2654435761) >>> 0) % 7 - 3, (Math.imul(n, 40503) >>> 0) % 5 - 2];
+type P = [number, number];
+type Trail = { last: Battle | null; lastAt: number; queued: boolean; seen: Battle | null; stepFrom: number; fallen: [Unit, P][]; lane: number; qLane: number; qOff: P; stepOff: P; drawn: number; at: Map<number, P> };
+const trails: Trail[] = [0, 1].map(() => ({ last: null, lastAt: -9, queued: false, seen: null, stepFrom: -9, fallen: [], lane: 0, qLane: -1, qOff: [40, -10], stepOff: [40, -10], drawn: 0, at: new Map() }));
 
 function draw(ctx: CanvasRenderingContext2D, t: number, r: RegionId) {
   const s = app.s;
@@ -148,36 +155,55 @@ function draw(ctx: CanvasRenderingContext2D, t: number, r: RegionId) {
     // a new fight: if its group was standing in line, it steps up from there
     tr.stepFrom = tr.queued && b.enter < WALK_IN_SECONDS ? t : -9;
     const old = tr.seen?.enemies ?? [];
-    const spotOf = (u: Unit): [number, number] => (u.boss ? BOSS_SPOT : enemySpot(old.filter((e) => !e.boss).indexOf(u)));
-    tr.fallen = old.filter((u) => u.hp <= 0 && t - (downAt.get(u.uid) ?? t) < 0.9).map((u) => [u, spotOf(u)]);
+    tr.fallen = old.filter((u) => u.hp <= 0 && t - (downAt.get(u.uid) ?? t) < 0.9).map((u) => [u, u.boss ? BOSS_SPOT : tr.at.get(u.uid) ?? BOSS_SPOT]);
+    tr.at.clear();
+    tr.lane = tr.qLane >= 0 ? tr.qLane : lane();
+    tr.stepOff = tr.qOff;
     tr.seen = b;
   }
   if (c.battle) ((tr.last = c.battle), (tr.lastAt = t), (tr.queued = c.queueEnter >= 0));
   else if (!gap) ((tr.last = null), (tr.queued = false));
+  if (c.queueEnter < 0) tr.qLane = -1;
+  else if (tr.qLane < 0) tr.qLane = lane();
+  const ease = 1 - Math.exp(-Math.min(0.1, t - tr.drawn) * 6);
+  tr.drawn = t;
   if (b) {
     if (!gap) for (const [u, p] of tr.fallen) drawUnit(ctx, u, p, t);
     const spots = crewSpots(b.crew.length);
     const order = b.crew.map((u, i) => [u, spots[i]] as const).sort((a, z) => a[1][1] - z[1][1]);
     for (const [u, p] of order) drawUnit(ctx, u, p, t);
-    // the next group walks in from the back of the lot (upper right) to where the last one fell
+    // the group walks in along its lane, or steps up from its place in line
     const k = Math.max(0, b.enter) / WALK_IN_SECONDS;
     const up = gap ? 0 : Math.max(0, 1 - (t - tr.stepFrom) / STEP_UP); // 1 = still in line, 0 = on the spot
     const ue = up * up * (3 - 2 * up);
-    const walk = ([x, y]: [number, number]): [number, number] => [
-      Math.round(x + k * 70 + QUEUE_OFF[0] * ue),
-      Math.round(y - k * 46 + QUEUE_OFF[1] * ue + (k > 0 || up > 0 ? Math.abs(Math.sin(t * 10)) * 1.5 : 0)),
+    const [lx, ly] = LANES[tr.lane];
+    const walk = ([x, y]: P): P => [
+      Math.round(x + k * lx + tr.stepOff[0] * ue),
+      Math.round(y + k * ly + tr.stepOff[1] * ue + (k > 0 || up > 0 ? Math.abs(Math.sin(t * 10)) * 1.5 : 0)),
     ];
     const regs = b.enemies.filter((e) => !e.boss);
-    regs.map((u, i) => [u, walk(enemySpot(i))] as const).sort((a, z) => a[1][1] - z[1][1]).forEach(([u, p]) => drawUnit(ctx, u, p, t));
+    const alive = regs.filter((u) => u.hp > 0);
+    for (const u of regs) {
+      // the living fill the front spots in order; the fallen stay where they dropped
+      const was = tr.at.get(u.uid);
+      if (u.hp <= 0 && was) continue;
+      const [sx, sy] = enemySpot(alive.indexOf(u));
+      const [jx, jy] = jitter(u.uid);
+      tr.at.set(u.uid, was ? [was[0] + (sx + jx - was[0]) * ease, was[1] + (sy + jy - was[1]) * ease] : [sx + jx, sy + jy]);
+    }
+    regs.map((u) => [u, walk(tr.at.get(u.uid)!)] as const).sort((a, z) => a[1][1] - z[1][1]).forEach(([u, p]) => drawUnit(ctx, u, p, t));
     for (const u of b.enemies.filter((e) => e.boss)) drawUnit(ctx, u, walk(BOSS_SPOT), t);
-    // the next group waits in line behind the one you're fighting
+    // the next group waits in line behind the one you're fighting, and only steps up once the last of it is down
     if (c.queueEnter >= 0) {
       const qk = c.queueEnter / WALK_IN_SECONDS;
-      const qwalk = ([x, y]: [number, number]): [number, number] => [Math.round(x + 36 + qk * 70), Math.round(y - 20 - qk * 46 + (qk > 0 ? Math.abs(Math.sin(t * 10)) * 1.5 : 0))];
+      tr.qOff = queueOff(regs.length);
+      const [qx, qy] = LANES[Math.max(0, tr.qLane)];
+      const qwalk = ([x, y]: P): P => [Math.round(x + tr.qOff[0] + qk * qx), Math.round(y + tr.qOff[1] + qk * qy + (qk > 0 ? Math.abs(Math.sin(t * 10)) * 1.5 : 0))];
       const next = enemyLineup(r, b.fight);
-      const regs = next.filter((e) => !e.boss);
-      regs.forEach((e, i) => {
-        const [x, y] = qwalk(enemySpot(i));
+      const regs2 = next.filter((e) => !e.boss);
+      regs2.forEach((e, i) => {
+        const [jx, jy] = jitter(i + 1);
+        const [x, y] = qwalk([enemySpot(i)[0] + jx, enemySpot(i)[1] + jy]);
         ctx.globalAlpha = 0.85;
         ctx.drawImage(enemyArt(e.def.name), x - 8, y - 24);
         ctx.globalAlpha = 1;
@@ -212,7 +238,8 @@ function hitAt(r: RegionId, mx: number, my: number) {
   const inside = (x: number, y: number, w: number, h: number) => mx >= x - w / 2 && mx <= x + w / 2 && my >= y - h && my <= y + 2;
   if (b) {
     const k = Math.max(0, b.enter) / WALK_IN_SECONDS;
-    const walk = ([x, y]: [number, number]): [number, number] => [x + k * 70, y - k * 46];
+    const [lx, ly] = LANES[trails[r].lane];
+    const walk = ([x, y]: P): P => [x + k * lx, y + k * ly];
     const spots = crewSpots(b.crew.length);
     for (let i = 0; i < b.crew.length; i++) {
       const u = b.crew[i];
@@ -222,7 +249,7 @@ function hitAt(r: RegionId, mx: number, my: number) {
     const regs = b.enemies.filter((e) => !e.boss);
     for (let i = 0; i < regs.length; i++) {
       const u = regs[i];
-      const [x, y] = walk(enemySpot(i));
+      const [x, y] = walk(trails[r].at.get(u.uid) ?? enemySpot(i));
       if (inside(x, y, 16, 24)) return `${u.name}${u.tell ? ` · ${u.tell}` : ''}${u.weak ? ` · weak to ${BATTLERS[u.weak].name}` : ''} · HP ${Math.ceil(u.hp)}/${u.maxHp}`;
     }
     for (const u of b.enemies.filter((e) => e.boss)) {
