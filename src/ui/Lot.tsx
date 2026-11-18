@@ -1,7 +1,7 @@
 // The Lot panel: region tabs, the lot signs, the field, and the calls.
 import { app, tip, toast } from '../app';
 import { FIGHTS, REGIONS, type RegionId } from '../game/defs';
-import { advance, autoCovers, autoPick, bal, buySlot, curb, lineupOf, slotPrice, slotsOf, topFight } from '../game/economy';
+import { advance, autoCovers, autoPick, bal, buySlot, curb, lotsTaken, slotPrice, slotsOf, slotsUsed, topFight } from '../game/economy';
 import { CURRENCY_SHORT } from '../game/defs';
 import { fmt } from './format';
 import { enemyLineup } from '../game/battle';
@@ -14,7 +14,8 @@ function Slots({ r }: { r: RegionId }) {
   const s = app.s;
   const c = s.crews[r];
   const n = slotsOf(s, r);
-  const used = lineupOf(s, r).length;
+  const used = slotsUsed(s, r);
+  const auto = r === 1 || lotsTaken(s, r) >= 2 || c.lineup; // auto lineup arrives with Big-Box: early on, every fighter is fielded anyway
   const price = slotPrice(s, r);
   const cur = REGIONS[r].trainIn;
   return (
@@ -22,9 +23,11 @@ function Slots({ r }: { r: RegionId }) {
       <span {...tip('Fighter slots', `${used} of ${n} fielded. ${curb(s, r).length} on the curb, always on.`, c.lineup ? 'Picked by hand.' : 'Auto picks the lineup for each fight.')}>
         · {used}/{n} fielding · {curb(s, r).length} on the curb
       </span>
-      <button class={`btn small ${c.lineup ? '' : 'on'}`} onClick={() => (autoPick(s, r), app.refresh())} {...tip('Auto lineup', 'Best tank, a healer, counters for this fight, then raw power.')}>
-        AUTO
-      </button>
+      {auto && (
+        <button class={`btn small ${c.lineup ? '' : 'on'}`} onClick={() => (autoPick(s, r), app.refresh())} {...tip('Auto lineup', 'Best tank, a healer, counters for this fight, then raw power. The break room always comes along.')}>
+          AUTO
+        </button>
+      )}
       {isFinite(price) && (
         <button class="btn small" disabled={bal(s, r, cur) < price} onClick={() => (toast(buySlot(s, r) ?? `Slot ${n + 1}`), app.refresh())} {...tip('Another slot', `One more fighter on the lot. ${fmt(price)} ${CURRENCY_SHORT[cur]}.`)}>
           +1 slot {fmt(price)} {CURRENCY_SHORT[cur]}

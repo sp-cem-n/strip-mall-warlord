@@ -140,7 +140,7 @@ function FieldToggle({ r, id }: { r: RegionId; id: string }) {
   if (BATTLERS[id].role === 'buffer') return <span class="ft curb" {...tip('On the curb', 'Buffers never take a slot. Their aura is always on.')}>CURB</span>;
   const on = lineupOf(s, r).includes(id);
   return (
-    <button class={`ft ${on ? 'on' : ''}`} onClick={(e) => (e.stopPropagation(), act(toggleField(s, r, id)))} {...tip(on ? 'Fielded' : 'Benched', on ? 'Click to bench. You pick the lineup from here on.' : 'Click to field.')}>
+    <button class={`ft ${on ? 'on' : ''}`} onClick={(e) => (e.stopPropagation(), act(toggleField(s, r, id)))} {...tip(on ? 'Fielded' : 'Benched', on ? 'Click to bench. You pick the lineup from here on.' : 'Click to field.', ...(joined(s, r).includes(id) ? ["From the break room: doesn't take a slot."] : []))}>
       {on ? 'FIELD' : 'BENCH'}
     </button>
   );

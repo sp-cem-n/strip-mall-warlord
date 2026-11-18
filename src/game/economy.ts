@@ -218,7 +218,12 @@ export function buyPatrol(s: GameState, r: RegionId, zone: number): string | nul
   return null;
 }
 
-// ---- fighter slots and the lineup. Buffers stand on the curb: always on, never in a slot. ----
+// ---- fighter slots and the lineup. Buffers stand on the curb: always on, never in a slot. Bosses from the break room
+// don't take a slot either: auto fields them all, and by hand they can be fielded or benched freely.
+const inSlot = (s: GameState, r: RegionId, ids: string[]) => {
+  const free = new Set(joined(s, r));
+  return ids.filter((id) => !free.has(id));
+};
 export const slotsOf = (s: GameState, r: RegionId) => Math.min(MAX_SLOTS, START_SLOTS + s.crews[r].slotBuys + roomSlots(s, r));
 export const slotPrice = (s: GameState, r: RegionId) => (slotsOf(s, r) >= MAX_SLOTS ? Infinity : (SLOT_PRICES[r][s.crews[r].slotBuys] ?? Infinity));
 export function buySlot(s: GameState, r: RegionId): string | null {
@@ -235,7 +240,8 @@ export const fighters = (s: GameState, r: RegionId) => roster(s, r).filter(([id]
 // The auto pick: best tank (two against hard hitters), a healer (two from 7 slots), counters for this fight, then raw power.
 export function autoLineup(s: GameState, r: RegionId, fight = s.crews[r].at): string[] {
   const n = slotsOf(s, r);
-  const pool = fighters(s, r).map(([id, lv]) => {
+  const free = joined(s, r).filter((id) => BATTLERS[id].role !== 'buffer');
+  const pool = fighters(s, r).filter(([id]) => !free.includes(id)).map(([id, lv]) => {
     const st = statsOf(s, r, id, lv);
     return { id, role: BATTLERS[id].role, hp: st.hp, power: (st.hp * st.dmg) / st.interval };
   });
@@ -248,19 +254,22 @@ export function autoLineup(s: GameState, r: RegionId, fight = s.crews[r].at): st
   take([...new Set(foes.map((e) => e.def.weak))].filter((id) => pool.some((p) => p.id === id)).slice(0, 2));
   take(pool.filter((p) => p.role !== 'tank').sort((a, b) => b.power - a.power).map((p) => p.id));
   take(pool.map((p) => p.id));
-  return out;
+  return [...out, ...free];
 }
 export function lineupOf(s: GameState, r: RegionId): string[] {
   const c = s.crews[r];
   if (!c.lineup) return autoLineup(s, r);
   const have = new Set(fighters(s, r).map(([id]) => id));
-  return c.lineup.filter((id) => have.has(id)).slice(0, slotsOf(s, r));
+  const picked = c.lineup.filter((id) => have.has(id));
+  const slotted = new Set(inSlot(s, r, picked).slice(0, slotsOf(s, r)));
+  return picked.filter((id) => slotted.has(id) || !inSlot(s, r, [id]).length);
 }
+export const slotsUsed = (s: GameState, r: RegionId) => inSlot(s, r, lineupOf(s, r)).length;
 export function toggleField(s: GameState, r: RegionId, id: string): string | null {
   const c = s.crews[r];
   const now = lineupOf(s, r);
   if (now.includes(id)) c.lineup = now.filter((x) => x !== id);
-  else if (now.length >= slotsOf(s, r)) return fieldFull(s, r);
+  else if (inSlot(s, r, [id]).length && inSlot(s, r, now).length >= slotsOf(s, r)) return fieldFull(s, r);
   else c.lineup = [...now, id];
   return null;
 }

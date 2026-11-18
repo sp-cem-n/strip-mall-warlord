@@ -3,7 +3,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { app, tip } from '../app';
 import { BATTLERS, CURRENCY_NAME, FIGHTS, REGIONS, type Fx, type RegionId, type Target } from '../game/defs';
 import { enemyLineup, statsOf } from '../game/battle';
-import { autoPick, curb, fighters, lineupOf, slotsOf, toggleField } from '../game/economy';
+import { autoPick, curb, fighters, lineupOf, slotsOf, slotsUsed, toggleField } from '../game/economy';
 import { crewURL } from './art';
 import { fmt } from './format';
 import { trainedBy } from './BackOffice';
@@ -116,7 +116,7 @@ export function RosterPopup() {
           <span class="t">THE LOT</span>
           <span class="sub">{fightLine(r)}</span>
           <span class="slots">
-            ON THE FIELD <b>{fielded.size} / {slots}</b>
+            ON THE FIELD <b>{slotsUsed(s, r)} / {slots}</b>
           </span>
           <button class="roster-x" onClick={closeRoster} aria-label="Close" {...tip('Close', 'Esc also works. The fight keeps going.')}>
             ✕

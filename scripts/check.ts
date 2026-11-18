@@ -1,7 +1,7 @@
 // Small invariant checks. Run: bun scripts/check.ts
 import { BATTLERS, FIGHTS, PATROL_WINS, GOODWILL_PER_EQUITY, MAX_SLOTS, OFFLINE_CAP_SECONDS, REGIONS, SHOPS, SMOKE_BREAK_SECONDS, SHOP_LIST, START_SLOTS, STEP, WEAK_BONUS } from '../src/game/defs';
 import { auras, enemyLineup, startBattle, statsOf, stepBattle } from '../src/game/battle';
-import { advance, topFight, asphaltGain, fieldFull, autoCovers, buyPatrol, buySlot, convert, curb, forLease, lease, lineupOf, newGame, patrolBlock, powerLevel, rentPerSec, patrolPrice, pave, renovate, renovateCost, roster, sinkHpBonus, sinkStatMult, slotsOf, tierOf, toggleField, train, trainCost, view } from '../src/game/economy';
+import { advance, topFight, asphaltGain, fieldFull, autoCovers, buyPatrol, buySlot, convert, curb, forLease, lease, lineupOf, newGame, patrolBlock, powerLevel, rentPerSec, patrolPrice, pave, renovate, renovateCost, joined, roster, sinkHpBonus, sinkStatMult, slotsOf, slotsUsed, tierOf, toggleField, train, trainCost, view } from '../src/game/economy';
 import { loadGame, old, saveGame } from '../src/game/save';
 import { blitzCost, buyBlitz, buyLandmark, consultOpen, hireConsultant, landmarkCost } from '../src/game/sinks';
 import { collectFind, fightRate, onScreen, simulateAway, step } from '../src/game/sim';
@@ -156,7 +156,7 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   const team = roster(t, 0);
   check('27 on the crew with every boss joined', team.length === 27);
   const b = startBattle(t, 0)!;
-  check(`${START_SLOTS} fighter slots to start; buffers stand on the curb, not in a slot`, slotsOf(t, 0) === START_SLOTS && b.crew.length === START_SLOTS && b.crew.every((u) => u.role !== 'buffer') && curb(t, 0).length > 0);
+  check(`${START_SLOTS} fighter slots to start; buffers stand on the curb, not in a slot`, slotsOf(t, 0) === START_SLOTS && slotsUsed(t, 0) === START_SLOTS && b.crew.length === START_SLOTS + joined(t, 0).filter((id) => BATTLERS[id].role !== 'buffer').length && b.crew.every((u) => u.role !== 'buffer') && curb(t, 0).length > 0);
   check('aura from the curb: Personal Trainer gives tanks +20% HP', b.crew.find((u) => u.role === 'tank')!.maxHp > statsOf(t, 0, b.crew.find((u) => u.role === 'tank')!.id, 5 + tierOf(r9.find((x) => x.battler === b.crew.find((u) => u.role === 'tank')!.id)?.id ?? 'pawn')).hp * 1.15);
   check('caps hold: stun, confuse <= 35%', b.field.stun <= 0.35 && b.field.confuse <= 0.35);
   check('Copy Guy copies an aura at half strength', auras(t, [['copyguy', 5], ['trainer', 5]], 0).filter((a) => a.fx.k === 'hpUp').length === 2);
@@ -394,6 +394,19 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   const CUT = /fights run themselves|nice to have|never required|ignoring them|this crew only|only this crew|both crews|own till|every shop pays rent and sends/i;
   const ui = readdirSync('src/ui').filter((f) => f.endsWith('.tsx')).flatMap((f) => readFileSync(`src/ui/${f}`, 'utf8').split('\n').filter((x) => CUT.test(x)).map((x) => `${f}: ${x.trim().slice(0, 60)}`));
   check(`no design-explaining copy in the UI${ui.length ? ` (${ui.join(' | ')})` : ''}`, ui.length === 0);
+}
+
+// break-room bosses ride free: auto fields them past the slots, and by hand they never fill the field
+{
+  const t = newGame(22);
+  const c = t.crews[0];
+  c.frontier = FIGHTS[0].findIndex((f) => f.zone === 2);
+  for (const sh of forLease(t, 0)) c.shops[sh.id] = 1;
+  const boss = joined(t, 0).find((id) => BATTLERS[id].role !== 'buffer')!;
+  const n = slotsOf(t, 0);
+  check('auto fields the break room on top of the slots', lineupOf(t, 0).includes(boss) && slotsUsed(t, 0) <= n && lineupOf(t, 0).length > slotsUsed(t, 0));
+  c.lineup = lineupOf(t, 0).filter((id) => id !== boss);
+  check('a full field still takes a break-room boss', slotsUsed(t, 0) === n && toggleField(t, 0, boss) === null && lineupOf(t, 0).includes(boss));
 }
 
 // the plaza: one check per buy
