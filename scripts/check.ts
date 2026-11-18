@@ -240,7 +240,7 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   check('walk-in shows up at a shop on screen', t.find?.shop === 'pawn');
   const k = t.find!.kind;
   const c0 = t.crews[0].cash, g0 = t.goodwill;
-  check(`walk-in pays out (${k})`, collectFind(t) === null && (k === 'rally' ? t.crews[0].rally > 0 : k === 'cash' ? t.crews[0].cash > c0 : t.goodwill > g0));
+  check(`walk-in pays out (${k})`, collectFind(t) === null && (k === 'rally' ? t.crews[0].rally > 0 : k === 'pay' ? t.goodwill > g0 : t.crews[0].cash === c0));
   const rt = fightRate(t, 0, 0);
   check(`farm rate: the first fight has a measured pay rate and win share (${rt?.n} fights)`, !!rt && rt.perSec > 0 && rt.won > 0 && rt.n <= 20 && fightRate(t, 0, 40) === null);
   const a = simulateAway(newGame(7), 20 * 3600);
@@ -365,7 +365,7 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
 {
   const LEAK = /bypass|equity|second crew|both crews|each crew|other crew|this crew only|only this crew|own till|exit 14|route 9 north/i;
   const texts: string[] = [...HOW.flat(), ...STORY.map((x) => x.text)];
-  for (const sh of r9) texts.push(sh.name, sh.tagline, sh.walkin.who, ...Object.values(sh.walkin).flat().map(String));
+  for (const sh of r9) texts.push(sh.name, sh.tagline, ...sh.walkins.map((w) => w.who));
   for (const id of [...r9.map((x) => x.battler), ...bosses(0)]) texts.push(BATTLERS[id].name, BATTLERS[id].does, BATTLERS[id].line);
   for (const l of REGIONS[0].lots) texts.push(l.name, l.blurb, l.clearText, ...[...l.regulars, l.boss].flatMap((e) => [e.name, e.title]));
   texts.push(REGIONS[0].name, ...Object.values(REGIONS[0].chrome));

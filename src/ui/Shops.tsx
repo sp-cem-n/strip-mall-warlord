@@ -16,25 +16,24 @@ import { fmt } from './format';
 
 const act = (err: string | null) => (err && toast(err), app.refresh());
 const RAISE_MS = 1400;
-const EFFECT = { cash: (v: number) => `+$${fmt(v)} cash`, referral: (v: number) => `+${fmt(v)} ${currencyOf(app.s.view)}`, rally: () => 'Crew hits 25% harder for 30s' };
+const EFFECT = { rally: () => 'Crew hits 25% harder for 30s', pay: () => `+${fmt(walkInValue(app.s))} ${currencyOf(app.s.view)}`, ticket: () => (app.s.view ? 'Maybe a rumor slip' : 'Maybe some tickets') };
 
 function WalkIn({ sh }: { sh: ShopDef }) {
   const s = app.s;
   const f = s.find!;
-  const v = walkInValue(s, f.kind);
   return (
     <button
       class={`walkin w-${f.kind}`}
       onClick={(e) => {
         e.stopPropagation();
-        if (f.kind === 'cash') register();
+        if (f.kind !== 'rally') register();
         act(collectFind(s));
         app.tip = null;
       }}
-      {...tip(`Walk-in at the ${sh.name}`, `${sh.walkin.who}: ${f.name}.`, `Click: ${EFFECT[f.kind](v)}.`, `Leaves in ${Math.ceil(f.left)}s.`)}
+      {...tip(`Walk-in at the ${sh.name}`, `${f.who}.`, `Click: ${EFFECT[f.kind]()}.`, `Leaves in ${Math.ceil(f.left)}s.`)}
     >
-      <b>{sh.walkin.who}</b>
-      <span>{f.name}</span>
+      <b>{f.who}</b>
+      <span>{EFFECT[f.kind]()}</span>
       <i style={{ width: `${(f.left / WALKIN_STAYS) * 100}%` }} />
     </button>
   );

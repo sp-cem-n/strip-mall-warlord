@@ -47,7 +47,7 @@ const rentCost = (sec: number, r: RegionId = 0) => (s: GameState): Cost => ({ cu
 export const BUFFS: Record<BuffKind, { name: string; does: string }> = {
   bat: { name: 'Plush Bat', does: '+30% crew damage' },
   duck: { name: 'Rubber Duck', does: '+30% crew HP' },
-  troll: { name: 'Troll Doll', does: 'walk-ins pay double' },
+  troll: { name: 'Troll Doll', does: 'walk-ins pay double, and the lucky ones twice as often' },
   ball: { name: 'Bouncy Ball', does: 'a free 30s rally' },
   slap: { name: 'Slap Bracelet', does: 'crew swings 20% faster' },
   quiz: { name: 'Three Right', does: DAWN.quiz },

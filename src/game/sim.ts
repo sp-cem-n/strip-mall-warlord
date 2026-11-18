@@ -1,5 +1,6 @@
-import { BATTLERS, BOSS_PAY, FIGHTS, OFFLINE_CAP_SECONDS, RALLY_SECONDS, REFERRAL_WINS, REGIONS, RETRY_AFTER, SHOPS, SHOP_LIST, STEP, TIP_SECONDS, WALK_IN_SECONDS, WALKIN_EVERY, WALKIN_NAMES, WALKIN_STAYS, type FightDef, type RegionId, type WalkInKind } from './defs';
-import { pick } from './rng';
+import { BATTLERS, BOSS_PAY, FIGHTS, OFFLINE_CAP_SECONDS, RALLY_SECONDS, REGIONS, RETRY_AFTER, SHOPS, SHOP_LIST, STEP, WALK_IN_SECONDS, WALKIN_EVERY, WALKIN_LUCK, WALKIN_STAYS, WALKIN_TICKETS, WALKIN_WINS, type FightDef, type RegionId } from './defs';
+import { pick, rand } from './rng';
+import { DAWN } from './content/dawn';
 import { lossReason, startBattle, stepBattle } from './battle';
 import { asphaltMult, autoCovers, available, currencyOf, earn, fightOf, leased, log, rentPerSec, smokeBreak, topFight } from './economy';
 import { BLITZ_WALKIN, tickSinks } from './sinks';
@@ -143,37 +144,37 @@ function walkIns(s: GameState) {
   if ((s.findClock -= STEP) > 0) return;
   const ads = Math.max(0, 1 - BLITZ_WALKIN * Object.values(s.blitz).reduce((a, n) => a + n, 0));
   s.findClock = ((s.view === 0 ? perk(s, 'walkins') : perk(s, 'bpBell')) ? 75 : WALKIN_EVERY) * Math.max(0.5, ads);
-  const shops = leased(s, s.view).filter((sh) => onScreen.has(sh.id));
+  const shops = leased(s, s.view).filter((sh) => onScreen.has(sh.id) && sh.walkins.length);
   if (!shops.length) return;
   const sh = pick(s, shops);
-  s.find = { shop: sh.id, kind: sh.walkin.kind, name: pick(s, WALKIN_NAMES[sh.walkin.kind]), left: WALKIN_STAYS };
+  const w = pick(s, sh.walkins);
+  s.find = { shop: sh.id, kind: ticketsOpen(s, sh.region) || w.kind !== 'ticket' ? w.kind : 'pay', who: w.who, left: WALKIN_STAYS };
 }
 
-export function walkInValue(s: GameState, kind: WalkInKind): number {
-  const troll = buffOn(s, 'troll') ? 2 : 1;
-  if (kind === 'cash') return rentPerSec(s, s.view) * TIP_SECONDS * troll;
-  if (kind === 'referral') return payFor(s, s.view) * REFERRAL_WINS * troll;
-  return 0;
-}
+// Ticket walk-ins need somewhere to spend it: the Fun Zone on Route 9, the Off-Ramp's Grapevine on the Bypass.
+const ticketsOpen = (s: GameState, r: RegionId) => s.room.unlocked.includes(r ? 'darts' : 'pusher');
+
+// What a paying walk-in is worth right now (a Troll Doll doubles it).
+export const walkInValue = (s: GameState) => payFor(s, s.view) * WALKIN_WINS * (buffOn(s, 'troll') ? 2 : 1);
 
 export function collectFind(s: GameState): string | null {
   const f = s.find;
   if (!f) return 'Nobody walked in';
   s.find = null;
   const r = SHOPS[f.shop].region;
-  const c = s.crews[r];
   const where = SHOPS[f.shop].name;
-  const v = walkInValue(s, f.kind);
   if (f.kind === 'rally') {
-    c.rally = RALLY_SECONDS;
-    log(s, r, `Somebody brought ${f.name} to the ${where}. Crew hits 25% harder for 30 seconds.`, 'win');
-  } else if (f.kind === 'cash') {
-    earn(s, r, 'cash', v, true);
-    log(s, r, `${f.name} at the ${where}. +$${fmt(v)}.`, 'win');
-  } else {
+    s.crews[r].rally = RALLY_SECONDS;
+    log(s, r, `${f.who} at the ${where}. Crew hits 25% harder for 30 seconds.`, 'win');
+  } else if (f.kind === 'pay') {
+    const v = walkInValue(s);
     earn(s, r, REGIONS[r].pay, v, true);
-    log(s, r, `${f.name}: ${where} regular. +${fmt(v)} ${currencyOf(r)}.`, 'win');
-  }
+    log(s, r, `${f.who} at the ${where}. +${fmt(v)} ${currencyOf(r)}.`, 'win');
+  } else if (rand(s) < WALKIN_LUCK * (buffOn(s, 'troll') ? 2 : 1)) {
+    if (r) s.room.slips = (s.room.slips ?? 0) + 1;
+    else s.tickets += WALKIN_TICKETS;
+    log(s, r, `${f.who} at the ${where}. ${r ? DAWN.grapevine.toast : `+${WALKIN_TICKETS} tickets.`}`, 'win');
+  } else log(s, r, `${f.who} at the ${where}. Nothing in it this time.`, 'info');
   return null;
 }
 

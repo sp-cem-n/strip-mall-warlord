@@ -1,6 +1,6 @@
 // Everyone who can stand in a parking lot for you: shop hires, then the bosses who quit and join.
 import { DAWN } from './dawn';
-import type { BattlerDef, WalkInKind } from '../defs';
+import type { BattlerDef } from '../defs';
 import { B } from './make';
 
 export const BATTLER_LIST: BattlerDef[] = [
@@ -48,8 +48,3 @@ export const BATTLER_LIST: BattlerDef[] = [
   B('chairman', 'The Chairman', 'buffer', 300, 20, 1.5, DAWN.chairman, 'Owns the mall. Rents the chair.', { k: 'payUp', v: 0.1 }),
 ];
 
-export const WALKIN_NAMES: Record<WalkInKind, string[]> = {
-  rally: ['a Tire Iron', 'a 4-Cell Flashlight', 'a Letterman Jacket', 'a Case of Energy Drinks', 'a CD Player w/ Anti-Skip', 'Inline Skates'],
-  cash: ['Guy with 40 Virtual Pets', 'Bean-Bag Animal Reseller', 'Man Who Needs It by Friday', 'Woman with a Jet Ski Problem', 'A Sock with a $20 In It'],
-  referral: ["Told his cousin about you", 'Left a five-star comment card', 'Mentioned you at church', 'Put your flyer on 30 windshields'],
-};

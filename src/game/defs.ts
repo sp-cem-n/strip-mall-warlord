@@ -6,7 +6,6 @@ import { BOSS } from './content/make';
 import { ROUTE9, ROUTE9_SHOPS } from './content/route9';
 import { FIGHT_GROWTH, LOT_JUMP, PAY_BASE, PAY_GROWTH, WINS_FIRST, WINS_LAST } from './knobs';
 export * from './knobs';
-export { WALKIN_NAMES } from './content/battlers';
 
 export type Role = 'tank' | 'damage' | 'heal' | 'control' | 'buffer';
 export const ROLES: Role[] = ['tank', 'damage', 'control', 'heal', 'buffer']; // front to back on the lot
@@ -45,7 +44,8 @@ export interface BattlerDef {
 
 export const BATTLERS: Record<string, BattlerDef> = Object.fromEntries([...BATTLER_LIST, SAL].map((b) => [b.id, b]));
 
-export type WalkInKind = 'cash' | 'referral' | 'rally';
+export type WalkInKind = 'rally' | 'pay' | 'ticket';
+export type WalkIn = { kind: WalkInKind; who: string };
 export interface ShopDef {
   id: string;
   name: string;
@@ -57,7 +57,7 @@ export interface ShopDef {
   reno: number; // first renovation, in dollars
   rent: number; // $/s at level 1
   tagline: string;
-  walkin: { kind: WalkInKind; who: string };
+  walkins: WalkIn[]; // who walks in, one picked at random; empty = nobody (offices)
   dawn?: boolean; // Plaza Management: for lease only after dawn, in Equity, and its hire fights at the crew's top level
 }
 
@@ -125,7 +125,7 @@ export const FIGHTS: FightDef[][] = REGIONS.map((r) => {
       const boss = i === lot.fights;
       const g = out.length;
       const per = PAY_BASE[r.id] * PAY_GROWTH[r.id] ** g;
-      out.push({ region: r.id, zone, i, boss, need: boss ? 1 : Math.round(WINS_FIRST + ((WINS_LAST - WINS_FIRST) * g) / (n - 1)), pay: Math.max(1, Math.round(per)), strength: str });
+      out.push({ region: r.id, zone, i, boss, need: boss ? 1 : Math.round(WINS_FIRST + ((WINS_LAST - WINS_FIRST) * g) / (n - 1)), pay: per, strength: str });
     }
   });
   return out;

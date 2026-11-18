@@ -1,28 +1,28 @@
 // Route 9: Pinewood Plaza and the five lots between it and the Developer.
 import type { RegionDef, ShopDef } from '../defs';
-import { BOSS, E, S } from './make';
+import { BOSS, E, S, W } from './make';
 
 export const ROUTE9_SHOPS: ShopDef[] = [
-  S('pawn', 'Pawn Shop', 'fixer', 0, 0, -1, 0, 1, 'We buy gold. We sell gold. Mostly we hold gold.', 'rally', 'Wants to pawn'),
-  S('dojo', 'Dojo', 'bouncer', 0, 0, 1, 15, 1.5, 'Karate, kickboxing, and a waiver nobody reads.', 'rally', 'Sparring partner'),
-  S('laundromat', 'Laundromat', 'medic', 0, 0, 4, 120, 3, 'Twelve washers. Nine work.', 'cash', 'Found in a dryer'),
-  S('vape', 'Vape Shop', 'hustler', 0, 0, 6, 600, 6, 'Open 24 hours, give or take.', 'cash', 'Reseller'),
-  S('funzone', 'Fun Zone Arcade', 'tokenkid', 0, 0, 6, 20000, 60, 'Tokens, tickets, and a claw that has never once let go.', 'cash', 'Needs change for a five'),
-  S('security', 'Security Office', 'watchman', 0, 0, BOSS, 2000, 0, "It doesn't make money. It makes sure.", 'referral', 'Retired cop'),
-  S('video', 'Video Rental', 'latefee', 0, 1, 3, 5000, 20, 'Be kind. Rewind.', 'cash', 'Returning a tape'),
-  S('payday', 'Payday Loans', 'lawyer', 0, 1, BOSS, 15000, 45, 'Cash today. Interest forever.', 'cash', 'Borrower'),
-  S('nails', 'Nail Salon', 'nailtech', 0, 2, 2, 40000, 90, 'Walk-ins welcome. Opinions included.', 'referral', 'Regular'),
-  S('tanning', 'Tanning Salon', 'tanning', 0, 2, 6, 90000, 160, 'A healthy glow. Medically, a glow.', 'rally', 'Bronzed guy'),
-  S('karaoke', 'Karaoke Bar', 'karaoke', 0, 2, 10, 200000, 300, 'Two-drink minimum. One-song maximum.', 'rally', 'Wants the mic'),
-  S('checks', 'Check Cashing', 'notary', 0, 2, BOSS, 450000, 550, "Two forms of ID. Three if you're nervous.", 'cash', 'Cashing a check'),
-  S('driving', 'Driving School', 'driving', 0, 3, 3, 1e6, 1000, 'Hands at ten and two.', 'referral', 'Passed on the 4th try'),
-  S('grooming', 'Pet Grooming', 'groomer', 0, 3, 7, 2.5e6, 1800, 'The dog is not for sale. Stop asking.', 'rally', 'Very good dog'),
-  S('copy', 'Copy Center', 'copyguy', 0, 3, 11, 6e6, 3200, 'Collated, stapled, mildly warm.', 'referral', 'Needs 500 flyers'),
-  S('dentist', 'Dentist', 'hygienist', 0, 3, BOSS, 1.4e7, 6000, 'Have you been flossing. (Not a question.)', 'cash', 'Paying cash'),
-  S('mattress', 'Mattress Store', 'mattress', 0, 4, 3, 3e7, 11000, 'Going out of business since 1989.', 'cash', 'Just looking'),
-  S('kiosk', 'Cell Phone Kiosk', 'kiosk', 0, 4, 7, 7e7, 20000, 'Can I ask you a question?', 'referral', 'Answered the question'),
-  S('gym', 'Gym', 'trainer', 0, 4, 11, 1.6e8, 36000, 'No contract. (Contract.)', 'rally', 'Spotter'),
-  S('party', 'Party Supply', 'clown', 0, 4, BOSS, 3.5e8, 65000, 'Balloons, plates, a clown named Doug.', 'cash', 'Needs 40 balloons'),
+  S('pawn', 'Pawn Shop', 'fixer', 0, 0, -1, 0, 1, 'We buy gold. We sell gold. Mostly we hold gold.', W('R Pawning a class ring', 'G Buying back his guitar', 'T Kid selling a Game Boy')),
+  S('dojo', 'Dojo', 'bouncer', 0, 0, 1, 15, 1.5, 'Karate, kickboxing, and a waiver nobody reads.', W('R Sparring partner', 'R Just saw a Van Damme movie', 'G Birthday party, 12 kids')),
+  S('laundromat', 'Laundromat', 'medic', 0, 0, 4, 120, 3, 'Twelve washers. Nine work.', W('T Found in a dryer', 'G Needs quarters for the change machine')),
+  S('vape', 'Vape Shop', 'hustler', 0, 0, 6, 600, 6, 'Open 24 hours, give or take.', W('G A carton and a scratch-off', 'T Won $2 on the scratch-off')),
+  S('funzone', 'Fun Zone Arcade', 'tokenkid', 0, 0, 6, 20000, 60, 'Tokens, tickets, and a claw that has never once let go.', W('T Cup of 400 tickets', 'G Birthday party booking')),
+  S('security', 'Security Office', 'watchman', 0, 0, BOSS, 2000, 0, "It doesn't make money. It makes sure.", W()),
+  S('video', 'Video Rental', 'latefee', 0, 1, 3, 5000, 20, 'Be kind. Rewind.', W('G Returned it rewound', 'T Late fee in pennies', 'R Wants the new Jackie Chan')),
+  S('payday', 'Payday Loans', 'lawyer', 0, 1, BOSS, 15000, 45, 'Cash today. Interest forever.', W('G Paid on time, somehow', 'R Collections guy, off the clock')),
+  S('nails', 'Nail Salon', 'nailtech', 0, 2, 2, 40000, 90, 'Walk-ins welcome. Opinions included.', W('G Regular', 'G Bridal party of six')),
+  S('tanning', 'Tanning Salon', 'tanning', 0, 2, 6, 90000, 160, 'A healthy glow. Medically, a glow.', W('R Bronzed guy', 'G Prom week')),
+  S('karaoke', 'Karaoke Bar', 'karaoke', 0, 2, 10, 200000, 300, 'Two-drink minimum. One-song maximum.', W('R Wants the mic', 'G Bachelorette party')),
+  S('checks', 'Check Cashing', 'notary', 0, 2, BOSS, 450000, 550, "Two forms of ID. Three if you're nervous.", W('G Cashing a check', 'T Tax-refund day')),
+  S('driving', 'Driving School', 'driving', 0, 3, 3, 1e6, 1000, 'Hands at ten and two.', W('G Passed on the 4th try', 'R Nervous teen (and his dad)')),
+  S('grooming', 'Pet Grooming', 'groomer', 0, 3, 7, 2.5e6, 1800, 'The dog is not for sale. Stop asking.', W('R Very good dog', 'G Show poodle')),
+  S('copy', 'Copy Center', 'copyguy', 0, 3, 11, 6e6, 3200, 'Collated, stapled, mildly warm.', W('G Needs 500 flyers', 'G Thesis due at 9 a.m.')),
+  S('dentist', 'Dentist', 'hygienist', 0, 3, BOSS, 1.4e7, 6000, 'Have you been flossing. (Not a question.)', W('G Paying cash', 'T Kid with a treasure-chest prize')),
+  S('mattress', 'Mattress Store', 'mattress', 0, 4, 3, 3e7, 11000, 'Going out of business since 1989.', W('G Just looking (lying down)', 'R Moving into his first apartment')),
+  S('kiosk', 'Cell Phone Kiosk', 'kiosk', 0, 4, 7, 7e7, 20000, 'Can I ask you a question?', W('G Needs a pager', 'R Batteries for a Walkman')),
+  S('gym', 'Gym', 'trainer', 0, 4, 11, 1.6e8, 36000, 'No contract. (Contract.)', W('R Spotter', "G New Year's resolution")),
+  S('party', 'Party Supply', 'clown', 0, 4, BOSS, 3.5e8, 65000, 'Balloons, plates, a clown named Doug.', W('G Needs 40 balloons', 'T Leftover piñata candy')),
 ];
 
 export const ROUTE9: RegionDef = {

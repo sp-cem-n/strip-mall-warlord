@@ -85,6 +85,6 @@ export function applyDebug(q: URLSearchParams) {
   }
   if (q.get('walkin') === '1') {
     const sh = SHOP_LIST.find((x) => x.region === app.s.view && app.s.crews[app.s.view].shops[x.id])!;
-    app.s.find = { shop: sh.id, kind: sh.walkin.kind, name: 'a 4-Cell Flashlight', left: 18 };
+    app.s.find = { shop: sh.id, ...sh.walkins[0], left: 18 };
   }
 }

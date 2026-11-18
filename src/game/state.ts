@@ -104,7 +104,7 @@ export interface GameState {
   stats: { earned: number; goodwill: number; equity: number; banked: number; relit?: number }; // equity = from Bypass wins, banked = from Goodwill; relit = dead sign letters clicked back on
   savedAt: number;
   nextUid: number;
-  find: { shop: string; kind: WalkInKind; name: string; left: number } | null; // walk-in, only while you're watching
+  find: { shop: string; kind: WalkInKind; who: string; left: number } | null; // walk-in, only while you're watching
   findClock: number;
   consultants: [number[], number[]]; // lots a consultant renovates, per region
   landmarks: string[]; // one entry per landmark put up; they stack
