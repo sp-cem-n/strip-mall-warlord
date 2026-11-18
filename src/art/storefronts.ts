@@ -167,9 +167,8 @@ function interior(g: Grid, art: ShopArt) {
   }
 }
 
-// one tube in most signs is out (lit = the rare moment it sputters back on)
-export const deadTube = (seed: number) => hash(seed, 7) < 0.6;
-export function facade(kind: string | null, material: Material, seed: number, ghost = 'SHOES', lit = false): Grid {
+// dead = one letter of the sign is out (which one comes from the seed)
+export function facade(kind: string | null, material: Material, seed: number, ghost = 'SHOES', dead = false): Grid {
   const g = new Grid(64, 56);
   const m = MATERIAL[material];
   g.rect(0, 0, 64, 50, m.wall);
@@ -181,8 +180,8 @@ export function facade(kind: string | null, material: Material, seed: number, gh
   g.boxed(3, 6, 58, 12, sgn ? sgn.bg : C.concrete);
   if (sgn) {
     const x = 32 - Math.floor(textWidth(sgn.text, 2) / 2);
-    const dead = lit ? -1 : Math.floor(hash(seed, 99) * sgn.text.length);
-    [...sgn.text].forEach((ch, i) => g.text(ch, x + i * 8, 7, i === dead && deadTube(seed) ? sgn.bg === C.sodium ? C.tan : C.concrete : sgn.fg, 2));
+    const out = dead ? Math.floor(hash(seed, 99) * sgn.text.length) : -1;
+    [...sgn.text].forEach((ch, i) => g.text(ch, x + i * 8, 7, i === out ? (sgn.bg === C.sodium ? C.tan : C.concrete) : sgn.fg, 2));
   } else {
     g.text(ghost, 32 - Math.floor(textWidth(ghost, 2) / 2), 7, C.stone, 2); // ghost of the last tenant
   }

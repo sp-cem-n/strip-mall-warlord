@@ -6,7 +6,7 @@ import { crewSprite, enemySprite } from '../art/people';
 import { battlefield, bootScene } from '../art/field';
 import * as F from '../art/frames';
 import { buttonFrame, ICONS, panelFrame } from '../art/frames';
-import { deadTube, facade, scaffold, type Material } from '../art/storefronts';
+import { facade, scaffold, type Material } from '../art/storefronts';
 import { titleSign } from '../art/sign';
 import { starsTile } from '../art/logos';
 import barLogo from '../art/bar-logo.png';
@@ -42,9 +42,13 @@ export const crewURL = (id: string) => urlOf(`crewurl:${id}`, () => crewSprite(i
 const MATERIALS: Material[] = ['home', 'bigbox', 'outlet', 'office', 'lifestyle'];
 export const materialOf = (id: string): Material => (SHOPS[id].region === 1 ? 'bypass' : MATERIALS[SHOPS[id].zone] ?? 'home');
 const seedOf = (id: string) => id.length * 7 + id.charCodeAt(0);
-export const hasDeadTube = (id: string) => deadTube(seedOf(id));
-export const facadeURL = (id: string, leased: boolean, lit = false) =>
-  urlOf(`facade:${id}:${leased}:${lit}`, () => facade(leased ? id : null, materialOf(id), seedOf(id), SHOPS[id].region === 1 ? 'COMING' : 'SHOES', lit));
+// About one sign in four has a letter out, hashed from the whole id so no two shops share the answer.
+const idHash = (id: string) => [...id].reduce((h, ch) => Math.imul(h ^ ch.charCodeAt(0), 16777619), 2166136261) >>> 0;
+export const hasDeadTube = (id: string) => idHash(id) / 2 ** 32 < 0.25;
+export const facadeURL = (id: string, leased: boolean, lit = false) => {
+  const dead = hasDeadTube(id) && !lit;
+  return urlOf(`facade:${id}:${leased}:${dead}`, () => facade(leased ? id : null, materialOf(id), seedOf(id), SHOPS[id].region === 1 ? 'COMING' : 'SHOES', dead));
+};
 export const scaffoldURL = () => urlOf('scaffold', scaffold);
 export const titleSignURL = (ray = false, out = 0) => urlOf(`titlesign:${ray}:${out}`, () => titleSign(ray, out));
 // Fun Zone neon script (option B): dead tubes underneath, each lit part on its own layer so it can flicker.

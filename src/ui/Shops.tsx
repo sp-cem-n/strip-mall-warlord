@@ -1,5 +1,5 @@
 // The plaza: one fixed-layout card per storefront. Leased shops renovate; new ones come up for lease in order.
-import { lit } from './lights';
+import { lit, relight } from './lights';
 import { useEffect, useRef } from 'preact/hooks';
 import { DAWN } from '../game/content/dawn';
 import { app, tip, toast } from '../app';
@@ -58,7 +58,10 @@ function Unit({ sh }: { sh: ShopDef }) {
   return (
     <div class={`unit ${lv ? '' : 'vacant'}`}>
       <div class="facade" {...tip(sh.name, sh.tagline, lv ? `Rent $${fmt(rent)}/s. Sends one ${d.name}.` : `For lease. Sends one ${d.name}: ${d.does}`)}>
-        <img class={!raising && now < (app.raising[sh.id] ?? 0) + 700 ? 'flicker' : ''} src={facadeURL(sh.id, lv > 0 && !raising, lit.has(sh.id))} width={192} height={168} alt={sh.name} />
+        <img
+          class={!raising && now < (app.raising[sh.id] ?? 0) + 700 ? 'flicker' : ''}
+          onClick={(e) => lv > 0 && e.offsetY < e.currentTarget.clientHeight / 3 && relight(sh.id)} // the sign band is the top third
+          src={facadeURL(sh.id, lv > 0 && !raising, lit.has(sh.id))} width={192} height={168} alt={sh.name} />
         {raising && <img class="scaffold" src={scaffoldURL()} width={192} height={168} alt="" />}
         {s.find?.shop === sh.id && <WalkIn sh={sh} />}
       </div>

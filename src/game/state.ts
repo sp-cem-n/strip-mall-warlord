@@ -99,7 +99,7 @@ export interface GameState {
   bypass: boolean; // region 2 found (survives paving)
   ending: 0 | 1 | 2; // a win card waiting to be seen (region + 1)
   log: LogLine[];
-  stats: { earned: number; goodwill: number; equity: number; banked: number }; // equity = from Bypass wins, banked = from Goodwill
+  stats: { earned: number; goodwill: number; equity: number; banked: number; relit?: number }; // equity = from Bypass wins, banked = from Goodwill; relit = dead sign letters clicked back on
   savedAt: number;
   nextUid: number;
   find: { shop: string; kind: WalkInKind; name: string; left: number } | null; // walk-in, only while you're watching

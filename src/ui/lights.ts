@@ -1,6 +1,6 @@
 // One timer per sign, nothing per frame. Off for prefers-reduced-motion.
 // Three separate schedules:
-//  - plaza tubes: the starburst ray and dead shop tubes sputter now and then;
+//  - plaza tubes: the starburst ray and dead shop tubes sputter now and then; a click relights a dead shop letter until it next burns out;
 //  - plaza WARLORD letters: one letter at a time burns out, at most 2 dark at once, and a letter always flickers on its way out and back;
 //  - Fun Zone script: FUN, ZONE or the underline flickers, sometimes stays off a few seconds, always comes back on; now and then a ~10s tantrum.
 import { app } from '../app';
@@ -17,8 +17,7 @@ const later = (ms: number, f: () => void) => setTimeout(f, ms);
 const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
 
 function candidates() {
-  const c = app.s.crews[0].shops;
-  return ['sign-ray', ...SHOP_LIST.filter((sh) => (c[sh.id] ?? 0) > 0 && hasDeadTube(sh.id)).map((sh) => sh.id)];
+  return ['sign-ray', ...SHOP_LIST.filter((sh) => (app.s.crews[sh.region].shops[sh.id] ?? 0) > 0 && hasDeadTube(sh.id)).map((sh) => sh.id)];
 }
 
 // a sputter: a handful of short on/off blinks of `flip`, ending on `end`
@@ -38,9 +37,17 @@ function next() {
   later(rnd(gap[0], gap[1]) * 1000, () => {
     const id = pick(candidates());
     const f = tubeFlip(id);
-    if (Math.random() < 0.35) sputter(f, true, () => later(rnd(10, 40) * 1000, () => sputter(f, false, next)));
+    if (lit.has(id) && id !== 'sign-ray') sputter(f, false, next); // a relit letter burns out again
+    else if (Math.random() < 0.35) sputter(f, true, () => later(rnd(10, 40) * 1000, () => sputter(f, false, next)));
     else sputter(f, false, next);
   });
+}
+// A click on a shop's dark letter: it sputters back on and stays lit until the schedule burns it out again.
+export function relight(id: string): boolean {
+  if (!hasDeadTube(id) || lit.has(id)) return false;
+  sputter(tubeFlip(id), true, () => {}, [1, 3]);
+  app.s.stats.relit = (app.s.stats.relit ?? 0) + 1;
+  return true;
 }
 
 // --- WARLORD letters ---
