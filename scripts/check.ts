@@ -9,7 +9,7 @@ import type { GameState } from '../src/game/state';
 import { HOW, STORY } from '../src/game/content/copy';
 import { botAct } from '../src/game/bot';
 import { QUESTIONS } from '../src/ui/bargames';
-import { BAR_BUFFS, BUFFS, MACHINES, PERKS, QUIZ, boardBonus, buffOn, buyAttract, buyPerk, endPlay, grant, perk, perkPrice, postShuffle, shelfOf, startPlay } from '../src/game/room';
+import { GRAPEVINE, barDmg, spendSlips, BAR_BUFFS, BUFFS, MACHINES, PERKS, QUIZ, boardBonus, buffOn, buyAttract, buyPerk, endPlay, grant, perk, perkPrice, postShuffle, shelfOf, startPlay } from '../src/game/room';
 import { handTier } from '../src/ui/machines';
 import { moving, powFor, scoreOf, slide, throwPuck, zoneOf } from '../src/ui/shuffle';
 import { readdirSync, readFileSync } from 'node:fs';
@@ -51,6 +51,13 @@ check('shop tiers: the Pawn Shop is tier 0, later shops sit higher', tierOf('paw
   const hit = [...park, throwPuck(20, powFor(-2), true)];
   for (let i = 0; i < 600 && moving(hit); i++) slide(hit, 1 / 120);
   check('shuffleboard: a hard red throw knocks the blue puck out of the 3', !(hit[0].live && zoneOf(hit[0].y) === 3) && scoreOf(hit, false) !== 3);
+}
+// the Grapevine: slips buy a short Bypass edge, and you can't spend what you don't have
+{
+  const t = newGame(6);
+  t.room.slips = 2;
+  check('Grapevine: 3-slip word refused with 2 slips', spendSlips(t, 'word') !== null && t.room.slips === 2);
+  check('Grapevine: 1-slip tip gives +15% Bypass damage', spendSlips(t, 'tip') === null && t.room.slips === 1 && Math.abs(barDmg(t) - 1.15) < 1e-9 && GRAPEVINE.length === 2);
 }
 // roster: a full field says where more slots come from, and stops offering once there are none
 {
@@ -331,7 +338,7 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   for (const l of REGIONS[0].lots) texts.push(l.name, l.blurb, l.clearText, ...[...l.regulars, l.boss].flatMap((e) => [e.name, e.title]));
   texts.push(REGIONS[0].name, ...Object.values(REGIONS[0].chrome));
   for (const m of MACHINES.filter((x) => x.region === 0)) texts.push(m.name, m.blurb, m.needs);
-  for (const [k, b] of Object.entries(BUFFS)) if (k !== 'shot' && ![...BAR_BUFFS, ...QUIZ].some(([x]) => x === k)) texts.push(b.name, b.does);
+  for (const [k, b] of Object.entries(BUFFS)) if (k !== 'shot' && ![...BAR_BUFFS, ...QUIZ, ...GRAPEVINE].some(([x]) => x === k)) texts.push(b.name, b.does);
   for (const p of Object.values(PERKS)) texts.push(p.name, p.does);
   let t = newGame(12);
   let next = 0;

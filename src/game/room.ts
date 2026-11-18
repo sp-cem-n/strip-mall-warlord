@@ -9,9 +9,9 @@ import { rand } from './rng';
 import type { GameState } from './state';
 
 export type MachineId = 'pusher' | 'whac' | 'skee' | 'claw' | 'pinball' | 'cyclone' | 'darts' | 'pool' | 'poker' | 'foos' | 'shuffle' | 'trivia' | 'tabs' | 'blackjack' | 'fairway';
-export type BuffKind = 'bat' | 'duck' | 'troll' | 'ball' | 'watch' | 'well' | 'call' | 'top' | 'royal' | 'quiz' | 'genius' | 'shot';
+export type BuffKind = 'bat' | 'duck' | 'troll' | 'ball' | 'watch' | 'well' | 'call' | 'top' | 'royal' | 'quiz' | 'genius' | 'shot' | 'tip' | 'word';
 export type Cost = { cur: Currency | 'tickets'; n: number };
-export interface Reward { cash?: number; goodwill?: number; tickets?: number; equity?: number; buff?: BuffKind; big?: boolean; text: string }
+export interface Reward { cash?: number; goodwill?: number; tickets?: number; equity?: number; buff?: BuffKind; big?: boolean; slip?: boolean; text: string }
 export interface PusherCoin { x: number; y: number; layer: 'shelf' | 'field'; kind: 'coin' | 'rent' | 'ticket' }
 export interface PusherField { coins: PusherCoin[]; hopper: number; tower: number; inn: number; out: number; rng?: number }
 export interface RoomState {
@@ -26,6 +26,7 @@ export interface RoomState {
   shelf: [number, number]; // what's left to win: the coin pusher's pile, and the darts pot. 0-10, one back a minute
   pusher?: PusherField; // persistent coin positions; save-migrates via newRoom spread
   clawPick?: BuffKind;
+  slips?: number; // Grapevine rumor slips on the bar (after dawn)
   buffs: Partial<Record<BuffKind, number>>; // seconds left
   plays: number;
   shuffle: number; // shuffleboard house scores beaten (0-5)
@@ -57,6 +58,8 @@ export const BUFFS: Record<BuffKind, { name: string; does: string }> = {
   quiz: { name: 'Three Right', does: DAWN.quiz },
   genius: { name: 'Five for Five', does: DAWN.genius },
   shot: { name: DAWN.shotName, does: DAWN.shotDoes },
+  tip: DAWN.grapevine.tip,
+  word: DAWN.grapevine.word,
 };
 export const BUFF_SECONDS = 600;
 // the bar's buffs, by poker hand: [kind, seconds, damage, HP]
@@ -277,7 +280,7 @@ export function startPlay(s: GameState, id: MachineId): string | null {
 }
 
 // The game is over: pay out for quality q (0..1).
-export function endPlay(s: GameState, id: MachineId, q: number, quiet = false): Reward {
+export function endPlay(s: GameState, id: MachineId, q: number, quiet = false, heard = !quiet): Reward {
   const m = MACHINE[id];
   const r = m.region;
   q = Math.max(0, Math.min(1, q));
@@ -287,6 +290,8 @@ export function endPlay(s: GameState, id: MachineId, q: number, quiet = false): 
   if (rw.equity) earn(s, r, 'equity', rw.equity, !quiet);
   if (rw.tickets) (s.tickets += rw.tickets), credit(s, 'tickets', rw.tickets, !quiet);
   if (rw.buff) grant(s, rw.buff);
+  // every Off-Ramp game can leave a rumor on a napkin; better plays hear more
+  if (r === 1 && heard && rand(s) < 0.12 + 0.3 * q) ((s.room.slips = (s.room.slips ?? 0) + 1), (rw.slip = true), (rw.text += DAWN.grapevine.drop));
   if (id === 'pusher' || id === 'darts') s.room.shelf[id === 'pusher' ? 0 : 1] = Math.max(0, s.room.shelf[id === 'pusher' ? 0 : 1] - 1);
   if (id === 'cyclone') s.room.jackpot = q >= 1 ? 500 : s.room.jackpot + 5;
   if (rw.big && m.cool) s.room.cool[id] = s.totalTime + m.cool;
@@ -306,8 +311,20 @@ export function postShuffle(s: GameState, score: number): number {
   }
   return gained;
 }
-export const barDmg = (s: GameState) => 1 + Math.max(0, ...BAR_BUFFS.filter(([b]) => buffOn(s, b)).map(([, , d]) => d));
-export const barHp = (s: GameState) => 1 + Math.max(0, ...BAR_BUFFS.filter(([b]) => buffOn(s, b)).map(([, , , h]) => h));
+// Grapevine spends: [kind, slips, seconds, damage, HP]. They don't stack with the poker buffs; the best one counts.
+export const GRAPEVINE: [BuffKind, number, number, number, number][] = [['tip', 1, 240, 0.15, 0], ['word', 3, 480, 0.25, 0.25]];
+const edges = (s: GameState) => [...BAR_BUFFS.map(([b, , d, h]) => [b, d, h] as const), ...GRAPEVINE.map(([b, , , d, h]) => [b, d, h] as const)].filter(([b]) => buffOn(s, b));
+export const barDmg = (s: GameState) => 1 + Math.max(0, ...edges(s).map(([, d]) => d));
+export const barHp = (s: GameState) => 1 + Math.max(0, ...edges(s).map(([, , h]) => h));
+export function spendSlips(s: GameState, kind: BuffKind): string | null {
+  const g = GRAPEVINE.find(([b]) => b === kind);
+  if (!g) return 'Not on the Grapevine';
+  if ((s.room.slips ?? 0) < g[1]) return 'Not enough rumor slips';
+  s.room.slips = (s.room.slips ?? 0) - g[1];
+  s.room.buffs[kind] = Math.max(s.room.buffs[kind] ?? 0, g[2]);
+  log(s, 1, DAWN.grapevine.spent(BUFFS[kind].name), 'win');
+  return null;
+}
 
 // Pinball: the score goes on the board. Each house score beaten is +6% Goodwill per win, forever.
 export function postScore(s: GameState, score: number): number {

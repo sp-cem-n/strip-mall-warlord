@@ -38,6 +38,18 @@ export const DAWN = {
   prizeBack: 'The back room',
   shotName: 'Souvenir shot glass',
   shotDoes: '+10% damage on the Bypass crew for 20 minutes',
+  // the Grapevine: rumor slips the Off-Ramp games drop (napkins, torn receipts), spent on a short edge for the Bypass crew
+  grapevine: {
+    title: 'The Grapevine',
+    pile: (n: number) => `${n} rumor slip${n === 1 ? '' : 's'} on the bar`,
+    empty: 'Play anything at the bar. Rumors turn up on napkins.',
+    drop: ' The bartender heard something.',
+    toast: 'A rumor slip, on a bar napkin.',
+    tip: { name: 'Heard something', does: '+15% Bypass crew damage for 4 min' },
+    word: { name: 'The inside word', does: '+25% Bypass crew damage and HP for 8 min' },
+    spend: (n: number) => `Spend ${n}`,
+    spent: (name: string) => `The Grapevine: ${name}.`,
+  },
   // roster: where more Bypass fighter slots come from
   slotWhere: { office: 'the Back Office (Equity)', stool: 'the Bar stool at the Fun Zone prize counter', shuffle: 'beating the third house score at Off-Ramp shuffleboard' },
   perks: {
