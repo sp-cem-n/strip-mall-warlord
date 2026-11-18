@@ -382,3 +382,134 @@ Fun Zone at Parking Lot fight 7 for $20,000. Off-Ramp at Exit 14 fight 4. Attrac
 - **Wall map (new design task before building):** list every boss and lot with its crew makeup, what it beats, what beats it, and which unlocked unit or role solves it. Walls should push the player to shift focus: upgrade one shop or role to pass a wall, then bench it and build another for the next wall. Strengths and weaknesses become the core of the puzzle, so check that the system has enough depth and make it readable on hovers and the roster.
 - **The tools to break a wall** are farming Goodwill for training, cash for renovations, and changing the lineup. Patrols cost a bit more Goodwill, as a goal once the farm-versus-advance loop is understood. Auto lineup is a goal worth unlocking because crew makeup is a real bottleneck.
 - **Balance:** re-run the check-in and skilled active sims without auto-overtime. Each wall should stop progress for a while but be breakable with the intended tools. Keep Route 9 near 15h±1, or retune and report.
+
+## Josh notes, Nov 18 (playtest; supersede anything above where they conflict)
+
+Read from the code on `v09` (same `src` as `main`), plus a probe run (seed 1991, check-in bot, first run, no asphalt, measured for 10 minutes on each fight with auto-advance off). No source changes yet. Each item: the problem, what the code does now, and the fix (delete before add).
+
+1. **Walk-up and formations.**
+   *Now:* `Field.tsx` walks every group in from one direction, the upper right (`x + k·70, y − k·46`). Enemies stand on a fixed grid of 3-high columns, 24 px apart (`enemySpot`). The waiting group is drawn on the same grid shifted by (+36, −20). Past 3 regulars the queue lands on the second column, and that is the overlap. Fallen enemies keep their spot (spots are indexed over every regular, dead or alive), so the back line never steps up.
+   *Fix:* pick an entry lane per group from three: upper right (today), far right, or lower right (the mirror of upper right). Index spots over **living** enemies, so when a front-liner drops the back line tweens forward one spot. The waiting group never moves until the last man is down; that rule is already correct. Fix the queue's place: put the on-deck group behind the last column, not on top of it, and the in-the-hole group after that (3 fights visible at most). Give each spot a small seeded jitter (±3 px x, ±2 px y, from the unit's uid) so the line stays a line but stops looking stamped. No new art.
+
+2. **Walk-ins.**
+   *Now:* each unit has exactly one walk-in: one kind and one "who" line (`S(..., kind, who)` in `route9.ts` / `bypass.ts`). The item it brings is picked at random from a shared pool of 4–6 per kind (`WALKIN_NAMES`), so a Dentist walk-in can be "Woman with a Jet Ski Problem." A walk-in rolls every 90s (75 with the bell), at a random **leased** unit of the road you're viewing, and lasts 25s. **The scroll bug:** the popup is drawn inside that unit's storefront, so if the unit is scrolled off-screen you never see it and it times out.
+   *Fix:* every walk-in belongs to its business (table below). Delete the shared item pools. Roll only among units **on screen**: `Shops.tsx` already measures the grid, so it can pass the visible ids to the roll, and if none are visible, skip the roll. No new indicator is needed. Kinds follow the 15 Nov call: walk-ins pay a little Goodwill (Equity on the Bypass), a chance at a ticket (a slip on the Bypass), or a rally, never cash. R = rally, G = Goodwill or Equity, T = ticket or slip chance.
+
+   | Unit | Today | Proposed |
+   |---|---|---|
+   | Pawn Shop | rally · Wants to pawn | R Pawning a class ring · G Buying back his guitar · T Kid selling a Game Boy |
+   | Dojo | rally · Sparring partner | R Sparring partner · R Just saw a Van Damme movie · G Birthday party, 12 kids |
+   | Laundromat | cash · Found in a dryer | T Found in a dryer · G Needs quarters for the change machine |
+   | Smoke Shop (was Vape) | cash · Reseller | G A carton and a scratch-off · T Won $2 on the scratch-off |
+   | Fun Zone | cash · Needs change for a five | T Cup of 400 tickets · G Birthday party booking |
+   | Security Office | referral · Retired cop | none (it doesn't make money) |
+   | Video Rental | cash · Returning a tape | G Returned it rewound · T Late fee in pennies · R Wants the new Jackie Chan |
+   | Payday Loans | cash · Borrower | G Paid on time, somehow · R Collections guy, off the clock |
+   | Nail Salon | referral · Regular | G Regular · G Bridal party of six |
+   | Tanning Salon | rally · Bronzed guy | R Bronzed guy · G Prom week |
+   | Karaoke Bar | rally · Wants the mic | R Wants the mic · G Bachelorette party |
+   | Check Cashing | cash · Cashing a check | G Cashing a check · T Tax-refund day |
+   | Driving School | referral · Passed on the 4th try | G Passed on the 4th try · R Nervous teen (and his dad) |
+   | Pet Grooming | rally · Very good dog | R Very good dog · G Show poodle |
+   | Copy Center | referral · Needs 500 flyers | G Needs 500 flyers · G Thesis due at 9 a.m. |
+   | Dentist | cash · Paying cash | G Paying cash · T Kid with a treasure-chest prize |
+   | Mattress Store | cash · Just looking | G Just looking (lying down) · R Moving into his first apartment |
+   | Electronics (was Kiosk) | referral · Answered the question | G Needs a pager · R Batteries for a Walkman |
+   | Gym | rally · Spotter | R Spotter · G New Year's resolution |
+   | Party Supply | cash · Needs 40 balloons | G Needs 40 balloons · T Leftover piñata candy |
+   | Plaza Management | referral · Somebody with a complaint | none (office hours by appointment) |
+   | Self Storage | cash · Unit 114, behind on rent | G Unit 114 pays up · T Auction find |
+   | Car Wash | rally · Wants the hot wax | R Wants the hot wax · G A fleet of six vans |
+   | The Off-Ramp | cash · Regular, wants his stool back | T Regular, wants his stool back · G Darts league night |
+   | Dojo (Exit 14) | rally · Sparring partner | R Sparring partner · G Belt test day |
+   | Urgent Care | referral · Got stitches, liked it | G Got stitches, liked it · R Sprained ankle, wants back in |
+   | Security Office (Bypass) | referral · Retired cop | none |
+   | Bail Bonds | referral · Somebody's cousin | G Somebody's cousin · R Skipped bail, came back |
+   | Tax Prep | cash · Wants a bigger refund | G Wants a bigger refund · T Shoebox of receipts |
+   | Wash-n-Fold | cash · Found in a dryer | T Found in a dryer · G Drop-off, 40 pounds |
+   | Golf Superstore | rally · Practicing his swing | R Practicing his swing · G Corporate outing |
+   | Payday Loans (Bypass) | cash · Borrower | G Borrower · R Collections guy |
+   | Bridal Boutique | referral · Mother of the bride | G Mother of the bride · R Bride on a deadline |
+   | Party Supply (Bypass) | cash · Needs 40 balloons | G Doug's brother's party · T Leftover confetti |
+   | Cineplex | rally · Snuck in | R Snuck in · G Midnight premiere line |
+   | Pet Grooming (Bypass) | rally · Very good dog | R Very good dog (he drove) · G Show poodle |
+   | Pretzel Stand | cash · Wants the cinnamon one | G Wants the cinnamon one · T Free-sample guy |
+
+3. **Renovations: cash-only vs cash and combat.**
+   *Now:* every renovation does both: rent ×1.2 (`RENT_GROWTH`), plus a stat step in `statsOf`. Tanks get HP ×1.1; damage, heal and control units get their hit ×1.1 and HP ×1.08; buffers get only **+4% of base** on their aura (`AURA_STEP`). Nail Tech's haste, for example, goes from 20% to 20.8%. Three things make some read as cash-only: (a) the card's "▲ +X HP +Y DMG" line shows **+0 HP +0 DMG** for every buffer (Nail Tech, Karaoke Host, Notary, Copy Guy, Personal Trainer; Detailer and Wedding Planner on the Bypass), because the aura step isn't shown; (b) tanks show "+0 DMG"; (c) some main effects never scale at all: Tanning and Pretzel regen, and Bartender, Bondsman and LP Manager damage reduction. Units with no rent (both Security Offices, Plaza Management) are combat-only and say "no rent."
+   *Fix:* one rule: **every renovation is +20% rent and +10% of the one thing this unit does.** Set the aura step to the same 10% (delete `AURA_STEP` and use `MAIN_GROWTH`), scale regen and damage reduction the same way, and have the card print that one thing in the unit's own words ("haste 20% → 22%", "HP 260 → 286"). Delete the generic HP/DMG pair from the card.
+
+4. **Goodwill to Equity waters Equity down.**
+   *Now:* the bank is 10 GW per EQ (`GOODWILL_PER_EQUITY`), one way, unlimited. Bypass wins pay `0.2 × 1.09^fight`, rounded, with a floor of 1. Because of that rounding, **every fight in the first two Bypass lots (about 24 fights) pays exactly 1 EQ**. The last regular fight pays 21 and the Chairman 572. Route 9 at the end (probe): Pinewood Commons fights farm **~400–1,500 GW/min**. That is ~2–9K EQ/hour at 10:1. The real leak is **re-farming a captured boss**. Bosses pay 25 wins' worth (`BOSS_PAY`) every time, and a finished crew beats an earlier boss in ~4 seconds: Regional Property Manager **49.3K GW/min** (0 losses), Building Manager 24.6K GW/min. At 10:1 that's **~150–300K EQ/hour**. Every Bypass lease combined costs ~143K EQ, so half an hour of boss farming buys the whole road. Bypass farming measured 1–23 EQ/min. Asphalt then multiplies all Route 9 Goodwill (+288% per pave).
+   *Fix (delete first):* (a) **a boss pays 25× once, on the capture;** a rematch pays like a regular win. That one line removes the 50× spike. (b) 20 GW/EQ flat, as already decided. (c) Bypass wins pay real Equity, as already decided: drop the per-win rounding and floor, and raise `PAY_BASE[1]` so pay grows from the first fight. Target: Bypass farming at least matches the bank for a player who plays both roads. Re-run both sims and the guard. Conversion stays a top-up.
+
+5. **Right side: lot skylines, the Back Office Plaza, consultants.**
+   *Now:* each lot's skyline (`art/field.ts`, `SKYLINE`) is a few flat boxes and one text label. Only the office park has windows, and nothing is lit or alive, so it reads plainer than the storefronts. The Back Office **Plaza** block is a grid of identical dark cards: name and a "$" button. What each item does lives only in the hover, and bought items stay on the grid forever ("Bought"). Late game that is up to 6 consultants, 6 auto-renos, 3 landmarks, 3 blitzes and contracts.
+   **What a consultant does, mechanically:** you hire one per lot, from that road's till, for 20 minutes of the road's **whole** rent (same price for every lot). It opens once the *next* lot is captured, pre-dawn included. Hiring does two things. (1) It counts as that lot's **patrol** (`autoCovers`): the crew climbs back up after 6 farmed wins, jumps to the new frontier after a clear, and (until overtime is cut) auto-buys overtime on a boss after two losses. (2) It unlocks a second purchase, **auto-renovation** (45 minutes of rent). After that, every 10 s, the road's single cheapest shop on any auto-reno lot is renovated if the till holds twice its price, fielded or benched. Consultants survive a pave; patrols don't. So today a consultant is a patrol that survives a pave, plus an optional auto-renovate button. "Keep the lights on" says none of that.
+   *Conflict:* 15 Nov calls say consultants are **post-dawn**, per lot, and their job beyond patrols is auto-renovation, "so the two don't overlap." The code overlaps them.
+   *Fix:* make it **one purchase**: "*Lot* consultant: renovates this lot's shops for you whenever the till can cover it twice." Delete the hire step, the patrol effect (`autoCovers` checks patrols only), and the separate auto-reno card. Post-dawn only. Plaza cards print their effect on the card. Bought one-time items leave the grid and show up as plaza furniture instead (landmarks already have sprites on the plaza title). Skylines: each lot gets one lit sign with a dead tube, plus one joke prop, built from the storefront sign and awning pieces so it matches the plaza. Keep the current gags (Circuit Barn's dead BARN, the aggressive fountain, COMING SOON).
+
+6. **Title screen lease code.**
+   *Now:* `Boot` always renders the full `SaveBox` (textarea, Copy, Load) in the menu, even on a first boot with no save. The game already autosaves to the browser; the code is only a backup or transfer. "Lease code" never says "save." How to Play still says the Back Office holds it (stale).
+   *Fix:* delete the box from the menu. Add one small **Saves** button under How to Play that drops the same box down, with one line of copy: "Your save, as a lease code. Copy it to back up or move computers; paste one to load." The floppy popup uses the same line. Fix the How to Play row.
+
+7. **Scoreboard W-L.**
+   *Now:* the LED shows lifetime wins and losses for the road's crew since the last pave (`fmtWL`), e.g. 4,366 and 735 after 16h in the check-in sim, so it reads "4.3K-735." It only ever grows, and at that size it stops reading as a record.
+   *Fix:* delete the lifetime cell. Show **this fight's win rate** over its last 20 fights ("86% WIN"). It never grows, and it's the number the farm choice needs. Lifetime totals move to the hover.
+
+8. **Uncle's note hover.**
+   *Now:* the note is the last thing in the plaza column, under every unit and the break room, often below the fold. Its hover ("Uncle's note — Taped to the register. Updated, somehow.") explains a note that explains itself. A few lines are stale ("Fifty bucks and the Parking Lot patrols itself.").
+   *Fix:* delete the hover. Move the note to the top of the plaza, next to the plaza name. Fold its lines into the copy pass (C3).
+
+9. **Route 9 North leftovers (all occurrences).**
+   - `src/game/content/bypass.ts:37`: Bypass ending, "Route 9 North is still being surveyed."
+   - `src/game/content/dawn.ts:20`: `hintDone`, "Somebody is surveying Route 9 North. Not yet."
+   - `src/ui/Screens.tsx:258`: comment, "Nothing before it hints that there's a road north."
+   - `src/ui/Screens.tsx:290`: the dawn card's **Drive north** button (it opens the Bypass; the label implies a north road).
+   - `scripts/check.ts:334, 354`: "route 9 north" in the leak regexes. Keep these; they are the guard.
+   - `docs/V10_PLAN.md` C2: "drive-north choice."
+   *Fix:* rewrite the two lines as a plain ending. The button becomes the stranger/Bypass gate copy once that's decided. Leave the check regex.
+
+10. **Overtime.**
+   *Conflict:* already decided **cut entirely** (Bottleneck design, 15 Nov, which supersedes the earlier "undecided"). So buyable-and-stackable is moot.
+   *Code still in:* `knobs.ts` (`OVERTIME_SECONDS`, `OVERTIME_FIGHTS`, `OVERTIME_BOOST`); `economy.ts` (`overtime`, `overtimeCost`, `overtimeFights`, the crew field); `sim.ts:32` (the auto-overtime on a patrolled boss after 2 losses); `battle.ts:85–87` (the boost); `state.ts:46, 76`; `ui/Calls.tsx` (the whole file is the button); `Field.tsx:205` ("OVERTIME" text); the How to Play row in `copy.ts`; the cash-till hover in `Pylon.tsx` ("…patrols, Overtime"); and on the prize shelf in `room.ts`, the Overtime coupon (`otCheap`), the Overtime punch card (`otLong`), and the Gold Watch claw toy (5 free overtime fights). Plus `bot.ts:119` and two checks in `check.ts`.
+   *Fix:* delete all of it. Give the Gold Watch a different short boost from the Route 9 claw set, or drop it.
+
+11. **Bypass unit count.**
+   *Now:* confirmed. The Bypass has 4 lots and **16 units** (6 / 3 / 4 / 3). Route 9 has 6 lots and 21 units: 20 shops (6 / 2 / 4 / 4 / 4 / 0; Pinewood Commons has none) plus Plaza Management. The grid is either 7 or 3 per row (`plazaFit`), so 16 leaves a ragged row in both layouts. **18 fills 3-wide but not 7-wide** (7 + 7 + 4); only 21 fills both. The Bypass also has 56 fights to Route 9's 84 and is paced to take about twice as long.
+   *Fix:* see open question 2. The cheap option is layout only: 4 per row on the Bypass (16 = 4 × 4, or 8 × 2 wide). The content option is 21: add 5 units (Campus and Galleria get the most).
+
+12. **Burnt-out unit signs.**
+   *Now:* `deadTube(seed) = hash(seed, 7) < 0.6`, but the seed is `id.length × 7 + first char`, so ids collide. Result: **28 of 37 signs (76%) have one letter permanently dark** (Route 9 16/21, Bypass 12/16). Every 2–6 minutes one of them sputters, and 35% of those stay lit for 10–40 s. Bypass signs never sputter back (`candidates()` only reads Route 9 shops). Click-to-relight (A4) is **not built yet**, so it doesn't cover this today.
+   *Fix:* seed from a hash of the full id, and drop the rate so about 1 in 4 signs is dark. A click relights a sign until its next burnout (A4). Include the Bypass. Once A4 ships, keep dead letters uncommon enough that the plaza reads clean and clicking feels like a find.
+
+13. **The Plaza (cash sinks) is broken.** Found in code:
+   - Crew contracts bought on the Bypass do **nothing**: the stat bonus only applies to Route 9 (`sinkStatMult` returns 1 for the Bypass), but the card is offered there.
+   - Crew contracts were already **cut** (15 Nov) and are still sold.
+   - Landmarks are one-time ("Bought"), but stacking was decided and the plaza title already counts copies (`×n`).
+   - Consultants double as patrols and open pre-dawn (item 5).
+   - Effects are only in hovers; the blitz text is vague ("A small, permanent bump…"). Bought cards never leave.
+   - Prices are minutes of the road's **current** rent, so after a pave everything is cheap again.
+   - Dead duplicate formulas: `sinkRentBonus`, `sinkStatBonus`, `blitzWalkin` and `landmarkHp` in `sinks.ts` are unused. The live math is `sinkRentMult` / `sinkStatMult` / `sinkHpBonus` in `economy.ts`, written a second time. Neither copy has a check in `scripts/check.ts`, and the bots never buy any of it, so nothing has tested it.
+
+   *Fix:* delete contracts and the dead copies, keeping one set of formulas next to the purse. Then three sinks: consultant (item 5), stacking landmarks, and blitzes. Add one `check.ts` case per sink (buy it, the number moves on the right road). Visual: same card grid as the prize counter, effect printed on the card, bought items become plaza props. If "the gold sink shop" means Plaza Management instead: it works (40 EQ lease, $3B first renovation, +3% rent on both roads per level); it only needs the card fix from item 3.
+
+14. **Final lots have no boss.**
+   *Now:* all 10 lots have a boss, with sprites. Once a road is finished, its last boss is on your crew, so `topFight` caps the ladder at the fight before him. The last lot (Pinewood Commons, and Bypass Galleria) then stops at 18/18 or 16/16 with no boss. Every **earlier** captured boss stays re-fightable at 25× pay (item 4). Two rules for the same thing.
+   *Fix:* one rule for all 10 (open question 1).
+
+15. **Farm-rate info button.**
+   *Now:* the only rate shown is the top bar's live 5-second window. Josh's read is right; the probe on the last lot: fight 8/18 1.49K GW/min, 14/18 927, 16/18 974, **17/18 381** (10 W, 11 L), 18/18 1.01K. Bypass: Exit 14 fight 1 **23 EQ/min**, fight 6 3.7, fight 8 1.1. Today the highest fight is often the worst farm.
+   *Fix:* a small toggle in the sky of the lot canvas, top left (under ◂), saved locally. It shows **measured** GW/min (EQ/min on the Bypass) for the fight you're on. For each fight index, keep a running total of pay earned and seconds spent, from battle start through any smoke break until the next battle starts, losses included at 0 pay, over the last ~10 cycles. Fights you haven't run show "—", not an estimate. No sim, no guessing, and it already counts losses and smoke breaks. Per minute, not per second, so the numbers stay readable. This pairs with item 7's win-rate cell.
+
+16. **Does a patrol stop you farming lower fights?**
+   *Now:* yes. A patrol is a cash contract per lot ($50, $40K, $100K, $250K, $4M, $15M on Route 9; $500 to $2M on the Bypass), lost on a pave. A consultant counts as one too. On a patrolled lot, after **6 farmed wins** below the frontier (`RETRY_AFTER`), the crew climbs one fight by itself (`sim.ts:79`), and after a clear it jumps to the new frontier (`sim.ts:109`). So if you press ◂ to park on an easier fight, the patrol walks you back up in about 6 wins, every time. A fresh loss at the frontier drops back one fight **with or without** a patrol (`sim.ts:55`).
+   *Conflict:* the 15 Nov call was: patrols cost **Goodwill**; **without** a patrol a lost wall keeps fighting and never drops back; **with** one, a loss drops to the highest fight you can win. The code does neither: patrols cost cash, and both cases drop back. This is not the "keep the lights on" consultant buff; consultants are item 5.
+   *Fix:* patrols in Goodwill, the drop-back only with a patrol (as decided), and **◂ parks the crew**: a manual step down turns auto-climb off until you press ▸ or a new fight is cleared. That's one flag on the crew, and it pairs with the farm-rate button.
+
+### Open for Josh
+
+1. **Captured bosses (items 4, 14):** rematch every boss at regular pay, the final two included? Or no boss rematches anywhere? *Recommend:* rematches everywhere, 25× only on the capture.
+2. **Bypass units (item 11):** a 4-wide Bypass grid (no new content), or 5 new units to reach 21? *Recommend:* 4-wide now, since no new features; 21 only if the Bypass should feel as big as Route 9. 18 doesn't fill the wide row.
+3. **Consultant (items 5, 13):** one post-dawn purchase per lot that auto-renovates that lot, with no patrol effect? *Recommend:* yes.
+4. **Parking with ◂ (item 16):** a manual step down pauses the patrol's climb until ▸ or a new clear? *Recommend:* yes.
