@@ -7,6 +7,8 @@ import { fmt } from './format';
 import { enemyLineup } from '../game/battle';
 import { Calls } from './Calls';
 import { Field } from './Field';
+import { fightRate } from '../game/sim';
+import { useState } from 'preact/hooks';
 import { ZoneTrack } from './ZoneTrack';
 
 function Slots({ r }: { r: RegionId }) {
@@ -30,6 +32,38 @@ function Slots({ r }: { r: RegionId }) {
         </button>
       )}
     </span>
+  );
+}
+
+// The farm-rate card in the lot's sky: what the fights around this one have actually paid lately, per minute or per
+// second, smoke breaks and losses included. Fights you haven't run show a dash.
+const RATE_KEY = 'smw.farmRate';
+function FarmRate({ r }: { r: RegionId }) {
+  const s = app.s;
+  const [on, setOn] = useState(() => globalThis.localStorage?.getItem(RATE_KEY) === '1');
+  const flip = () => (setOn(!on), localStorage.setItem(RATE_KEY, on ? '0' : '1'));
+  const at = s.crews[r].at;
+  const cur = CURRENCY_SHORT[REGIONS[r].pay];
+  const rows = [at - 1, at, at + 1].filter((i) => i >= 0 && i <= topFight(s, r));
+  return (
+    <div class={`farm-rate ${on ? 'open' : ''}`} onClick={(e) => e.stopPropagation()}>
+      <button class="fr-i" onClick={flip} {...tip('Farm rate', `What each fight has paid lately, ${cur} per minute or second.`, 'Losses and smoke breaks count.')}>
+        i
+      </button>
+      {on &&
+        rows.map((i) => {
+          const f = FIGHTS[r][i];
+          const rt = fightRate(s, r, i);
+          const fast = rt && rt.perSec >= 1.5;
+          return (
+            <div key={i} class={i === at ? 'here' : ''}>
+              <span>{f.boss ? 'BOSS' : `${REGIONS[r].lots[f.zone].short} ${f.i + 1}`}</span>
+              <b>{rt ? `${fmt(fast ? rt.perSec : rt.perSec * 60)} ${cur}/${fast ? 's' : 'm'}` : '—'}</b>
+              <span>{rt ? `${Math.round(rt.won * 100)}% won` : ''}</span>
+            </div>
+          );
+        })}
+    </div>
   );
 }
 
@@ -68,7 +102,10 @@ export function Lot() {
           ▸
         </button>
       </div>
-      <Field r={r} />
+      <div class="field-box">
+        <Field r={r} />
+        <FarmRate r={r} />
+      </div>
       <Calls r={r} />
     </section>
   );

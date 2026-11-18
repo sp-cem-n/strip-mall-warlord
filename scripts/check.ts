@@ -3,7 +3,7 @@ import { BATTLERS, FIGHTS, GOODWILL_PER_EQUITY, MAX_SLOTS, OFFLINE_CAP_SECONDS, 
 import { auras, enemyLineup, startBattle, statsOf, stepBattle } from '../src/game/battle';
 import { advance, asphaltGain, fieldFull, autoCovers, buyPatrol, buySlot, convert, curb, forLease, lease, lineupOf, newGame, overtime, patrolBlock, powerLevel, rentPerSec, patrolPrice, pave, renovate, renovateCost, roster, slotsOf, tierOf, toggleField, train, trainCost, view } from '../src/game/economy';
 import { loadGame, old, saveGame } from '../src/game/save';
-import { collectFind, onScreen, simulateAway, step } from '../src/game/sim';
+import { collectFind, fightRate, onScreen, simulateAway, step } from '../src/game/sim';
 import { CREW_LOOKS, ENEMY_LOOKS } from '../src/art/people';
 import type { GameState } from '../src/game/state';
 import { HOW, STORY } from '../src/game/content/copy';
@@ -214,6 +214,8 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   const k = t.find!.kind;
   const c0 = t.crews[0].cash, g0 = t.goodwill;
   check(`walk-in pays out (${k})`, collectFind(t) === null && (k === 'rally' ? t.crews[0].rally > 0 : k === 'cash' ? t.crews[0].cash > c0 : t.goodwill > g0));
+  const rt = fightRate(t, 0, 0);
+  check(`farm rate: the first fight has a measured pay rate and win share (${rt?.n} fights)`, !!rt && rt.perSec > 0 && rt.won > 0 && rt.n <= 20 && fightRate(t, 0, 40) === null);
   const a = simulateAway(newGame(7), 20 * 3600);
   check('offline capped at 8h', a.seconds === OFFLINE_CAP_SECONDS && a.wins > 0);
 }

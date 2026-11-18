@@ -45,6 +45,8 @@ export function loadGame(): GameState | 'old' | null {
         c.wounds ??= {};
         c.smoke ??= 0;
         c.queueEnter ??= -1;
+        c.rec ??= {};
+        c.lastEnd ??= -1;
         delete (c as { streak?: number }).streak;
         delete (c as { stance?: string }).stance;
         if (c.battle && c.battle.enter === undefined) c.battle = null;
@@ -95,7 +97,7 @@ export function importCode(raw: string): GameState | string {
     s.retainers ??= 0;
     s.blitz ??= {};
     s.room = { ...newRoom(), ...s.room, attracting: s.room?.attracting ?? null };
-    for (const c of s.crews) c.queueEnter ??= -1;
+    for (const c of s.crews) (c.queueEnter ??= -1), (c.rec ??= {}), (c.lastEnd ??= -1);
     return s;
   } catch {
     return 'Could not read that lease code.';

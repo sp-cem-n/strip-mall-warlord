@@ -434,3 +434,11 @@ button { font: inherit; }
 .cab.attracting { outline: 3px dashed var(--sodium); outline-offset: -3px; }
 .boot-menu.tenant-board { border-image: var(--cinder) 8 fill / 16px; background: var(--night); }
 .boot-logo { display: block; margin: 0 auto 8px; width: 390px; max-width: 100%; height: auto; }
+/* the farm-rate card, top left in the lot's sky */
+.field-box { position: relative; }
+.farm-rate { position: absolute; top: 6px; left: 6px; display: flex; flex-direction: column; gap: 1px; font-size: 15px; line-height: 1; color: var(--bone); }
+.farm-rate.open { background: rgba(20, 16, 26, 0.82); border: 2px solid var(--ink); padding: 2px 6px 4px 2px; }
+.farm-rate .fr-i { width: 18px; height: 18px; padding: 0; font: inherit; color: var(--mint); background: var(--ink); border: 2px solid var(--concrete); cursor: pointer; }
+.farm-rate > div { display: grid; grid-template-columns: 10ch 12ch 9ch; gap: 6px; white-space: nowrap; }
+.farm-rate > div.here { color: var(--sodium-light); }
+.farm-rate b { font-weight: normal; color: var(--paper); }

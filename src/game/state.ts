@@ -81,6 +81,8 @@ export interface Crew {
   wins: number;
   losses: number;
   queueEnter: number; // next group walking in behind the current fight; -1 = none, 0 = waiting in line
+  rec: Record<number, number[]>; // per fight, the last RECORD_KEEP outcomes as [won, pay, seconds since the fight before ended]
+  lastEnd: number; // totalTime when the last fight ended, -1 before the first
 }
 
 export interface GameState {

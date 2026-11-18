@@ -42,12 +42,33 @@ export function fightLabel(r: RegionId, idx: number) {
   return f.boss ? (lot.boss.name.startsWith('The ') ? lot.boss.name : `the ${lot.boss.name}`) : `fight ${f.i + 1}/${lot.fights} at ${lot.name}`;
 }
 
+// What each fight has been worth lately: wins, pay, and the time it took, smoke breaks included.
+const RECORD_KEEP = 20;
+function record(s: GameState, r: RegionId, fight: number, won: boolean, pay: number) {
+  const c = s.crews[r];
+  if (c.lastEnd >= 0) {
+    const rows = (c.rec[fight] ??= []);
+    rows.push(won ? 1 : 0, +pay.toPrecision(3), Math.round((s.totalTime - c.lastEnd) * 10) / 10);
+    if (rows.length > RECORD_KEEP * 3) rows.splice(0, rows.length - RECORD_KEEP * 3);
+  }
+  c.lastEnd = s.totalTime;
+}
+// Pay per second and share of wins over the recent record, or null if the fight hasn't been run.
+export function fightRate(s: GameState, r: RegionId, fight: number): { perSec: number; won: number; n: number } | null {
+  const rows = s.crews[r].rec[fight];
+  if (!rows?.length) return null;
+  let won = 0, pay = 0, secs = 0;
+  for (let i = 0; i < rows.length; i += 3) (won += rows[i]), (pay += rows[i + 1]), (secs += rows[i + 2]);
+  return { perSec: pay / Math.max(1, secs), won: won / (rows.length / 3), n: rows.length / 3 };
+}
+
 function resolve(s: GameState, r: RegionId, b: Battle, result: 'win' | 'loss') {
   const c = s.crews[r];
   c.battle = null;
   const ladder = FIGHTS[r];
   const wasAt = c.at;
   if (result === 'loss') {
+    record(s, r, b.fight, false, 0);
     c.losses++;
     if (b.fight === c.frontier) c.tries++;
     smokeBreak(s, r);
@@ -68,6 +89,7 @@ function resolve(s: GameState, r: RegionId, b: Battle, result: 'win' | 'loss') {
   const pay = payFor(s, r, f, b.field.payUp);
   earn(s, r, REGIONS[r].pay, pay);
   s.stats[REGIONS[r].pay as 'goodwill' | 'equity'] += pay;
+  record(s, r, b.fight, true, pay);
   if (b.fight === c.frontier) {
     if (++c.kills < f.need) return log(s, r, `Won ${fightLabel(r, b.fight)}. ${c.kills}/${f.need} to move up.`, 'win', true);
     clearFight(s, r);
