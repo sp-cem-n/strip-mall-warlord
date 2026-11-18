@@ -1,6 +1,6 @@
 // The lot signs across the top of the Lot: progress, weakness badges, auto-advance.
 import { app, tip, toast } from '../app';
-import { BATTLERS, FIGHTS, PATROL_WINS, REGIONS, WEAK_BONUS, type RegionId } from '../game/defs';
+import { BATTLERS, CURRENCY_SHORT, FIGHTS, PATROL_WINS, REGIONS, WEAK_BONUS, type RegionId } from '../game/defs';
 import { autoCovers, buyPatrol, currencyOf, patrolPrice, purse } from '../game/economy';
 import { fmt } from './format';
 
@@ -18,7 +18,7 @@ function Weak({ id, r, zone }: { id: string; r: RegionId; zone: number }) {
 export function ZoneTrack({ r }: { r: RegionId }) {
   const s = app.s;
   const c = s.crews[r];
-  const cur = currencyOf(r);
+  const cur = CURRENCY_SHORT[REGIONS[r].trainIn];
   const price = (z: number) => patrolPrice(s, r, z);
   return (
     <div class="zones">
@@ -53,7 +53,7 @@ export function ZoneTrack({ r }: { r: RegionId }) {
                   AUTO
                 </div>
               ) : (
-                <button class="auto hire" disabled={purse(s, r) < price(i)} onClick={() => (toast(buyPatrol(s, r, i) ?? `${z.short}: on patrol`), app.refresh())} {...tip('Hire a patrol', `${fmt(price(i))} ${cur}, about ${PATROL_WINS} wins at this lot.`, 'The crew moves up here on its own, and drops back a fight when a new one is too much.', 'Without one, press ▸.')}>
+                <button class="auto hire" disabled={purse(s, r) < price(i)} onClick={() => (toast(buyPatrol(s, r, i) ?? `${z.short}: on patrol`), app.refresh())} {...tip('Hire a patrol', `${fmt(price(i))} ${currencyOf(r)}, about ${PATROL_WINS} wins at this lot.`, 'The crew moves up here on its own, and drops back a fight when a new one is too much.', 'Without one, press ▸.')}>
                   PATROL {fmt(price(i))} {cur}
                 </button>
               )

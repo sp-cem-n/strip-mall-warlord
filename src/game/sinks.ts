@@ -8,7 +8,7 @@ const rentMinutes = (s: GameState, r: RegionId, minutes: number) => Math.max(100
 
 // A consultant renovates one captured lot's shops on their own once the night is over: one hire per lot.
 export const CONSULT_MIN = 45;
-export const CONSULT_DOES = 'Renovates a shop on this lot, cheapest first, whenever the till could pay for it twice.';
+export const CONSULT_DOES = "Renovates this lot's cheapest shop whenever the till could pay twice.";
 export const consultCost = (s: GameState, r: RegionId) => rentMinutes(s, r, CONSULT_MIN);
 export const hasConsultant = (s: GameState, r: RegionId, z: number) => s.consultants[r].includes(z);
 export const consultOpen = (s: GameState, r: RegionId, z: number) => s.bypass && lotsTaken(s, r) > z && !hasConsultant(s, r, z);
