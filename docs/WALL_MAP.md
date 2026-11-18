@@ -124,29 +124,23 @@ Units listed are what you can lease by that point (shop fight index in brackets)
 
 ---
 
-## 4. The Bypass, lot by lot
+## 4. The Bypass, lot by lot (9 lots, DRAFT, Nov 18)
 
-New crew, Equity wallet. The player already knows all four tells, so the Bypass remixes them faster and in a different order, with new answers.
+New crew, Equity wallet. The player already knows all four tells, so the Bypass remixes them in a different order, with new answers. Josh's call, Nov 18: **9 lots and 21 units**, because the longer road needs more milestones. The 4 existing lots keep their bosses; 5 lots are new. The full table (units, bosses, skylines, times) is in `V10_PLAN.md`, "Josh notes, Nov 18", item 11. This is the wall spine only. *est.* throughout.
 
-### 4.1 Exit 14 Power Center (10 + boss)
-- **Today:** Power Center Security (weak Auction Hunter), Inventory Specialist (weak Auction Hunter, hard), Sweeper Truck Driver (weak Bouncer, tanky). Boss: Leasing Director (weak Auction Hunter, hard).
-- **Units:** Self Storage/Auction Hunter (start), Car Wash/Detailer (crew haste) [2], Off-Ramp/Bartender (tank) [4], Dojo/Bouncer [5], Urgent Care/Nurse [7], Security/Watchman [boss].
-- **Proposed:** **Armored** lot. Your starting unit is a heavy hitter, so this one is "you already know this." **Boss = Bruiser.** Bartender + Dojo up front. The Off-Ramp opens here.
+| # | Lot | Wall (regulars) → counter | Boss → counter | Answers it adds |
+|---|---|---|---|---|
+| 1 | Exit 14 Power Center | Armored → Auction Hunter (start) | Leasing Director, Bruiser → Bartender up front | Detailer, Bartender |
+| 2 | Frontage Road (new) | Hard → Nurse + Bouncer | The Franchisee, Thick → Auction Hunter + Leasing Director | Bouncer, Nurse, Watchman (on capture) |
+| 3 | Corporate Campus | Bruiser → Temp Worker + Bouncer + Bartender | VP, Hard + Thick → Tax Preparer + Nurse + Day-Care Teacher | Temp Worker, Day-Care Teacher, Tax Preparer |
+| 4 | County Center Drive (new) | Thick → Lawyer + Watchman + Leasing Director | County Commissioner, Armored → Lawyer + Auction Hunter | Bondsman, Lawyer |
+| 5 | Fairway Pointe (new) | Hard → Nurse + Day-Care Teacher + Tax Preparer | Club Treasurer, Bruiser → Bondsman + Temp Worker | Golf Pro, Groomer |
+| 6 | Town Center, Phase II | Crowd → Golf Pro + Groomer + Barista + Detailer | Managing Partner, Armored → Lawyer + Wedding Planner | Barista, Wedding Planner |
+| 7 | Bargain Square (new) | Thick → Lawyer + Golf Pro + Watchman + Planner | Liquidation Manager, Hard → Medic + Nurse + Day-Care Teacher | Party Clown, Medic |
+| 8 | Crossroads 16 (new) | Armored → Lawyer + Auction Hunter + Usher | Megaplex GM, Crowd → Golf Pro + Groomer + Barista + Clown | Usher, Pretzel Kid |
+| 9 | Bypass Galleria | Rotating thirds (Hard, Bruiser, Thick) | The Chairman, Thick with Bruiser escorts | Photographer, Record Clerk |
 
-### 4.2 Corporate Campus (12 + boss) — today's big Bypass wall
-- **Today:** Campus Security (weak Bouncer), Synergy Consultant (weak Auction Hunter, hard), Shuttle Driver (weak Bondsman, tanky). Boss: VP of Real Estate Strategy (weak Auction Hunter, tanky). `LOT_JUMP` ×4 made this a 12–16h check-in wall in the V09_BYPASS runs.
-- **New units:** Bail Bondsman (tank, −15% damage taken) [2], Tax Preparer (weaken) [9], Wash-n-Fold/Medic [boss]. Joined: Leasing Director (heavy hitter).
-- **Proposed:** **Hard hitter** lot. Nurse + Tax Preparer. **Boss = Hard + Thick.** Lower the ×4 jump per the V09_BYPASS guard so the puzzle, not the step, is the wall.
-
-### 4.3 Town Center, Phase II (14 + boss)
-- **Today:** Construction Flagger (weak Golf Pro, tanky), Brand Ambassador (weak Golf Pro, hard), Render Artist (weak Lawyer). Boss: Managing Partner (weak Lawyer, hard).
-- **New units:** Golf Pro (fast, heavy) [3], Lawyer (Payday) [7], Wedding Planner (crew +8% damage) [10], Party Clown [boss]. Joined: VP (crew +10% damage).
-- **Proposed:** **Crowd** lot. Golf Pro + Detailer haste + Clown. **Boss = Armored.** Bench the Golf Pro, build the Lawyer + Planner.
-
-### 4.4 Bypass Galleria (16 + boss) — the endgame wall
-- **Today:** Mall Cop on a Segway (weak Golf Pro, hard), Kiosk Manager (weak Lawyer), Escalator Tech (weak Groomer, tanky). Boss: The Chairman (weak Lawyer, tanky).
-- **New units:** Cineplex Usher (mark) [3], Groomer [7], Pretzel Kid (tank regen) [11]. Joined: Managing Partner (crew +15% HP). Uncle Sal (Plaza Management, after dawn) fights at your best shop's level.
-- **Proposed:** rotating thirds like the Commons (Hard, Bruiser, Thick). **Boss = Thick with Bruiser escorts.** Usher mark + Groomer + Pretzel-fed tank line. Beating the Chairman is win condition 2.
+The shape to keep: a fast build is built twice (Crowd at 6 and 8) and benched twice (Armored at 4, 6 and 8). The tank front is rebuilt at 3 and 5, and the two-healer back line lands at 7, right before the final exam. No lot's wall needs a unit that arrives later in the same lot.
 
 ---
 
@@ -161,8 +155,13 @@ New crew, Equity wallet. The player already knows all four tells, so the Bypass 
 | Lifestyle | Bruiser, Hard boss | ~9,000 GW | farms |
 | Commons | Rotating thirds | ~30,000 GW | farms; this is where it visibly falls short |
 | Exit 14 | Armored, Bruiser boss | Equity, price after PAY_BASE retune | Bypass crew gets it at dawn (*proposed*: the skill carries over) |
-| Campus | Hard | Equity | |
+| Frontage Road | Hard, Thick boss | Equity | |
+| Campus | Bruiser, Hard + Thick boss | Equity | |
+| County Center | Thick, Armored boss | Equity | |
+| Fairway Pointe | Hard, Bruiser boss | Equity | |
 | Phase II | Crowd, Armored boss | Equity | |
+| Bargain Square | Thick, Hard boss | Equity | |
+| Crossroads 16 | Armored, Crowd boss | Equity | |
 | Galleria | Rotating thirds | Equity | |
 
 - Patrol prices are about 20–30 minutes of farming at that lot's last regular fight (Route 9 pay 3 → 238 GW a win), assuming ~4.5 wins a minute from the sims. Asphalt multiplies Goodwill, so a repaved run buys every patrol early, which is exactly the "resets break walls faster" feel.
