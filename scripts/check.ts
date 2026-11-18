@@ -3,7 +3,7 @@ import { BATTLERS, FIGHTS, GOODWILL_PER_EQUITY, MAX_SLOTS, OFFLINE_CAP_SECONDS, 
 import { auras, enemyLineup, startBattle, statsOf, stepBattle } from '../src/game/battle';
 import { advance, asphaltGain, fieldFull, autoCovers, buyPatrol, buySlot, convert, curb, forLease, lease, lineupOf, newGame, overtime, patrolBlock, powerLevel, rentPerSec, patrolPrice, pave, renovate, renovateCost, roster, slotsOf, tierOf, toggleField, train, trainCost, view } from '../src/game/economy';
 import { loadGame, old, saveGame } from '../src/game/save';
-import { collectFind, simulateAway, step } from '../src/game/sim';
+import { collectFind, onScreen, simulateAway, step } from '../src/game/sim';
 import { CREW_LOOKS, ENEMY_LOOKS } from '../src/art/people';
 import type { GameState } from '../src/game/state';
 import { HOW, STORY } from '../src/game/content/copy';
@@ -207,7 +207,10 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   for (let i = 0; i < steps; i++) step(t);
   check('no walk-ins unless watching', !t.find);
   for (let i = 0; i < steps && !t.find; i++) step(t, true);
-  check('walk-in shows up while watching', !!t.find);
+  check('no walk-in at a shop scrolled off screen', !t.find);
+  onScreen.add('pawn');
+  for (let i = 0; i < steps && !t.find; i++) step(t, true);
+  check('walk-in shows up at a shop on screen', t.find?.shop === 'pawn');
   const k = t.find!.kind;
   const c0 = t.crews[0].cash, g0 = t.goodwill;
   check(`walk-in pays out (${k})`, collectFind(t) === null && (k === 'rally' ? t.crews[0].rally > 0 : k === 'cash' ? t.crews[0].cash > c0 : t.goodwill > g0));
