@@ -118,7 +118,7 @@ for (const r of [0, 1] as const)
     console.log(`${l.short.padEnd(14)} ${(t ? fmtTime(t) : '-').padStart(8)}   ${`${st.fw}/${st.fl}`.padStart(11)}  ${((100 * st.fl) / Math.max(1, st.fw + st.fl)).toFixed(0).padStart(4)}%  ${((100 * st.hp) / Math.max(1, st.fw)).toFixed(0).padStart(6)}%  ${`${st.w}/${st.l}`.padStart(8)}  ${((100 * st.l) / Math.max(1, st.w + st.l)).toFixed(0).padStart(4)}%  ${String(st.boss).padStart(5)}`);
   });
 const tt = (k: string) => (done[k] ? fmtTime(done[k]) : '-');
-console.log(`\nSUMMARY mode="${mode}" lot=${tt("0-0")} bigbox=${tt("0-1")} outlet=${tt("0-2")} route9=${tt('0-5')} galleria=${tt('1-3')} losses=${(climb ?? [s.crews[0].losses, s.crews[0].wins + s.crews[0].losses]).join('/')}`);
+console.log(`\nSUMMARY mode="${mode}" lot=${tt("0-0")} bigbox=${tt("0-1")} outlet=${tt("0-2")} route9=${tt('0-5')} galleria=${tt(`1-${REGIONS[1].lots.length - 1}`)} bypass=${REGIONS[1].lots.map((_, z) => tt(`1-${z}`).replace(/ /g, '')).join(',')} losses=${(climb ?? [s.crews[0].losses, s.crews[0].wins + s.crews[0].losses]).join('/')}`);
 if (quiet) process.exit(0);
 console.log('\nMilestones');
 lines.forEach((l) => console.log(l));
@@ -138,14 +138,16 @@ async function guard(): Promise<never> {
   const knobs = knobArgs.flatMap((k) => ['--knob', k]);
   const SEEDS = [1991, 7, 1, 2, 3, 4];
   const MODES = [
-    { mode: 'check-in', flags: [] as string[], route9: [14, 16], losses: true },
-    { mode: 'active', flags: ['--active', '--every=10'], route9: [11, 15.5], losses: true },
-    { mode: 'skilled', flags: ['--skilled'], route9: [7, 12], losses: false }, // arcade, claw picks, smart farming: walls only, no loss floor
+    { mode: 'check-in', flags: [] as string[], route9: [14, 16], bypass: [24, 31], losses: true },
+    { mode: 'active', flags: ['--active', '--every=10'], route9: [11, 15.5], bypass: [21, 29], losses: true },
+    { mode: 'skilled', flags: ['--skilled'], route9: [7, 12], bypass: [15, 24], losses: false }, // arcade, claw picks, smart farming: walls only, no loss floor
   ];
+  // The Bypass, timed from dawn to the Chairman: each run paves as soon as Route 9 is done and keeps repaving (repaves feed the Bypass).
+  // Each seed may sit 4h outside its window.
   const hrs = (t: string) => (t === '-' ? 99 : t.includes('h') ? Number(t.split('h')[0]) + Number(t.split('h')[1].replace('m', '')) / 60 : Number(t.split(':')[0]) / 60);
   const median = (xs: number[]) => xs.slice().sort((x, y) => x - y)[Math.floor(xs.length / 2)];
   const runs = MODES.flatMap((m) => SEEDS.map((seed) => ({ ...m, seed })));
-  const out = await Promise.all(runs.map((r) => new Response(Bun.spawn([process.execPath, process.argv[1], '20', String(r.seed), ...r.flags, '--quiet', ...knobs]).stdout).text()));
+  const out = await Promise.all(runs.map((r) => new Response(Bun.spawn([process.execPath, process.argv[1], String(r.route9[1] + r.bypass[1] + 6), String(r.seed), ...r.flags, '--pave=0', '--quiet', ...knobs]).stdout).text()));
   let bad = 0;
   const fail = (why: string) => (bad++, console.log(`  FAIL ${why}`));
   for (const m of MODES) {
@@ -154,6 +156,11 @@ async function guard(): Promise<never> {
     const losses = mine.map(({ txt }) => (([l, n]) => l / n)((/losses=(\d+)\/(\d+)/.exec(txt) ?? [0, 0, 1]).slice(1).map(Number)));
     const mean = times.reduce((x, y) => x + y, 0) / times.length;
     console.log(`${m.mode}: Route 9 mean ${mean.toFixed(1)}h [${times.map((t) => t.toFixed(1)).join(' ')}], climb losses ${Math.round((100 * losses.reduce((x, y) => x + y, 0)) / losses.length)}% [${losses.map((l) => Math.round(l * 100)).join(' ')}]`);
+    const bp = mine.map(({ txt }, i) => hrs(/galleria=([^ ]+(?: \d+m)?) /.exec(txt)?.[1] ?? '-') - times[i]);
+    const bpMean = bp.reduce((x, y) => x + y, 0) / bp.length;
+    console.log(`${''.padEnd(m.mode.length)}  Bypass mean ${bpMean.toFixed(1)}h after dawn [${bp.map((t) => t.toFixed(1)).join(' ')}]`);
+    if (bpMean < m.bypass[0] || bpMean > m.bypass[1]) fail(`${m.mode}: mean Bypass outside ${m.bypass[0]}-${m.bypass[1]}h`);
+    bp.forEach((t, i) => (t < m.bypass[0] - 4 || t > m.bypass[1] + 4) && fail(`${m.mode} seed ${SEEDS[i]}: Bypass took ${t.toFixed(1)}h`));
     if (mean < m.route9[0] || mean > m.route9[1]) fail(`${m.mode}: mean Route 9 outside ${m.route9[0]}-${m.route9[1]}h`);
     times.forEach((t, i) => (t < m.route9[0] - 2.5 || t > m.route9[1] + 2.5) && fail(`${m.mode} seed ${SEEDS[i]}: Route 9 at ${t.toFixed(1)}h`));
     // losses on the climb to dawn (after it the game asks for a repave, and run 2 on asphalt is meant to be easy): mean in 10-30%, each seed within 5 points of that
