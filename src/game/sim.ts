@@ -12,7 +12,7 @@ import { fmt } from '../ui/format';
 // `watching` is true only for the live game: walk-ins never happen offline or in the idle bot.
 // Both crews are always on the clock; `view` only picks which one you manage.
 export function step(s: GameState, watching = false) {
-  s.time += STEP;
+  if (!s.crews[0].closed) s.time += STEP; // the night clock starts when the sign flips
   s.totalTime += STEP;
   if (watching) walkIns(s);
   tickRoom(s, STEP);

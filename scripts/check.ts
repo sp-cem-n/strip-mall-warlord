@@ -48,10 +48,10 @@ check('a boss rematch pays like a regular win; only the capture pays BOSS_PAY', 
   const t = newGame(3);
   t.crews[0].closed = true;
   for (let i = 0; i < 600; i++) step(t);
-  const shut = t.crews[0].wins + t.crews[0].losses === 0 && t.crews[0].cash === newGame(3).crews[0].cash;
+  const shut = t.crews[0].wins + t.crews[0].losses === 0 && t.crews[0].cash === newGame(3).crews[0].cash && t.time === 0;
   t.crews[0].closed = false;
   for (let i = 0; i < 600; i++) step(t);
-  check('Flip the sign: nothing happens on a closed road, and it fights once flipped', shut && t.crews[0].wins > 0);
+  check('Flip the sign: nothing happens on a closed road (the clock waits too), and it fights once flipped', shut && t.crews[0].wins > 0);
 }
 check('wins to clear and pay never go down inside a lot', FIGHTS.every((L) => L.every((f, i) => i === 0 || f.boss || L[i - 1].zone !== f.zone || (f.need >= L[i - 1].need && f.pay >= L[i - 1].pay))));
 check(`wins to clear grow gently: ${FIGHTS[0][0].need} at the start, ${FIGHTS[0].at(-2)!.need} at the end; bosses 1`, FIGHTS[0][0].need === 3 && FIGHTS[0].at(-2)!.need === 10 && FIGHTS.every((L) => L.every((f) => !f.boss || f.need === 1)));
