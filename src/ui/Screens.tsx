@@ -92,7 +92,7 @@ export function SaveBox() {
   return (
     <div class="save-box">
       <b>Lease code</b>
-      <span class="dim">Copy a code out, or paste one in.</span>
+      <span class="dim">Your save, as a lease code. Copy it to back up or move computers; paste one to load.</span>
       <textarea value={code} spellcheck={false} onFocus={(e) => (e.target as HTMLTextAreaElement).select()} placeholder="SMW1." onInput={(e) => setCode((e.target as HTMLTextAreaElement).value)} />
       <div class="tp-row">
         <button class="btn small" onClick={copyOut}>Copy lease code</button>
@@ -118,6 +118,7 @@ export function SavePopup() {
 }
 
 export function Boot({ onNew, onResume }: { onNew: () => void; onResume: () => void }) {
+  const [saves, setSaves] = useState(false);
   const kinds = app.hasSave ? leased(app.s, 0).slice(0, 4).map((x) => x.id) : ['pawn'];
   while (kinds.length < 4) kinds.push(null as unknown as string);
   return (
@@ -142,7 +143,10 @@ export function Boot({ onNew, onResume }: { onNew: () => void; onResume: () => v
         <button class="btn big" onClick={() => ((app.howFrom = 'boot'), (app.screen = 'howto'), app.refresh())}>
           How to Play
         </button>
-        <SaveBox />
+        <button class="btn big" aria-expanded={saves} onClick={() => setSaves(!saves)}>
+          Saves {saves ? '▴' : '▾'}
+        </button>
+        {saves && <SaveBox />}
       </div>
       <p class="boot-foot dim">Fall 1997 · Route 9 · Ample parking</p>
     </div>

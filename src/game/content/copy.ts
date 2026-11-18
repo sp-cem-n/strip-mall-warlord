@@ -10,7 +10,7 @@ export const HOW = [
   ['Overtime', 'Two minutes of rent: +25% HP and damage for the next three fights.'],
   ['Walk-ins', 'While you watch, somebody walks into a shop: cash, a referral, or a rally. Click them.'],
   ['The Fun Zone', 'Lease it and a door opens on the top bar. Quarters go in, money, Goodwill and tickets come out. Tickets buy prizes at the counter. The claw takes tickets.'],
-  ['Your lease', 'The Back Office can copy a lease code out, or load one in. Confirm before a load overwrites the current run.'],
+  ['Saves', 'The game saves itself in this browser. The floppy on the top bar (or Saves on the title screen) copies it out as a lease code, or loads one in.'],
 ];
 
 export const STORY: { text: string; note?: boolean }[] = [
