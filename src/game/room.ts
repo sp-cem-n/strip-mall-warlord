@@ -9,9 +9,9 @@ import { rand } from './rng';
 import type { GameState } from './state';
 
 export type MachineId = 'pusher' | 'whac' | 'skee' | 'claw' | 'pinball' | 'cyclone' | 'darts' | 'pool' | 'poker' | 'foos' | 'shuffle' | 'trivia' | 'tabs' | 'blackjack' | 'fairway';
-export type BuffKind = 'bat' | 'duck' | 'troll' | 'ball' | 'well' | 'call' | 'top' | 'royal' | 'quiz' | 'genius' | 'shot' | 'tip' | 'word';
+export type BuffKind = 'bat' | 'duck' | 'troll' | 'ball' | 'slap' | 'quiz' | 'genius' | 'tip' | 'word';
 export type Cost = { cur: Currency | 'tickets'; n: number };
-export interface Reward { cash?: number; goodwill?: number; tickets?: number; equity?: number; buff?: BuffKind; big?: boolean; slip?: boolean; text: string }
+export interface Reward { cash?: number; goodwill?: number; tickets?: number; equity?: number; buff?: BuffKind; slips?: number; big?: boolean; slip?: boolean; text: string }
 export interface PusherCoin { x: number; y: number; layer: 'shelf' | 'field'; kind: 'coin' | 'rent' | 'ticket' }
 export interface PusherField { coins: PusherCoin[]; hopper: number; tower: number; inn: number; out: number; rng?: number }
 export interface RoomState {
@@ -31,10 +31,9 @@ export interface RoomState {
   plays: number;
   shuffle: number; // shuffleboard house scores beaten (0-5)
   shuffleBest: number;
-  hands: Partial<Record<BuffKind, string>>; // the real poker hand behind each bar buff (a flush pays like trips)
   attracting: { id: MachineId; q: number; left: number; held?: boolean } | null;
 }
-export const newRoom = (): RoomState => ({ unlocked: [], attract: {}, clock: {}, cool: {}, perks: {}, board: 0, best: 0, jackpot: 500, shelf: [10, 10], buffs: {}, plays: 0, shuffle: 0, shuffleBest: 0, hands: {}, attracting: null });
+export const newRoom = (): RoomState => ({ unlocked: [], attract: {}, clock: {}, cool: {}, perks: {}, board: 0, best: 0, jackpot: 500, shelf: [10, 10], buffs: {}, plays: 0, shuffle: 0, shuffleBest: 0, attracting: null });
 
 // ---- rates every payout is priced in, so nothing goes stale ----
 const rent = (s: GameState, r: RegionId) => Math.max(1, rentPerSec(s, r));
@@ -50,19 +49,16 @@ export const BUFFS: Record<BuffKind, { name: string; does: string }> = {
   duck: { name: 'Rubber Duck', does: '+30% crew HP' },
   troll: { name: 'Troll Doll', does: 'walk-ins pay double' },
   ball: { name: 'Bouncy Ball', does: 'a free 30s rally' },
-  well: { name: 'Jacks or Better', does: '+10% crew damage' },
-  call: { name: 'Three of a Kind', does: '+20% crew damage' },
-  top: { name: 'Full House', does: '+30% crew damage and HP' },
-  royal: { name: 'Royal Flush', does: '+50% crew damage and HP' },
+  slap: { name: 'Slap Bracelet', does: 'crew swings 20% faster' },
   quiz: { name: 'Three Right', does: DAWN.quiz },
   genius: { name: 'Five for Five', does: DAWN.genius },
-  shot: { name: DAWN.shotName, does: DAWN.shotDoes },
   tip: DAWN.grapevine.tip,
   word: DAWN.grapevine.word,
 };
 export const BUFF_SECONDS = 600;
-// the bar's buffs, by poker hand: [kind, seconds, damage, HP]
-export const BAR_BUFFS: [BuffKind, number, number, number][] = [['well', 300, 0.1, 0], ['call', 480, 0.2, 0], ['top', 600, 0.3, 0.3], ['royal', 900, 0.5, 0.5]];
+export const CLAW_TOYS: BuffKind[] = ['bat', 'duck', 'troll', 'slap']; // the timed ones; the bouncy ball is a rally
+// video poker pays the Grapevine: rumor slips by hand, nothing to royal flush
+export const POKER_SLIPS = [0, 1, 2, 3, 6];
 export const BAR_HOUSE: [string, number][] = [['MO', 10], ['TERRI', 13], ['GUS', 16], ['BIG AL', 19], ['RAY', 22]];
 export const SHUFFLE_TOP = 24;
 export const POKER_HANDS = ['NOTHING', 'JACKS OR BETTER', 'THREE OF A KIND', 'FULL HOUSE', 'ROYAL FLUSH'];
@@ -121,7 +117,7 @@ export const MACHINES: MachineDef[] = [
       if (q < 0.25) return { text: pick ? 'It slipped. It always slips.' : 'Closed on a gap.' };
       if (!pick && rand(s) > q + 0.12 * perk(s, 'grip')) return { text: 'It slipped. It always slips.' };
       const roll = rand(s);
-      const buff: BuffKind = pick ?? (roll < 0.35 ? 'bat' : roll < 0.68 ? 'duck' : roll < 0.86 ? 'troll' : 'ball');
+      const buff: BuffKind = pick ?? (roll < 0.06 ? 'slap' : roll < 0.37 ? 'bat' : roll < 0.68 ? 'duck' : roll < 0.86 ? 'troll' : 'ball');
       return { buff, big: true, text: `Got the ${BUFFS[buff].name}: ${BUFFS[buff].does}.` };
     },
   },
@@ -158,12 +154,12 @@ export const MACHINES: MachineDef[] = [
     },
   },
   {
-    id: 'poker', region: 1, name: 'Video Poker', blurb: 'Jacks or Better. Click to hold, then draw.', needs: 'Clear fight 6 at the Corporate Campus', unlock: or((s) => cleared(s, 1, 1, 5)), cost: rentCost(10, 1), secs: 10, cool: 600,
+    id: 'poker', region: 1, name: 'Video Poker', blurb: 'Jacks or Better. Click to hold, then draw. Pays in rumor slips.', needs: 'Clear fight 6 at the Corporate Campus', unlock: or((s) => cleared(s, 1, 1, 5)), cost: rentCost(10, 1), secs: 10, cool: 600,
     pay: (_s, q) => {
       const tier = Math.round(q * 4);
       if (!tier) return { text: 'Nothing.' };
-      const [buff, sec] = BAR_BUFFS[tier - 1];
-      return { buff, big: tier === 4, text: `${POKER_HANDS[tier]}: ${BUFFS[buff].does} for ${sec / 60} min.` };
+      const n = POKER_SLIPS[tier];
+      return { slips: n, big: tier === 4, text: `${POKER_HANDS[tier]}: ${DAWN.grapevine.pile(n).replace(' on the bar', '')}.` };
     },
   },
   {
@@ -232,7 +228,6 @@ export function buyPerk(s: GameState, id: PerkId): string | null {
     const c = s.crews[s.view];
     c.rally = Math.max(c.rally, 30);
   }
-  if (id === 'shot') s.room.buffs.shot = 1200;
   log(s, 0, `Prize counter: ${p.name}. ${p.does}.`, 'win');
   return null;
 }
@@ -287,6 +282,7 @@ export function endPlay(s: GameState, id: MachineId, q: number, quiet = false, h
   if (rw.equity) earn(s, r, 'equity', rw.equity, !quiet);
   if (rw.tickets) (s.tickets += rw.tickets), credit(s, 'tickets', rw.tickets, !quiet);
   if (rw.buff) grant(s, rw.buff);
+  if (rw.slips) s.room.slips = (s.room.slips ?? 0) + rw.slips;
   // every Off-Ramp game can leave a rumor on a napkin; better plays hear more
   if (r === 1 && heard && rand(s) < 0.12 + 0.3 * q) ((s.room.slips = (s.room.slips ?? 0) + 1), (rw.slip = true), (rw.text += DAWN.grapevine.drop));
   if (id === 'pusher' || id === 'darts') s.room.shelf[id === 'pusher' ? 0 : 1] = Math.max(0, s.room.shelf[id === 'pusher' ? 0 : 1] - 1);
@@ -308,11 +304,11 @@ export function postShuffle(s: GameState, score: number): number {
   }
   return gained;
 }
-// Grapevine spends: [kind, slips, seconds, damage, HP]. They don't stack with the poker buffs; the best one counts.
+// Grapevine spends: [kind, slips, seconds, damage, HP]: the Bypass's one short boost. The best one running counts.
 export const GRAPEVINE: [BuffKind, number, number, number, number][] = [['tip', 1, 240, 0.15, 0], ['word', 3, 480, 0.25, 0.25]];
-const edges = (s: GameState) => [...BAR_BUFFS.map(([b, , d, h]) => [b, d, h] as const), ...GRAPEVINE.map(([b, , , d, h]) => [b, d, h] as const)].filter(([b]) => buffOn(s, b));
-export const barDmg = (s: GameState) => 1 + Math.max(0, ...edges(s).map(([, d]) => d));
-export const barHp = (s: GameState) => 1 + Math.max(0, ...edges(s).map(([, , h]) => h));
+const edges = (s: GameState) => GRAPEVINE.filter(([b]) => buffOn(s, b));
+export const barDmg = (s: GameState) => 1 + Math.max(0, ...edges(s).map(([, , , d]) => d));
+export const barHp = (s: GameState) => 1 + Math.max(0, ...edges(s).map(([, , , , h]) => h));
 export function spendSlips(s: GameState, kind: BuffKind): string | null {
   const g = GRAPEVINE.find(([b]) => b === kind);
   if (!g) return 'Not on the Grapevine';
@@ -336,14 +332,9 @@ export function postScore(s: GameState, score: number): number {
 }
 
 export function grant(s: GameState, b: BuffKind) {
-  delete s.room.hands[b]; // the cabinet writes the real hand back after
   const c = s.crews[s.view];
   if (b === 'ball') c.rally = Math.max(c.rally, 30);
-  else {
-    const base = BAR_BUFFS.find(([k]) => k === b)?.[1] ?? BUFF_SECONDS;
-    const toys = b === 'bat' || b === 'duck' || b === 'troll';
-    s.room.buffs[b] = base * (toys && perk(s, 'clawLong') ? 2 : 1);
-  }
+  else s.room.buffs[b] = BUFF_SECONDS * (CLAW_TOYS.includes(b) && perk(s, 'clawLong') ? 2 : 1);
 }
 export const buffOn = (s: GameState, b: BuffKind) => (s.room.buffs[b] ?? 0) > 0;
 

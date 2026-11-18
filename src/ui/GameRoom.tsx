@@ -5,8 +5,7 @@ import { app, tip, toast } from '../app';
 import { CAB_H, CAB_W, cabinet, carpet, paneling, screenOf, type CabinetLook } from '../art/cabinets';
 import { C } from '../art/palette';
 import { CURRENCY_SHORT } from '../game/defs';
-import { log } from '../game/economy';
-import { GRAPEVINE, spendSlips, type Reward, ATTRACT_EVERY, BAR_BUFFS, QUIZ, BAR_HOUSE, BUFFS, HOUSE_SCORES, postShuffle, MACHINES, PERKS, attractPrice, buffOn, buyAttract, buyPerk, canAfford, endPlay, ensurePusher, perk, perkInfo, perkPrice, postScore, serviced, shelfOf, startPlay, type BuffKind, type Cost, type MachineDef, type MachineId, type PerkId, type PrePerkId } from '../game/room';
+import { GRAPEVINE, spendSlips, type Reward, ATTRACT_EVERY, QUIZ, BAR_HOUSE, BUFFS, HOUSE_SCORES, postShuffle, MACHINES, PERKS, attractPrice, buffOn, buyAttract, buyPerk, canAfford, endPlay, ensurePusher, perk, perkInfo, perkPrice, postScore, serviced, shelfOf, startPlay, type BuffKind, type Cost, type MachineDef, type MachineId, type PerkId, type PrePerkId } from '../game/room';
 import { canvasOf, urlOf } from './art';
 import { fmt, fmtTime } from './format';
 import { idle, newGame, pen, type Game } from './machines';
@@ -32,8 +31,7 @@ export const LOOKS: Record<MachineId, CabinetLook> = {
   blackjack: { body: C.forest, trim: C.sodium, marquee: C.paper, ink: C.forest, title: 'BLACKJACK', side: 'stars' },
   fairway: { body: C.navy, trim: C.green, marquee: C.mint, ink: C.navy, title: 'FAIRWAY 9', side: 'stripes' },
 };
-const BAR_IDS = new Set([...BAR_BUFFS, ...QUIZ, ...GRAPEVINE].map(([b]) => b));
-// The hand that earned each poker buff (saved in room.hands): a flush pays like trips, so show the real hand.
+const BAR_IDS = new Set([...QUIZ, ...GRAPEVINE].map(([b]) => b));
 // the sticker on the coin door
 const tagText = (c: Cost) => (c.cur === 'cash' ? `$${fmt(c.n)}` : `${fmt(c.n)} ${c.cur === 'tickets' ? 'TK' : CURRENCY_SHORT[c.cur]}`);
 export const costText = (c: Cost) => (c.cur === 'tickets' ? `${fmt(c.n)} tickets` : c.cur === 'cash' ? `$${fmt(c.n)}` : `${fmt(c.n)} ${CURRENCY_SHORT[c.cur]}`);
@@ -160,20 +158,16 @@ function Cabinet({ m }: { m: MachineDef }) {
       // Attract / test autoplay already paid; only endPlay once. If we walked off mid-play, tickRoom may have settled it.
       const stillOurs = !watched || app.s.room.attracting?.id === m.id;
       if (watched !== null && app.s.room.attracting?.id === m.id) app.s.room.attracting = null;
-      const rw = stillOurs ? endPlay(app.s, m.id, g.q, m.id === 'poker' || watched !== null, watched === null) : ({ text: '' } as Reward);
+      const rw = stillOurs ? endPlay(app.s, m.id, g.q, watched !== null, watched === null) : ({ text: '' } as Reward);
       if (rw.slip) toast(DAWN.grapevine.toast);
-      if (m.id === 'poker' && rw.buff) {
-        const hand = (app.s.room.hands[rw.buff] = g.label![0] + g.label!.slice(1).toLowerCase());
-        if (rw.big) log(app.s, m.region, `${m.name}: ${hand}. ${BUFFS[rw.buff].does}.`, 'win');
-      }
-      const got = m.id === 'poker' ? '' : [rw.cash && `+$${fmt(rw.cash)}`, rw.goodwill && `+${fmt(rw.goodwill)} GW`, rw.tickets && `+${fmt(rw.tickets)} TICKETS`, rw.equity && `+${fmt(rw.equity)} EQ`].filter(Boolean).join(' ');
+      const got = [rw.slips && `+${rw.slips} SLIP${rw.slips > 1 ? 'S' : ''}`, rw.cash && `+$${fmt(rw.cash)}`, rw.goodwill && `+${fmt(rw.goodwill)} GW`, rw.tickets && `+${fmt(rw.tickets)} TICKETS`, rw.equity && `+${fmt(rw.equity)} EQ`].filter(Boolean).join(' ');
       text = got || text;
       if (rw.cash || rw.tickets) register();
       const costN = m.cost(app.s).n;
       const wonCash = (rw.cash ?? 0) > costN && m.cost(app.s).cur === 'cash';
-      const showSlip = !watched && (rw.big || wonCash || (rw.tickets ?? 0) >= 20 || !!rw.buff);
+      const showSlip = !watched && (rw.big || wonCash || (rw.tickets ?? 0) >= 20 || !!rw.buff || !!rw.slips);
       if (showSlip) {
-        const amount = rw.tickets ? `${fmt(rw.tickets)}` : rw.cash ? `$${fmt(rw.cash)}` : rw.buff ? BUFFS[rw.buff].name.toUpperCase() : rw.goodwill ? `${fmt(rw.goodwill)} GW` : rw.equity ? `${fmt(rw.equity)} EQ` : text;
+        const amount = rw.slips ? `${rw.slips} SLIP${rw.slips > 1 ? 'S' : ''}` : rw.tickets ? `${fmt(rw.tickets)}` : rw.cash ? `$${fmt(rw.cash)}` : rw.buff ? BUFFS[rw.buff].name.toUpperCase() : rw.goodwill ? `${fmt(rw.goodwill)} GW` : rw.equity ? `${fmt(rw.equity)} EQ` : text;
         result.current = { text, until: performance.now() + 2800, slip: { amount, sub: (g.label ?? rw.text ?? '').toUpperCase().slice(0, 22), tickets: !!rw.tickets } };
         app.refresh();
         return;
@@ -260,7 +254,7 @@ function Cabinet({ m }: { m: MachineDef }) {
 
 function BarCounter() {
   const s = app.s;
-  const on = [...BAR_BUFFS, ...QUIZ, ...GRAPEVINE].filter(([b]) => buffOn(s, b));
+  const on = [...QUIZ, ...GRAPEVINE].filter(([b]) => buffOn(s, b));
   return (
     <section class="counter pub">
       <h2>Behind the bar</h2>
@@ -268,12 +262,12 @@ function BarCounter() {
       {on.map(([b]) => (
         <div key={b} class="perk">
           <span>
-            <b>{s.room.hands[b] ?? BUFFS[b].name}</b> <span class="dim">{BUFFS[b].does}</span>
+            <b>{BUFFS[b].name}</b> <span class="dim">{BUFFS[b].does}</span>
           </span>
           <span class="dim">{fmtTime(s.room.buffs[b] ?? 0)}</span>
         </div>
       ))}
-      {!on.length && <div class="dim">Nothing from the poker machine or the trivia yet.</div>}
+      {!on.length && <div class="dim">Nothing running. Poker and every game at the bar pay rumor slips.</div>}
       <h3>{DAWN.grapevine.title}</h3>
       <div class="dim">{(s.room.slips ?? 0) > 0 ? DAWN.grapevine.pile(s.room.slips ?? 0) : DAWN.grapevine.empty}</div>
       {GRAPEVINE.map(([b, n]) => (
@@ -325,7 +319,7 @@ function Counter() {
   const s = app.s;
   const pre = Object.keys(PERKS) as PrePerkId[];
   const back = shelfOf(s).filter((id) => !(id in PERKS));
-  const clawed = (Object.keys(BUFFS) as BuffKind[]).filter((b) => !BAR_IDS.has(b) && b !== 'shot' && buffOn(s, b));
+  const clawed = (Object.keys(BUFFS) as BuffKind[]).filter((b) => !BAR_IDS.has(b) && buffOn(s, b));
   return (
     <section class="counter">
       <h2>Prize counter</h2>
@@ -346,14 +340,6 @@ function Counter() {
           <span class="dim">{fmtTime(s.room.buffs[b] ?? 0)}</span>
         </div>
       ))}
-      {buffOn(s, 'shot') && (
-        <div class="perk">
-          <span>
-            <b>{BUFFS.shot.name}</b> <span class="dim">{BUFFS.shot.does}</span>
-          </span>
-          <span class="dim">{fmtTime(s.room.buffs.shot ?? 0)}</span>
-        </div>
-      )}
       {!clawed.length && <div class="dim">Nothing from the claw yet.</div>}
       <h3>Night Shift board</h3>
       {HOUSE_SCORES.map(([n, v], i) => (

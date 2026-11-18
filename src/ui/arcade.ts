@@ -241,12 +241,14 @@ const TOYS: { id: BuffKind; x: number; y: number; r: number; easy: boolean }[] =
   { id: 'duck', x: 39, y: 50, r: 7, easy: true },
   { id: 'ball', x: 56, y: 50, r: 6, easy: true },
   { id: 'troll', x: 28, y: 64, r: 6, easy: true },
+  { id: 'slap', x: 50, y: 64, r: 5, easy: false },
 ];
 
 function toyIcon(p: Pen, id: BuffKind, x: number, y: number) {
   if (id === 'bat') (circle(p, x, y, 4, C.violet), p.rect(x - 6, y - 2, 4, 2, C.plum), p.rect(x + 3, y - 2, 4, 2, C.plum));
   else if (id === 'duck') (circle(p, x, y, 4, C.sodiumLight), p.rect(x + 3, y - 1, 3, 2, C.sodium));
   else if (id === 'troll') (p.rect(x - 3, y - 2, 6, 6, C.green), p.rect(x - 2, y - 5, 4, 3, C.skin), p.rect(x, y - 8, 1, 4, C.neon));
+  else if (id === 'slap') (p.rect(x - 5, y - 1, 11, 3, C.neon), p.rect(x - 3, y - 1, 2, 3, C.ink), p.rect(x + 1, y - 1, 2, 3, C.sodium), p.rect(x - 6, y - 2, 1, 2, C.neon), p.rect(x + 6, y - 2, 1, 2, C.neon));
   else (circle(p, x, y, 4, C.teal), p.rect(x - 3, y, 6, 1, C.mint));
 }
 

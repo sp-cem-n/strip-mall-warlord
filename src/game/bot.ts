@@ -3,7 +3,7 @@ import { FIGHTS, RETRY_AFTER, ROLES, SHOPS, REGIONS, type RegionId } from './def
 import { advance, bal, buyPatrol, buySlot, convert, curb, forLease, leased, lease, lineupOf, lotsTaken, patrolBlock, patrolPrice, pave, purse, regionDone, renovate, renovateCost, slotPrice, topFight, train, trainCost, view } from './economy';
 import { collectFind } from './sim';
 import type { GameState } from './state';
-import { BAR_BUFFS, QUIZ, serviced, MACHINE, PINBALL_TOP, SHUFFLE_TOP, buffOn, buyPerk, endPlay, perkPrice, pokerQ, postScore, postShuffle, shelfOf, startPlay, type MachineId } from './room';
+import { GRAPEVINE, QUIZ, spendSlips, serviced, MACHINE, PINBALL_TOP, SHUFFLE_TOP, buffOn, buyPerk, endPlay, perkPrice, pokerQ, postScore, postShuffle, shelfOf, startPlay, type MachineId } from './room';
 import { rand } from './rng';
 
 const PATROL_SAVE = 4; // the bot saves for a patrol that costs under this many training levels
@@ -14,7 +14,9 @@ const BAR_MIX: [MachineId, number][] = [['darts', 0.3], ['pool', 0.35], ['foos',
 function barAct(s: GameState, o: BotOpts) {
   for (let g = 0; g < 20 && o.barBudget! > 0; g++) {
     let id: MachineId;
-    if (s.room.unlocked.includes('poker') && !BAR_BUFFS.some(([b]) => buffOn(s, b))) id = 'poker';
+    // keep a Grapevine edge going: the inside word when three slips are on the bar, otherwise a tip
+    if (!GRAPEVINE.some(([b]) => buffOn(s, b))) spendSlips(s, 'word') && spendSlips(s, 'tip');
+    if (s.room.unlocked.includes('poker') && !serviced(s, 'poker') && (s.room.slips ?? 0) < 3) id = 'poker';
     else if (s.room.unlocked.includes('trivia') && !QUIZ.some(([b]) => buffOn(s, b)) && !serviced(s, 'trivia')) id = 'trivia';
     else {
       const open = BAR_MIX.filter(([m]) => s.room.unlocked.includes(m)).map(([m, w]) => [m, m === 'shuffle' && s.room.shuffle >= 5 ? 0.03 : w] as [MachineId, number]);
