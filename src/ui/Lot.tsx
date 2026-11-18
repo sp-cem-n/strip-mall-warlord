@@ -1,5 +1,6 @@
 // The Lot panel: region tabs, the lot signs, the field, and the calls.
 import { app, tip, toast } from '../app';
+import { DAWN } from '../game/content/dawn';
 import { FIGHTS, REGIONS, type RegionId } from '../game/defs';
 import { advance, autoCovers, autoPick, bal, buySlot, curb, lotsTaken, slotPrice, slotsOf, slotsUsed, topFight } from '../game/economy';
 import { CURRENCY_SHORT } from '../game/defs';
@@ -108,10 +109,10 @@ export function Lot() {
         <FarmRate r={r} />
         {c.closed && (
           <div class="closed-sign">
-            <button class="btn big hot" onClick={() => ((c.closed = false), toast("Open. Uncle Sal's crew heads out to the lot."), app.refresh())}>
+            <button class="btn big hot" onClick={() => ((c.closed = false), toast(r ? DAWN.openToast : "Open. Uncle Sal's crew heads out to the lot."), app.refresh())}>
               Flip the sign
             </button>
-            <span>The pawn shop opens when you say so.</span>
+            <span>{r ? DAWN.openSign : 'The pawn shop opens when you say so.'}</span>
           </div>
         )}
       </div>

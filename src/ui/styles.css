@@ -276,6 +276,14 @@ button { font: inherit; }
 /* a YOU WON napkin at the bar: square, scalloped, red pen. (Grapevine rumor slips are the folded blue-pen ones on the spike.) */
 .won-slip.napkin { background: #faf6ee; border: none; border-radius: 0.3cqw; outline: 0.3cqw dotted #faf6ee; outline-offset: 0.15cqw; box-shadow: 0 0 0 0.55cqw rgba(26, 20, 32, 0.35); transform: rotate(4deg); }
 .won-slip.napkin::before { display: none; }
+/* the stranger's bubble: off his shoulder in the side hall */
+.bubble { position: absolute; left: 10%; top: 20%; width: 24cqw; padding: 1cqw 1.2cqw; font: 1.6cqw/1.15 'VT323', monospace; color: var(--ink); background: var(--paper); border: 0.25cqw solid var(--ink); box-shadow: 0.4cqw 0.4cqw 0 rgba(10, 8, 14, 0.6); }
+.bubble::before { content: ''; position: absolute; left: -1.6cqw; top: 2.5cqw; border: 0.8cqw solid transparent; border-right: 1cqw solid var(--paper); }
+.bubble p { margin: 0 0 0.8cqw; }
+.bubble button { font: 1.4cqw 'VT323', monospace; padding: 0.2cqw 0.8cqw; color: var(--ink); background: var(--sodium); border: 0.2cqw solid var(--ink); cursor: pointer; }
+.bubble button:hover { background: var(--sodium-light); }
+.open-game.reveal-card { top: auto; bottom: auto; left: 50%; right: auto; top: 50%; transform: translate(-50%, -30%); width: min(640px, 92vw); font-size: 20px; color: var(--paper); }
+.reveal-card p b { color: var(--sodium-light); font-weight: normal; }
 /* an open game: over the room, under the bar */
 .open-game { position: fixed; z-index: 12; top: calc(var(--bar, 172px) + 10px); left: 24px; right: 24px; bottom: 12px; display: flex; flex-direction: column; padding: 8px 14px 14px; background: #1a1520f2; border: 4px solid var(--sodium); box-shadow: 0 0 0 4px var(--ink), 0 10px 40px #000a; }
 .open-game.pub { background: #1c1612f2; }

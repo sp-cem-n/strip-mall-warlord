@@ -122,7 +122,6 @@ function clearFight(s: GameState, r: RegionId) {
   for (const sh of SHOP_LIST) if (sh.region === r && sh.zone === f.zone && sh.fight === f.i) log(s, r, `For lease: ${sh.name}. ${sh.tagline}`, 'capture');
   if (c.frontier >= ladder.length) {
     c.at = ladder.length - 2;
-    if (r === 0 && !s.bypass) s.bypass = true;
     if (r === 0 ? s.paves === 0 || s.ending === 0 : true) s.ending = (r + 1) as 1 | 2;
     log(s, r, REGIONS[r].ending, 'capture');
     return;

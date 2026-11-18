@@ -6,13 +6,16 @@ import { app, toast } from '../app';
 import { C } from '../art/palette';
 import roomFz from '../art/room-fz.png';
 import roomOr from '../art/room-or.png';
+import strangerPng from '../art/stranger.png';
+import { STRANGER } from '../game/content/copy';
+import { hearHimOut, strangerHere } from '../game/economy';
 import { GRAPEVINE, spendSlips, type Reward, ATTRACT_EVERY, QUIZ, BAR_HOUSE, BUFFS, HOUSE_SCORES, postShuffle, MACHINE, PERKS, attractOn, attractPrice, buffOn, buyAttract, buyPerk, canAfford, endPlay, ensurePusher, perk, perkInfo, perkPrice, postScore, serviced, shelfOf, slipText, startPlay, stopAttract, type BuffKind, type Cost, type MachineDef, type MachineId, type PerkId, type PrePerkId } from '../game/room';
 import { CURRENCY_SHORT } from '../game/defs';
 import { fmt, fmtTime } from './format';
 import { idle, newGame, pen, type Game } from './machines';
 import { drawSlip } from './arcade';
 import { register } from './audio';
-import { Pylon } from './Pylon';
+import { Pylon, leaveRoom, roomFrom } from './Pylon';
 
 export const costText = (c: Cost) => (c.cur === 'tickets' ? `${fmt(c.n)} tickets` : c.cur === 'cash' ? `$${fmt(c.n)}` : `${fmt(c.n)} ${CURRENCY_SHORT[c.cur]}`);
 const BAR_IDS = new Set([...QUIZ, ...GRAPEVINE].map(([b]) => b));
@@ -61,11 +64,15 @@ const PAYS: Partial<Record<MachineId, string>> = { pusher: 'Pays tickets. The Re
 const paysOf = (m: MachineDef) => PAYS[m.id] ?? DAWN.pays[m.id as keyof typeof DAWN.pays] ?? (m.region ? DAWN.pays.room : 'Pays tickets for the prize counter.');
 const img = (src: string) => Object.assign(new Image(), { src });
 const ART = ROOMS.map((r) => img(r.art));
+// the man by the pay phone, in the Fun Zone's side hall (behind the coin pusher), 19x36 at (9, 42)
+const MAN = img(strangerPng);
+const MAN_AT: Rect = [9, 42, 19, 36];
 const short = (n: number) => (n >= 1e6 ? `${Math.floor(n / 1e5) / 10}M` : n >= 1e4 ? `${Math.floor(n / 1e3)}K` : `${Math.floor(n)}`);
-const hit = (r: 0 | 1, x: number, y: number) => [...ROOMS[r].spots].reverse().find(({ r: [a, b, w, h] }) => x >= a && x < a + w && y >= b && y < b + h);
-type Open = MachineId | 'counter' | null;
+const inside = ([a, b, w, h]: Rect, x: number, y: number) => x >= a && x < a + w && y >= b && y < b + h;
+const hit = (r: 0 | 1, x: number, y: number) => [...ROOMS[r].spots].reverse().find((sp) => inside(sp.r, x, y));
+type Open = MachineId | 'counter' | 'stranger' | 'reveal' | null;
 
-function Room({ r, onOpen }: { r: 0 | 1; onOpen: (id: Open) => void }) {
+function Room({ r, onOpen, stranger }: { r: 0 | 1; onOpen: (id: Open) => void; stranger: boolean }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const hover = useRef<Spot | undefined>(undefined);
   useEffect(() => {
@@ -75,6 +82,7 @@ function Room({ r, onOpen }: { r: 0 | 1; onOpen: (id: Open) => void }) {
       const s = app.s;
       if (ctx && ART[r].complete) {
         ctx.drawImage(ART[r], 0, 0);
+        if (r === 0 && strangerHere(s) && MAN.complete) ctx.drawImage(MAN, MAN_AT[0], MAN_AT[1]);
         const p = pen(ctx, 0, 0, RW, RH);
         for (const sp of ROOMS[r].spots) {
           const [x, y, w, h] = sp.r;
@@ -112,10 +120,12 @@ function Room({ r, onOpen }: { r: 0 | 1; onOpen: (id: Open) => void }) {
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
   }, [r]);
-  const at = (e: MouseEvent) => {
+  const xy = (e: MouseEvent) => {
     const b = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    return hit(r, ((e.clientX - b.left) / b.width) * RW, ((e.clientY - b.top) / b.height) * RH);
+    return [((e.clientX - b.left) / b.width) * RW, ((e.clientY - b.top) / b.height) * RH] as const;
   };
+  const man = (e: MouseEvent) => r === 0 && strangerHere(app.s) && inside(MAN_AT, ...xy(e));
+  const at = (e: MouseEvent) => hit(r, ...xy(e));
   const s = app.s;
   return (
     <div class={`room-stage ${r ? 'pub' : 'fz'}`}>
@@ -125,6 +135,7 @@ function Room({ r, onOpen }: { r: 0 | 1; onOpen: (id: Open) => void }) {
         height={RH}
         style={{ cursor: hover.current ? 'pointer' : 'default' }}
         onMouseMove={(e) => {
+          if (man(e)) return ((hover.current = undefined), ((e.currentTarget as HTMLElement).style.cursor = 'pointer'), app.tip && ((app.tip = null), app.refresh()));
           const sp = at(e);
           if (sp !== hover.current) {
             hover.current = sp;
@@ -138,8 +149,9 @@ function Room({ r, onOpen }: { r: 0 | 1; onOpen: (id: Open) => void }) {
         }}
         onMouseLeave={() => ((hover.current = undefined), (app.tip = null), app.refresh())}
         onClick={(e) => {
+          if (man(e)) return onOpen('stranger');
           const sp = at(e);
-          if (!sp) return;
+          if (!sp) return onOpen(null);
           if (sp.id !== 'counter' && !s.room.unlocked.includes(sp.id)) return toast(MACHINE[sp.id].needs);
           app.tip = null;
           onOpen(sp.id);
@@ -155,6 +167,14 @@ function Room({ r, onOpen }: { r: 0 | 1; onOpen: (id: Open) => void }) {
           </button>
         );
       })}
+      {stranger && strangerHere(s) && (
+        <div class="bubble">
+          {STRANGER.lines.map((l) => (
+            <p key={l}>"{l}"</p>
+          ))}
+          <button onClick={() => (hearHimOut(app.s), onOpen('reveal'))}>{STRANGER.button}</button>
+        </div>
+      )}
     </div>
   );
 }
@@ -475,15 +495,34 @@ export function GameRoom() {
   }, [open]);
   const go = (id: Open) => {
     // opening a machine picks up its YOU WON slip
-    if (id && id !== 'counter') (setLast(s.room.won[id] ?? ''), delete s.room.won[id]);
+    if (id && id !== 'counter' && id !== 'stranger' && id !== 'reveal') (setLast(s.room.won[id] ?? ''), delete s.room.won[id]);
     setOpen(id);
   };
-  const m = open && open !== 'counter' ? MACHINE[open] : null;
+  const m = open && open !== 'counter' && open !== 'stranger' && open !== 'reveal' ? MACHINE[open] : null;
   return (
     <div class={`screen room ${r ? 'pub' : 'fz'}`}>
       <Pylon room />
-      <Room r={r} onOpen={go} />
-      {open && (
+      <Room r={r} onOpen={go} stranger={open === 'stranger'} />
+      {open === 'reveal' && (
+        <div class="open-game reveal-card">
+          <header>
+            <h2>{DAWN.bypass}</h2>
+          </header>
+          <p>
+            {DAWN.reveal[0]} <b>{DAWN.reveal[1]}</b>
+            {DAWN.reveal[2]}
+          </p>
+          <div class="ask-buttons">
+            <button class="btn" onClick={() => setOpen(null)}>
+              Not yet
+            </button>
+            <button class="btn hot" onClick={() => ((roomFrom.r = 1), leaveRoom())}>
+              {DAWN.drive}
+            </button>
+          </div>
+        </div>
+      )}
+      {open && open !== 'stranger' && open !== 'reveal' && (
         <div class={`open-game ${r ? 'pub' : 'fz'}`}>
           <header>
             <h2>

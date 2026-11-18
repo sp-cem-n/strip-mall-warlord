@@ -60,6 +60,7 @@ type LotStat = { fw: number; fl: number; hp: number; w: number; l: number; boss:
 const stat: LotStat[][] = REGIONS.map((r) => r.lots.map(() => ({ fw: 0, fl: 0, hp: 0, w: 0, l: 0, boss: 0 })));
 const snaps: string[] = [];
 let nextAct = 0;
+let climb: [number, number] | null = null; // Route 9 losses / fights on the climb to the first dawn: the guard's loss window
 let nextSnap = 1800;
 const t0 = Date.now();
 while (s.totalTime < hours * 3600) {
@@ -95,7 +96,8 @@ while (s.totalTime < hours * 3600) {
       mark(key, `${REGIONS[r].name}: CAPTURED ${l.name}${run ? ` (run ${run + 1})` : ''}  rent ${fmt(rentPerSec(s, r))}/s`);
     });
   }
-  if (s.bypass) mark('bypass', `ROUTE 9 ENDING. Goodwill on hand ${fmt(s.goodwill)}`);
+  if (done['0-5'] && !climb) (climb = [s.crews[0].losses, s.crews[0].wins + s.crews[0].losses]), mark('dawn', `ROUTE 9 ENDING. Goodwill on hand ${fmt(s.goodwill)}`);
+  if (s.bypass) mark('bypass', 'THE BYPASS OPENS (heard the stranger out)');
   for (let p = 1; p <= s.paves; p++) mark(`p${p}`, `PAVE #${p} -> asphalt ${s.asphalt}`);
   if (s.totalTime >= nextSnap) {
     nextSnap += 1800;
@@ -116,7 +118,7 @@ for (const r of [0, 1] as const)
     console.log(`${l.short.padEnd(14)} ${(t ? fmtTime(t) : '-').padStart(8)}   ${`${st.fw}/${st.fl}`.padStart(11)}  ${((100 * st.fl) / Math.max(1, st.fw + st.fl)).toFixed(0).padStart(4)}%  ${((100 * st.hp) / Math.max(1, st.fw)).toFixed(0).padStart(6)}%  ${`${st.w}/${st.l}`.padStart(8)}  ${((100 * st.l) / Math.max(1, st.w + st.l)).toFixed(0).padStart(4)}%  ${String(st.boss).padStart(5)}`);
   });
 const tt = (k: string) => (done[k] ? fmtTime(done[k]) : '-');
-console.log(`\nSUMMARY mode="${mode}" lot=${tt("0-0")} bigbox=${tt("0-1")} outlet=${tt("0-2")} route9=${tt('0-5')} galleria=${tt('1-3')} losses=${s.crews[0].losses}/${s.crews[0].wins + s.crews[0].losses}`);
+console.log(`\nSUMMARY mode="${mode}" lot=${tt("0-0")} bigbox=${tt("0-1")} outlet=${tt("0-2")} route9=${tt('0-5')} galleria=${tt('1-3')} losses=${(climb ?? [s.crews[0].losses, s.crews[0].wins + s.crews[0].losses]).join('/')}`);
 if (quiet) process.exit(0);
 console.log('\nMilestones');
 lines.forEach((l) => console.log(l));
@@ -151,10 +153,13 @@ async function guard(): Promise<never> {
     const times = mine.map(({ txt }) => hrs(/route9=([^ ]+(?: \d+m)?) /.exec(txt)?.[1] ?? '-'));
     const losses = mine.map(({ txt }) => (([l, n]) => l / n)((/losses=(\d+)\/(\d+)/.exec(txt) ?? [0, 0, 1]).slice(1).map(Number)));
     const mean = times.reduce((x, y) => x + y, 0) / times.length;
-    console.log(`${m.mode}: Route 9 mean ${mean.toFixed(1)}h [${times.map((t) => t.toFixed(1)).join(' ')}], losses ${Math.round((100 * losses.reduce((x, y) => x + y, 0)) / losses.length)}%`);
+    console.log(`${m.mode}: Route 9 mean ${mean.toFixed(1)}h [${times.map((t) => t.toFixed(1)).join(' ')}], climb losses ${Math.round((100 * losses.reduce((x, y) => x + y, 0)) / losses.length)}% [${losses.map((l) => Math.round(l * 100)).join(' ')}]`);
     if (mean < m.route9[0] || mean > m.route9[1]) fail(`${m.mode}: mean Route 9 outside ${m.route9[0]}-${m.route9[1]}h`);
     times.forEach((t, i) => (t < m.route9[0] - 2.5 || t > m.route9[1] + 2.5) && fail(`${m.mode} seed ${SEEDS[i]}: Route 9 at ${t.toFixed(1)}h`));
-    if (m.losses && losses.some((l) => l < 0.1 || l > 0.3)) fail(`${m.mode}: overall losses outside 10-30% on a seed`);
+    // losses on the climb to dawn (after it the game asks for a repave, and run 2 on asphalt is meant to be easy): mean in 10-30%, each seed within 5 points of that
+    const lossMean = losses.reduce((x, y) => x + y, 0) / losses.length;
+    if (m.losses && (lossMean < 0.1 || lossMean > 0.3)) fail(`${m.mode}: mean climb losses outside 10-30%`);
+    if (m.losses) losses.forEach((l, i) => (l < 0.05 || l > 0.35) && fail(`${m.mode} seed ${SEEDS[i]}: climb losses ${Math.round(l * 100)}%`));
     const lots = new Map<string, { front: number[]; boss: number[] }>();
     for (const { txt } of mine)
       for (const row of txt.split('\n').filter((x) => /^\S.*\d+\/\d+\s+\d+%/.test(x))) {

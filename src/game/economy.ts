@@ -70,6 +70,13 @@ export function pave(s: GameState): GameState {
   log(s, 0, `Route 9 repaved: +${gain} asphalt. Uncle Sal's pawn shop opens at 9, same as always.`);
   return s;
 }
+// The gate: after the first repave a man waits by the Fun Zone pay phone. Hearing him out opens the new road, its sign still closed.
+export const strangerHere = (s: GameState) => s.paves > 0 && !s.bypass;
+export function hearHimOut(s: GameState) {
+  if (!strangerHere(s)) return;
+  s.bypass = true;
+  s.crews[1].closed = true;
+}
 // Asphalt is Route 9's: +2% rent, stats and Goodwill each. The Bypass only gets Route 9 through Equity.
 // Plaza buys (sinks.ts) are Route 9's too: billboards and ad runs raise rent, pylons stats, water towers HP.
 export const sinkRentMult = (s: GameState) => 1 + landmarkBuff(s, 'billboard') + BLITZ.reduce((a, d) => a + d.rent * blitzLevel(s, d.id), 0);

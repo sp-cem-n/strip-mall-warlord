@@ -33,7 +33,6 @@ export interface RoomState {
   shuffleBest: number;
   attracting: Attracting[]; // at most one per room
   won: Partial<Record<MachineId, string>>; // YOU WON slips Attract Mode left on a machine, until you open it
-  stranger?: 'there' | 'heard'; // the man by the Fun Zone pay phone (after the first repave)
 }
 export interface Attracting { id: MachineId; q: number; left: number; held?: boolean }
 export const newRoom = (): RoomState => ({ unlocked: [], attract: {}, clock: {}, cool: {}, perks: {}, board: 0, best: 0, jackpot: 500, shelf: [10, 10], buffs: {}, plays: 0, shuffle: 0, shuffleBest: 0, attracting: [], won: {} });

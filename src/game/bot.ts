@@ -1,6 +1,6 @@
 // A scripted player for balance runs and the debug `advance` param. Plays like someone who checks in now and then.
 import { FIGHTS, RETRY_AFTER, ROLES, SHOPS, REGIONS, type RegionId } from './defs';
-import { advance, bal, buyPatrol, buySlot, convert, curb, forLease, leased, lease, lineupOf, lotsTaken, patrolBlock, patrolPrice, pave, purse, regionDone, renovate, renovateCost, slotPrice, topFight, train, trainCost, view } from './economy';
+import { advance, bal, hearHimOut, strangerHere, buyPatrol, buySlot, convert, curb, forLease, leased, lease, lineupOf, lotsTaken, patrolBlock, patrolPrice, pave, purse, regionDone, renovate, renovateCost, slotPrice, topFight, train, trainCost, view } from './economy';
 import { collectFind, fightRate } from './sim';
 import { LANDMARKS, buyLandmark, landmarkCost, landmarkOpen } from './sinks';
 import type { GameState } from './state';
@@ -141,6 +141,7 @@ export function botAct(s: GameState, o: BotOpts = {}, dt = 10): GameState {
   if (o.room) roomAct(s, o, dt);
   if (o.active && s.find) collectFind(s);
   if (s.ending) s.ending = 0; // dismiss the win card and keep farming
+  if (strangerHere(s)) (hearHimOut(s), (s.crews[1].closed = false));
   if (s.bypass) {
     const share = o.convert ?? 0.5;
     const n = Math.floor((s.goodwill * share) / 100);

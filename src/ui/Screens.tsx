@@ -3,7 +3,7 @@ import { DAWN } from '../game/content/dawn';
 import { useEffect, useState } from 'preact/hooks';
 import { app, ask, toast } from '../app';
 import { ASPHALT_BONUS, FIGHTS, REGIONS } from '../game/defs';
-import { asphaltGain, leased, pave, view } from '../game/economy';
+import { asphaltGain, leased, pave } from '../game/economy';
 import { fightLabel } from '../game/sim';
 import { exportCode, importCode, old, saveGame } from '../game/save';
 import { HOW, STORY } from '../game/content/copy';
@@ -278,21 +278,12 @@ export function WinCard() {
             <p class="dim">
               The Developer is on your crew and Pinewood Commons is a parking lot. Now pave Route 9 and do it again, faster: +{gain} asphalt is +{Math.round(gain * ASPHALT_BONUS * 100)}% Route 9 rent, stats and Goodwill, forever. Tickets and the arcade carry over when you repave.
             </p>
-            {s.paves === 0 && (
-              <div class="reveal">
-                <b>One more thing.</b> {DAWN.reveal[0]} <b>{DAWN.reveal[1]}</b>
-                {DAWN.reveal[2]}
-              </div>
-            )}
             <div class="ask-buttons">
               <button class="btn" onClick={close}>
                 Not yet
               </button>
               <button class="btn hot" onClick={() => (pave(s), (s.crews[0].closed = true), close())}>
                 Pave Route 9 (+{gain})
-              </button>
-              <button class="btn" onClick={() => (view(s, 1), close())}>
-                {DAWN.drive}
               </button>
             </div>
           </>

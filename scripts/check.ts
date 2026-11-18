@@ -1,13 +1,13 @@
 // Small invariant checks. Run: bun scripts/check.ts
 import { BATTLERS, FIGHTS, PATROL_WINS, GOODWILL_PER_EQUITY, MAX_SLOTS, OFFLINE_CAP_SECONDS, REGIONS, SHOPS, SMOKE_BREAK_SECONDS, SHOP_LIST, START_SLOTS, STEP, WEAK_BONUS } from '../src/game/defs';
 import { auras, enemyLineup, startBattle, statsOf, stepBattle } from '../src/game/battle';
-import { advance, topFight, asphaltGain, fieldFull, autoCovers, buyPatrol, buySlot, convert, curb, forLease, lease, lineupOf, newGame, patrolBlock, powerLevel, rentPerSec, patrolPrice, pave, renovate, renovateCost, joined, roster, sinkHpBonus, sinkStatMult, slotsOf, slotsUsed, tierOf, toggleField, train, trainCost, view } from '../src/game/economy';
+import { advance, hearHimOut, strangerHere, topFight, asphaltGain, fieldFull, autoCovers, buyPatrol, buySlot, convert, curb, forLease, lease, lineupOf, newGame, patrolBlock, powerLevel, rentPerSec, patrolPrice, pave, renovate, renovateCost, joined, roster, sinkHpBonus, sinkStatMult, slotsOf, slotsUsed, tierOf, toggleField, train, trainCost, view } from '../src/game/economy';
 import { loadGame, old, saveGame } from '../src/game/save';
 import { blitzCost, buyBlitz, buyLandmark, consultOpen, hireConsultant, landmarkCost } from '../src/game/sinks';
 import { collectFind, fightRate, onScreen, simulateAway, step } from '../src/game/sim';
 import { CREW_LOOKS, ENEMY_LOOKS } from '../src/art/people';
 import type { GameState } from '../src/game/state';
-import { HOW, STORY } from '../src/game/content/copy';
+import { HOW, STORY, STRANGER } from '../src/game/content/copy';
 import { botAct } from '../src/game/bot';
 import { QUESTIONS } from '../src/ui/bargames';
 import { GRAPEVINE, barDmg, spendSlips, BUFFS, MACHINES, PERKS, QUIZ, boardBonus, buyAttract, buyPerk, endPlay, grant, perk, perkPrice, postShuffle, shelfOf, startPlay } from '../src/game/room';
@@ -197,8 +197,12 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
   t.crews[0].frontier = FIGHTS[0].length - 1;
   t.crews[0].at = FIGHTS[0].length - 1;
   t.crews[0].kills = 0;
-  for (let i = 0; i < 20000 && !t.bypass; i++) step(t);
-  check('beating the Developer: the ending, then the Bypass', t.bypass && t.ending === 1 && roster(t, 0).some(([id]) => id === 'developer'));
+  for (let i = 0; i < 20000 && !t.ending; i++) step(t);
+  check('beating the Developer: the dawn ending, no Bypass and no stranger yet', !t.bypass && t.ending === 1 && !strangerHere(t) && roster(t, 0).some(([id]) => id === 'developer'));
+  t.paves = 1;
+  check('after a repave the stranger waits in the Fun Zone; hearing him out opens the Bypass with its sign closed', strangerHere(t) && (hearHimOut(t), t.bypass && !!t.crews[1].closed && !strangerHere(t)));
+  t.paves = 0;
+  t.crews[1].closed = false;
   check('the Bypass is a whole new crew: Self Storage, one Auction Hunter', roster(t, 1).length === 1 && roster(t, 1)[0][0] === 'auction');
   check('after dawn: farming the fight before the Developer (he works for you now)', (() => { const w = t.crews[0].wins; for (let i = 0; i < 2000; i++) step(t); return t.crews[0].wins > w && t.crews[0].at === FIGHTS[0].length - 2; })());
   t.goodwill = 50 * GOODWILL_PER_EQUITY + 7;
@@ -373,7 +377,7 @@ check('advance stops at the frontier', advance(s, 0, 1) === null && advance(s, 0
 // pre-dawn copy: nothing before the Route 9 ending may hint at the Bypass, Equity or a second crew
 {
   const LEAK = /bypass|equity|second crew|both crews|each crew|other crew|this crew only|only this crew|own till|exit 14|route 9 north/i;
-  const texts: string[] = [...HOW.flat(), ...STORY.map((x) => x.text)];
+  const texts: string[] = [...HOW.flat(), ...STORY.map((x) => x.text), ...STRANGER.lines, STRANGER.button];
   for (const sh of r9) texts.push(sh.name, sh.tagline, ...sh.walkins.map((w) => w.who));
   for (const id of [...r9.map((x) => x.battler), ...bosses(0)]) texts.push(BATTLERS[id].name, BATTLERS[id].does, BATTLERS[id].line);
   for (const l of REGIONS[0].lots) texts.push(l.name, l.blurb, l.clearText, ...[...l.regulars, l.boss].flatMap((e) => [e.name, e.title]));
