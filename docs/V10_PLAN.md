@@ -8,6 +8,21 @@ Prep only. No source changes ship from this doc. The economy map was reviewed he
 
 Worktree note, leave as-is: Grapevine rumor slips are half-done and **uncommitted** in `/workspace/smw-v09` (`dawn.ts`, `room.ts`, `GameRoom.tsx`, `scripts/check.ts`). Do not mix them into unrelated commits.
 
+## Build checklist (Nov 18, consolidated; this order wins)
+
+Coding resumed Nov 18. Each stage ends with `bun scripts/check.ts`, `bun scripts/balance.ts --guard`, a five-size layout pass (1280×800, 1366×768, 1440×900, 1920×1080, 390×844), a merge to `main`, and a confirmed Pages deploy. Item numbers point at the Nov 18 notes at the bottom; A–G at §4.
+
+1. **Quick fixes (live first).** A1 painted matchbook logo · A2 commit the Grapevine WIP · A3 smoke-break and swap rules · A4 click a dark unit letter to relight it, with item 12 (full-id seed, about 1 in 4 signs dark, Bypass included) · A5 SMW logo burnout rules · A6 receipt grows with the bar · A7 break-room slots, training shown on the roster, auto lineup after Big-Box · A8 / item 6 title **Saves** button, lease code explained · A9 pool cue clip · item 1 walk-up lanes, jittered lines, back line steps up · item 2 walk-in scroll fix · item 7 scoreboard win rate · item 8 uncle's note · item 9 Route 9 North leftovers.
+2. **Economy and cohesion.** Item 10 overtime out (Gold Watch gets a new toy) · item 16 patrols in Goodwill, drop-back only on a patrolled lot, ◂ parks the crew · item 5 consultant = one post-dawn per-lot auto-renovation · items 4a and 14 boss 25× on first capture only, final bosses rematchable · item 3 one renovation rule · item 13 Plaza: contracts and dead formulas out, landmarks stack, effect on the card · item 15 farm-rate toggle · item 4b–c Equity pay and 20 GW/EQ · walk-ins pay Goodwill or a ticket chance with item 2's per-unit list · poker pays slips, shot glass out (one short boost per room) · skilled active-player sim.
+3. **Start, theme, copy.** C1 "Flip the sign" · the Bypass gate (audit addition 1) · C2 dawn title · C3 copy pass with the uncle's lines · 1997 pass (Smoke Shop, the RadioShack-style store, Exit 14's "Opened 1998") · item 5 skylines and the Plaza's look.
+4. **The 9-lot, 21-unit Bypass** (item 11) and the wall-map rework (`WALL_MAP.md` §2–5), Toad mockups for bosses and skylines first.
+5. **Minigame overhaul** (§4 D, all 15 games).
+6. **Post-REIT layer and achievements** (§4 E).
+7. **Sound** (§4 F).
+8. **Repo cleanup and tags** (§4 G, §6). No history rewrite or force-push without Josh.
+
+Top-bar changes always get a mockup and Josh's look before they ship.
+
 ---
 
 ## 1. Economy map (reviewed)
@@ -544,3 +559,13 @@ Read from the code on `v09` (same `src` as `main`), plus a probe run (seed 1991,
    *Now:* yes. A patrol is a cash contract per lot ($50, $40K, $100K, $250K, $4M, $15M on Route 9; $500 to $2M on the Bypass), lost on a pave. A consultant counts as one too. On a patrolled lot, after **6 farmed wins** below the frontier (`RETRY_AFTER`), the crew climbs one fight by itself (`sim.ts:79`), and after a clear it jumps to the new frontier (`sim.ts:109`). So if you press ◂ to park on an easier fight, the patrol walks you back up in about 6 wins, every time. A fresh loss at the frontier drops back one fight **with or without** a patrol (`sim.ts:55`).
    *Conflict:* the 15 Nov call was: patrols cost **Goodwill**; **without** a patrol a lost wall keeps fighting and never drops back; **with** one, a loss drops to the highest fight you can win. The code does neither: patrols cost cash, and both cases drop back. This is not the "keep the lights on" consultant buff; consultants are item 5.
    *Fix:* patrols in Goodwill, the drop-back only with a patrol (as decided), and **◂ parks the crew** (decided, call 4): stepping down by hand pauses the patrol's climb until you press ▸ or a new fight is cleared. That's one flag on the crew, set by `advance(-1)` and cleared by `advance(+1)` or `clearFight`. While it's set, `sim.ts:79` doesn't climb and `sim.ts:109` doesn't jump. The ▸ hover says the patrol is paused. It pairs with the farm-rate button.
+
+## Audit additions, Nov 18 (conversation since the last push, checked against this file)
+
+1. **The Bypass gate (Josh's idea, Nov 18).** Dawn becomes the Route 9 ending and points at repaving. A stranger in the Fun Zone unlocks the Bypass, and he only shows up after the first repave. A repave keeps asphalt, tickets and the prize shelf, Attract levels, consultants and Equity; it resets Goodwill, shops and lots. Replace "keep the lights on" with plain copy ("Tickets and the arcade carry over when you repave."). Run 2 has to feel faster on asphalt. The stranger's lines are pre-reveal copy and must pass the leak check. This replaces item 9's "Drive north" button.
+2. **Rates read /s when fast and /m when slow** (Nov 15). The farm-rate toggle (item 15) follows the same rule as the top bar instead of always per minute.
+3. **Content and playtime (Nov 18).** Fill in lots, bosses, units and copy without asking item by item; bring Josh only calls that change the game. Total playtime is a dial for the final balance pass, so the 9-lot Bypass is about steady milestones, not a longer road.
+4. **Unit sign burnouts** keep the Nov 15 feel: sporadic per letter, never more than two out, always a flicker going out or coming back, and a few that cycle on and off over long stretches. Item 12's 1-in-4 rate sits on top of that.
+5. **The four win conditions (Nov 15)** frame every balance call: clear Route 9; the Bypass endgame, with repaves still feeding it; faster REIT runs; and 100%. Dawn must not hint at a zone past the Bypass.
+6. **Grapevine vs poker.** The 15 Nov cohesion call (poker pays slips, the shot glass goes) replaces §1.3's stack-and-cap fix. A2 commits the WIP as-is; the poker change ships in stage 2.
+7. **Josh's Nov 15 "list before push"** is met by this checklist. His Nov 18 go-ahead covers building and pushing it stage by stage.
