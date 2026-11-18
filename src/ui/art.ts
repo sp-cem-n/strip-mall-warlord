@@ -49,7 +49,7 @@ export const scaffoldURL = () => urlOf('scaffold', scaffold);
 export const titleSignURL = (ray = false, out = 0) => urlOf(`titlesign:${ray}:${out}`, () => titleSign(ray, out));
 // Fun Zone neon script (option B): dead tubes underneath, each lit part on its own layer so it can flicker.
 export const FZ_LOGO = { base: fzBase, fun: fzFun, zone: fzZone, line: fzLine };
-export const barLogoURL = () => barLogo; // Toad's neon matchbook, Josh's pick
+export const barLogoURL = () => barLogo; // the painted matchbook on plywood, Josh's pick
 export const landmarkURL = (id: string) => urlOf(`landmark:${id}`, () => landmarkSprite(id));
 
 export const bootURL = (kinds: (string | null)[], dawn = false) => urlOf(`boot:${kinds.join(',')}:${dawn}`, () => bootScene(kinds, dawn));
