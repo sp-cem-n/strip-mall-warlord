@@ -385,6 +385,12 @@ Fun Zone at Parking Lot fight 7 for $20,000. Off-Ramp at Exit 14 fight 4. Attrac
 
 ## Josh notes, Nov 18 (playtest; supersede anything above where they conflict)
 
+**Josh's calls, Nov 18 (decided; they settle items 4, 5, 11, 14 and 16 below):**
+1. **Captured bosses:** every boss, the final two included, can be rematched at normal pay. The 25× pays only on the first capture.
+2. **Bypass units:** add 5 new units, taking the Bypass from 16 to 21. Draft concepts are in item 11, for Josh to review.
+3. **Consultant:** a post-dawn purchase per lot that auto-renovates that lot's shops. No patrol effect.
+4. **Stepping down with ◂:** it pauses the patrol's climb until ▸ is pressed or a new fight is cleared.
+
 Read from the code on `v09` (same `src` as `main`), plus a probe run (seed 1991, check-in bot, first run, no asphalt, measured for 10 minutes on each fight with auto-advance off). No source changes yet. Each item: the problem, what the code does now, and the fix (delete before add).
 
 1. **Walk-up and formations.**
@@ -441,13 +447,13 @@ Read from the code on `v09` (same `src` as `main`), plus a probe run (seed 1991,
 
 4. **Goodwill to Equity waters Equity down.**
    *Now:* the bank is 10 GW per EQ (`GOODWILL_PER_EQUITY`), one way, unlimited. Bypass wins pay `0.2 × 1.09^fight`, rounded, with a floor of 1. Because of that rounding, **every fight in the first two Bypass lots (about 24 fights) pays exactly 1 EQ**. The last regular fight pays 21 and the Chairman 572. Route 9 at the end (probe): Pinewood Commons fights farm **~400–1,500 GW/min**. That is ~2–9K EQ/hour at 10:1. The real leak is **re-farming a captured boss**. Bosses pay 25 wins' worth (`BOSS_PAY`) every time, and a finished crew beats an earlier boss in ~4 seconds: Regional Property Manager **49.3K GW/min** (0 losses), Building Manager 24.6K GW/min. At 10:1 that's **~150–300K EQ/hour**. Every Bypass lease combined costs ~143K EQ, so half an hour of boss farming buys the whole road. Bypass farming measured 1–23 EQ/min. Asphalt then multiplies all Route 9 Goodwill (+288% per pave).
-   *Fix (delete first):* (a) **a boss pays 25× once, on the capture;** a rematch pays like a regular win. That one line removes the 50× spike. (b) 20 GW/EQ flat, as already decided. (c) Bypass wins pay real Equity, as already decided: drop the per-win rounding and floor, and raise `PAY_BASE[1]` so pay grows from the first fight. Target: Bypass farming at least matches the bank for a player who plays both roads. Re-run both sims and the guard. Conversion stays a top-up.
+   *Fix (delete first):* (a) **decided (call 1): a boss pays 25× only on its first capture;** every rematch, the final two bosses included, pays like a regular win of that fight. That one line removes the 50× spike. (b) 20 GW/EQ flat, as already decided. (c) Bypass wins pay real Equity, as already decided: drop the per-win rounding and floor, and raise `PAY_BASE[1]` so pay grows from the first fight. Target: Bypass farming at least matches the bank for a player who plays both roads. Re-run both sims and the guard. Conversion stays a top-up.
 
 5. **Right side: lot skylines, the Back Office Plaza, consultants.**
    *Now:* each lot's skyline (`art/field.ts`, `SKYLINE`) is a few flat boxes and one text label. Only the office park has windows, and nothing is lit or alive, so it reads plainer than the storefronts. The Back Office **Plaza** block is a grid of identical dark cards: name and a "$" button. What each item does lives only in the hover, and bought items stay on the grid forever ("Bought"). Late game that is up to 6 consultants, 6 auto-renos, 3 landmarks, 3 blitzes and contracts.
    **What a consultant does, mechanically:** you hire one per lot, from that road's till, for 20 minutes of the road's **whole** rent (same price for every lot). It opens once the *next* lot is captured, pre-dawn included. Hiring does two things. (1) It counts as that lot's **patrol** (`autoCovers`): the crew climbs back up after 6 farmed wins, jumps to the new frontier after a clear, and (until overtime is cut) auto-buys overtime on a boss after two losses. (2) It unlocks a second purchase, **auto-renovation** (45 minutes of rent). After that, every 10 s, the road's single cheapest shop on any auto-reno lot is renovated if the till holds twice its price, fielded or benched. Consultants survive a pave; patrols don't. So today a consultant is a patrol that survives a pave, plus an optional auto-renovate button. "Keep the lights on" says none of that.
    *Conflict:* 15 Nov calls say consultants are **post-dawn**, per lot, and their job beyond patrols is auto-renovation, "so the two don't overlap." The code overlaps them.
-   *Fix:* make it **one purchase**: "*Lot* consultant: renovates this lot's shops for you whenever the till can cover it twice." Delete the hire step, the patrol effect (`autoCovers` checks patrols only), and the separate auto-reno card. Post-dawn only. Plaza cards print their effect on the card. Bought one-time items leave the grid and show up as plaza furniture instead (landmarks already have sprites on the plaza title). Skylines: each lot gets one lit sign with a dead tube, plus one joke prop, built from the storefront sign and awning pieces so it matches the plaza. Keep the current gags (Circuit Barn's dead BARN, the aggressive fountain, COMING SOON).
+   *Fix (decided, call 3):* make it **one purchase**: "*Lot* consultant: renovates this lot's shops for you whenever the till can cover it twice." Delete the hire step, the patrol effect (`autoCovers` checks patrols only), and the separate auto-reno card. Post-dawn only: hidden before dawn, and on a lot only once it is captured. Price stays in minutes of that road's rent; `tickSinks` keeps today's rule (cheapest shop on the lot, till at 2× its price). Consultants still persist through a pave. Plaza cards print their effect on the card. Bought one-time items leave the grid and show up as plaza furniture instead (landmarks already have sprites on the plaza title). Skylines: each lot gets one lit sign with a dead tube, plus one joke prop, built from the storefront sign and awning pieces so it matches the plaza. Keep the current gags (Circuit Barn's dead BARN, the aggressive fountain, COMING SOON).
 
 6. **Title screen lease code.**
    *Now:* `Boot` always renders the full `SaveBox` (textarea, Copy, Load) in the menu, even on a first boot with no save. The game already autosaves to the browser; the code is only a backup or transfer. "Lease code" never says "save." How to Play still says the Back Office holds it (stale).
@@ -477,7 +483,17 @@ Read from the code on `v09` (same `src` as `main`), plus a probe run (seed 1991,
 
 11. **Bypass unit count.**
    *Now:* confirmed. The Bypass has 4 lots and **16 units** (6 / 3 / 4 / 3). Route 9 has 6 lots and 21 units: 20 shops (6 / 2 / 4 / 4 / 4 / 0; Pinewood Commons has none) plus Plaza Management. The grid is either 7 or 3 per row (`plazaFit`), so 16 leaves a ragged row in both layouts. **18 fills 3-wide but not 7-wide** (7 + 7 + 4); only 21 fills both. The Bypass also has 56 fights to Route 9's 84 and is paced to take about twice as long.
-   *Fix:* see open question 2. The cheap option is layout only: 4 per row on the Bypass (16 = 4 × 4, or 8 × 2 wide). The content option is 21: add 5 units (Campus and Galleria get the most).
+   *Fix (decided, call 2):* add 5 Bypass units to reach **21**, which fills rows of 3 and of 7 the same as Route 9. Lots go from 6 / 3 / 4 / 3 to **6 / 5 / 5 / 5**: Corporate Campus +2, Town Center Phase II +1, Bypass Galleria +2. Exit 14 stays the six-unit starter lot. Each new unit is a new storefront and a new hire. The roles fill gaps on the Bypass crew, which today has two of each role and leans on Route 9 franchises. Leases are priced between their lot neighbours in the existing ×2.5 ladder, then the Bypass guard is re-run. Facades and sprites need Toad mockups first.
+
+   **DRAFT, for Josh to review.** Names are parodies of 1997 chains, never real brands. Walk-ins follow item 2's kinds.
+
+   | Lot (unlocks at) | Unit | Business | Hire (role) | Tagline | Walk-ins |
+   |---|---|---|---|---|---|
+   | Corporate Campus (fight 5) | **Temp-Rite Staffing** | temp agency in the office-park strip | Temp Worker (tank): "Shows up. Stays all day. Nobody knows his last name." | "Here through Friday. Possibly forever." | G Needs a receptionist by Monday · R Data-entry temp, 90 wpm · T Free coffee mug |
+   | Corporate Campus (fight 11) | **Little Achievers Day Care** | corporate-park day care | Day-Care Teacher (heal): heals whoever is worst off, a little at a time, fast | "Pickup by 6. After 6, it's a dollar a minute." | G Late pickup, paid the fee · R Field-trip chaperone · T Lost-and-found mitten |
+   | Town Center Phase II (fight 6) | **Daily Grind Espresso** | the first espresso bar in the county | Barista (buffer): whole crew attacks a little faster | "Tall, grande, or a coffee." | R Triple-shot regular · G Book club of eight · T Punch card, tenth one free |
+   | Bypass Galleria (fight 5) | **Glamor Snaps Portraits** | mall glamour-portrait studio | Portrait Photographer (control): the flash, a chance an enemy loses its turn | "Soft focus. Hard sell." | G Family portrait, matching sweaters · R Wants the feather-boa shot · T Free 8×10 coupon |
+   | Bypass Galleria (fight 12) | **Disc Depot** | mall CD and tape store | Record Clerk (damage): quick, sharp hits | "Listening stations in back. Headphones mostly work." | R Wants the new Spice Girls CD · G Midnight release line · T Listening-station regular |
 
 12. **Burnt-out unit signs.**
    *Now:* `deadTube(seed) = hash(seed, 7) < 0.6`, but the seed is `id.length × 7 + first char`, so ids collide. Result: **28 of 37 signs (76%) have one letter permanently dark** (Route 9 16/21, Bypass 12/16). Every 2–6 minutes one of them sputters, and 35% of those stay lit for 10–40 s. Bypass signs never sputter back (`candidates()` only reads Route 9 shops). Click-to-relight (A4) is **not built yet**, so it doesn't cover this today.
@@ -496,7 +512,7 @@ Read from the code on `v09` (same `src` as `main`), plus a probe run (seed 1991,
 
 14. **Final lots have no boss.**
    *Now:* all 10 lots have a boss, with sprites. Once a road is finished, its last boss is on your crew, so `topFight` caps the ladder at the fight before him. The last lot (Pinewood Commons, and Bypass Galleria) then stops at 18/18 or 16/16 with no boss. Every **earlier** captured boss stays re-fightable at 25× pay (item 4). Two rules for the same thing.
-   *Fix:* one rule for all 10 (open question 1).
+   *Fix (decided, call 1):* one rule for all 10. Once a road is finished, `topFight` stops capping at the fight before the last boss, so the Developer and the Chairman can be rematched like every other boss. Every rematch pays a regular win; only the first capture pays 25×. Also delete the "keeping the lights on" label on the last fight (`Lot.tsx:63`).
 
 15. **Farm-rate info button.**
    *Now:* the only rate shown is the top bar's live 5-second window. Josh's read is right; the probe on the last lot: fight 8/18 1.49K GW/min, 14/18 927, 16/18 974, **17/18 381** (10 W, 11 L), 18/18 1.01K. Bypass: Exit 14 fight 1 **23 EQ/min**, fight 6 3.7, fight 8 1.1. Today the highest fight is often the worst farm.
@@ -505,11 +521,4 @@ Read from the code on `v09` (same `src` as `main`), plus a probe run (seed 1991,
 16. **Does a patrol stop you farming lower fights?**
    *Now:* yes. A patrol is a cash contract per lot ($50, $40K, $100K, $250K, $4M, $15M on Route 9; $500 to $2M on the Bypass), lost on a pave. A consultant counts as one too. On a patrolled lot, after **6 farmed wins** below the frontier (`RETRY_AFTER`), the crew climbs one fight by itself (`sim.ts:79`), and after a clear it jumps to the new frontier (`sim.ts:109`). So if you press ◂ to park on an easier fight, the patrol walks you back up in about 6 wins, every time. A fresh loss at the frontier drops back one fight **with or without** a patrol (`sim.ts:55`).
    *Conflict:* the 15 Nov call was: patrols cost **Goodwill**; **without** a patrol a lost wall keeps fighting and never drops back; **with** one, a loss drops to the highest fight you can win. The code does neither: patrols cost cash, and both cases drop back. This is not the "keep the lights on" consultant buff; consultants are item 5.
-   *Fix:* patrols in Goodwill, the drop-back only with a patrol (as decided), and **◂ parks the crew**: a manual step down turns auto-climb off until you press ▸ or a new fight is cleared. That's one flag on the crew, and it pairs with the farm-rate button.
-
-### Open for Josh
-
-1. **Captured bosses (items 4, 14):** rematch every boss at regular pay, the final two included? Or no boss rematches anywhere? *Recommend:* rematches everywhere, 25× only on the capture.
-2. **Bypass units (item 11):** a 4-wide Bypass grid (no new content), or 5 new units to reach 21? *Recommend:* 4-wide now, since no new features; 21 only if the Bypass should feel as big as Route 9. 18 doesn't fill the wide row.
-3. **Consultant (items 5, 13):** one post-dawn purchase per lot that auto-renovates that lot, with no patrol effect? *Recommend:* yes.
-4. **Parking with ◂ (item 16):** a manual step down pauses the patrol's climb until ▸ or a new clear? *Recommend:* yes.
+   *Fix:* patrols in Goodwill, the drop-back only with a patrol (as decided), and **◂ parks the crew** (decided, call 4): stepping down by hand pauses the patrol's climb until you press ▸ or a new fight is cleared. That's one flag on the crew, set by `advance(-1)` and cleared by `advance(+1)` or `clearFight`. While it's set, `sim.ts:79` doesn't climb and `sim.ts:109` doesn't jump. The ▸ hover says the patrol is paused. It pairs with the farm-rate button.
