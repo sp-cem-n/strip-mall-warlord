@@ -140,7 +140,7 @@ function skilledAct(s: GameState, r: RegionId) {
 export function botAct(s: GameState, o: BotOpts = {}, dt = 10): GameState {
   if (o.room) roomAct(s, o, dt);
   if (o.active && s.find) collectFind(s);
-  if (s.ending) s.ending = 0; // dismiss the win card, keep the lights on
+  if (s.ending) s.ending = 0; // dismiss the win card and keep farming
   if (s.bypass) {
     const share = o.convert ?? 0.5;
     const n = Math.floor((s.goodwill * share) / 100);

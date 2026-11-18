@@ -121,10 +121,11 @@ export function Boot({ onNew, onResume }: { onNew: () => void; onResume: () => v
   const [saves, setSaves] = useState(false);
   const kinds = app.hasSave ? leased(app.s, 0).slice(0, 4).map((x) => x.id) : ['pawn'];
   while (kinds.length < 4) kinds.push(null as unknown as string);
+  const dawn = app.hasSave && app.s.bypass; // once Route 9 has seen dawn, so does the title
   return (
     <div class="screen boot">
       <Speaker corner />
-      <div class="boot-scene-wrap"><img class="boot-scene" src={bootURL(kinds)} width={960} height={540} alt="Pinewood Plaza at night" /></div>
+      <div class="boot-scene-wrap"><img class="boot-scene" src={bootURL(kinds, dawn)} width={960} height={540} alt={`Pinewood Plaza ${dawn ? 'at dawn' : 'at night'}`} /></div>
       <div class="boot-menu panel-brick tenant-board">
         {app.oldSave && (
           <div class="notice">
@@ -148,7 +149,7 @@ export function Boot({ onNew, onResume }: { onNew: () => void; onResume: () => v
         </button>
         {saves && <SaveBox />}
       </div>
-      <p class="boot-foot dim">Fall 1997 · Route 9 · Ample parking</p>
+      <p class="boot-foot dim">Fall 1997 · Route 9 · {dawn ? 'Open 24 hours' : 'Ample parking'}</p>
     </div>
   );
 }
@@ -275,7 +276,7 @@ export function WinCard() {
         {r === 0 ? (
           <>
             <p class="dim">
-              The Developer is on your crew. Pinewood Commons is a parking lot. You can keep the lights on and farm it, or pave Route 9 and do it again faster: +{gain} asphalt, +{Math.round(gain * ASPHALT_BONUS * 100)}% Route 9 rent, stats and Goodwill, forever.
+              The Developer is on your crew and Pinewood Commons is a parking lot. Now pave Route 9 and do it again, faster: +{gain} asphalt is +{Math.round(gain * ASPHALT_BONUS * 100)}% Route 9 rent, stats and Goodwill, forever. Tickets and the arcade carry over when you repave.
             </p>
             {s.paves === 0 && (
               <div class="reveal">
@@ -285,12 +286,12 @@ export function WinCard() {
             )}
             <div class="ask-buttons">
               <button class="btn" onClick={close}>
-                Keep the lights on
+                Not yet
               </button>
-              <button class="btn danger" onClick={() => (pave(s), close())}>
+              <button class="btn hot" onClick={() => (pave(s), (s.crews[0].closed = true), close())}>
                 Pave Route 9 (+{gain})
               </button>
-              <button class="btn hot" onClick={() => (view(s, 1), close())}>
+              <button class="btn" onClick={() => (view(s, 1), close())}>
                 {DAWN.drive}
               </button>
             </div>
@@ -298,7 +299,7 @@ export function WinCard() {
         ) : (
           <div class="ask-buttons">
             <button class="btn" onClick={close}>
-              Keep the lights on
+              Back to it
             </button>
           </div>
         )}
