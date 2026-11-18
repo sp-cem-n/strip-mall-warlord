@@ -50,7 +50,7 @@ export const facadeURL = (id: string, leased: boolean, lit = false) => {
   return urlOf(`facade:${id}:${leased}:${dead}`, () => facade(leased ? id : null, materialOf(id), seedOf(id), SHOPS[id].region === 1 ? 'COMING' : 'SHOES', dead));
 };
 export const scaffoldURL = () => urlOf('scaffold', scaffold);
-export const titleSignURL = (ray = false, out = 0) => urlOf(`titlesign:${ray}:${out}`, () => titleSign(ray, out));
+export const titleSignURL = (ray = 6, out = 0) => urlOf(`titlesign:${ray}:${out}`, () => titleSign(ray, out));
 // Fun Zone neon script (option B): dead tubes underneath, each lit part on its own layer so it can flicker.
 export const FZ_LOGO = { base: fzBase, fun: fzFun, zone: fzZone, line: fzLine };
 export const barLogoURL = () => barLogo; // the painted matchbook on plywood, Josh's pick

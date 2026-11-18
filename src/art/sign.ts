@@ -1,6 +1,6 @@
 // The title sign: a '60s starburst and a slanted slab, sodium STRIP MALL over a pink neon WARLORD.
-// One ray of the starburst is burnt out. Nobody has called anyone about it.
-// ray = the few seconds a while it sputters back on; out = bitmask of WARLORD letters that are dark right now (see ui/lights.ts).
+// A ray of the starburst is usually burnt out. Nobody has called anyone about it.
+// ray = the dark ray (-1 for none); out = bitmask of the WARLORD letter that is dark right now (see ui/lights.ts).
 // 195x33, shown at 2x in the top bar's 390x66 slot.
 import { Grid } from './grid';
 import { C } from './palette';
@@ -24,13 +24,13 @@ function tube(g: Grid, t: string, x: number, y: number, cols: number[]) {
   return x;
 }
 
-function starburst(ray: boolean) {
+function starburst(ray: number) {
   const sb = new Grid(36, 33);
   const cx = 17, cy = 16;
   for (let k = 0; k < 16; k++) {
     const a = (k * Math.PI) / 8;
     const L = k % 2 === 0 ? 15 : 8;
-    for (let r = 4; r <= L; r++) sb.px(cx + Math.cos(a) * r, cy + Math.sin(a) * r, k === 6 && !ray ? C.concrete : r >= L - 2 ? C.sodiumLight : C.sodium);
+    for (let r = 4; r <= L; r++) sb.px(cx + Math.cos(a) * r, cy + Math.sin(a) * r, k === ray ? C.concrete : r >= L - 2 ? C.sodiumLight : C.sodium);
   }
   for (let y = -4; y <= 4; y++)
     for (let x = -4; x <= 4; x++) {
@@ -41,7 +41,7 @@ function starburst(ray: boolean) {
   return sb.outline();
 }
 
-export function titleSign(ray = false, out = 0) {
+export function titleSign(ray = 6, out = 0) {
   const g = new Grid(W, H);
   // the slab leans right, lit edge on the right, then the teal underline with daylight on both sides
   for (let y = 3; y < 31; y++) {

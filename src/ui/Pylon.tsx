@@ -8,7 +8,7 @@ import { lotsTaken, rentPerSec, view } from '../game/economy';
 import { lumps, rateLabel, type RateKey } from '../game/rates';
 import { MACHINES, roomOpen } from '../game/room';
 import { FZ_LOGO, icon, barLogoURL, titleSignURL } from './art';
-import { fzOff, lit, signOut } from './lights';
+import { fzOff, signOut } from './lights';
 import { fmt, fmtClock, fmtWL } from './format';
 import { Receipt } from './Receipt';
 import { Speaker } from './Speaker';
@@ -75,9 +75,9 @@ function Sign({ room }: { room: boolean }) {
       </div>
     );
   return (
-    <button class="title-sign" onClick={() => ((app.screen = 'boot'), (app.tip = null), app.refresh())} {...tip('Pinewood Plaza', 'Est. 1991. Back to the title screen.')}>
-      <img src={titleSignURL(lit.has('sign-ray'), signOut.mask)} width={390} height={66} alt="Strip Mall Warlord" />
-    </button>
+    <span class="title-sign" {...tip('Pinewood Plaza', 'Est. 1991.')}>
+      <img src={titleSignURL(signOut.ray, signOut.mask)} width={390} height={66} alt="Strip Mall Warlord" />
+    </span>
   );
 }
 

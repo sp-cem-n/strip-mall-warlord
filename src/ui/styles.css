@@ -41,9 +41,8 @@ button { font: inherit; }
 .sign-main .neon { font-weight: 500; font-size: 30px; letter-spacing: 0.1em; color: #ff6a5a; text-shadow: 0 0 6px var(--red), 2px 2px 0 var(--brick); }
 .sign-sub { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; color: var(--stone); white-space: nowrap; overflow: hidden; }
 .sign-sub .lit { color: var(--mint); }
-.title-sign { display: block; padding: 0; margin: 0 0 2px; border: 0; background: none; cursor: pointer; }
+.title-sign { display: block; margin: 0 0 2px; }
 .title-sign img { display: block; width: 390px; max-width: 100%; height: auto; }
-.title-sign:hover img { filter: brightness(1.15); }
 .fz-logo { position: relative; display: block; width: 390px; max-width: 100%; }
 .fz-logo img + img { position: absolute; inset: 0; width: 100%; height: auto; }
 .fz-logo img.off { visibility: hidden; }
