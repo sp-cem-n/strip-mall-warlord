@@ -8,8 +8,8 @@ export const SLOT_PRICES = [[2000, 20000], [50, 500, 20000]] as const; // Back O
 export const HARD_FOCUS = 0.75; // share of a hard hitter's hits that go for the weakest
 export const FRONT_SHARE = 0.6; // enemy hits that go to the front tank; the rest land on anyone. Hard hitters and bosses pick the weakest.
 // Enemy HP and damage growth per fight, one entry per lot: steep while the plaza fills up, gentler once renovations get expensive.
-export const FIGHT_GROWTH = [[1.6, 1.0865, 1.0865, 1.0865, 1.0865, 1.0865], [1.95, 1.08, 1.08, 1.08, 1.05, 1.05, 1.05, 1.05, 1.05]] as const;
-export const LOT_JUMP = [[2, 1.45, 1.103, 1.35, 0.7, 1.295], [1.75, 7.36, 2.7, 1.244, 1.085, 0.392, 1.244, 1.018, 1.3]] as const; // step entering each lot (entry 0 scales the first fight)
+export const FIGHT_GROWTH = [[1.6, 1.0865, 1.0865, 1.0865, 1.0865, 1.0865], [1.6, 1.4, 1.25, 1.11, 1.065, 1.02, 1.07, 1.06, 1.03]] as const;
+export const LOT_JUMP = [[2, 1.45, 1.103, 1.35, 0.7, 1.295], [1.75, 1, 1, 1, 1, 0.6, 1, 1, 0.6]] as const; // step entering each lot (entry 0 scales the first fight)
 export const PAY_BASE = [2, 1] as const; // Goodwill / Equity per win at a region's first fight. Bypass farming pays real Equity; the bank is a top-up.
 export const PAY_GROWTH = [1.06, 1.046] as const; // per fight, across the region
 export const BOSS_STRENGTH = 1.05; // a boss is this much over the fight before it
