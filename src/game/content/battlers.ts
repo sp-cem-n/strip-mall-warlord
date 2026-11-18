@@ -21,7 +21,7 @@ export const BATTLER_LIST: BattlerDef[] = [
   B('copyguy', 'Copy Guy', 'buffer', 55, 5, 1.4, 'Copies the strongest other aura at 50%.', "It's not plagiarism if it's toner.", { k: 'copy', v: 0.5 }),
   B('hygienist', 'Hygienist', 'heal', 60, 40, 3.0, 'Big heal on the worst off, slowly.', 'This might pinch.'),
   B('mattress', 'Mattress Guy', 'tank', 260, 5, 2.0, 'The most HP on the lot.', 'Every day is a sale. Every sale is final.'),
-  B('kiosk', 'Kiosk Pitchman', 'control', 55, 6, 1.2, '10% chance an enemy loses its turn.', 'Sir. Sir. Sir.', { k: 'stun', v: 0.1 }),
+  B('kiosk', 'Sales Associate', 'control', 55, 6, 1.2, '10% chance an enemy loses its turn.', 'Can I get your phone number?', { k: 'stun', v: 0.1 }),
   B('trainer', 'Personal Trainer', 'buffer', 70, 7, 1.4, 'Tanks +20% HP.', 'One more rep. One more fight.', { k: 'hpUp', to: 'tank', v: 0.2 }),
   B('clown', 'Party Clown', 'control', 55, 6, 1.3, '10% of enemy hits land on another enemy.', 'His name is Doug.', { k: 'confuse', v: 0.1 }),
   // bosses who quit and join you

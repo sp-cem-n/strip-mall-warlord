@@ -196,11 +196,13 @@ function uncleSays(s: GameState, r: RegionId): string {
     if (forLease(s, 1).length) return DAWN.hintLease;
     return regionDone(s, 1) ? DAWN.hintDone : 'Same rules, bigger checks.';
   }
+  if (c.closed) return 'Flip the sign. Sal always opened at 9 sharp.';
   if (!c.shops.dojo && forLease(s, 0).some((x) => x.id === 'dojo')) return 'Lease the Dojo. Somebody has to stand in front.';
   if (forLease(s, 0).length) return 'Something is for lease. Every shop is one more person in the lot.';
+  if (regionDone(s, 0)) return 'Now pave it yourself and run it again. Asphalt keeps, and so do the tickets.';
   if (c.tries >= 3) return 'Losing? Renovate, train, or let them farm the fight behind them.';
-  if (!c.contracts.includes(0) && s.goodwill >= patrolPrice(s, 0, 0)) return 'Some Goodwill and the Parking Lot patrols itself.';
-  return regionDone(s, 0) ? "They didn't pave it. You might. Asphalt keeps." : "Don't let them pave it.";
+  if (!c.contracts.includes(0) && s.goodwill >= patrolPrice(s, 0, 0)) return 'Hire a patrol on the Parking Lot sign. The crew climbs on its own.';
+  return "Don't let them pave it.";
 }
 
 // 21 units: 7 or 3 to a row, so every row comes out full. Tiles are the 64px storefronts at 3x (4x when 3 to a row

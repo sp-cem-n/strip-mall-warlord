@@ -9,14 +9,14 @@ export const DAWN = {
   reveal: ['The state opened the Route 9 Bypass this morning. Exit 14 has a Self Storage with your name on the lease. New road, new crew, new money:', 'Equity', `. The bank will turn ${R} Goodwill into 1 Equity, any time.`],
   // tooltips and the bank
   goodwillTip: `The bank turns ${R} Goodwill into 1 Equity.`,
-  equityTip: ['Equity', 'Bypass leases and training cost it. Bypass wins pay a little.', `Mostly you buy it: ${R} Route 9 Goodwill each.`, 'The bank calls it "a relationship."'],
+  equityTip: ['Equity', 'Bypass leases and training cost it. Bypass wins pay it.', `The bank sells it too: ${R} Route 9 Goodwill each.`, 'The bank calls it "a relationship."'],
   bankTip: `${R} Goodwill buys 1 Equity. One way.`,
   convertShort: `Takes ${R} Goodwill per Equity`,
   converted: (gw: number, eq: number) => `Converted ${gw} Goodwill into ${eq} Equity. The bank called it "a relationship."`,
   awayPay: ' / Equity',
   // the Bypass hints under the shops
   hintNew: 'Sal never made it up here. New road, new crew. Bring Goodwill: the bank turns it into Equity.',
-  hintLease: 'Bypass leases cost Equity, not dollars. Convert Goodwill from Route 9, or win it here.',
+  hintLease: 'Bypass leases cost Equity, not dollars. Win it here, or trade Route 9 Goodwill at the bank.',
   drive: 'Take the Bypass',
   hintDone: 'Both roads are yours. Farm them, or pave Route 9 and run it again faster.',
   // the Off-Ramp

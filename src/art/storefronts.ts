@@ -10,10 +10,10 @@ const MATERIAL: Record<Material, { wall: number; trim: number; grime: number }> 
   outlet: { wall: C.paper, trim: C.mint, grime: C.bone },
   office: { wall: C.concrete, trim: C.teal, grime: C.asphalt }, // poured concrete, 1984
   lifestyle: { wall: C.brick, trim: C.bone, grime: C.umber }, // fake brick
-  bypass: { wall: C.paper, trim: C.navy, grime: C.stone }, // EIFS, 1998, still white
+  bypass: { wall: C.paper, trim: C.navy, grime: C.stone }, // EIFS, brand new, still white
 };
 
-type Decor = 'arcade' | 'bar' | 'dojo' | 'vape' | 'laundromat' | 'pawn' | 'payday' | 'desk' | 'shelves' | 'chair' | 'mic' | 'beds' | 'gym' | 'pets' | 'phones' | 'tooth' | 'tan' | 'wash' | 'storage' | 'golf' | 'dress' | 'film' | 'pretzel';
+type Decor = 'arcade' | 'bar' | 'dojo' | 'smokes' | 'laundromat' | 'pawn' | 'payday' | 'desk' | 'shelves' | 'chair' | 'mic' | 'beds' | 'gym' | 'pets' | 'radio' | 'tooth' | 'tan' | 'wash' | 'storage' | 'golf' | 'dress' | 'film' | 'pretzel';
 interface ShopArt { text: string; bg: number; fg: number; awning: number; decor: Decor; label?: string }
 const A = (text: string, bg: number, fg: number, awning: number, decor: Decor, label?: string): ShopArt => ({ text, bg, fg, awning, decor, label });
 // one sign per shop; Bypass franchises reuse the original's sign
@@ -23,7 +23,7 @@ const SHOP_ART: Record<string, ShopArt> = {
   offramp: A(DAWN.barSign, C.umber, C.sodiumLight, C.brick, 'bar', 'COLD BEER'),
   dojo: A('DOJO', C.red, C.paper, C.red, 'dojo'),
   laundromat: A('SUDS', C.blue, C.paper, C.blue, 'laundromat'),
-  vape: A('VAPE', C.plum, C.neon, C.violet, 'vape'),
+  vape: A('SMOKES', C.umber, C.sodiumLight, C.brick, 'smokes'),
   security: A('GUARD', C.navy, C.sodiumLight, C.navy, 'desk', 'CCTV'),
   video: A('VIDEO', C.navy, C.sodiumLight, C.blue, 'shelves', 'NEW'),
   payday: A('PAYDAY', C.forest, C.sodiumLight, C.green, 'payday'),
@@ -36,7 +36,7 @@ const SHOP_ART: Record<string, ShopArt> = {
   copy: A('COPIES', C.bone, C.blue, C.blue, 'shelves', '5 CENTS'),
   dentist: A('DENTIST', C.paper, C.teal, C.mint, 'tooth'),
   mattress: A('BEDS', C.blue, C.sodiumLight, C.navy, 'beds', 'SALE'),
-  kiosk: A('PHONES', C.night, C.mint, C.teal, 'phones'),
+  kiosk: A('RADIO', C.red, C.paper, C.night, 'radio'),
   gym: A('GYM', C.red, C.paper, C.night, 'gym'),
   party: A('PARTY', C.violet, C.sodiumLight, C.neon, 'shelves', 'BALLOONS'),
   storage: A('STORAGE', C.sodium, C.navy, C.sodium, 'storage'),
@@ -72,10 +72,10 @@ function interior(g: Grid, art: ShopArt) {
       g.vline(32, 25, 3, C.stone).block(30, 28, 5, 11, C.red).hline(30, 28, 5, C.brick);
       g.rect(8, 28, 9, 11, C.paper).text('KO', 9, 31, C.red);
       break;
-    case 'vape':
+    case 'smokes': // carton rack behind the counter
       g.hline(5, 33, 36, C.stone).hline(5, 40, 36, C.stone);
-      for (let i = 0; i < 9; i++) g.rect(7 + i * 4, 30, 2, 3, [C.neon, C.mint, C.violet][i % 3]).rect(7 + i * 4, 37, 2, 3, [C.mint, C.violet, C.neon][i % 3]);
-      g.text('OPEN 24', 9, 26, C.neon);
+      for (let i = 0; i < 9; i++) g.rect(7 + i * 4, 30, 3, 3, [C.red, C.paper, C.sodium][i % 3]).rect(7 + i * 4, 37, 3, 3, [C.paper, C.sodium, C.red][i % 3]);
+      g.text('LOTTO', 9, 26, C.neon);
       break;
     case 'laundromat':
       for (const x of [6, 18, 30]) g.block(x, 33, 10, 13, C.stone).rect(x + 2, 36, 6, 6, C.navy).rect(x + 3, 37, 4, 4, C.blue).px(x + 3, 37, C.mint).hline(x + 1, 34, 3, C.mint);
@@ -130,9 +130,9 @@ function interior(g: Grid, art: ShopArt) {
       g.block(10, 36, 14, 6, C.bone).block(22, 32, 6, 6, C.bone).px(26, 34, C.ink).vline(11, 42, 3, C.bone).vline(21, 42, 3, C.bone).px(9, 35, C.bone);
       g.block(30, 38, 9, 7, C.mint);
       break;
-    case 'phones':
-      for (let i = 0; i < 5; i++) g.block(7 + i * 7, 33, 4, 7, [C.night, C.blue, C.stone, C.neon, C.mint][i]).px(8 + i * 7, 34, C.mint);
-      g.text('PAGERS', 6, 26, C.mint).hline(5, 41, 36, C.stone);
+    case 'radio': // pagers, a cordless phone and a parts drawer
+      for (let i = 0; i < 5; i++) g.block(7 + i * 7, 33, 4, 7, [C.night, C.blue, C.stone, C.red, C.mint][i]).px(8 + i * 7, 34, C.mint);
+      g.text('PARTS', 8, 26, C.paper).hline(5, 41, 36, C.stone);
       break;
     case 'tooth':
       g.text('SMILE', 7, 26, C.teal);
@@ -167,6 +167,18 @@ function interior(g: Grid, art: ShopArt) {
   }
 }
 
+// A lit sign: letters in fg on a bg box, with the tubes at the `out` indexes dark. The lot skylines use these too.
+export function sign(g: Grid, x: number, y: number, text: string, bg: number, fg: number, out: number[] = [], scale = 1, w = textWidth(text, scale) + 4) {
+  g.boxed(x, y, w, 5 * scale + 2 + (scale === 1 ? 1 : 0), bg);
+  const tx = x + Math.floor((w - textWidth(text, scale)) / 2);
+  [...text].forEach((ch, i) => g.text(ch, tx + i * 4 * scale, y + 1 + (scale === 1 ? 1 : 0), out.includes(i) ? (bg === C.sodium ? C.tan : C.concrete) : fg, scale));
+}
+export function awning(g: Grid, x: number, y: number, w: number, c: number) {
+  for (let i = x; i < x + w; i++) g.rect(i, y, 1, 3, Math.floor(i / 4) % 2 ? c : C.paper);
+  for (let i = x; i < x + w; i += 2) g.px(i, y + 3, Math.floor(i / 4) % 2 ? c : C.paper);
+  g.hline(x, y + 4, w, C.ink);
+}
+
 // dead = one letter of the sign is out (which one comes from the seed)
 export function facade(kind: string | null, material: Material, seed: number, ghost = 'SHOES', dead = false): Grid {
   const g = new Grid(64, 56);
@@ -175,21 +187,10 @@ export function facade(kind: string | null, material: Material, seed: number, gh
   if (material === 'lifestyle') for (let y = 4; y < 50; y += 4) g.hline(0, y, 64, C.umber).vline(((y / 4) % 2) * 6 + 3, y, 4, C.umber);
   for (let i = 0; i < 40; i++) g.px(Math.floor(hash(seed, i) * 64), Math.floor(hash(i, seed) * 50), m.grime);
   g.rect(0, 0, 64, 3, m.trim).hline(0, 3, 64, C.ink).vline(0, 0, 50, C.ink);
-  // sign band
   const sgn = kind ? SHOP_ART[kind] : null;
-  g.boxed(3, 6, 58, 12, sgn ? sgn.bg : C.concrete);
-  if (sgn) {
-    const x = 32 - Math.floor(textWidth(sgn.text, 2) / 2);
-    const out = dead ? Math.floor(hash(seed, 99) * sgn.text.length) : -1;
-    [...sgn.text].forEach((ch, i) => g.text(ch, x + i * 8, 7, i === out ? (sgn.bg === C.sodium ? C.tan : C.concrete) : sgn.fg, 2));
-  } else {
-    g.text(ghost, 32 - Math.floor(textWidth(ghost, 2) / 2), 7, C.stone, 2); // ghost of the last tenant
-  }
-  // awning
-  const aw = sgn ? sgn.awning : C.stone;
-  for (let x = 2; x < 62; x++) g.rect(x, 19, 1, 3, Math.floor(x / 4) % 2 ? aw : C.paper);
-  for (let x = 2; x < 62; x += 2) g.px(x, 22, Math.floor(x / 4) % 2 ? aw : C.paper);
-  g.hline(2, 23, 60, C.ink);
+  if (sgn) sign(g, 3, 6, sgn.text, sgn.bg, sgn.fg, dead ? [Math.floor(hash(seed, 99) * sgn.text.length)] : [], 2, 58);
+  else g.boxed(3, 6, 58, 12, C.concrete).text(ghost, 32 - Math.floor(textWidth(ghost, 2) / 2), 7, C.stone, 2); // ghost of the last tenant
+  awning(g, 2, 19, 60, sgn ? sgn.awning : C.stone);
   // window + door
   g.boxed(4, 24, 38, 24, C.night);
   g.rect(44, 24, 16, 26, C.night);
