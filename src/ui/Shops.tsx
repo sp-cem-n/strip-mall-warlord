@@ -6,7 +6,7 @@ import { app, tip, toast } from '../app';
 import { BATTLERS, CURRENCY_NAME, REGIONS, SHOPS, WALKIN_STAYS, type RegionId, type ShopDef } from '../game/defs';
 import { bal, leaseCur, tierOf, bossLevel, currencyOf, forLease, joined, lease, leased, lineupOf, regionDone, renovate, renovateCost, rentOf, toggleField } from '../game/economy';
 import { statsOf } from '../game/battle';
-import { collectFind, walkInValue } from '../game/sim';
+import { collectFind, onScreen, walkInValue } from '../game/sim';
 import { LANDMARKS, hasLandmark } from '../game/sinks';
 import type { GameState } from '../game/state';
 import { crewURL, facadeURL, landmarkURL, scaffoldURL } from './art';
@@ -41,8 +41,28 @@ function WalkIn({ sh }: { sh: ShopDef }) {
 
 const statLine = (role: string, hp: number, dmg: number) => `HP ${fmt(hp)} · ${role === 'heal' ? 'HEAL' : 'DMG'} ${fmt(dmg)}`;
 
+// one observer for the whole plaza: which storefronts are mostly on screen
+let watcher: IntersectionObserver | null = null;
+const watch = () =>
+  (watcher ??= new IntersectionObserver(
+    (es) => {
+      for (const e of es) {
+        const id = (e.target as HTMLElement).dataset.shop!;
+        if (e.isIntersecting) onScreen.add(id);
+        else onScreen.delete(id);
+      }
+    },
+    { threshold: 0.6 },
+  ));
+
 function Unit({ sh }: { sh: ShopDef }) {
   const s = app.s;
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = box.current!;
+    watch().observe(el);
+    return () => (watch().unobserve(el), onScreen.delete(sh.id));
+  }, [sh.id]);
   const c = s.crews[sh.region];
   const lv = c.shops[sh.id] ?? 0;
   const d = BATTLERS[sh.battler];
@@ -56,7 +76,7 @@ function Unit({ sh }: { sh: ShopDef }) {
   const rent = rentOf(s, sh.id, lv);
   const dRent = rentOf(s, sh.id, lv + 1) - rent;
   return (
-    <div class={`unit ${lv ? '' : 'vacant'}`}>
+    <div class={`unit ${lv ? '' : 'vacant'}`} ref={box} data-shop={sh.id}>
       <div class="facade" {...tip(sh.name, sh.tagline, lv ? `Rent $${fmt(rent)}/s. Sends one ${d.name}.` : `For lease. Sends one ${d.name}: ${d.does}`)}>
         <img
           class={!raising && now < (app.raising[sh.id] ?? 0) + 700 ? 'flicker' : ''}
@@ -218,15 +238,15 @@ export function Shops() {
           })}
         </span>
       </h2>
+      <div class="uncle">
+        <b>Uncle's note:</b> {uncleSays(s, r)}
+      </div>
       <div class="strip" ref={strip}>
         {list.map((sh) => (
           <Unit key={sh.id} sh={sh} />
         ))}
       </div>
       <BreakRoom r={r} />
-      <div class="uncle" {...tip("Uncle's note", 'Taped to the register. Updated, somehow.')}>
-        <b>Uncle's note:</b> {uncleSays(s, r)}
-      </div>
     </section>
   );
 }

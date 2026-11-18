@@ -110,6 +110,9 @@ function clearFight(s: GameState, r: RegionId) {
   else if (next.i === 0) log(s, r, `${REGIONS[r].lots[next.zone].name} is open.`);
 }
 
+// Shops the player can see right now; the plaza keeps it current. A walk-in only goes where you'd notice it.
+export const onScreen = new Set<string>();
+
 // A walk-in every 90s or so, at the crew you're watching.
 function walkIns(s: GameState) {
   if (s.find) {
@@ -119,7 +122,7 @@ function walkIns(s: GameState) {
   if ((s.findClock -= STEP) > 0) return;
   const ads = 1 - 0.04 * Object.values(s.blitz ?? {}).reduce((a, n) => a + n, 0);
   s.findClock = ((s.view === 0 ? perk(s, 'walkins') : perk(s, 'bpBell')) ? 75 : WALKIN_EVERY) * Math.max(0.5, ads);
-  const shops = leased(s, s.view);
+  const shops = leased(s, s.view).filter((sh) => onScreen.has(sh.id));
   if (!shops.length) return;
   const sh = pick(s, shops);
   s.find = { shop: sh.id, kind: sh.walkin.kind, name: pick(s, WALKIN_NAMES[sh.walkin.kind]), left: WALKIN_STAYS };

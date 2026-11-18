@@ -125,7 +125,7 @@ button { font: inherit; }
 .walkin i { position: absolute; left: 0; bottom: -2px; height: 2px; background: var(--sodium); }
 .walkin:hover { animation: none; }
 @keyframes bob { 50% { transform: translateY(-2px); } }
-.uncle { position: relative; margin: 14px 4px 0; padding: 6px 10px 5px; font-size: 17px; color: var(--ink); border: 4px solid; border-image: var(--tag) 2 fill / 4px; }
+.uncle { position: relative; margin: 12px 4px 12px; padding: 6px 10px 5px; font-size: 17px; color: var(--ink); border: 4px solid; border-image: var(--tag) 2 fill / 4px; }
 .uncle::before { content: ''; position: absolute; top: -10px; left: 50%; width: 40px; height: 10px; margin-left: -20px; background: var(--bone); opacity: 0.85; }
 .uncle b { color: var(--brick); font-weight: normal; }
 
