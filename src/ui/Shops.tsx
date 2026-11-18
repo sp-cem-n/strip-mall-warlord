@@ -5,7 +5,7 @@ import { DAWN } from '../game/content/dawn';
 import { app, tip, toast } from '../app';
 import { BATTLERS, CURRENCY_NAME, REGIONS, SHOPS, WALKIN_STAYS, type RegionId, type ShopDef } from '../game/defs';
 import { bal, patrolPrice, leaseCur, tierOf, bossLevel, currencyOf, forLease, joined, lease, leased, lineupOf, regionDone, renovate, renovateCost, rentOf, toggleField } from '../game/economy';
-import { statsOf } from '../game/battle';
+import { fxScale, statsOf } from '../game/battle';
 import { collectFind, onScreen, walkInValue } from '../game/sim';
 import { LANDMARKS, hasLandmark, landmarkBuff } from '../game/sinks';
 import type { GameState } from '../game/state';
@@ -40,6 +40,18 @@ function WalkIn({ sh }: { sh: ShopDef }) {
   );
 }
 
+// What a renovation raises, in the unit's own words: control and buffers their effect, tanks HP, the rest their hit or heal.
+const FX_WORD: Partial<Record<string, string>> = { hpUp: 'HP aura', dmgUp: 'damage aura', haste: 'haste', payUp: 'pay', regen: 'regen', revive: 'revive', dr: 'armor', mark: 'mark', slow: 'slow', weaken: 'weaken', stun: 'stun', confuse: 'confuse', copy: 'copy' };
+const pctOf = (v: number) => `${v < 0.1 ? (v * 100).toFixed(1) : Math.round(v * 100)}%`;
+function mainThing(r: RegionId, id: string, lv: number): [string, string, string] {
+  const s = app.s;
+  const d = BATTLERS[id];
+  const fx = d.fx && 'v' in d.fx && (d.role === 'control' || d.role === 'buffer') ? d.fx : null;
+  if (fx) return [FX_WORD[fx.k] ?? fx.k, pctOf(fx.v * fxScale(s, r, id, lv)), pctOf(fx.v * fxScale(s, r, id, lv + 1))];
+  const [a, b] = [statsOf(s, r, id, lv), statsOf(s, r, id, lv + 1)];
+  if (d.role === 'tank') return ['HP', fmt(a.hp), fmt(b.hp)];
+  return [d.role === 'heal' ? 'heal' : 'hit', fmt(a.dmg), fmt(b.dmg)];
+}
 const statLine = (role: string, hp: number, dmg: number) => `HP ${fmt(hp)} · ${role === 'heal' ? 'HEAL' : 'DMG'} ${fmt(dmg)}`;
 
 // one observer for the whole plaza: which storefronts are mostly on screen
@@ -70,7 +82,7 @@ function Unit({ sh }: { sh: ShopDef }) {
   const now = performance.now();
   const raising = now < (app.raising[sh.id] ?? 0);
   const st = statsOf(s, sh.region, sh.battler, Math.max(1, lv) + tierOf(sh.id));
-  const nx = statsOf(s, sh.region, sh.battler, lv + 1 + tierOf(sh.id));
+  const thing = mainThing(sh.region, sh.battler, Math.max(1, lv) + tierOf(sh.id));
   const cost = lv ? renovateCost(sh.id, lv) : sh.lease;
   const cur = lv ? 'cash' : leaseCur(sh);
   const afford = bal(s, sh.region, cur) >= cost;
@@ -102,11 +114,11 @@ function Unit({ sh }: { sh: ShopDef }) {
             <span class="dim">{lv ? `rent $${fmt(rent)}/s` : `rent $${fmt(sh.rent)}/s`}</span>
           </span>
         </div>
-        <div class="next" {...tip('Next renovation', `+${fmt(nx.hp - st.hp)} HP, +${fmt(nx.dmg - st.dmg)} ${d.role === 'heal' ? 'heal' : 'damage'}${sh.rent ? `, +$${fmt(dRent)}/s rent` : ''}.`, `Lv ${lv} → ${lv + 1}. Renovations are the big stat jump.`)}>
+        <div class="next" {...tip('Next renovation', `${thing[0]} ${thing[1]} → ${thing[2]}${sh.rent ? `, rent +20%` : ''}.`, `Lv ${lv} → ${lv + 1}. Every renovation: +20% rent and +10% of what this unit does.`)}>
           {lv ? (
             <>
               <span>
-                ▲ +{fmt(nx.hp - st.hp)} HP +{fmt(nx.dmg - st.dmg)} {d.role === 'heal' ? 'HEAL' : 'DMG'}
+                ▲ {thing[0]} {thing[1]} → {thing[2]}
               </span>
               <span>{sh.rent ? `▲ +$${fmt(dRent)}/s rent` : 'no rent'}</span>
             </>

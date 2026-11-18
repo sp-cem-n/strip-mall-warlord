@@ -19,17 +19,20 @@ export function statsOf(s: GameState, region: RegionId, id: string, level: numbe
     hp: Math.round(d.hp * a * (1 + (region === 0 ? sinkHpBonus(s) : 0)) * (d.role === 'tank' ? TANK_HP_GROWTH ** L * t : d.role === 'buffer' ? 1 : SIDE_HP_GROWTH ** L)),
     dmg: d.dmg * a * (fights ? MAIN_GROWTH ** L * t : 1),
     interval: d.interval,
-    aura: 1 + AURA_STEP * L,
   };
 }
 
 const CAPS: Partial<Record<Fx['k'], number>> = { stun: 0.35, confuse: 0.35, slow: 0.6, weaken: 0.6, dr: 0.6 };
 const targets = (to: string, d: BattlerDef) => to === 'all' || to === d.role || to === d.id;
 
-// Every aura on the crew, scaled by the Paperwork (control) and Team Building (buffer) tracks.
+// A unit's effect at a level: +10% of base per renovation, and the Paperwork (control) / Team Building (buffer) tracks.
+export const fxScale = (s: GameState, region: RegionId, id: string, lv: number) =>
+  (BATTLERS[id].role === 'control' || BATTLERS[id].role === 'buffer' ? trackMult(s, BATTLERS[id].role, region) : 1) * (1 + AURA_STEP * (lv - 1));
+
+// Every aura on the crew, scaled by level and track.
 export function auras(s: GameState, members: [string, number][], region: RegionId): { from: string; fx: Fx }[] {
   const out: { from: string; fx: Fx }[] = [];
-  const scaleOf = (id: string, lv: number) => (BATTLERS[id].role === 'control' || BATTLERS[id].role === 'buffer' ? trackMult(s, BATTLERS[id].role, region) * (1 + AURA_STEP * (lv - 1)) : 1);
+  const scaleOf = (id: string, lv: number) => fxScale(s, region, id, lv);
   for (const [id, lv] of members) {
     const d = BATTLERS[id];
     if (!d.fx || d.fx.k === 'copy' || d.fx.k === 'twin') continue;
@@ -89,7 +92,7 @@ export function startBattle(s: GameState, r: RegionId): Battle | null {
     const st = statsOf(s, r, id, lv);
     const toy = (k: 'bat' | 'duck') => (buffOn(s, k) ? 1.3 : 1);
     const bar = (k: 'bat' | 'duck') => (r === 1 ? (k === 'bat' ? barDmg(s) : barHp(s)) : 1);
-    let hp = toy('duck') * bar('duck'), dmg = toy('bat') * bar('bat'), haste = buffOn(s, 'slap') ? 0.8 : 1, dr = d.fx?.k === 'dr' ? d.fx.v : 0;
+    let hp = toy('duck') * bar('duck'), dmg = toy('bat') * bar('bat'), haste = buffOn(s, 'slap') ? 0.8 : 1, dr = d.fx?.k === 'dr' ? d.fx.v * fxScale(s, r, id, lv) : 0;
     for (const { fx } of aur) {
       if (fx.k === 'hpUp' && targets(fx.to, d)) hp += fx.v;
       if (fx.k === 'dmgUp' && targets(fx.to, d)) dmg += fx.v;
